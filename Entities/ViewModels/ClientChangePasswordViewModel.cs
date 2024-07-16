@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Utilities;
 
 namespace Entities.ViewModels
 {
-  public  class ClientChangePasswordViewModel
+    public  class ClientChangePasswordViewModel
     {
         [Key]
         public long ClientId { get; set; }

@@ -1,10 +1,6 @@
 ﻿using Entities.Models;
-using Entities.ValidationAtribute;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Utilities;
 
@@ -24,13 +20,11 @@ namespace Entities.ViewModels
         [Required(ErrorMessage = "Bạn phải nhập Email")]
         [RegularExpression(PresentationUtils.EmailPattern, ErrorMessage = "Email không đúng định dạng")]
         [StringLength(100, ErrorMessage = "Email không được dài quá 100 ký tự")]
-        [Remote("checkEmailExist", "Client", ErrorMessage = "Email này đã được sử dụng", AdditionalFields = "ClientId", HttpMethod = "POST")]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập số điện thoại")]
         [RegularExpression(PresentationUtils.MobilePattern, ErrorMessage = "Số điện thoại không đúng định dạng")]
         [StringLength(30, ErrorMessage = "Số điện thoại không được dài quá 30 ký tự")]
-        [Remote("checkPhoneExist", "Client", ErrorMessage = "Số điện thoại này đã tồn tại trong hệ thống", AdditionalFields = "ClientId", HttpMethod = "POST")]
         public string Phone { get; set; }
 
         [Required(ErrorMessage = "Bạn phải nhập họ tên")]
@@ -129,22 +123,18 @@ namespace Entities.ViewModels
         public string Email { get; set; }
         public override string Phone { get; set; }
 
-        [BindProperty]
 
         public int Gender { get; set; }
         public string[] Genders = new[] { "Nam", "Nữ" };
 
         [Range(1, 31, ErrorMessage = "Bạn chưa chọn ngày sinh")]
         public int BirthdayDay { get; set; }
-        public IEnumerable<SelectListItem> BirthdayDayList { get; set; }
 
         [Range(1, 12, ErrorMessage = "Bạn chưa chọn tháng sinh")]
         public int BirthdayMonth { get; set; }
-        public IEnumerable<SelectListItem> BirthdayMonthList { get; set; }
 
         [Range(1920, 9000, ErrorMessage = "Bạn chưa chọn năm sinh")]
         public int BirthdayYear { get; set; }
-        public IEnumerable<SelectListItem> BirthdayYearList { get; set; }
 
         [Range(1, 100000, ErrorMessage = "Bạn chưa chọn tỉnh thành")]
         public override string ProvinceId { get; set; }
@@ -163,7 +153,6 @@ namespace Entities.ViewModels
 
 
         [DataType(DataType.Password)]
-        [Remote("checkPasswordOldExist", "Client", ErrorMessage = "Mật khẩu cũ không đúng", AdditionalFields = "PasswordOld", HttpMethod = "POST")]
         public string PasswordOld { get; set; }
 
         [RegularExpression("[\\S]{6,100}", ErrorMessage = "Mật khẩu mới phải từ 6 ký tự trở lên")]

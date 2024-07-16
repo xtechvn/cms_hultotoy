@@ -1,20 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Runtime.InteropServices.WindowsRuntime;
+﻿using System.Data;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using Aspose.Cells;
-using Aspose.Cells.Drawing;
 using Entities.Models;
 using Entities.ViewModels;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -24,7 +11,6 @@ using Utilities.Contants;
 using WEB.CMS.Common;
 using WEB.CMS.Customize;
 using WEB.CMS.Models;
-using Range = Aspose.Cells.Range;
 
 namespace WEB.CMS.Controllers
 {
