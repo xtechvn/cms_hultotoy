@@ -249,7 +249,7 @@ namespace WEB.CMS.Controllers
             try
             {
                 var rootParentId = await _GroupProductRepository.GetRootParentId(id);
-                var rs = await _GroupProductRepository.Delete(id);
+                var rs = await _GroupProductRepository.DeleteById(id);
 
                 if (rs > 0)
                 {

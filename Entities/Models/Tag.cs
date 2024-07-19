@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Entities.Models
+namespace Entities.Models;
+
+public partial class Tag
 {
-    public partial class Tag
-    {
-        public Tag()
-        {
-            ArticleTag = new HashSet<ArticleTag>();
-        }
+    public long Id { get; set; }
 
-        public long Id { get; set; }
-        public string TagName { get; set; }
-        public DateTime? CreatedOn { get; set; }
+    public string TagName { get; set; }
 
-        public virtual ICollection<ArticleTag> ArticleTag { get; set; }
-    }
+    public DateTime? CreatedOn { get; set; }
+
+    public virtual ICollection<ArticleTag> ArticleTags { get; set; } = new List<ArticleTag>();
 }

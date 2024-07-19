@@ -29,5 +29,6 @@ namespace Repositories.IRepositories
         Task<string> GetGroupProductNameAsync(int cateID);
         Task<List<GroupProductFeaturedViewModel>> GetGroupProductFeatureds(string img_domain,string position);
         Task<List<LocationProduct>> getProductCodeByGroupId(int group_product_id);
+        Task<int> DeleteById(int id);
     }
 }

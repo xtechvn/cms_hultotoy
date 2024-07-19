@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Entities.Models
-{
-    public partial class ArticleRelated
-    {
-        public long Id { get; set; }
-        public long? ArticleId { get; set; }
-        public long? ArticleRelatedId { get; set; }
+namespace Entities.Models;
 
-        public virtual Article Article { get; set; }
-    }
+public partial class ArticleRelated
+{
+    public long Id { get; set; }
+
+    public long? ArticleId { get; set; }
+
+    public long? ArticleRelatedId { get; set; }
+
+    public virtual Article Article { get; set; }
 }
