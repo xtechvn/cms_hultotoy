@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Entities.ViewModels
 {
-    public class CampaignAdsViewModel : ProductClassification
+    public class CampaignAdsViewModel
     {
         public string GroupName { get; set; }
         public string LabelName { get; set; }

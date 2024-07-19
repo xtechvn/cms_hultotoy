@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Utilities;
 
 namespace Repositories.Repositories
 {
@@ -23,6 +24,16 @@ namespace Repositories.Repositories
         {
             return await _CommonDAL.GetProvinceList();
         }
+        public async Task<List<District>> GetDistrictList(string id)
+        {
+            var ProvinceDetail =await _CommonDAL.GetProvinceDetail(Convert.ToInt32(id));
+            return await _CommonDAL.District(ProvinceDetail.ProvinceId);
+        }
+
+        public async Task<Supplier> GetSupplierById(int id)
+        {
+            return await _CommonDAL.GetSupplierById(id);
+        }
 
         public async Task<List<District>> GetDistrictListByProvinceId(string provinceId)
         {
@@ -37,6 +48,24 @@ namespace Repositories.Repositories
         public async Task<List<AllCode>> GetAllCodeByType(string type)
         {
             return await _CommonDAL.GetAllCodeListByType(type);
+        }
+
+        public List<AttachFile> GetAttachFilesByDataIdAndType(long dataId, int type)
+        {
+            try
+            {
+                var dataTable = _CommonDAL.GetAttachFilesByDataIdAndType(dataId, type);
+                return dataTable.ToList<AttachFile>();
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<National>> GetNationalList()
+        {
+            return await _CommonDAL.GetNationalList();
         }
     }
 }

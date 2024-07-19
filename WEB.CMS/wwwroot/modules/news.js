@@ -145,7 +145,7 @@ var _news = {
                 },
                 success: function (result) {
                     if (result != undefined && result.length > 0) {
-                        debugger;
+                        
                         result.forEach(function (item) {
                             $('#pv_' + item.articleID).html(item.pageview);
                         });

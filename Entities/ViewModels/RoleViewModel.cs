@@ -26,4 +26,9 @@ namespace Entities.ViewModels
         public int RoleId { get; set; }
         public List<User> ListUser { get; set; }
     }
+    public class RolePermissionViewModel
+    {
+        public int MenuId { get; set; }
+        public int PermissionId { get; set; }
+    }
 }

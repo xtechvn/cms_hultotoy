@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Repositories.IRepositories;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
@@ -24,22 +24,25 @@ namespace WEB.CMS.Controllers
     [CustomAuthorize]
     public class NewsController : Controller
     {
-        private const int NEWS_CATEGORY_ID = 91;
+        private const int NEWS_CATEGORY_ID = 39;
+        private const int VIDEO_NEWS_CATEGORY_ID = 36;
+        private readonly IGroupProductRepository _GroupProductRepository;
         private readonly IArticleRepository _ArticleRepository;
         private readonly IUserRepository _UserRepository;
-        private readonly IGroupProductRepository _GroupProductRepository;
         private readonly ICommonRepository _CommonRepository;
         private readonly IWebHostEnvironment _WebHostEnvironment;
         private readonly IConfiguration _configuration;
 
-        public NewsController(IConfiguration configuration, IArticleRepository articleRepository, IUserRepository userRepository, IGroupProductRepository groupProductRepository, ICommonRepository commonRepository, IWebHostEnvironment hostEnvironment)
+        public NewsController(IConfiguration configuration, IArticleRepository articleRepository, IUserRepository userRepository, ICommonRepository commonRepository, IWebHostEnvironment hostEnvironment,
+            IGroupProductRepository groupProductRepository)
         {
             _ArticleRepository = articleRepository;
             _CommonRepository = commonRepository;
-            _GroupProductRepository = groupProductRepository;
             _UserRepository = userRepository;
             _WebHostEnvironment = hostEnvironment;
             _configuration = configuration;
+            _GroupProductRepository = groupProductRepository;
+
         }
 
         public async Task<IActionResult> Index()
@@ -103,7 +106,7 @@ namespace WEB.CMS.Controllers
 
         public async Task<IActionResult> RelationArticle(long Id)
         {
-            ViewBag.StringTreeViewCate = await _GroupProductRepository.GetListTreeViewCheckBox(NEWS_CATEGORY_ID, -1);
+            //ViewBag.StringTreeViewCate = await _GroupProductRepository.GetListTreeViewCheckBox(NEWS_CATEGORY_ID, -1);
             ViewBag.ListAuthor = await _UserRepository.GetUserSuggestionList(string.Empty);
             return PartialView();
         }
@@ -128,6 +131,7 @@ namespace WEB.CMS.Controllers
         {
             try
             {
+                
                 var settings = new JsonSerializerSettings
                 {
                     NullValueHandling = NullValueHandling.Ignore,
@@ -135,19 +139,9 @@ namespace WEB.CMS.Controllers
                 };
 
                 var model = JsonConvert.DeserializeObject<ArticleModel>(data.ToString(), settings);
-
-                #region upload image to local folder
-                //string _UploadFolder = @"uploads/images";
-                //string _UploadDirectory = Path.Combine(_WebHostEnvironment.WebRootPath, _UploadFolder);
-                //if (!Directory.Exists(_UploadDirectory))
-                //{
-                //    Directory.CreateDirectory(_UploadDirectory);
-                //}
-
-                //model.Image11 = StringHelpers.SaveBase64StringAsFile(model.Image11, _UploadFolder, _UploadDirectory);
-                //model.Image43 = StringHelpers.SaveBase64StringAsFile(model.Image43, _UploadFolder, _UploadDirectory);
-                //model.Image169 = StringHelpers.SaveBase64StringAsFile(model.Image169, _UploadFolder, _UploadDirectory);
-                #endregion
+               
+              
+                if (await _GroupProductRepository.IsGroupHeader(model.Categories)) model.Categories.Add(NEWS_CATEGORY_ID);
 
                 if (model != null && HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
                 {
@@ -155,7 +149,22 @@ namespace WEB.CMS.Controllers
                 }
 
                 model.Body = ArticleHelper.HighLightLinkTag(model.Body);
-
+                if (model.Body == null || model.Body.Trim() == ""|| model.Title == null || model.Title.Trim() == "" || model.Lead == null || model.Lead.Trim() == "")
+                {
+                    return new JsonResult(new
+                    {
+                        isSuccess = false,
+                        message = "Phần Tiêu đề, Mô tả và Nội dung bài viết không được để trống"
+                    });
+                }
+                if(model.Lead.Length >= 400)
+                {
+                    return new JsonResult(new
+                    {
+                        isSuccess = false,
+                        message = "Phần Tiêu đề không được vượt quá 400 ký tự"
+                    });
+                }
                 var articleId = await _ArticleRepository.SaveArticle(model);
 
                 if (articleId > 0)
@@ -185,6 +194,7 @@ namespace WEB.CMS.Controllers
             }
             catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("UpSert - NewsController: " + ex);
                 return new JsonResult(new
                 {
                     isSuccess = false,
@@ -236,6 +246,7 @@ namespace WEB.CMS.Controllers
             }
             catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("ChangeArticleStatus - NewsController: " + ex);
                 return new JsonResult(new
                 {
                     isSuccess = false,
@@ -274,6 +285,7 @@ namespace WEB.CMS.Controllers
             }
             catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("DeleteArticle - NewsController: " + ex);
                 return new JsonResult(new
                 {
                     isSuccess = false,
@@ -287,20 +299,21 @@ namespace WEB.CMS.Controllers
             string token = string.Empty;
             try
             {
-                var apiPrefix = ReadFile.LoadConfig().API_CMS_URL + ReadFile.LoadConfig().API_SYNC_ARTICLE;
+                var apiPrefix = ReadFile.LoadConfig().API_ADAVIGO_URL + ReadFile.LoadConfig().API_SYNC_ARTICLE;
                 var key_token_api = ReadFile.LoadConfig().KEY_TOKEN_API;
                 HttpClient httpClient = new HttpClient();
                 var j_param = new Dictionary<string, string> {
                     { "article_id", articleId.ToString() },
                     { "category_id",ArrCategoryId }
                 };
-                token = CommonHelper.Encode(JsonConvert.SerializeObject(j_param), key_token_api);
+                token = CommonHelper.Encode(JsonConvert.SerializeObject(j_param), _configuration["DataBaseConfig:key_api:api_manual"]);
                 var content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("token", token) });
-                await httpClient.PostAsync(apiPrefix, content);
+                var result_post=await httpClient.PostAsync(apiPrefix, content);
+                var post_content =JObject.Parse(result_post.Content.ReadAsStringAsync().Result);
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("ClearCacheArticle - " + ex.Message.ToString() + " Token:" + token);
+                LogHelper.InsertLogTelegram("ClearCacheArticle - " + ex.ToString() + " Token:" + token);
             }
         }
         [HttpPost]
@@ -317,5 +330,6 @@ namespace WEB.CMS.Controllers
             }
             return null;        
         }
+        
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Entities.Models;
-using System;
+using Entities.ViewModels;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Repositories.IRepositories
@@ -15,10 +14,15 @@ namespace Repositories.IRepositories
         Task<long> Update(AllCode model);
         Task<long> Delete(int id);
         List<AllCode> GetListByType(string type);
+        List<BankingAccount> GetBankingAccounts();
+        List<BankingAccount> GetBankingAccountsBySupplierId(int supplierId);
         AllCode GetByType(string type);
         Task<short> GetLastestCodeValueByType(string type);
         Task<short> GetLastestOrderNoByType(string type);
         Task<AllCode> GetIDIfValueExists(string type, string description);
         Task<List<AllCode>> GetListSortByName(string type_name);
+        Task<T> GetAllCodeValueByType<T>(string apiPrefix, string keyToken, string key, string type);
+        Task<T> Sendata<T>(string apiPrefix, string keyToken, Dictionary<string,string> keyValuePairs);
+        BankOnePay GetBankOnePayByBankName(string BankName);
     }
 }

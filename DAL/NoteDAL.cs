@@ -84,7 +84,7 @@ namespace DAL
                                     {
                                         noteItem.DataId = OrderId;
                                     }
-
+                                    /*
                                     if (item.Type == (int)Constants.NoteType.ORDER_ITEM)
                                     {
                                         var OrderItemModel = await _DbContext.OrderItem.FirstOrDefaultAsync(s => s.OrderItempMapId == item.OrderItemMapId);
@@ -92,7 +92,7 @@ namespace DAL
                                         {
                                             noteItem.DataId = OrderItemModel.Id;
                                         }
-                                    }
+                                    }*/
 
                                     if (noteItem.DataId != 0)
                                     {
@@ -106,7 +106,7 @@ namespace DAL
                         catch (Exception ex)
                         {
                             transaction.Rollback();
-                            LogHelper.InsertLogTelegram("MultipleInsertAsync - NoteDAL: " + ex);
+                            LogHelper.InsertLogTelegram("MultipleInsertAsync - transaction.Rollback - NoteDAL: " + ex);
                             return false;
                         }
                     }

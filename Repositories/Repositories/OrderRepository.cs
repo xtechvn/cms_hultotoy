@@ -1,367 +1,684 @@
 ﻿using Aspose.Cells;
 using DAL;
+using DAL.StoreProcedure;
 using Entities.ConfigModels;
 using Entities.Models;
 using Entities.ViewModels;
-using Entities.ViewModels.Affiliate;
-using Entities.ViewModels.Orders;
-using Microsoft.Extensions.Logging;
+using Entities.ViewModels.Funding;
+using Entities.ViewModels.HotelBookingCode;
+using Entities.ViewModels.Report;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Repositories.IRepositories;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
-using System.IO;
+using System.Globalization;
 using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
 using System.Threading.Tasks;
 using Utilities;
 using Utilities.Contants;
-using static Utilities.Contants.OrderConstants;
 
 namespace Repositories.Repositories
 {
     public class OrderRepository : IOrderRepository
     {
-        private readonly OrderDAL _OrderDAL;
-        private readonly OrderItemDAL _OrderItemDAL;
-        private readonly VoucherDAL _VoucherDAL;
-        private readonly ClientDAL _ClientDAL;
-        private readonly NoteDAL _NoteDAL;
-        private readonly PaymentDAL _PaymentDAL;
-        private readonly CashbackDAL _CashbackDAL;
-        private readonly LabelDAL _LabelDAL;
-        private readonly AddressClientDAL _AddressClientDAL;
+        private readonly OrderDAL _OrderDal;
+        private readonly ClientDAL _clientDAL;
+        private readonly ContractPayDAL contractPayDAL;
+        private readonly AllCodeDAL allCodeDAL;
+        private readonly UserDAL userDAL;
+        private readonly HotelBookingDAL hotelBookingDAL;
+        private readonly HotelBookingCodeDAL _hotelBookingCodeDAL;
+        private readonly ContractPayDAL _contractPayDAL;
+
 
         public OrderRepository(IOptions<DataBaseConfig> dataBaseConfig)
         {
-            var _StrConnection = dataBaseConfig.Value.SqlServer.ConnectionString;
-            _OrderDAL = new OrderDAL(_StrConnection);
-            _OrderItemDAL = new OrderItemDAL(_StrConnection);
-            _ClientDAL = new ClientDAL(_StrConnection);
-            _VoucherDAL = new VoucherDAL(_StrConnection);
-            _NoteDAL = new NoteDAL(_StrConnection);
-            _PaymentDAL = new PaymentDAL(_StrConnection);
-            _CashbackDAL = new CashbackDAL(_StrConnection);
-            _LabelDAL = new LabelDAL(_StrConnection);
-        }
+            _OrderDal = new OrderDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
+            contractPayDAL = new ContractPayDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
+            allCodeDAL = new AllCodeDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
+            userDAL = new UserDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
+            hotelBookingDAL = new HotelBookingDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
+            _clientDAL = new ClientDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
+            _contractPayDAL = new ContractPayDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
+            _hotelBookingCodeDAL = new HotelBookingCodeDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
 
-        public async Task<long> CreateOrder(OrderViewModel order, List<OrderItemViewModel> orderItems, List<NoteModel> notes)
+        }
+        public async Task<GenericViewModel<OrderViewModel>> GetTotalCountOrder(OrderViewSearchModel searchModel, int currentPage, int pageSize)
         {
+            var model = new GenericViewModel<OrderViewModel>();
             try
             {
-                long rs = 0;
-                long _VoucherId = -1;
-
-                if (!string.IsNullOrEmpty(order.Voucher))
+                DataTable dt = await _OrderDal.GetPagingList(searchModel, currentPage, pageSize, ProcedureConstants.GET_TOTALCOUNT_ORDER);
+                if (dt != null && dt.Rows.Count > 0)
                 {
-                    var VoucherModel = await _VoucherDAL.FindByVoucherCode(order.Voucher);
-                    if (VoucherModel != null)
-                    {
-                        _VoucherId = VoucherModel.Id;
-                    }
+
+                    model.TotalRecord = dt.Rows[0]["Total"].Equals(DBNull.Value) ? 0 : Convert.ToInt32(dt.Rows[0]["Total"].ToString());
+                    model.TotalRecord1 = dt.Rows[0]["TotalStatusTab1"].Equals(DBNull.Value) ? 0 : Convert.ToInt32(dt.Rows[0]["TotalStatusTab1"]);
+                    model.TotalRecord2 = dt.Rows[0]["TotalStatusTab2"].Equals(DBNull.Value) ? 0 : Convert.ToInt32(dt.Rows[0]["TotalStatusTab2"]);
+                    model.TotalRecord3 = dt.Rows[0]["TotalStatusTab3"].Equals(DBNull.Value) ? 0 : Convert.ToInt32(dt.Rows[0]["TotalStatusTab3"]);
+                    model.TotalrecordErr = dt.Rows[0]["TotalStatusTab4"].Equals(DBNull.Value) ? 0 : Convert.ToInt32(dt.Rows[0]["TotalStatusTab4"]);
+                    model.TotalRecord4 = dt.Rows[0]["TotalStatusTab5"].Equals(DBNull.Value) ? 0 : Convert.ToInt32(dt.Rows[0]["TotalStatusTab5"]);
                 }
-
-                var _OrderModel = await _OrderDAL.FindByOrderNo(order.OrderNo);
-
-                if (_OrderModel != null)
-                {
-                    _OrderModel.PaymentType = order.PaymentType;
-                    _OrderModel.PaymentStatus = order.PaymentStatus;
-                    _OrderModel.OrderStatus = order.OrderStatus;
-                    _OrderModel.Note = order.Note;
-                    _OrderModel.ClientName = order.ClientName;
-                    _OrderModel.Address = order.Address;
-                    _OrderModel.Phone = order.Phone;
-                    _OrderModel.Email = order.Email;
-                    _OrderModel.VoucherId = _VoucherId;
-                    _OrderModel.UpdateLast = order.CreatedOn;
-                    _OrderModel.PaymentDate = order.PaymentDate;
-                    await _OrderDAL.UpdateAsync(_OrderModel);
-
-                    // UpSert Note for order and order item
-                    await _NoteDAL.MultipleInsertAsync(notes, _OrderModel.Id);
-                    rs = _OrderModel.Id;
-                }
-                else
-                {
-                    double _TotalShippingFeeUsd = order.TotalShippingFeeUsd ?? 0;
-                    double _TotalShippingFeeVnd = order.TotalShippingFeeVnd ?? 0;
-
-                    if (orderItems != null && orderItems.Count > 0)
-                    {
-                        _TotalShippingFeeUsd = orderItems.Sum(s => (s.FirstPoundFee + s.NextPoundFee + s.LuxuryFee) * s.Quantity);
-                        _TotalShippingFeeVnd = _TotalShippingFeeUsd * (double)order.RateCurrent;
-                    }
-
-                    var _orderModel = new Order
-                    {
-                        ClientId = order.ClientId,
-                        UserId = order.UserId,
-                        LabelId = order.LabelId,
-                        OrderNo = order.OrderNo,
-                        ClientName = order.ClientName,
-                        Email = order.Email,
-                        Phone = order.Phone,
-                        Address = order.Address,
-                        CreatedOn = order.CreatedOn,
-                        UpdateLast = order.CreatedOn,
-                        RateCurrent = order.RateCurrent,
-                        PriceVnd = order.PriceVnd,
-                        AmountVnd = order.AmountVnd,
-                        TotalDiscount2ndVnd = order.TotalDiscount2ndVnd,
-                        TotalShippingFeeVnd = _TotalShippingFeeVnd,
-                        TotalShippingFeeUsd = _TotalShippingFeeUsd,
-                        TotalDiscountVoucherVnd = order.TotalDiscountVoucherVnd,
-                        VoucherId = string.IsNullOrEmpty(order.Voucher) ? -1 : _VoucherId,
-                        VoucherName = order.VoucherName == null ? _OrderModel.VoucherName : order.VoucherName, // cuonglv moi bo sung. truong nay luu danh sach voucher phan cach dau phay
-                        Discount = order.Discount,
-                        PriceUsd = order.PriceUsd,
-                        AmountUsd = order.AmountUsd,
-                        TotalDiscount2ndUsd = order.TotalDiscount2ndUsd,
-                        TotalDiscountVoucherUsd = order.TotalDiscountVoucherUsd,
-                        Note = order.Note,
-                        PaymentType = order.PaymentType,
-                        PaymentStatus = order.PaymentStatus,
-                        PaymentDate = order.PaymentDate,
-                        OrderStatus = order.OrderStatus,
-                        TrackingId = order.TrackingId,
-                        UtmMedium = order.UtmMedium,
-                        UtmCampaign = order.UtmCampaign,
-                        UtmFirstTime = order.UtmFirstTime,
-                        UtmSource = order.UtmSource,
-                        Version = 2,
-                        AddressId = order.AddressId
-                    };
-
-                    rs = await _OrderDAL.CreateAsync(_orderModel);
-
-                    if (rs > 0)
-                    {
-                        // Update order count for client
-                        var clientModel = await _ClientDAL.FindAsync(_orderModel.ClientId);
-                        if (clientModel != null)
-                        {
-                            clientModel.TotalOrder = clientModel.TotalOrder == null ? 1 : (clientModel.TotalOrder + 1);
-                            await _ClientDAL.UpdateAsync(clientModel);
-                        }
-
-                        #region UpSert order item list
-                        var ListOrderItem = orderItems.Select(item => new OrderItem
-                        {
-                            ProductId = item.ProductId,
-                            OrderId = rs,
-                            Price = item.Price,
-                            FirstPoundFee = item.FirstPoundFee,
-                            DiscountShippingFirstPound = item.DiscountShippingFirstPound,
-                            NextPoundFee = item.NextPoundFee,
-                            LuxuryFee = item.LuxuryFee,
-                            ShippingFeeUs = item.ShippingFeeUs,
-                            Quantity = item.Quantity,
-                            CreateOn = DateTime.Now,
-                            UpdateLast = DateTime.Now,
-                            ImageThumb = item.ProductImage,
-                            OrderItempMapId = item.OrderItemMapId,
-                            SpecialLuxuryId = item.SpecialLuxuryId,
-                            Weight = item.Weight
-                        }).ToList();
-
-                        await _OrderItemDAL.MultipleInsertAsync(ListOrderItem);
-
-                        // Update product quantity in Elasticsearch 
-
-                        #endregion
-
-                    }
-                }
-
-                if (rs > 0) // cuonglv update: chỉ cho đơn được tạo mới từ us old mới cho cập nhật lại orderdetail
-                {
-                    #region Upsert first-time payment
-                    if (order.PaymentStatus == (int)Payment_Status.DA_THANH_TOAN)
-                    {
-                        var IsCreated = false;
-                        var PaymentFirstModel = await _PaymentDAL.GetFirstPaymentOrder(rs);
-                        if (PaymentFirstModel != null)
-                        {
-                            if (PaymentFirstModel.Amount != order.AmountVnd)
-                            {
-                                IsCreated = true;
-                                await _PaymentDAL.DeleteAsync(PaymentFirstModel.Id);
-                            }
-                        }
-                        else
-                        {
-                            IsCreated = true;
-                        }
-
-                        if (IsCreated)
-                        {
-                            var paymentModel = new Payment()
-                            {
-                                OrderId = rs,
-                                Amount = (double)order.AmountVnd,
-                                PaymentDate = (DateTime)order.PaymentDate,
-                                PaymentType = (int)order.PaymentType,
-                                UserId = 36, // admin
-                                CreatedOn = DateTime.Now,
-                                ModifiedOn = DateTime.Now
-                            };
-                            await _PaymentDAL.CreateAsync(paymentModel);
-                        }
-                    }
-                    #endregion
-                }
-
-                return rs;
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("CreateOrder in OrderRepository" + ex);
-                return 0;
+                LogHelper.InsertLogTelegram("GetTotalCountOrder in OrderRepository: " + ex);
             }
+            return model;
         }
-
-        public async Task<OrderViewModel> GetOrderDetail(long Id)
+        private async Task<GenericViewModel<OrderViewModel>> GetOrders(OrderViewSearchModel searchModel, int currentPage, int pageSize)
         {
+            var model = new GenericViewModel<OrderViewModel>();
             try
             {
-                return await _OrderDAL.GetOrderDetail(Id);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderDetail in OrderRepository" + ex);
-                return null;
-            }
-        }
-
-        public async Task<List<OrderItemViewModel>> GetOrderItemList(long Id)
-        {
-            try
-            {
-                return await _OrderDAL.GetOrderItemList(Id);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderItemList in OrderRepository" + ex);
-                return null;
-            }
-        }
-
-        public GenericViewModel<OrderGridModel> GetPagingList(OrderSearchModel searchModel, int currentPage, int pageSize)
-        {
-            var model = new GenericViewModel<OrderGridModel>();
-
-            try
-            {
-                DataTable dt = _OrderDAL.GetPagingList(searchModel, currentPage, pageSize);
+                DataTable dt = await _OrderDal.GetPagingList(searchModel, currentPage, pageSize, ProcedureConstants.GETALLORDER_SEARCH);
                 if (dt != null && dt.Rows.Count > 0)
                 {
                     model.ListData = (from row in dt.AsEnumerable()
-                                      select new OrderGridModel
+                                      select new OrderViewModel
                                       {
-                                          Id = Convert.ToInt64(row["Id"]),
-                                          OrderNo = row["OrderNo"].ToString(),
-                                          ClientId = Convert.ToInt64(!row["ClientId"].Equals(DBNull.Value) ? row["ClientId"] : 0),
+                                          OrderId = row["OrderId"].ToString(),
+                                          OrderCode = row["OrderNo"].ToString(),
+                                          StartDate = !row["StartDate"].Equals(DBNull.Value) ? Convert.ToDateTime(row["StartDate"]).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : "",
+                                          EndDate = !row["EndDate"].Equals(DBNull.Value) ? Convert.ToDateTime(row["EndDate"]).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : "",
                                           ClientName = row["ClientName"].ToString(),
-                                          Email = row["Email"].ToString(),
-                                          Phone = row["Phone"].ToString(),
-                                          Address = row["Address"].ToString(),
-                                          CreatedOn = Convert.ToDateTime(!row["CreatedOn"].Equals(DBNull.Value) ? row["CreatedOn"] : null),
-                                          RateCurrent = Convert.ToDouble(!row["RateCurrent"].Equals(DBNull.Value) ? row["RateCurrent"] : 0),
-                                          PriceUsd = Convert.ToDouble(!row["PriceUsd"].Equals(DBNull.Value) ? row["PriceUsd"] : 0),
-                                          PriceVnd = Convert.ToDouble(!row["PriceVnd"].Equals(DBNull.Value) ? row["PriceVnd"] : 0),
-                                          Discount = Convert.ToDouble(!row["Discount"].Equals(DBNull.Value) ? row["Discount"] : 0),
-                                          AmountUsd = Convert.ToDouble(!row["AmountUsd"].Equals(DBNull.Value) ? row["AmountUsd"] : 0),
-                                          AmountVnd = Convert.ToDouble(!row["AmountVnd"].Equals(DBNull.Value) ? row["AmountVnd"] : 0),
-                                          PaymentDate = Convert.ToDateTime(!row["PaymentDate"].Equals(DBNull.Value) ? row["PaymentDate"] : null),
-                                          TotalDiscount2ndUsd = Convert.ToDouble(!row["TotalDiscount2ndUsd"].Equals(DBNull.Value) ? row["TotalDiscount2ndUsd"] : 0),
-                                          TotalDiscount2ndVnd = Convert.ToDouble(!row["TotalDiscount2ndVnd"].Equals(DBNull.Value) ? row["TotalDiscount2ndVnd"] : 0),
-                                          TotalDiscountVoucherUsd = Convert.ToDouble(!row["TotalDiscountVoucherUsd"].Equals(DBNull.Value) ? row["TotalDiscountVoucherUsd"] : 0),
-                                          TotalDiscountVoucherVnd = Convert.ToDouble(!row["TotalDiscountVoucherVnd"].Equals(DBNull.Value) ? row["TotalDiscountVoucherVnd"] : 0),
-                                          TotalShippingFeeUsd = Convert.ToDouble(!row["TotalShippingFeeUsd"].Equals(DBNull.Value) ? row["TotalShippingFeeUsd"] : 0),
-                                          TotalShippingFeeVnd = Convert.ToDouble(!row["TotalShippingFeeVnd"].Equals(DBNull.Value) ? row["TotalShippingFeeVnd"] : 0),
-                                          TrackingId = row["TrackingId"].ToString(),
+                                          ClientNumber = row["Phone"].ToString(),
+                                          ClientEmail = row["Email"].ToString(),
+                                          Note = row["Note"].ToString(),
+                                          PaymentStatus = row["PaymentStatus"].ToString(),
+                                          Payment = !row["Payment"].Equals(DBNull.Value) ? Convert.ToDouble(row["Payment"].ToString()) : 0,
+                                          Amount = !row["Amount"].Equals(DBNull.Value) ? Convert.ToDouble(row["Amount"].ToString()) : 0,
                                           UtmSource = row["UtmSource"].ToString(),
-                                          VoucherCode = row["VoucherCode"].ToString(),
-                                          OrderStatusName = row["OrderStatusName"].ToString(),
+                                          Profit = !row["Profit"].Equals(DBNull.Value) ? Convert.ToDouble(row["Profit"].ToString()) : 0,
+                                          Status = row["Status"].ToString(),
+                                          StatusCode = !row["StatusCode"].Equals(DBNull.Value) ? Convert.ToInt32(row["StatusCode"]) : -1,
+                                          CreateDate = row["CreateTime"].Equals(DBNull.Value) ? "" : Convert.ToDateTime(row["CreateTime"]).ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
+                                          CreateName = row["CreateName"].ToString(),
+                                          UpdateName = row["UpdateName"].ToString(),
+                                          UpdateDate = row["UpdateLast"].Equals(DBNull.Value) ? "" : Convert.ToDateTime(row["UpdateLast"]).ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
+                                          SalerName = row["SalerName"].ToString(),
+                                          ServiceType = row["ServiceType"].ToString(),
+                                          SaleGroupName = row["SalerGroupName"].ToString(),
+                                          Vouchercode = row["code"].ToString(),
                                           PaymentStatusName = row["PaymentStatusName"].ToString(),
-                                          PaymentTypeName = row["PaymentTypeName"].ToString()
+                                          PermisionTypeName = row["PermisionTypeName"].ToString(),
+                                          OperatorIdName = row["OperatorIdName"].ToString(),
+                                          SalerUserName = row["SalerUserName"].ToString(),
+                                          SalerEmail = row["SalerEmail"].ToString(),
+                                          UtmMedium = row["UtmMedium"].ToString(),
+
+
                                       }).ToList();
+
                     model.CurrentPage = currentPage;
                     model.PageSize = pageSize;
                     model.TotalRecord = Convert.ToInt32(dt.Rows[0]["TotalRow"]);
-                    model.TotalPage = (int)Math.Ceiling((double)model.TotalRecord / pageSize);
+                    model.TotalPage = (int)Math.Ceiling((double)model.TotalRecord / model.PageSize);
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetPagingList in OrderRepository" + ex);
+                LogHelper.InsertLogTelegram("GetOrders in OrderRepository: " + ex);
             }
             return model;
         }
 
-        /// <summary>
-        /// Report Order
-        /// </summary>
-        /// <param name="searchModel"></param>
-        /// <returns></returns>
-        public string ReportOrder(OrderSearchModel searchModel, string FilePath)
+        public async Task<GenericViewModel<OrderViewModel>> GetList(OrderViewSearchModel searchModel, int currentPage, int pageSize)
+        {
+            var model = new GenericViewModel<OrderViewModel>();
+
+            var model1 = await GetOrders(searchModel, currentPage, pageSize);
+            var model3 = await GetTotalCountOrder(searchModel, currentPage, pageSize);
+
+            try
+            {
+                if (model1.ListData != null)
+                {
+                    model.ListData = (from md1 in model1.ListData
+                                      select new OrderViewModel
+                                      {
+                                          OrderId = md1.OrderId,
+                                          OrderCode = md1.OrderCode,
+                                          StartDate = md1.StartDate,
+                                          EndDate = md1.EndDate,
+                                          ClientName = md1.ClientName,
+                                          ClientNumber = md1.ClientNumber,
+                                          ClientEmail = md1.ClientEmail,
+                                          Note = md1.Note,
+                                          Payment = md1.Payment,
+                                          Amount = md1.Amount,
+                                          UtmSource = md1.UtmSource,
+                                          Profit = md1.Profit,
+                                          PaymentStatus = md1.PaymentStatus,
+                                          //StatusDetail = md2.StatusDetail,
+                                          Status = md1.Status,
+                                          StatusCode = md1.StatusCode,
+                                          CreateDate = md1.CreateDate,
+                                          CreateName = md1.CreateName,
+                                          UpdateName = md1.UpdateName,
+                                          UpdateDate = md1.UpdateDate,
+                                          SalerName = md1.SalerName,
+                                          SaleGroupName = md1.SaleGroupName,
+                                          PaymentStatusName = md1.PaymentStatusName,
+                                          PermisionTypeName = md1.PermisionTypeName,
+                                          Vouchercode = md1.Vouchercode,
+                                          OperatorIdName = md1.OperatorIdName,
+                                          SalerEmail = md1.SalerEmail,
+                                          SalerUserName = md1.SalerUserName,
+                                          UtmMedium = md1.UtmMedium,
+                                      }
+                                                    ).ToList();
+                }
+                else
+                {
+                    //  LogHelper.InsertLogTelegram("GetList -  OrderRepository: No Order Count with" + JsonConvert.SerializeObject(searchModel));
+
+                }
+                model.CurrentPage = model1.CurrentPage;
+                model.PageSize = model1.PageSize;
+                model.TotalPage = model1.TotalPage;
+                model.TotalRecord = model3.TotalRecord;
+                model.TotalRecord1 = model3.TotalRecord1;
+                model.TotalRecord2 = model3.TotalRecord2;
+                model.TotalRecord3 = model3.TotalRecord3;
+                model.TotalRecord4 = model3.TotalRecord4;
+                model.TotalrecordErr = model3.TotalrecordErr;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetList in OrderRepository: " + ex);
+            }
+            return model;
+        }
+
+        public async Task<Order> CreateOrder(Order order)
+        {
+            try
+            {
+
+                var id = await _OrderDal.CreateOrder(order);
+                if (order.OrderId > 0)
+                {
+                    return order;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("CreateOrder in OrderRepository: " + ex);
+            }
+            return null;
+        }
+
+        public async Task<Order> GetOrderByID(long id)
+        {
+            try
+            {
+
+                return _OrderDal.GetByOrderId(id);
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetOrderByID - OrderRepository: " + ex);
+            }
+            return null;
+        }
+
+        public List<OrderViewModel> GetByClientId(long clientId, int payId = 0, int status = 0)
+        {
+            try
+            {
+                var listOrder = new List<OrderViewModel>();
+                var listOrderOutput = new List<OrderViewModel>();
+                var dt = _OrderDal.GetListOrderByClientId(clientId, ProcedureConstants.SP_GetDetailOrderByClientId, status);
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    listOrder = (from row in dt.AsEnumerable()
+                                 select new OrderViewModel
+                                 {
+                                     OrderId = row["OrderId"].ToString(),
+                                     OrderCode = row["OrderNo"].ToString(),
+                                     StartDate = !row["StartDate"].Equals(DBNull.Value) ? Convert.ToDateTime(row["StartDate"]).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : "",
+                                     EndDate = !row["EndDate"].Equals(DBNull.Value) ? Convert.ToDateTime(row["EndDate"]).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : "",
+                                     Status = row["OrderStatus"].ToString(),
+                                     PaymentStatus = row["PaymentStatus"].ToString(),
+                                     SalerName = row["SalerName"].ToString(),
+                                     CreateDate = row["CreateTime"].Equals(DBNull.Value) ? "" : Convert.ToDateTime(row["CreateTime"]).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                                     Amount = !row["Amount"].Equals(DBNull.Value) ? Convert.ToDouble(row["Amount"].ToString()) : 0,
+                                     IsFinishPayment = Convert.ToInt32(row["IsFinishPayment"].ToString()),
+                                 }).ToList();
+                    var listContractPayDetail = contractPayDAL.GetByContractDataIds(listOrder.Select(n => Convert.ToInt64(n.OrderId)).ToList());
+                    foreach (var item in listOrder)
+                    {
+                        OrderViewModel orderViewModel = new OrderViewModel();
+                        var detail = listContractPayDetail.Where(n => n.DataId != null
+                                && n.DataId.Value == Convert.ToInt64(item.OrderId) && n.PayId == payId).FirstOrDefault();
+                        var TotalDisarmed = listContractPayDetail.Where(n => n.DataId != null
+                                && n.DataId.Value == Convert.ToInt64(item.OrderId)).ToList().Sum(n => n.Amount);
+                        item.TotalDisarmed = (double)TotalDisarmed;
+                        item.TotalAmount = item.Amount;
+                        item.TotalNeedPayment = item.Amount - item.TotalDisarmed;
+                        item.CopyProperties(orderViewModel);
+                        if (detail != null)
+                        {
+                            orderViewModel.PayDetailId = detail.Id;
+                            orderViewModel.IsChecked = true;
+                            orderViewModel.Amount = (double)detail?.Amount;
+                            orderViewModel.Payment = (double)detail?.Amount;
+                        }
+
+                        if (item.TotalNeedPayment > 0 || (item.Amount == 0 && item.IsFinishPayment == 0))
+                        {
+                            if (payId <= 0)
+                                orderViewModel.Amount = item.TotalNeedPayment;
+                            listOrderOutput.Add(orderViewModel);
+                        }
+
+                    }
+                    if (payId != 0)
+                    {
+                        var allCode_ORDER_STATUS = allCodeDAL.GetListByType(AllCodeType.ORDER_STATUS);
+                        var listOrderId = listOrderOutput.Select(n => Convert.ToInt64(n.OrderId)).ToList();
+                        listContractPayDetail = contractPayDAL.GetByContractPayIds(new List<int>() { payId });
+                        var listOrderDisable = listContractPayDetail.Where(n => !listOrderId.Contains(n.DataId.Value)).ToList();
+                        foreach (var item in listOrderDisable)
+                        {
+                            OrderViewModel orderViewModel = new OrderViewModel();
+                            var order = listOrder.FirstOrDefault(n => Convert.ToInt64(n.OrderId) == item.DataId);
+                            if (order != null)
+                            {
+                                order.CopyProperties(orderViewModel);
+                                orderViewModel.Amount = (double)item?.Amount;
+                                orderViewModel.Payment = (double)item?.Amount;
+                                orderViewModel.TotalDisarmed = order.Amount;
+                                orderViewModel.TotalAmount = order.Amount;
+                            }
+                            else
+                            {
+                                var orderInfo = _OrderDal.GetByOrderId(item.DataId.Value);
+                                if (orderInfo != null)
+                                {
+                                    orderViewModel.OrderId = orderInfo.OrderId.ToString();
+                                    orderViewModel.OrderCode = orderInfo.OrderNo;
+                                    orderViewModel.StartDate = orderInfo.StartDate != null ?
+                                        orderInfo.StartDate.Value.ToString("dd:MM:yyyy") : string.Empty;
+                                    orderViewModel.EndDate = orderInfo.EndDate != null ?
+                                        orderInfo.EndDate.Value.ToString("dd:MM:yyyy") : string.Empty;
+                                    orderViewModel.Status = allCode_ORDER_STATUS.FirstOrDefault(n => n.CodeValue == orderInfo.OrderStatus)?.Description;
+                                    orderViewModel.SalerName = userDAL.GetById(orderInfo.SalerId != null ? orderInfo.SalerId.Value : 0).Result?.FullName;
+                                    orderViewModel.Amount = (double)item?.Amount;
+                                    orderViewModel.Payment = (double)item?.Amount;
+                                    orderViewModel.TotalDisarmed = orderInfo.Amount.Value;
+                                    orderViewModel.TotalAmount = orderInfo.Amount.Value;
+                                }
+                            }
+                            orderViewModel.PayDetailId = item.Id;
+                            orderViewModel.IsChecked = true;
+
+                            orderViewModel.IsDisabled = true;
+                            listOrderOutput.Add(orderViewModel);
+                        }
+                    }
+                }
+                return listOrderOutput;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByClientId - OrderRepository: " + ex);
+            }
+            return new List<OrderViewModel>();
+        }
+
+        public async Task<Order> GetOrderByOrderNo(string orderNo)
+        {
+            try
+            {
+                return _OrderDal.GetByOrderNo(orderNo);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetOrderByOrderNo - OrderRepository: " + ex);
+            }
+            return null;
+        }
+        public async Task<List<ProductServiceName>> ProductServiceName(string OrderId)
+        {
+            var ListData = new List<ProductServiceName>();
+            try
+            {
+
+                DataTable dt = await _OrderDal.GetDetailOrderServiceByOrderId(Convert.ToInt32(OrderId));
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    ListData = (from row in dt.AsEnumerable()
+                                select new ProductServiceName
+                                {
+                                    OrderId = row["OrderId"].ToString(),
+                                    ServiceName = row["ServiceName"].ToString(),
+                                    StatusName = row["StatusName"].ToString(),
+                                    ServiceId = row["ServiceId"].ToString(),
+                                    Type = row["Type"].ToString(),
+                                    Status = Convert.ToInt32(row["Status"].ToString()),
+                                }).ToList();
+                    foreach (var item in ListData)
+                    {
+                        DataTable dt2 = await hotelBookingDAL.GetServiceDeclinesByServiceId(item.ServiceId, Convert.ToInt32(item.Type));
+                        if (dt2 != null && dt2.Rows.Count > 0)
+                        {
+                            var data2 = dt2.ToList<ServiceDeclinesViewModel>();
+                            item.Note = data2[0].Note;
+                        }
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("ProductServiceName- OrderRepository: " + ex);
+            }
+            return ListData;
+        }
+        public async Task<double> UpdateOrderDetail(long OrderId, long user_id)
+        {
+            try
+            {
+                var result = await _OrderDal.UpdateOrderDetail(OrderId, user_id);
+                var order = _OrderDal.GetByOrderId(OrderId);
+                if (order == null || order.OrderId <= 0)
+                {
+                    return result;
+                }
+                await UndoContractPayByOrderId(OrderId, (int)user_id);
+
+                return result;
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdateOrderAmount - OrderRepository: " + ex);
+            }
+            return -2;
+        }
+        public async Task<int> UpdateOrderStatus(long OrderId, long Status, long UpdatedBy, long UserVerify)
+        {
+            try
+            {
+                return await _OrderDal.UpdateOrderStatus(OrderId, Status, UpdatedBy, UserVerify);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdateOrderAmount - OrderRepository: " + ex);
+            }
+            return 0;
+        }
+        public async Task<List<OrderServiceViewModel>> GetAllServiceByOrderId(long OrderId)
+        {
+            //var data = new List<OrderServiceViewModel>();
+            try
+            {
+                DataTable dt = await _OrderDal.GetAllServiceByOrderId(OrderId);
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    var listData = dt.ToList<OrderServiceViewModel>();
+                    return listData;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdateOrderAmount - OrderRepository: " + ex);
+            }
+            return null;
+        }
+
+        public List<OrderViewModel> GetBySupplierId(long clientId, int payId = 0)
+        {
+            try
+            {
+                var listOrder = new List<OrderViewModel>();
+
+                return listOrder;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetBySupplierId - OrderRepository: " + ex);
+                return new List<OrderViewModel>();
+            }
+        }
+
+        public List<OrderViewModel> GetOrderByClientId(long clientId, int payId = 0)
+        {
+            try
+            {
+                var listOrder = new List<OrderViewModel>();
+                var listOrderOutput = new List<OrderViewModel>();
+                var dt = _OrderDal.GetListOrderByClientId(clientId, ProcedureConstants.SP_GetDetailOrderByClientId);
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    listOrder = (from row in dt.AsEnumerable()
+                                 select new OrderViewModel
+                                 {
+                                     OrderId = row["OrderId"].ToString(),
+                                     OrderCode = row["OrderNo"].ToString(),
+                                     StartDate = !row["StartDate"].Equals(DBNull.Value) ? Convert.ToDateTime(row["StartDate"]).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : "",
+                                     EndDate = !row["EndDate"].Equals(DBNull.Value) ? Convert.ToDateTime(row["EndDate"]).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : "",
+                                     Status = row["OrderStatus"].ToString(),
+                                     PaymentStatus = row["PaymentStatus"].ToString(),
+                                     SalerName = row["SalerName"].ToString(),
+                                     CreateDate = row["CreateTime"].Equals(DBNull.Value) ? "" : Convert.ToDateTime(row["CreateTime"]).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                                     Amount = !row["Amount"].Equals(DBNull.Value) ? Convert.ToDouble(row["Amount"].ToString()) : 0,
+                                 }).ToList();
+                    var listContractPayDetail = contractPayDAL.GetByContractDataIds(listOrder.Select(n => Convert.ToInt64(n.OrderId)).ToList());
+                    foreach (var item in listOrder)
+                    {
+                        OrderViewModel orderViewModel = new OrderViewModel();
+                        var detail = listContractPayDetail.Where(n => n.DataId != null
+                                && n.DataId.Value == Convert.ToInt64(item.OrderId) && n.PayId == payId).FirstOrDefault();
+                        var TotalDisarmed = listContractPayDetail.Where(n => n.DataId != null
+                                && n.DataId.Value == Convert.ToInt64(item.OrderId)).ToList().Sum(n => n.Amount);
+                        item.TotalDisarmed = (double)TotalDisarmed;
+                        item.TotalAmount = item.Amount;
+                        item.TotalNeedPayment = item.Amount - item.TotalDisarmed;
+                        item.CopyProperties(orderViewModel);
+                        if (detail != null)
+                        {
+                            orderViewModel.PayDetailId = detail.Id;
+                            orderViewModel.IsChecked = true;
+                            orderViewModel.Amount = (double)detail?.Amount;
+                            orderViewModel.Payment = (double)detail?.Amount;
+                        }
+
+                        if (item.TotalNeedPayment > 0)
+                            listOrderOutput.Add(orderViewModel);
+                    }
+                    if (payId != 0)
+                    {
+                        var allCode_ORDER_STATUS = allCodeDAL.GetListByType(AllCodeType.ORDER_STATUS);
+                        var listOrderId = listOrderOutput.Select(n => Convert.ToInt64(n.OrderId)).ToList();
+                        listContractPayDetail = contractPayDAL.GetByContractPayIds(new List<int>() { payId });
+                        var listOrderDisable = listContractPayDetail.Where(n => !listOrderId.Contains(n.DataId.Value)).ToList();
+                        foreach (var item in listOrderDisable)
+                        {
+                            OrderViewModel orderViewModel = new OrderViewModel();
+                            var order = listOrder.FirstOrDefault(n => Convert.ToInt64(n.OrderId) == item.DataId);
+                            if (order != null)
+                            {
+                                order.CopyProperties(orderViewModel);
+                                orderViewModel.Amount = (double)item?.Amount;
+                                orderViewModel.Payment = (double)item?.Amount;
+                                orderViewModel.TotalDisarmed = order.Amount;
+                                orderViewModel.TotalAmount = order.Amount;
+                            }
+                            else
+                            {
+                                var orderInfo = _OrderDal.GetByOrderId(item.DataId.Value);
+                                orderViewModel.OrderId = orderInfo.OrderId.ToString();
+                                orderViewModel.OrderCode = orderInfo.OrderNo;
+                                orderViewModel.StartDate = orderInfo.StartDate != null ?
+                                    orderInfo.StartDate.Value.ToString("dd:MM:yyyy") : string.Empty;
+                                orderViewModel.EndDate = orderInfo.EndDate != null ?
+                                    orderInfo.EndDate.Value.ToString("dd:MM:yyyy") : string.Empty;
+                                orderViewModel.Status = allCode_ORDER_STATUS.FirstOrDefault(n => n.CodeValue == orderInfo.OrderStatus)?.Description;
+                                orderViewModel.SalerName = userDAL.GetById(orderInfo.SalerId != null ? orderInfo.SalerId.Value : 0).Result?.FullName;
+                                orderViewModel.Amount = (double)item?.Amount;
+                                orderViewModel.Payment = (double)item?.Amount;
+                                orderViewModel.TotalDisarmed = orderInfo.Amount.Value;
+                                orderViewModel.TotalAmount = orderInfo.Amount.Value;
+                            }
+                            orderViewModel.PayDetailId = item.Id;
+                            orderViewModel.IsChecked = true;
+
+                            orderViewModel.IsDisabled = true;
+                            listOrderOutput.Add(orderViewModel);
+                        }
+                    }
+                }
+                return listOrderOutput;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByClientId - OrderRepository: " + ex);
+            }
+            return new List<OrderViewModel>();
+        }
+        public int UpdateOrder(Order model)
+        {
+            return _OrderDal.UpdateOrder(model);
+        }
+        public async Task<int> IsClientAllowedToDebtNewService(double service_amount, long client_id, long order_id, int service_type)
+        {
+            try
+            {
+                var client = await _clientDAL.GetClientDetail(client_id);
+                if (client != null && client.ClientType == (int)ClientType.kl)
+                {
+                    return (int)DebtType.DEBT_ACCEPTED;
+                }
+                return _OrderDal.IsClientAllowedToDebtNewService(service_amount, client_id, order_id, service_type);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("IsClientAllowedToDebtNewService - OrderRepository: " + ex);
+            }
+            return (int)DebtType.DEBT_NOT_ACCEPTED;
+        }
+        public async Task<long> UpdateOrderSaler(long order_id, int user_commit)
+        {
+            return await _OrderDal.UpdateOrderSaler(order_id, user_commit);
+        }
+
+        public int UpdateOrderOperator(long order_id)
+        {
+            return _OrderDal.UpdateOrderOperator(order_id);
+        }
+        public async Task<long> UpdateOrderFinishPayment(long OrderId, long Status)
+        {
+            try
+            {
+                var update = await _OrderDal.UpdateOrderFinishPayment(OrderId, Status);
+                return update;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdateOrderFinishPayment - OrderRepository: " + ex);
+            }
+            return -1;
+        }
+        public async Task<long> UpdateServiceStatusByOrderId(long OrderId, long StatusFilter, long Status)
+        {
+            try
+            {
+                var update = await _OrderDal.UpdateServiceStatusByOrderId(OrderId, StatusFilter, Status);
+                return update;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdateOrderFinishPayment - OrderRepository: " + ex);
+            }
+            return -1;
+        }
+        public async Task<long> UpdateAllServiceStatusByOrderId(long OrderId, long Status)
+        {
+            try
+            {
+                var update = await _OrderDal.UpdateAllServiceStatusByOrderId(OrderId, Status);
+                return update;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdateOrderFinishPayment - OrderRepository: " + ex);
+            }
+            return -1;
+        }
+        public async Task<long> RePushDeclineServiceToOperator(long OrderId)
+        {
+            try
+            {
+                var update = await _OrderDal.RePushDeclineServiceToOperator(OrderId);
+                return update;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("RePushDeclineServiceToOperator - OrderRepository: " + ex);
+            }
+            return -1;
+        }
+        public async Task<string> ExportDeposit(OrderViewSearchModel searchModel, string FilePath, FieldOrder field, int currentPage, int pageSize)
         {
             var pathResult = string.Empty;
             try
             {
-                DataSet dataSet = _OrderDAL.GetOrderReport(searchModel);
-                var ListOrder = new List<OrderReportModel>();
-                var ListOrderItem = new List<OrderItemReportModel>();
-
-                if (dataSet != null)
+                currentPage = -1;
+                var data = new List<OrderViewModel>();
+                DataTable dt = await _OrderDal.GetPagingList(searchModel, currentPage, pageSize, ProcedureConstants.GETALLORDER_SEARCH);
+                if (dt != null && dt.Rows.Count > 0)
                 {
-                    ListOrder = (from dr in dataSet.Tables[0].AsEnumerable()
-                                 select new OrderReportModel
-                                 {
-                                     OrderId = Convert.ToInt64(dr["OrderId"].Equals(DBNull.Value) ? 0 : dr["OrderId"]),
-                                     OrderNo = dr["OrderNo"].ToString(),
-                                     TotalDiscount2ndVnd = Convert.ToDouble(dr["TotalDiscount2ndVnd"].Equals(DBNull.Value) ? 0 : dr["TotalDiscount2ndVnd"]),
-                                     TotalDiscountVoucherVnd = Convert.ToDouble(dr["TotalDiscountVoucherVnd"].Equals(DBNull.Value) ? 0 : dr["TotalDiscountVoucherVnd"]),
-                                     PaymentAmount = Convert.ToDouble(dr["PaymentAmount"].Equals(DBNull.Value) ? 0 : dr["PaymentAmount"]),
-                                     CashbackAmount = Convert.ToDouble(dr["CashbackAmount"].Equals(DBNull.Value) ? 0 : dr["CashbackAmount"]),
-                                     OrderAmount = Convert.ToDouble(dr["OrderAmount"].Equals(DBNull.Value) ? 0 : dr["OrderAmount"]),
-                                     RateCurrent = Convert.ToDouble(dr["RateCurrent"].Equals(DBNull.Value) ? 0 : dr["RateCurrent"]),
-                                     PaymentDate = Convert.ToDateTime(dr["PaymentDate"].Equals(DBNull.Value) ? DateTime.MinValue : dr["PaymentDate"]),
-                                     StoreName = dr["StoreName"].ToString(),
-                                     UtmSource = dr["UtmSource"].ToString(),
-                                     UtmMedium = dr["UtmMedium"].ToString(),
-                                     OrderStatusName = dr["OrderStatusName"].ToString(),
-                                     USExpressAff = Convert.ToInt32(dr["USExpressAff"].Equals(DBNull.Value) ? 0 : dr["USExpressAff"]),
-                                     CustomerName = dr["CustomerName"].ToString(),
-                                     Address = dr["Address"].ToString(),
-                                     USExpressAffEmail = _ClientDAL.GetClientEmailByRefferalCode(dr["UtmMedium"].ToString())
-                                 }).ToList();
-
-                    ListOrderItem = (from dr in dataSet.Tables[1].AsEnumerable()
-                                     select new OrderItemReportModel
-                                     {
-                                         Id = Convert.ToInt64(dr["Id"].Equals(DBNull.Value) ? 0 : dr["Id"]),
-                                         OrderId = Convert.ToInt64(dr["OrderId"].Equals(DBNull.Value) ? 0 : dr["OrderId"]),
-                                         Price = Convert.ToDouble(dr["Price"].Equals(DBNull.Value) ? 0 : dr["Price"]),
-                                         Quantity = Convert.ToInt32(dr["Quantity"].Equals(DBNull.Value) ? 0 : dr["Quantity"]),
-                                         Weight = Convert.ToDouble(dr["Weight"].Equals(DBNull.Value) ? 0 : dr["Weight"]),
-                                         FirstPoundFee = Convert.ToDouble(dr["FirstPoundFee"].Equals(DBNull.Value) ? 0 : dr["FirstPoundFee"]),
-                                         NextPoundFee = Convert.ToDouble(dr["NextPoundFee"].Equals(DBNull.Value) ? 0 : dr["NextPoundFee"]),
-                                         LuxuryFee = Convert.ToDouble(dr["LuxuryFee"].Equals(DBNull.Value) ? 0 : dr["LuxuryFee"])
-                                     }).ToList();
+                    data = (from row in dt.AsEnumerable()
+                            select new OrderViewModel
+                            {
+                                OrderId = row["OrderId"].ToString(),
+                                OrderCode = row["OrderNo"].ToString(),
+                                StartDate = !row["StartDate"].Equals(DBNull.Value) ? Convert.ToDateTime(row["StartDate"]).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : "",
+                                EndDate = !row["EndDate"].Equals(DBNull.Value) ? Convert.ToDateTime(row["EndDate"]).ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : "",
+                                ClientName = row["ClientName"].ToString(),
+                                ClientNumber = row["Phone"].ToString(),
+                                ClientEmail = row["Email"].ToString(),
+                                Note = row["Note"].ToString(),
+                                Payment = !row["Payment"].Equals(DBNull.Value) ? Convert.ToDouble(row["Payment"].ToString()) : 0,
+                                Amount = !row["Amount"].Equals(DBNull.Value) ? Convert.ToDouble(row["Amount"].ToString()) : 0,
+                                UtmSource = row["UtmSource"].ToString(),
+                                Profit = !row["Profit"].Equals(DBNull.Value) ? Convert.ToDouble(row["Profit"].ToString()) : 0,
+                                Status = row["Status"].ToString(),
+                                StatusCode = !row["StatusCode"].Equals(DBNull.Value) ? Convert.ToInt32(row["StatusCode"]) : -1,
+                                CreateDate = row["CreateTime"].Equals(DBNull.Value) ? "" : Convert.ToDateTime(row["CreateTime"]).ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
+                                CreateName = row["CreateName"].ToString(),
+                                UpdateName = row["UpdateName"].ToString(),
+                                UpdateDate = row["UpdateLast"].Equals(DBNull.Value) ? "" : Convert.ToDateTime(row["UpdateLast"]).ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
+                                SalerName = row["SalerName"].ToString(),
+                                ServiceType = row["ServiceType"].ToString(),
+                                SaleGroupName = row["SalerGroupName"].ToString(),
+                                Vouchercode = row["code"].ToString(),
+                                PaymentStatusName = row["PaymentStatusName"].ToString(),
+                                PermisionTypeName = row["PermisionTypeName"].ToString(),
+                                OperatorIdName = row["OperatorIdName"].ToString(),
+                                SalerUserName = row["SalerUserName"].ToString(),
+                                SalerEmail = row["SalerEmail"].ToString(),
+                                UtmMedium = row["UtmMedium"].ToString(),
+                            }).ToList();
                 }
+                else
+                {
+                    LogHelper.InsertLogTelegram("GetList -  OrderRepository: No Order Count with" + JsonConvert.SerializeObject(searchModel));
 
-                if (ListOrder.Count > 0)
+                }
+                if (data != null && data.Count > 0)
                 {
                     Workbook wb = new Workbook();
                     Worksheet ws = wb.Worksheets[0];
-                    ws.Name = "Báo cáo đơn hàng";
+                    ws.Name = "Danh sách đơn hàng";
                     Cells cell = ws.Cells;
 
                     var range = ws.Cells.CreateRange(0, 0, 1, 1);
@@ -370,7 +687,53 @@ namespace Repositories.Repositories
                     Style style = ws.Cells["A1"].GetStyle();
 
                     #region Header
-                    range = cell.CreateRange(0, 0, 1, 28);
+
+
+                    // Set column width
+                    var listfield = new List<int>();
+                    var listfieldtext = new List<string>();
+                    if (field.OrderNo) { listfieldtext.Add("Mã đơn"); listfield.Add(1); }
+                    if (field.DateOrder)
+                    {
+                        listfieldtext.Add("Ngày bắt đầu"); listfield.Add(2);
+                        listfieldtext.Add("kết thúc");
+                    }
+                    if (field.ClientOrder)
+                    {
+                        listfieldtext.Add("Khách hàng"); listfield.Add(3);
+                        listfieldtext.Add("Số điện thoại khách hàng");
+                        listfieldtext.Add(" Email khách hàng"); ;
+                    }
+                    if (field.NoteOrder) { listfieldtext.Add("Nhãn đơn"); listfield.Add(4); }
+                    if (field.PayOrder)
+                    {
+                        listfieldtext.Add("Doanh thu"); listfield.Add(5);
+                        listfieldtext.Add("Khách đã thanh toán");
+                        listfieldtext.Add("Khách phải trả");
+                    }
+                    if (field.UtmSource) { listfieldtext.Add("Nguồn"); listfield.Add(6); }
+                    if (field.ProfitOrder) { listfieldtext.Add("Lợi nhuận"); listfield.Add(7); }
+                    if (field.tum_medium) { listfieldtext.Add("Mã giới thiệu"); listfield.Add(8); }
+                    if (field.SttOrder) { listfieldtext.Add("Trạng thái"); listfield.Add(9); }
+                    if (field.StartDateOrder) { listfieldtext.Add("Ngày tạo"); listfield.Add(10); }
+                    if (field.CreatedName) { listfieldtext.Add("Người tạo"); listfield.Add(11); }
+                    if (field.UpdatedDate) { listfieldtext.Add("Ngày cập nhật"); listfield.Add(12); }
+                    if (field.UpdatedName) { listfieldtext.Add("Người cập nhật"); listfield.Add(13); }
+                    if (field.MainEmp) { listfieldtext.Add("Nhân viên chính"); listfield.Add(14); }
+                    if (field.SubEmp) { listfieldtext.Add("Nhân viên phụ"); listfield.Add(15); }
+                    if (field.Voucher) { listfieldtext.Add("Voucher"); listfield.Add(16); }
+                    if (field.Operator) { listfieldtext.Add("Điều hành viên"); listfield.Add(17); }
+                    if (field.HINHTHUCTT) { listfieldtext.Add("Hình thức thanh toán"); listfield.Add(18); }
+
+                    listfieldtext.Add("Mã code dịch vụ"); listfield.Add(19);
+
+                    cell.SetColumnWidth(0, 8);
+                    for (int i = 1; i <= listfieldtext.Count; i++)
+                    {
+                        cell.SetColumnWidth(i, 40);
+                    }
+
+                    range = cell.CreateRange(0, 0, 1, listfieldtext.Count + 1);
                     style = ws.Cells["A1"].GetStyle();
                     style.Font.IsBold = true;
                     style.IsTextWrapped = true;
@@ -389,41 +752,19 @@ namespace Repositories.Repositories
                     style.Borders[BorderType.RightBorder].Color = Color.Black;
                     range.ApplyStyle(style, st);
 
+                    int Index = 1;
                     // Set header value
-                    ws.Cells["A1"].PutValue("Mã đơn");
-                    ws.Cells["B1"].PutValue("Số Lượng SP");
-                    ws.Cells["C1"].PutValue("Cân nặng (Pounds)");
-                    ws.Cells["D1"].PutValue("Giá bán ($)");
-                    ws.Cells["E1"].PutValue("Tổng Phí mua hộ ($)");
-                    ws.Cells["F1"].PutValue("Thành tiền ($)");
-                    ws.Cells["G1"].PutValue("Rate");
-                    ws.Cells["H1"].PutValue("Thành tiền (VNĐ)");
-                    ws.Cells["I1"].PutValue("Thành tiền đã trừ Voucher($)");
-                    ws.Cells["J1"].PutValue("Số tiền giảm trên phí mua hộ (VNĐ)");
-                    ws.Cells["K1"].PutValue("Giảm giá của Voucher (VNĐ)");
-                    ws.Cells["L1"].PutValue("Giảm giá của Voucher ($)");
-                    ws.Cells["M1"].PutValue("Tổng tiền được giảm giá ($)");
-                    ws.Cells["N1"].PutValue("Tổng số lần thanh toán");
-                    ws.Cells["O1"].PutValue("Tổng hoàn tiền");
-                    ws.Cells["P1"].PutValue("Tổng giá trị đơn hàng");
-                    ws.Cells["Q1"].PutValue("Ngày thanh toán");
-                    ws.Cells["R1"].PutValue("Store name");
-                    ws.Cells["S1"].PutValue("UTM Source");
-                    ws.Cells["T1"].PutValue("UTM Medium");
-                    ws.Cells["U1"].PutValue("Trạng thái đơn hàng");
-                    ws.Cells["V1"].PutValue("USExpress Affiliate");
-                    ws.Cells["W1"].PutValue("Customer Name");
-                    ws.Cells["X1"].PutValue("Address");
-                    ws.Cells["Y1"].PutValue("USExpress Affiliate Email");
-                    ws.Cells["Z1"].PutValue("Phí mua hộ pound đầu tiên ($)");
-                    ws.Cells["AA1"].PutValue("Phí mua hộ pound tiếp theo ($)");
-                    ws.Cells["AB1"].PutValue("Phí phụ thu sản phẩm đặc biệt ($)");
-
+                    ws.Cells["A1"].PutValue("STT");
+                    List<string> Cell = new List<string>() { "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP" };
+                    for (int I = 0; I < listfieldtext.Count; I++)
+                    {
+                        ws.Cells[Cell[I] + Index].PutValue(listfieldtext[I]);
+                    }
                     #endregion
 
                     #region Body
 
-                    range = cell.CreateRange(1, 0, ListOrder.Count + 1, 28);
+                    range = cell.CreateRange(1, 0, data.Count, listfieldtext.Count + 1);
                     style = ws.Cells["A2"].GetStyle();
                     style.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
                     style.Borders[BorderType.TopBorder].Color = Color.Black;
@@ -436,1268 +777,326 @@ namespace Repositories.Repositories
                     style.VerticalAlignment = TextAlignmentType.Center;
                     range.ApplyStyle(style, st);
 
-                    Style alignRightStyle = ws.Cells["C2"].GetStyle();
-                    alignRightStyle.HorizontalAlignment = TextAlignmentType.Right;
-                    alignRightStyle.VerticalAlignment = TextAlignmentType.Center;
+                    Style alignCenterStyle = ws.Cells["A2"].GetStyle();
+                    alignCenterStyle.HorizontalAlignment = TextAlignmentType.Center;
 
-                    Style centerStyle = ws.Cells["A2"].GetStyle();
-                    alignRightStyle.HorizontalAlignment = TextAlignmentType.Center;
-                    alignRightStyle.VerticalAlignment = TextAlignmentType.Center;
-
-                    Style currencyStyle = ws.Cells["D2"].GetStyle();
-                    currencyStyle.Custom = "#,##0.00";
-                    currencyStyle.HorizontalAlignment = TextAlignmentType.Right;
-                    currencyStyle.VerticalAlignment = TextAlignmentType.Center;
-
-                    Style numberStyle = ws.Cells["M2"].GetStyle();
+                    Style numberStyle = ws.Cells[Cell[listfield.Count] + "2"].GetStyle();
                     numberStyle.Number = 3;
                     numberStyle.HorizontalAlignment = TextAlignmentType.Right;
                     numberStyle.VerticalAlignment = TextAlignmentType.Center;
 
                     int RowIndex = 1;
 
-                    double Total_Quantity = 0;
-                    double Total_Weight = 0;
-                    double Total_Price = 0;
-                    double Total_ShippingFee = 0;
-                    double Total_AmountUSD = 0;
-                    double Total_AmountWithoutVoucherUSD = 0;
-                    double Total_Amount_Discount = 0;
-                    double Total_AmountVND = 0;
-                    double Total_Discount2ndVnd = 0;
-                    double Total_DiscountVoucherVnd = 0;
-                    double Total_DiscountVoucherUSD = 0;
-                    double Total_PaymentAmount = 0;
-                    double Total_CashbackAmount = 0;
-                    double Total_OrderAmount = 0;
-                    double Total_FirstPoundFee = 0;
-                    double Total_NextPoundFee = 0;
-                    double Total_SpecialFee = 0;
-
-                    foreach (var item in ListOrder)
+                    foreach (var item in data)
                     {
-                        var ListItem = ListOrderItem.Where(s => s.OrderId == item.OrderId).ToList();
-
-                        double _Price = 0;
-                        double _ShippingFee = 0;
-                        double _AmountUSD = 0;
-                        double _AmountVND = 0;
-                        double _first_pound_fee = 0;
-                        double _next_pound_fee = 0;
-                        double _special_industry_fee = 0;
+                        string ttchitiet = string.Empty;
+                        var listfield2 = new List<int>();
+                        listfield2.AddRange(listfield);
                         RowIndex++;
-                        var RowOrderBegin = RowIndex;
-
-                        ws.Cells["A" + RowIndex].PutValue(item.OrderNo);
-
-                        if (ListItem != null && ListItem.Count > 0)
+                        ws.Cells["A" + RowIndex].PutValue(RowIndex - 1);
+                        ws.Cells["A" + RowIndex].SetStyle(alignCenterStyle);
+                        for (int I = 0; I < listfieldtext.Count; I++)
                         {
-                            _Price = Math.Round(ListItem.Sum(s => s.Price * s.Quantity), 2);
-                            _ShippingFee = Math.Round(ListItem.Sum(s => (s.FirstPoundFee + s.NextPoundFee + s.LuxuryFee) * s.Quantity), 2);
-                            _AmountUSD = Math.Round(ListItem.Sum(s => (s.Price + s.FirstPoundFee + s.NextPoundFee + s.LuxuryFee) * s.Quantity), 2);
-                            _AmountVND = Math.Round(ListItem.Sum(s => (s.Price + s.FirstPoundFee + s.NextPoundFee + s.LuxuryFee) * s.Quantity * item.RateCurrent));
-                            _first_pound_fee = ListItem.Sum(s => (s.FirstPoundFee) * s.Quantity);
-                            _next_pound_fee = ListItem.Sum(s => (s.NextPoundFee) * s.Quantity);
-                            _special_industry_fee = ListItem.Sum(s => (s.LuxuryFee) * s.Quantity);
+                            for (int f = 0; f < listfield2.Count; f++)
+                            {
+                                if (listfield2[f] == 1)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.OrderCode);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+                                }
+                                if (listfield2[f] == 2)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.StartDate);
+                                    I++;
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.EndDate);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+                                }
+                                if (listfield2[f] == 3)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.ClientName);
+                                    I++;
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.ClientNumber);
+                                    I++;
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.ClientEmail);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+                                }
+                                if (listfield2[f] == 4)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.Note);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+                                }
+                                if (listfield2[f] == 5)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.Amount == 0 ? 0 : item.Amount);
+                                    ws.Cells[Cell[I] + RowIndex].SetStyle(numberStyle);
+                                    I++;
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.Payment == 0 ? 0 : item.Payment);
+                                    ws.Cells[Cell[I] + RowIndex].SetStyle(numberStyle);
+                                    I++;
+                                    ws.Cells[Cell[I] + RowIndex].PutValue((item.Amount - item.Payment));
+                                    ws.Cells[Cell[I] + RowIndex].SetStyle(numberStyle);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+                                }
+                                if (listfield2[f] == 6)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.UtmSource);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+                                }
+                                if (listfield2[f] == 7)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.Profit);
+                                    ws.Cells[Cell[I] + RowIndex].SetStyle(numberStyle);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+                                }
+                                if (listfield2[f] == 8)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.UtmMedium);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+                                }
+                                if (listfield2[f] == 9)
+                                {
+                                    switch (item.StatusCode)
+                                    {
+                                        case (int)(OrderStatus.CREATED_ORDER):
+                                            {
+                                                ws.Cells[Cell[I] + RowIndex].PutValue(item.Status);
+                                                listfield2.Remove(listfield2[f]);
 
-                            Total_Quantity += ListItem.Sum(s => s.Quantity);
-                            ws.Cells["B" + RowIndex].PutValue(ListItem.Sum(s => s.Quantity));
-                            ws.Cells["B" + RowIndex].SetStyle(numberStyle);
+                                            }
+                                            break;
+                                        case (int)(OrderStatus.CONFIRMED_SALE):
+                                        case (int)(OrderStatus.WAITING_FOR_OPERATOR):
+                                            {
 
-                            Total_Weight += ListItem.Sum(s => s.Weight);
-                            ws.Cells["C" + RowIndex].PutValue(StringHelpers.FormatWeight(ListItem.Sum(s => s.Weight)));
-                            ws.Cells["C" + RowIndex].SetStyle(numberStyle);
+                                                ws.Cells[Cell[I] + RowIndex].PutValue(item.Status);
+                                                listfield2.Remove(listfield2[f]);
 
-                            Total_Price += _Price;
-                            ws.Cells["D" + RowIndex].PutValue(_Price);
-                            ws.Cells["D" + RowIndex].SetStyle(currencyStyle);
+                                            }
+                                            break;
+                                        case (int)(OrderStatus.WAITING_FOR_ACCOUNTANT):
+                                            {
+                                                ws.Cells[Cell[I] + RowIndex].PutValue(item.Status);
+                                                listfield2.Remove(listfield2[f]);
 
-                            Total_ShippingFee += _ShippingFee;
-                            ws.Cells["E" + RowIndex].PutValue(_ShippingFee);
-                            ws.Cells["E" + RowIndex].SetStyle(currencyStyle);
+                                            }
+                                            break;
+                                        case (int)(OrderStatus.FINISHED):
+                                            {
+                                                ws.Cells[Cell[I] + RowIndex].PutValue(item.Status);
+                                                listfield2.Remove(listfield2[f]);
 
-                            Total_AmountUSD += _AmountUSD;
-                            ws.Cells["F" + RowIndex].PutValue(_AmountUSD);
-                            ws.Cells["F" + RowIndex].SetStyle(currencyStyle);
+                                            }
+                                            break;
+                                        case ((int)(OrderStatus.CANCEL)):
+                                        case ((int)(OrderStatus.ACCOUNTANT_DECLINE)):
+                                        case ((int)(OrderStatus.OPERATOR_DECLINE)):
+                                            {
+                                                ws.Cells[Cell[I] + RowIndex].PutValue(item.Status);
+                                                listfield2.Remove(listfield2[f]);
 
-                            ws.Cells["G" + RowIndex].PutValue(item.RateCurrent);
-                            ws.Cells["G" + RowIndex].SetStyle(numberStyle);
+                                            }
+                                            break;
+                                    }
+                                    f--;
+                                    break;
+                                }
 
-                            Total_AmountVND += _AmountVND;
-                            ws.Cells["H" + RowIndex].PutValue(_AmountVND);
-                            ws.Cells["H" + RowIndex].SetStyle(numberStyle);
+                                if (listfield2[f] == 10)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.CreateDate);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+                                }
+                                if (listfield2[f] == 11)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.CreateName);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+
+                                }
+                                if (listfield2[f] == 12)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.UpdateDate);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+
+                                }
+                                if (listfield2[f] == 13)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.UpdateName);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+
+                                }
+                                if (listfield2[f] == 14)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.SalerName + "\n" + item.SalerUserName + "\n" + item.SalerEmail);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+
+                                }
+
+                                if (listfield2[f] == 15)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.SaleGroupName.TrimEnd(' ', ','));
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+
+                                }
+                                if (listfield2[f] == 16)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.Vouchercode);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+
+                                }
+                                if (listfield2[f] == 17)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue(item.OperatorIdName.TrimEnd(' ', ','));
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+
+                                }
+                                if (listfield2[f] == 18)
+                                {
+                                    ws.Cells[Cell[I] + RowIndex].PutValue((item.PermisionTypeName == null || item.PermisionTypeName.Trim() == "" ? "Không công nợ" : item.PermisionTypeName) + " - " + @item.PaymentStatusName);
+                                    listfield2.Remove(listfield2[f]);
+                                    f--;
+                                    break;
+
+                                }
+
+                                if (listfield2[f] == 19)
+                                {
+                                   
+                                    DataTable dt_HotelBookingCode = await _hotelBookingCodeDAL.GetListHotelBookingCodeByOrderId(Convert.ToInt32(item.OrderId));
+                                    if (dt_HotelBookingCode != null && dt_HotelBookingCode.Rows.Count > 0)
+                                    {
+                                        var ListHotelBookingCode = dt_HotelBookingCode.ToList<HotelBookingCodeModel>();
+                                        ws.Cells[Cell[I] + RowIndex].PutValue(string.Join(",", ListHotelBookingCode.Select(x => x.BookingCode)));
+                                        listfield2.Remove(listfield2[f]);
+                                        f--;
+
+                                    }
+                               
+                                    break;
+
+                                }
+                            }
+
+
                         }
 
 
-                        Total_AmountWithoutVoucherUSD += (_AmountUSD - (item.TotalDiscountVoucherVnd + item.TotalDiscount2ndVnd) / item.RateCurrent);
-                        ws.Cells["I" + RowIndex].PutValue(Math.Round(_AmountUSD - (item.TotalDiscountVoucherVnd + item.TotalDiscount2ndVnd) / item.RateCurrent, 2));
-                        ws.Cells["I" + RowIndex].SetStyle(currencyStyle);
 
-                        Total_Discount2ndVnd += item.TotalDiscount2ndVnd;
-                        ws.Cells["J" + RowIndex].PutValue(item.TotalDiscount2ndVnd);
-                        ws.Cells["J" + RowIndex].SetStyle(numberStyle);
-
-                        Total_DiscountVoucherVnd += item.TotalDiscountVoucherVnd;
-                        ws.Cells["K" + RowIndex].PutValue(item.TotalDiscountVoucherVnd);
-                        ws.Cells["K" + RowIndex].SetStyle(numberStyle);
-
-                        Total_DiscountVoucherUSD += item.TotalDiscountVoucherVnd / item.RateCurrent;
-                        ws.Cells["L" + RowIndex].PutValue(Math.Round(item.TotalDiscountVoucherVnd / item.RateCurrent, 2));
-                        ws.Cells["L" + RowIndex].SetStyle(currencyStyle);
-
-
-                        Total_Amount_Discount += (item.TotalDiscountVoucherVnd + item.TotalDiscount2ndVnd) / item.RateCurrent;
-                        ws.Cells["M" + RowIndex].PutValue(Math.Round((item.TotalDiscountVoucherVnd + item.TotalDiscount2ndVnd) / item.RateCurrent, 2));
-                        ws.Cells["M" + RowIndex].SetStyle(currencyStyle);
-
-                        Total_PaymentAmount += item.PaymentAmount;
-                        ws.Cells["N" + RowIndex].PutValue(item.PaymentAmount);
-                        ws.Cells["N" + RowIndex].SetStyle(numberStyle);
-
-                        Total_CashbackAmount += item.CashbackAmount;
-                        ws.Cells["O" + RowIndex].PutValue(item.CashbackAmount);
-                        ws.Cells["O" + RowIndex].SetStyle(numberStyle);
-
-                        var _OrderAmount = item.PaymentAmount > 0 ? (item.PaymentAmount - item.CashbackAmount) : (_AmountVND - item.TotalDiscount2ndVnd - item.TotalDiscountVoucherVnd);
-                        Total_OrderAmount += _OrderAmount;
-                        ws.Cells["P" + RowIndex].PutValue(_OrderAmount);
-                        ws.Cells["P" + RowIndex].SetStyle(numberStyle);
-
-                        ws.Cells["Q" + RowIndex].PutValue(item.PaymentDate.Year > 2016 ? item.PaymentDate.ToString("dd/MM/yyyy HH:mm") : string.Empty);
-                        ws.Cells["R" + RowIndex].PutValue(item.StoreName);
-                        ws.Cells["S" + RowIndex].PutValue(item.UtmSource);
-                        ws.Cells["T" + RowIndex].PutValue(item.UtmMedium);
-                        ws.Cells["U" + RowIndex].PutValue(item.OrderStatusName);
-                        ws.Cells["V" + RowIndex].PutValue(item.USExpressAff == 1 ? true : false);
-                        ws.Cells["W" + RowIndex].PutValue(item.CustomerName);
-                        ws.Cells["X" + RowIndex].PutValue(item.Address);
-                        ws.Cells["Y" + RowIndex].PutValue(item.USExpressAffEmail);
-
-                        Total_FirstPoundFee += _first_pound_fee;
-                        ws.Cells["Z" + RowIndex].PutValue(_first_pound_fee);
-                        ws.Cells["Z" + RowIndex].SetStyle(currencyStyle);
-
-                        Total_NextPoundFee += _next_pound_fee;
-                        ws.Cells["AA" + RowIndex].PutValue(_next_pound_fee);
-                        ws.Cells["AA" + RowIndex].SetStyle(currencyStyle);
-
-                        Total_SpecialFee += _special_industry_fee;
-                        ws.Cells["AB" + RowIndex].PutValue(_special_industry_fee);
-                        ws.Cells["AB" + RowIndex].SetStyle(currencyStyle);
                     }
-
-                    #region total row
-                    RowIndex++;
-
-                    numberStyle.Font.IsBold = true;
-                    numberStyle.BackgroundColor = Color.FromArgb(240, 248, 255);
-
-                    currencyStyle.Font.IsBold = true;
-                    numberStyle.BackgroundColor = Color.FromArgb(240, 248, 255);
-
-                    alignRightStyle.Font.IsBold = true;
-                    numberStyle.BackgroundColor = Color.FromArgb(240, 248, 255);
-
-                    centerStyle.Font.IsBold = true;
-                    numberStyle.BackgroundColor = Color.FromArgb(240, 248, 255);
-
-                    ws.Cells["A" + RowIndex].PutValue("TỔNG CỘNG");
-                    ws.Cells["A" + RowIndex].SetStyle(centerStyle);
-
-                    ws.Cells["B" + RowIndex].PutValue(Total_Quantity);
-                    ws.Cells["B" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["C" + RowIndex].PutValue(StringHelpers.FormatWeight(Total_Weight));
-                    ws.Cells["C" + RowIndex].SetStyle(alignRightStyle);
-
-                    ws.Cells["D" + RowIndex].PutValue(Total_Price);
-                    ws.Cells["D" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["E" + RowIndex].PutValue(Total_ShippingFee);
-                    ws.Cells["E" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["F" + RowIndex].PutValue(Total_AmountUSD);
-                    ws.Cells["F" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["H" + RowIndex].PutValue(Total_AmountVND);
-                    ws.Cells["H" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["I" + RowIndex].PutValue(Total_AmountWithoutVoucherUSD);
-                    ws.Cells["I" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["J" + RowIndex].PutValue(Total_Discount2ndVnd);
-                    ws.Cells["J" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["K" + RowIndex].PutValue(Total_DiscountVoucherVnd);
-                    ws.Cells["K" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["L" + RowIndex].PutValue(Total_DiscountVoucherUSD);
-                    ws.Cells["L" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["M" + RowIndex].PutValue(Total_Amount_Discount);
-                    ws.Cells["M" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["N" + RowIndex].PutValue(Total_PaymentAmount);
-                    ws.Cells["N" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["O" + RowIndex].PutValue(Total_CashbackAmount);
-                    ws.Cells["O" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["P" + RowIndex].PutValue(Total_OrderAmount);
-                    ws.Cells["P" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["Z" + RowIndex].PutValue(Total_FirstPoundFee);
-                    ws.Cells["Z" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["AA" + RowIndex].PutValue(Total_NextPoundFee);
-                    ws.Cells["AA" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["AB" + RowIndex].PutValue(Total_SpecialFee);
-                    ws.Cells["AB" + RowIndex].SetStyle(currencyStyle);
                     #endregion
-
-                    ws.AutoFitColumns();
-
-                    #endregion
-
-                    ws.Cells.InsertColumn(4);
-                    ws.Cells.InsertColumn(5);
-                    ws.Cells.InsertColumn(6);
-                    ws.Cells.CopyColumn(ws.Cells, ws.Cells.Columns[28].Index, ws.Cells.Columns[4].Index);
-                    ws.Cells.CopyColumn(ws.Cells, ws.Cells.Columns[29].Index, ws.Cells.Columns[5].Index);
-                    ws.Cells.CopyColumn(ws.Cells, ws.Cells.Columns[30].Index, ws.Cells.Columns[6].Index);
-                    ws.Cells.DeleteColumn(28);
-                    ws.Cells.DeleteColumn(28);
-                    ws.Cells.DeleteColumn(28);
-
                     wb.Save(FilePath);
                     pathResult = FilePath;
                 }
-
             }
             catch (Exception ex)
             {
-                //LogHelper.InsertLogTelegram("ReportOrder - OrderRepository: " + ex);
+                LogHelper.InsertLogTelegram("ExportDeposit - OrderRepository: " + ex);
             }
             return pathResult;
         }
-        public string ExportOrderExpected(string FilePath)
+        public async Task<bool> ReCheckandUpdateOrderPayment(long OrderId)
         {
-            var pathResult = string.Empty;
             try
             {
-                DataSet dataSet = _OrderDAL.GetOrderExpectedReport();
-                var ListOrder = new List<OrderExpectedExportModel>();
-                var ListOrderItem = new List<OrderItemReportModel>();
-                var ListLastestProgress = new List<OrderLastestProgressExportModel>();
-                if (dataSet != null)
+                var data = contractPayDAL.GetByOrderId(OrderId, ProcedureConstants.SP_GetListContractPayByOrderId).ToList<ContractPayViewModel>();
+                var order = _OrderDal.GetByOrderId(OrderId);
+
+                if (order != null && order.OrderId > 0 && order.Amount > 0 && data != null && data.Count > 0 && order.Amount <= data.Sum(x => x.AmountPayDetail))
                 {
-                    ListOrder = (from dr in dataSet.Tables[0].AsEnumerable()
-                                 select new OrderExpectedExportModel
-                                 {
-                                     OrderId = Convert.ToInt64(dr["OrderId"].Equals(DBNull.Value) ? 0 : dr["OrderId"]),
-                                     OrderNo = dr["OrderNo"].ToString(),
-                                     TotalDiscount2ndVnd = Convert.ToDouble(dr["TotalDiscount2ndVnd"].Equals(DBNull.Value) ? 0 : dr["TotalDiscount2ndVnd"]),
-                                     TotalDiscountVoucherVnd = Convert.ToDouble(dr["TotalDiscountVoucherVnd"].Equals(DBNull.Value) ? 0 : dr["TotalDiscountVoucherVnd"]),
-                                     PaymentAmount = Convert.ToDouble(dr["PaymentAmount"].Equals(DBNull.Value) ? 0 : dr["PaymentAmount"]),
-                                     CashbackAmount = Convert.ToDouble(dr["CashbackAmount"].Equals(DBNull.Value) ? 0 : dr["CashbackAmount"]),
-                                     OrderAmount = Convert.ToDouble(dr["OrderAmount"].Equals(DBNull.Value) ? 0 : dr["OrderAmount"]),
-                                     RateCurrent = Convert.ToDouble(dr["RateCurrent"].Equals(DBNull.Value) ? 0 : dr["RateCurrent"]),
-                                     PaymentDate = Convert.ToDateTime(dr["PaymentDate"].Equals(DBNull.Value) ? DateTime.MinValue : dr["PaymentDate"]),
-                                     StoreName = dr["StoreName"].ToString(),
-                                     UtmSource = dr["UtmSource"].ToString(),
-                                     UtmMedium = dr["UtmMedium"].ToString(),
-                                     OrderStatusName = dr["OrderStatusName"].ToString(),
-                                     USExpressAff = Convert.ToInt32(dr["USExpressAff"].Equals(DBNull.Value) ? 0 : dr["USExpressAff"]),
-                                     CustomerName = dr["CustomerName"].ToString(),
-                                     Address = dr["Address"].ToString(),
-                                     USExpressAffEmail = _ClientDAL.GetClientEmailByRefferalCode(dr["UtmMedium"].ToString()),
-                                     OrderStatus = Convert.ToInt32(dr["OrderStatus"].Equals(DBNull.Value) ? 0 : dr["OrderStatus"]),
-                                     Email= dr["Email"].ToString()
-                                 }).ToList();
-
-                    ListOrderItem = (from dr in dataSet.Tables[1].AsEnumerable()
-                                     select new OrderItemReportModel
-                                     {
-                                         Id = Convert.ToInt64(dr["Id"].Equals(DBNull.Value) ? 0 : dr["Id"]),
-                                         OrderId = Convert.ToInt64(dr["OrderId"].Equals(DBNull.Value) ? 0 : dr["OrderId"]),
-                                         Price = Convert.ToDouble(dr["Price"].Equals(DBNull.Value) ? 0 : dr["Price"]),
-                                         Quantity = Convert.ToInt32(dr["Quantity"].Equals(DBNull.Value) ? 0 : dr["Quantity"]),
-                                         Weight = Convert.ToDouble(dr["Weight"].Equals(DBNull.Value) ? 0 : dr["Weight"]),
-                                         FirstPoundFee = Convert.ToDouble(dr["FirstPoundFee"].Equals(DBNull.Value) ? 0 : dr["FirstPoundFee"]),
-                                         NextPoundFee = Convert.ToDouble(dr["NextPoundFee"].Equals(DBNull.Value) ? 0 : dr["NextPoundFee"]),
-                                         LuxuryFee = Convert.ToDouble(dr["LuxuryFee"].Equals(DBNull.Value) ? 0 : dr["LuxuryFee"])
-                                     }).ToList();
-                    ListLastestProgress = (from dr in dataSet.Tables[2].AsEnumerable()
-                                     select new OrderLastestProgressExportModel
-                                     {
-                                        OrderNo= dr["OrderNo"].ToString(),
-                                        LastestOrderProgressDay = Convert.ToInt32(dr["LastestOrderProgressDay"].Equals(DBNull.Value) ? 0 : dr["LastestOrderProgressDay"]),
-                                        TotalOrderProgressDay = Convert.ToInt32(dr["TotalOrderProgressDay"].Equals(DBNull.Value) ? 0 : dr["TotalOrderProgressDay"]),
-
-                                     }).ToList();
+                    order.PaymentStatus = (int)PaymentStatus.PAID;
+                    order.DebtStatus = (int)PaymentStatus.PAID;
+                    _OrderDal.Update(order);
                 }
-
-                if (ListOrder.Count > 0)
-                {
-                    Workbook wb = new Workbook();
-                    Worksheet ws = wb.Worksheets[0];
-                    ws.Name = "Báo cáo đơn hàng";
-                    Cells cell = ws.Cells;
-
-                    var range = ws.Cells.CreateRange(0, 0, 1, 1);
-                    StyleFlag st = new StyleFlag();
-                    st.All = true;
-                    Style style = ws.Cells["A1"].GetStyle();
-
-                    #region Header
-                    range = cell.CreateRange(0, 0, 1, 31);
-                    style = ws.Cells["A1"].GetStyle();
-                    style.Font.IsBold = true;
-                    style.IsTextWrapped = true;
-                    style.ForegroundColor = Color.FromArgb(33, 88, 103);
-                    style.BackgroundColor = Color.FromArgb(33, 88, 103);
-                    style.Pattern = BackgroundType.Solid;
-                    style.Font.Color = Color.White;
-                    style.VerticalAlignment = TextAlignmentType.Center;
-                    style.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
-                    style.Borders[BorderType.TopBorder].Color = Color.Black;
-                    style.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
-                    style.Borders[BorderType.BottomBorder].Color = Color.Black;
-                    style.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
-                    style.Borders[BorderType.LeftBorder].Color = Color.Black;
-                    style.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
-                    style.Borders[BorderType.RightBorder].Color = Color.Black;
-                    range.ApplyStyle(style, st);
-
-                    // Set header value
-                    ws.Cells["A1"].PutValue("Mã đơn");
-                    ws.Cells["B1"].PutValue("Số Lượng SP");
-                    ws.Cells["C1"].PutValue("Cân nặng (Pounds)");
-                    ws.Cells["D1"].PutValue("Giá bán ($)");
-                    ws.Cells["E1"].PutValue("Tổng Phí mua hộ ($)");
-                    ws.Cells["F1"].PutValue("Thành tiền ($)");
-                    ws.Cells["G1"].PutValue("Rate");
-                    ws.Cells["H1"].PutValue("Thành tiền (VNĐ)");
-                    ws.Cells["I1"].PutValue("Thành tiền đã trừ Voucher($)");
-                    ws.Cells["J1"].PutValue("Số tiền giảm trên phí mua hộ (VNĐ)");
-                    ws.Cells["K1"].PutValue("Giảm giá của Voucher (VNĐ)");
-                    ws.Cells["L1"].PutValue("Giảm giá của Voucher ($)");
-                    ws.Cells["M1"].PutValue("Tổng tiền được giảm giá ($)");
-                    ws.Cells["N1"].PutValue("Tổng số lần thanh toán");
-                    ws.Cells["O1"].PutValue("Tổng hoàn tiền");
-                    ws.Cells["P1"].PutValue("Tổng giá trị đơn hàng");
-                    ws.Cells["Q1"].PutValue("Ngày thanh toán");
-                    ws.Cells["R1"].PutValue("Store name");
-                    ws.Cells["S1"].PutValue("UTM Source");
-                    ws.Cells["T1"].PutValue("UTM Medium");
-                    ws.Cells["U1"].PutValue("Trạng thái đơn hàng");
-                    ws.Cells["V1"].PutValue("USExpress Affiliate");
-                    ws.Cells["W1"].PutValue("Customer Name");
-                    ws.Cells["X1"].PutValue("Address");
-                    ws.Cells["Y1"].PutValue("USExpress Affiliate Email");
-                    ws.Cells["Z1"].PutValue("Phí mua hộ pound đầu tiên ($)");
-                    ws.Cells["AA1"].PutValue("Phí mua hộ pound tiếp theo ($)");
-                    ws.Cells["AB1"].PutValue("Phí phụ thu sản phẩm đặc biệt ($)");
-                    ws.Cells["AC1"].PutValue("Số ngày trễ hạn tính từ trạng thái mới nhất (Cột U)");
-                    ws.Cells["AD1"].PutValue("Tổng số ngày trễ hạn tính từ lúc thanh toán");
-                    ws.Cells["AE1"].PutValue("Email");
-
-                    #endregion
-
-                    #region Body
-
-                    range = cell.CreateRange(1, 0, ListOrder.Count + 1, 31);
-                    style = ws.Cells["A2"].GetStyle();
-                    style.Borders[BorderType.TopBorder].LineStyle = CellBorderType.Thin;
-                    style.Borders[BorderType.TopBorder].Color = Color.Black;
-                    style.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
-                    style.Borders[BorderType.BottomBorder].Color = Color.Black;
-                    style.Borders[BorderType.LeftBorder].LineStyle = CellBorderType.Thin;
-                    style.Borders[BorderType.LeftBorder].Color = Color.Black;
-                    style.Borders[BorderType.RightBorder].LineStyle = CellBorderType.Thin;
-                    style.Borders[BorderType.RightBorder].Color = Color.Black;
-                    style.VerticalAlignment = TextAlignmentType.Center;
-                    range.ApplyStyle(style, st);
-
-                    Style alignRightStyle = ws.Cells["C2"].GetStyle();
-                    alignRightStyle.HorizontalAlignment = TextAlignmentType.Right;
-                    alignRightStyle.VerticalAlignment = TextAlignmentType.Center;
-
-                    Style centerStyle = ws.Cells["A2"].GetStyle();
-                    alignRightStyle.HorizontalAlignment = TextAlignmentType.Center;
-                    alignRightStyle.VerticalAlignment = TextAlignmentType.Center;
-
-                    Style currencyStyle = ws.Cells["D2"].GetStyle();
-                    currencyStyle.Custom = "#,##0.00";
-                    currencyStyle.HorizontalAlignment = TextAlignmentType.Right;
-                    currencyStyle.VerticalAlignment = TextAlignmentType.Center;
-
-                    Style numberStyle = ws.Cells["M2"].GetStyle();
-                    numberStyle.Number = 3;
-                    numberStyle.HorizontalAlignment = TextAlignmentType.Right;
-                    numberStyle.VerticalAlignment = TextAlignmentType.Center;
-
-                    int RowIndex = 1;
-
-                    double Total_Quantity = 0;
-                    double Total_Weight = 0;
-                    double Total_Price = 0;
-                    double Total_ShippingFee = 0;
-                    double Total_AmountUSD = 0;
-                    double Total_AmountWithoutVoucherUSD = 0;
-                    double Total_Amount_Discount = 0;
-                    double Total_AmountVND = 0;
-                    double Total_Discount2ndVnd = 0;
-                    double Total_DiscountVoucherVnd = 0;
-                    double Total_DiscountVoucherUSD = 0;
-                    double Total_PaymentAmount = 0;
-                    double Total_CashbackAmount = 0;
-                    double Total_OrderAmount = 0;
-                    double Total_FirstPoundFee = 0;
-                    double Total_NextPoundFee = 0;
-                    double Total_SpecialFee = 0;
-
-                    foreach (var item in ListOrder)
-                    {
-
-                        var ListItem = ListOrderItem.Where(s => s.OrderId == item.OrderId).ToList();
-                        var LastestProgress = ListLastestProgress.Where(s => s.OrderNo.Trim() == item.OrderNo.Trim()).FirstOrDefault();
-
-                        double _Price = 0;
-                        double _ShippingFee = 0;
-                        double _AmountUSD = 0;
-                        double _AmountVND = 0;
-                        double _first_pound_fee = 0;
-                        double _next_pound_fee = 0;
-                        double _special_industry_fee = 0;
-                        var RowOrderBegin = RowIndex;
-
-                        //-- Exprire Day Cal:
-                        int totaldayexprire = 0, lasteststatusexprire = 0;
-                        if (LastestProgress != null && LastestProgress.OrderNo.Trim() != "")
-                        {
-                            switch (item.OrderStatus)
-                            {
-                                case 6:
-                                    {
-                                        lasteststatusexprire = (LastestProgress.LastestOrderProgressDay - 6) <= 0 ? 0 : (LastestProgress.LastestOrderProgressDay - 6);
-
-                                    }
-                                    break;
-                                case 13:
-                                    {
-                                        lasteststatusexprire = (LastestProgress.LastestOrderProgressDay - 1) <= 0 ? 0 : (LastestProgress.LastestOrderProgressDay - 1);
-
-                                    }
-                                    break;
-                                case 7:
-                                    {
-                                        lasteststatusexprire = (LastestProgress.LastestOrderProgressDay - 7) <= 0 ? 0 : (LastestProgress.LastestOrderProgressDay - 7);
-
-                                    }
-                                    break;
-                                case 10:
-                                    {
-                                        lasteststatusexprire = (LastestProgress.LastestOrderProgressDay - 5) <= 0 ? 0 : (LastestProgress.LastestOrderProgressDay - 5);
-
-                                    }
-                                    break;
-                                case 11:
-                                    {
-                                        lasteststatusexprire = (LastestProgress.LastestOrderProgressDay - 5) <= 0 ? 0 : (LastestProgress.LastestOrderProgressDay - 5);
-
-                                    }
-                                    break;
-                                case 16:
-                                    {
-                                        lasteststatusexprire = (LastestProgress.LastestOrderProgressDay - 7) <= 0 ? 0 : (LastestProgress.LastestOrderProgressDay - 7);
-
-                                    }
-                                    break;
-                                default:
-                                    {
-
-                                    }
-                                    break;
-                            }
-                            totaldayexprire = (LastestProgress.TotalOrderProgressDay - 14) <= 0 ? 0 : (LastestProgress.TotalOrderProgressDay - 14);
-                            if (totaldayexprire <= 0 && lasteststatusexprire <= 0)
-                            {
-                                continue;
-                            }
-                            RowIndex++;
-                            ws.Cells["A" + RowIndex].PutValue(item.OrderNo);
-                            if (ListItem != null && ListItem.Count > 0)
-                            {
-                                _Price = Math.Round(ListItem.Sum(s => s.Price * s.Quantity), 2);
-                                _ShippingFee = Math.Round(ListItem.Sum(s => (s.FirstPoundFee + s.NextPoundFee + s.LuxuryFee) * s.Quantity), 2);
-                                _AmountUSD = Math.Round(ListItem.Sum(s => (s.Price + s.FirstPoundFee + s.NextPoundFee + s.LuxuryFee) * s.Quantity), 2);
-                                _AmountVND = Math.Round(ListItem.Sum(s => (s.Price + s.FirstPoundFee + s.NextPoundFee + s.LuxuryFee) * s.Quantity * item.RateCurrent));
-                                _first_pound_fee = ListItem.Sum(s => (s.FirstPoundFee) * s.Quantity);
-                                _next_pound_fee = ListItem.Sum(s => (s.NextPoundFee) * s.Quantity);
-                                _special_industry_fee = ListItem.Sum(s => (s.LuxuryFee) * s.Quantity);
-
-                                Total_Quantity += ListItem.Sum(s => s.Quantity);
-                                ws.Cells["B" + RowIndex].PutValue(ListItem.Sum(s => s.Quantity));
-                                ws.Cells["B" + RowIndex].SetStyle(numberStyle);
-
-                                Total_Weight += ListItem.Sum(s => s.Weight);
-                                ws.Cells["C" + RowIndex].PutValue(StringHelpers.FormatWeight(ListItem.Sum(s => s.Weight)));
-                                ws.Cells["C" + RowIndex].SetStyle(numberStyle);
-
-                                Total_Price += _Price;
-                                ws.Cells["D" + RowIndex].PutValue(_Price);
-                                ws.Cells["D" + RowIndex].SetStyle(currencyStyle);
-
-                                Total_ShippingFee += _ShippingFee;
-                                ws.Cells["E" + RowIndex].PutValue(_ShippingFee);
-                                ws.Cells["E" + RowIndex].SetStyle(currencyStyle);
-
-                                Total_AmountUSD += _AmountUSD;
-                                ws.Cells["F" + RowIndex].PutValue(_AmountUSD);
-                                ws.Cells["F" + RowIndex].SetStyle(currencyStyle);
-
-                                ws.Cells["G" + RowIndex].PutValue(item.RateCurrent);
-                                ws.Cells["G" + RowIndex].SetStyle(numberStyle);
-
-                                Total_AmountVND += _AmountVND;
-                                ws.Cells["H" + RowIndex].PutValue(_AmountVND);
-                                ws.Cells["H" + RowIndex].SetStyle(numberStyle);
-                            }
-
-
-                            Total_AmountWithoutVoucherUSD += (_AmountUSD - (item.TotalDiscountVoucherVnd + item.TotalDiscount2ndVnd) / item.RateCurrent);
-                            ws.Cells["I" + RowIndex].PutValue(Math.Round(_AmountUSD - (item.TotalDiscountVoucherVnd + item.TotalDiscount2ndVnd) / item.RateCurrent, 2));
-                            ws.Cells["I" + RowIndex].SetStyle(currencyStyle);
-
-                            Total_Discount2ndVnd += item.TotalDiscount2ndVnd;
-                            ws.Cells["J" + RowIndex].PutValue(item.TotalDiscount2ndVnd);
-                            ws.Cells["J" + RowIndex].SetStyle(numberStyle);
-
-                            Total_DiscountVoucherVnd += item.TotalDiscountVoucherVnd;
-                            ws.Cells["K" + RowIndex].PutValue(item.TotalDiscountVoucherVnd);
-                            ws.Cells["K" + RowIndex].SetStyle(numberStyle);
-
-                            Total_DiscountVoucherUSD += item.TotalDiscountVoucherVnd / item.RateCurrent;
-                            ws.Cells["L" + RowIndex].PutValue(Math.Round(item.TotalDiscountVoucherVnd / item.RateCurrent, 2));
-                            ws.Cells["L" + RowIndex].SetStyle(currencyStyle);
-
-
-                            Total_Amount_Discount += (item.TotalDiscountVoucherVnd + item.TotalDiscount2ndVnd) / item.RateCurrent;
-                            ws.Cells["M" + RowIndex].PutValue(Math.Round((item.TotalDiscountVoucherVnd + item.TotalDiscount2ndVnd) / item.RateCurrent, 2));
-                            ws.Cells["M" + RowIndex].SetStyle(currencyStyle);
-
-                            Total_PaymentAmount += item.PaymentAmount;
-                            ws.Cells["N" + RowIndex].PutValue(item.PaymentAmount);
-                            ws.Cells["N" + RowIndex].SetStyle(numberStyle);
-
-                            Total_CashbackAmount += item.CashbackAmount;
-                            ws.Cells["O" + RowIndex].PutValue(item.CashbackAmount);
-                            ws.Cells["O" + RowIndex].SetStyle(numberStyle);
-
-                            var _OrderAmount = item.PaymentAmount > 0 ? (item.PaymentAmount - item.CashbackAmount) : (_AmountVND - item.TotalDiscount2ndVnd - item.TotalDiscountVoucherVnd);
-                            Total_OrderAmount += _OrderAmount;
-                            ws.Cells["P" + RowIndex].PutValue(_OrderAmount);
-                            ws.Cells["P" + RowIndex].SetStyle(numberStyle);
-
-                            ws.Cells["Q" + RowIndex].PutValue(item.PaymentDate.Year > 2016 ? item.PaymentDate.ToString("dd/MM/yyyy HH:mm") : string.Empty);
-                            ws.Cells["R" + RowIndex].PutValue(item.StoreName);
-                            ws.Cells["S" + RowIndex].PutValue(item.UtmSource);
-                            ws.Cells["T" + RowIndex].PutValue(item.UtmMedium);
-                            ws.Cells["U" + RowIndex].PutValue(item.OrderStatusName);
-                            ws.Cells["V" + RowIndex].PutValue(item.USExpressAff == 1 ? true : false);
-                            ws.Cells["W" + RowIndex].PutValue(item.CustomerName);
-                            ws.Cells["X" + RowIndex].PutValue(item.Address);
-                            ws.Cells["Y" + RowIndex].PutValue(item.USExpressAffEmail);
-
-                            Total_FirstPoundFee += _first_pound_fee;
-                            ws.Cells["Z" + RowIndex].PutValue(_first_pound_fee);
-                            ws.Cells["Z" + RowIndex].SetStyle(currencyStyle);
-
-                            Total_NextPoundFee += _next_pound_fee;
-                            ws.Cells["AA" + RowIndex].PutValue(_next_pound_fee);
-                            ws.Cells["AA" + RowIndex].SetStyle(currencyStyle);
-
-                            Total_SpecialFee += _special_industry_fee;
-                            ws.Cells["AB" + RowIndex].PutValue(_special_industry_fee);
-                            ws.Cells["AB" + RowIndex].SetStyle(currencyStyle);
-
-
-                            ws.Cells["AC" + RowIndex].PutValue(lasteststatusexprire);
-                            ws.Cells["AC" + RowIndex].SetStyle(numberStyle);
-
-                            ws.Cells["AD" + RowIndex].PutValue(totaldayexprire);
-                            ws.Cells["AD" + RowIndex].SetStyle(numberStyle);
-
-                            ws.Cells["AE" + RowIndex].PutValue(item.Email);
-
-                        }
-
-                    }
-
-                    #region total row
-                    RowIndex++;
-
-                    numberStyle.Font.IsBold = true;
-                    numberStyle.BackgroundColor = Color.FromArgb(240, 248, 255);
-
-                    currencyStyle.Font.IsBold = true;
-                    numberStyle.BackgroundColor = Color.FromArgb(240, 248, 255);
-
-                    alignRightStyle.Font.IsBold = true;
-                    numberStyle.BackgroundColor = Color.FromArgb(240, 248, 255);
-
-                    centerStyle.Font.IsBold = true;
-                    numberStyle.BackgroundColor = Color.FromArgb(240, 248, 255);
-
-                    ws.Cells["A" + RowIndex].PutValue("TỔNG CỘNG");
-                    ws.Cells["A" + RowIndex].SetStyle(centerStyle);
-
-                    ws.Cells["B" + RowIndex].PutValue(Total_Quantity);
-                    ws.Cells["B" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["C" + RowIndex].PutValue(StringHelpers.FormatWeight(Total_Weight));
-                    ws.Cells["C" + RowIndex].SetStyle(alignRightStyle);
-
-                    ws.Cells["D" + RowIndex].PutValue(Total_Price);
-                    ws.Cells["D" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["E" + RowIndex].PutValue(Total_ShippingFee);
-                    ws.Cells["E" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["F" + RowIndex].PutValue(Total_AmountUSD);
-                    ws.Cells["F" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["H" + RowIndex].PutValue(Total_AmountVND);
-                    ws.Cells["H" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["I" + RowIndex].PutValue(Total_AmountWithoutVoucherUSD);
-                    ws.Cells["I" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["J" + RowIndex].PutValue(Total_Discount2ndVnd);
-                    ws.Cells["J" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["K" + RowIndex].PutValue(Total_DiscountVoucherVnd);
-                    ws.Cells["K" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["L" + RowIndex].PutValue(Total_DiscountVoucherUSD);
-                    ws.Cells["L" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["M" + RowIndex].PutValue(Total_Amount_Discount);
-                    ws.Cells["M" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["N" + RowIndex].PutValue(Total_PaymentAmount);
-                    ws.Cells["N" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["O" + RowIndex].PutValue(Total_CashbackAmount);
-                    ws.Cells["O" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["P" + RowIndex].PutValue(Total_OrderAmount);
-                    ws.Cells["P" + RowIndex].SetStyle(numberStyle);
-
-                    ws.Cells["Z" + RowIndex].PutValue(Total_FirstPoundFee);
-                    ws.Cells["Z" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["AA" + RowIndex].PutValue(Total_NextPoundFee);
-                    ws.Cells["AA" + RowIndex].SetStyle(currencyStyle);
-
-                    ws.Cells["AB" + RowIndex].PutValue(Total_SpecialFee);
-                    ws.Cells["AB" + RowIndex].SetStyle(currencyStyle);
-                    #endregion
-
-                    ws.AutoFitColumns();
-
-                    #endregion
-
-                    ws.Cells.InsertColumn(4);
-                    ws.Cells.InsertColumn(5);
-                    ws.Cells.InsertColumn(6);
-                    ws.Cells.CopyColumn(ws.Cells, ws.Cells.Columns[28].Index, ws.Cells.Columns[4].Index);
-                    ws.Cells.CopyColumn(ws.Cells, ws.Cells.Columns[29].Index, ws.Cells.Columns[5].Index);
-                    ws.Cells.CopyColumn(ws.Cells, ws.Cells.Columns[30].Index, ws.Cells.Columns[6].Index);
-                    ws.Cells.DeleteColumn(28);
-                    ws.Cells.DeleteColumn(28);
-                    ws.Cells.DeleteColumn(28);
-
-                    wb.Save(FilePath);
-                    pathResult = FilePath;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                //LogHelper.InsertLogTelegram("ReportOrder - OrderRepository: " + ex);
-            }
-            return pathResult;
-        }
-
-        public List<ChartRevenuViewModel> GetRevenuByDateRange(OrderSearchModel searchModel, bool isNow = true)
-        {
-            var model = new List<ChartRevenuViewModel>();
-            try
-            {
-                DataTable dt = _OrderDAL.GetRevenuByDateRange(searchModel);
-                if (dt != null && dt.Rows.Count > 0)
-                {
-                    if (isNow)
-                    {
-                        model = (from row in dt.AsEnumerable()
-                                 select new ChartRevenuViewModel
-                                 {
-                                     Date = Convert.ToDateTime(!row["Date"].
-                                     Equals(DBNull.Value) ? row["Date"] : null),
-                                     OrderCount = Convert.ToInt32(row["OrderCount"]),
-                                     TotalRevenu = Math.Round(Convert.ToDouble(row["Amount"])),
-                                     TotalShipFee = Math.Round(Convert.ToDouble(row["ShipFee"]))
-                                 }).ToList();
-                    }
-                    else
-                    {
-                        model = (from row in dt.AsEnumerable()
-                                 select new ChartRevenuViewModel
-                                 {
-                                     DatePass = Convert.ToDateTime(!row["Date"].
-                                     Equals(DBNull.Value) ? row["Date"] : null),
-                                     OrderCountPass = Convert.ToInt32(row["OrderCount"]),
-                                     TotalRevenuPass = Math.Round(Convert.ToDouble(row["Amount"])),
-                                     TotalShipFeePass = Math.Round(Convert.ToDouble(row["ShipFee"]))
-                                 }).ToList();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetRevenuByDateRange in OrderRepository" + ex);
-            }
-            return model;
-        }
-        public List<ChartRevenuViewModel> GetLabelRevenuByDateRange(OrderSearchModel searchModel)
-        {
-            var model = new List<ChartRevenuViewModel>();
-            try
-            {
-                DataTable dt = _OrderDAL.GetLabelRevenuByDateRange(searchModel);
-                if (dt != null && dt.Rows.Count > 0)
-                {
-                    model = (from row in dt.AsEnumerable()
-                             select new ChartRevenuViewModel
-                             {
-                                 TotalRevenu = Math.Round(Convert.ToDouble(row["Amount"])),
-                                 StoreName = Convert.ToString(row["StoreName"]),
-                             }).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetLabelRevenuByDateRange in OrderRepository" + ex);
-            }
-            return model;
-        }
-        public List<ChartRevenuViewModel> GetLabelQuantityByDateRange(OrderSearchModel searchModel)
-        {
-            var model = new List<ChartRevenuViewModel>();
-            try
-            {
-                DataTable dt = _OrderDAL.GetLabelQuantityByDateRange(searchModel);
-                if (dt != null && dt.Rows.Count > 0)
-                {
-                    model = (from row in dt.AsEnumerable()
-                             select new ChartRevenuViewModel
-                             {
-                                 OrderCount = Convert.ToInt32(row["OrderCount"]),
-                                 StoreName = Convert.ToString(row["StoreName"]),
-                             }).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetLabelRevenuByDateRange in OrderRepository" + ex);
-            }
-            return model;
-        }
-        public double GetRevenuDay()
-        {
-            double? percent = 0;
-            try
-            {
-                percent = _OrderDAL.GetRevenuDay();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetPagingList in OrderRepository" + ex);
-            }
-            return percent != null ? percent.Value : 0;
-        }
-
-        public async Task<object> GetOrderSuggestionList(string orderNo)
-        {
-            return await _OrderDAL.GetOrderSuggestionList(orderNo);
-        }
-
-        public async Task<long> FindOrderIdByOrderNo(string orderNo)
-        {
-            long rs = 0;
-            try
-            {
-                var order = await _OrderDAL.FindByOrderNo(orderNo);
-                if (order != null)
-                {
-                    rs = order.Id;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("FindOrderIdByOrderNo in OrderRepository" + ex);
-            }
-            return rs;
-        }
-
-        public async Task<Order> FindOrderByOrderId(long orderId)
-        {
-            Order order = new Order();
-            try
-            {
-                var rs = await _OrderDAL.FindAsync(orderId);
-                if (rs != null)
-                {
-                    order = rs;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("FindOrderIdByOrderNo in OrderRepository" + ex);
-            }
-            return order;
-        }
-
-        public RevenueViewModel SummaryRevenuToday()
-        {
-            try
-            {
-                return _OrderDAL.SummaryRevenuToday();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("SummaryRevenuToday in OrderRepository" + ex);
-                return null;
-            }
-        }
-
-        public RevenueViewModel SummaryRevenuTodayTemp()
-        {
-            try
-            {
-                return _OrderDAL.SummaryRevenuTodayTemp();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("SummaryRevenuTodayTemp in OrderRepository" + ex);
-                return null;
-            }
-        }
-
-        public async Task<List<OrderGridModel>> GetOrderListByClientId(long ClientId)
-        {
-            try
-            {
-                return await _OrderDAL.GetOrderListByClientId(ClientId);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public async Task<RevenueMinMax> GetMinMaxOrderAmount()
-        {
-            try
-            {
-                return await _OrderDAL.GetMinMaxAmountOrder();
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public async Task<double> GetOrderTotalAmount(long Id)
-        {
-            var OrderModel = await _OrderDAL.FindAsync(Id);
-            var PaymentAmount = await _PaymentDAL.GetOrderPaymentAmount(Id);
-            var CashbackAmount = await _CashbackDAL.GetOrderCashbackAmount(Id);
-            return (double)(PaymentAmount > 0 ? (PaymentAmount - CashbackAmount) : OrderModel.AmountVnd);
-        }
-
-        public async Task<OrderViewModel> GetOrderDetailByContractNo(string orderNo)
-        {
-            try
-            {
-                return await _OrderDAL.GetOrderDetail(orderNo);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderDetailByContractNo(orderNo) in OrderRepository" + ex);
-                return null;
-            }
-        }
-
-        public async Task<string> BuildOrderNo(int label_id)
-        {
-            var rd = new Random();
-            Dictionary<int, string> months = new Dictionary<int, string> { { 1, "A" }, { 2, "B" }, { 3, "C" }, { 4, "D" }, { 5, "E" }, { 6, "F" }, { 7, "G" }, { 8, "H" }, { 9, "K" }, { 10, "L" }, { 11, "M" }, { 12, "N" } };
-            try
-            {
-                var label_detail = await _LabelDAL.getLabelDetailById(label_id);
-                DateTime current = DateTime.Now;
-                DateTime startDate = new DateTime(current.Year, current.Month, current.Day, 0, 0, 0);
-
-                // Lấy ra tổng số đơn trong ngày tính đến thời điểm hiện tại
-                int total_order = await _OrderDAL.getTotalOrderByCurrentDate();
-
-                string orderCode = ((current.Day * 10) + (total_order + 1)).ToString("D3");
-
-                string order_no_final = label_detail.PrefixOrderCode + "-"
-                        + current.Year.ToString().Substring(current.Year.ToString().Length - 1, 1)
-                        + months[current.Month]
-                        + current.Day.ToString("D2") // cụm ngày tháng
-                        + orderCode; // cụm id
-
-
-                // kiem tra don nay co trong db chua. Neu co roi tinh lai
-                var order_detail = await _OrderDAL.FindByOrderNo(order_no_final);
-                if (order_detail != null)
-                {
-                    total_order += rd.Next(1, 9);
-                    orderCode = ((current.Day * 10) + (total_order + 1)).ToString("D3");
-                    order_no_final = label_detail.PrefixOrderCode + "-"
-                        + current.Year.ToString().Substring(current.Year.ToString().Length - 1, 1)
-                        + months[current.Month]
-                        + current.Day.ToString("D2") // cụm ngày tháng
-                        + orderCode; // cụm id
-                }
-
-                return order_no_final;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("BuildOrderNo(label_id=" + label_id + ") in OrderRepository" + ex);
-                string unixTimestamp = ((Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds).ToString();
-                Dictionary<int, string> types = new Dictionary<int, string> { { 1, "AM" }, { 2, "CC" }, { 3, "BB" }, { 4, "NR" }, { 5, "HL" }, { 6, "SP" }, { 7, "JS" }, { 8, "VS" } };
-
-                return "U" + types[label_id] + "-" // cụm 1
-                          + DateTime.Now.Year.ToString().Substring(3, 1)
-                          + months[DateTime.Now.Month]
-                          + unixTimestamp.Substring(unixTimestamp.Length - 3, unixTimestamp.Length - 1);// cụm ngày tháng
-            }
-        }
-
-        public async Task<long> Update(OrderViewModel model)
-        {
-            try
-            {
-                await _OrderDAL.UpdateAsync(model);
-                return model.Id;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("Update - OrderRepository. Ex= " + ex);
-                return -1;
-            }
-        }
-
-        public async Task<OrderApiViewModel> GetOrderDetailForApi(long Id)
-        {
-            try
-            {
-                return await _OrderDAL.GetOrderByIdForAPI(Id);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderDetailForApi in OrderRepository" + ex);
-                return null;
-            }
-        }
-
-        public async Task<long> UpdateOrderMapId(long order_id, long order_map_id)
-        {
-            try
-            {
-                return await _OrderDAL.UpdateOrderMapId(order_id, order_map_id);
-            }
-            catch (Exception ex)
-            {
-
-                LogHelper.InsertLogTelegram("UpdateOrderMapId - OrderRepository" + ex);
-                return -1;
-            }
-        }
-        public Task<OrderViewModel> GetOrderDetail(string orderNo)
-        {
-            throw new NotImplementedException();
-        }
-
-        public long GetTotalVoucherUse(long voucher_id, string email_client)
-        {
-            try
-            {
-                return _OrderDAL.GetTotalVoucherUse(voucher_id, email_client);
-            }
-            catch (Exception ex)
-            {
-
-                LogHelper.InsertLogTelegram("[orderRepo-] GetTotalVoucherUse - OrderRepository" + ex);
-                return 0;
-            }
-        }
-        public object GetOrderListFEByClientId(int clientID, string keyword, int order_status, int current_page, int page_size)
-        {
-            try
-            {
-                return _OrderDAL.GetOrderListByClientId(clientID, keyword, order_status, current_page, page_size);
-            }
-            catch (Exception ex)
-            {
-
-                LogHelper.InsertLogTelegram(" GetOrderListByClientId - OrderRepository" + ex);
-                return null;
-            }
-        }
-        public object GetOrderDetailFEByID(int OrderId)
-        {
-            try
-            {
-                return _OrderDAL.GetFeOrderDetailById(OrderId);
-            }
-            catch (Exception ex)
-            {
-
-                LogHelper.InsertLogTelegram(" GetFeOrderDetailById - OrderRepository" + ex);
-                return 0;
-            }
-        }
-        public object GetFELastestRecordByClientID(int ClientId)
-        {
-            try
-            {
-                return _OrderDAL.GetLastestRecordByClientID(ClientId);
-            }
-            catch (Exception ex)
-            {
-
-                LogHelper.InsertLogTelegram(" GetLastestRecordByClientID - OrderRepository" + ex);
-                return 0;
-            }
-        }
-        public object GetFEOrderCountByClientID(int ClientId)
-        {
-            try
-            {
-                return _OrderDAL.GetOrderCountByClientID(ClientId);
-            }
-            catch (Exception ex)
-            {
-
-                LogHelper.InsertLogTelegram(" GetLastestRecordByClientID - OrderRepository" + ex);
-                return 0;
-            }
-        }
-
-        public long GetTotalErrorOrderCount()
-        {
-            return _OrderDAL.GetTotalErrorOrderCount();
-        }
-
-        public async Task<bool> UpdatePaymentReCheckOut(long order_id, int address_id, short pay_type)
-        {
-            try
-            {
-                var address_detail = await _ClientDAL.GetAddressReceiverByAddressId(address_id);
-                string receiver_name = address_detail.Count() > 0 ? address_detail[0].ReceiverName : "N/A";
-                string full_address = address_detail.Count() > 0 ? address_detail[0].FullAddress : "N/A";
-                string phone = address_detail.Count() > 0 ? address_detail[0].Phone : "N/A";
-
-                var order_id_rs = await _OrderDAL.UpdatePaymentReChecOut(order_id, receiver_name, full_address, phone, pay_type);
-                return (order_id_rs > 0);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("[ORDERRESPONITORY] UpdatePaymentReCheckOut - OrderRepository" + ex);
-                return false;
-            }
-        }
-
-        public async Task<bool> updateAdressReceiver(string full_address, string phone, string receiver_name, long order_id)
-        {
-            try
-            {
-                var order = await _OrderDAL.FindAsync(order_id);
-                order.Address = full_address;
-                order.Phone = phone;
-                order.ClientName = receiver_name;
-                await _OrderDAL.UpdateAsync(order);
                 return true;
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("[ORDERRESPONITORY] updateAdressReceiver - OrderRepository" + ex);
+                LogHelper.InsertLogTelegram("ReCheckandUpdateOrderPayment - OrderRepository: " + ex);
                 return false;
             }
         }
-
-        public async Task<int> GetTotalReturningClientInDay()
+        public List<long> GetAllOrderIDs()
+        {
+            return _OrderDal.GetAllOrderIDs();
+        }
+        public async Task<bool> UndoContractPayByOrderId(long order_id, int user_summit)
         {
             try
             {
-                var ListOrderToday = await _OrderDAL.GetByConditionAsync(s => s.CreatedOn.Value.Date == DateTime.Now.Date);
-                if (ListOrderToday != null && ListOrderToday.Count > 0)
+                var order = _OrderDal.GetByOrderId(order_id);
+                if (order.OrderStatus == (int)OrderStatus.CANCEL)
                 {
-                    var ListClientId = ListOrderToday.Select(s => s.ClientId).Distinct();
-                    var ListReturningClient = await _ClientDAL.GetByConditionAsync(s => ListClientId.Contains(s.Id) && s.JoinDate.Date < DateTime.Now.Date);
-
-                    if (ListReturningClient != null && ListReturningClient.Count > 0)
+                    var list_contract_pay = _contractPayDAL.GetByOrderId(order_id, ProcedureConstants.SP_GetListContractPayByOrderId).ToList<ContractPayViewModel>();
+                    if (list_contract_pay != null && list_contract_pay.Count > 0)
                     {
-                        return ListReturningClient.Count;
+                        //_contractPayDAL.UpdateContractPayDetail(string.Join(",", list_contract_pay.Select(x => x.PayId)), order_id, (order.Amount == null ? 0 : (double)order.Amount), user_summit);
+                        foreach (var contract in list_contract_pay)
+                        {
+                            _contractPayDAL.UndoContractPayByCancelService(contract.PayId, order_id, user_summit);
+                        }
+
                     }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UndoContractPayByOrderId - OrderRepository: " + ex);
+                return false;
+            }
+
+        }
+        public async Task<TotalCountSumOrder> GetTotalCountSumOrder(OrderViewSearchModel searchModel, int currentPage, int pageSize)
+        {
+            var model = new TotalCountSumOrder();
+            try
+            {
+                DataTable dt = await _OrderDal.GetPagingList(searchModel, currentPage, pageSize, ProcedureConstants.GET_TOTALCOUNT_ORDER);
+                if (dt != null && dt.Rows.Count > 0)
+                {
+
+             
+                    model.Profit = dt.Rows[0]["Profit"].Equals(DBNull.Value) ? 0 : Convert.ToDouble(dt.Rows[0]["Profit"]);
+                    model.Amount = dt.Rows[0]["Amount"].Equals(DBNull.Value) ? 0 : Convert.ToDouble(dt.Rows[0]["Amount"]);
+                    model.Price = dt.Rows[0]["Price"].Equals(DBNull.Value) ? 0 : Convert.ToDouble(dt.Rows[0]["Price"]);
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("[ORDERRESPONITORY] GetTotalReturningClientInDay - OrderRepository" + ex);
+                LogHelper.InsertLogTelegram("GetTotalCountSumOrder in OrderRepository: " + ex);
             }
-            return 0;
-        }
-
-        public async Task<long> GetTotalPaymentClientInDay()
-        {
-            try
-            {
-                var ListOrderToday = await _OrderDAL.GetByConditionAsync(s => s.PaymentStatus == 0 && s.PaymentDate.Value.Date == DateTime.Now.Date);
-                if (ListOrderToday != null && ListOrderToday.Count > 0)
-                {
-                    var ListClientId = ListOrderToday.Select(s => s.ClientId).Distinct();
-
-                    if (ListClientId != null && ListClientId.Count() > 0)
-                    {
-                        return ListClientId.Count();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("[ORDERRESPONITORY] GetTotalPaymentClientInDay - OrderRepository" + ex);
-            }
-            return 0;
-        }
-
-
-        public async Task<Order> FindAsync(long Id)
-        {
-            return await _OrderDAL.FindAsync(Id);
-        }
-        public async Task<string> UpdateOrderStatus(string order_no, int order_status)
-        {
-            return await _OrderDAL.UpdateOrderStatus(order_no, order_status);
-        }
-
-        public async Task<long> UpdateAsync(Order entity)
-        {
-            try
-            {
-                await _OrderDAL.UpdateAsync(entity);
-                return entity.Id;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("[ORDERRESPONITORY] UpdateAsync - OrderRepository" + ex);
-                return 0;
-            }
-
-        }
-
-        public async Task<List<OrderGridModel>> GetOrderListByReferralId(string ReferralId)
-        {
-            try
-            {
-                return await _OrderDAL.GetOrderListByReferralId(ReferralId);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("[ORDERRESPONITORY] GetOrderListByReferralId - OrderRepository" + ex);
-                return null;
-            }
-        }
-
-
-        public async Task<double> getTotalOrderByEmail(string email)
-        {
-            try
-            {
-                return _OrderDAL.getTotalOrderByEmail(email).Result.AmountVnd ?? 0;
-            }
-            catch (Exception ex)
-            {
-
-                LogHelper.InsertLogTelegram(" GetFeOrderDetailById - OrderRepository" + ex);
-                return 0;
-            }
-        }
-
-
-        public async Task<OrderAppModel> GetOrderDetailByOrderNo(string order_no)
-        {
-            try
-            {
-                return await _OrderDAL.GetOrderDetailByOrderNo(order_no);
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        public async Task<object> GetOrderListByClientPhone(string client_phone)
-        {
-            try
-            {
-                return await _OrderDAL.GetOrderListByClientPhone(client_phone);
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        public async Task<object> GetOrderTrackingByOrderNo(string order_no)
-        {
-            try
-            {
-                return await _OrderDAL.GetOrderTrackingByOrderNo(order_no);
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-        public async Task<List<AffOrder>> GetAffiliateOrderItems(DateTime time_start, DateTime time_end, List<string> utm_source)
-        {
-            try
-            {
-                return await _OrderDAL.GetAffiliateOrders(time_start, time_end, utm_source);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-        public List<OrderLogShippingDateViewModel> GetOrderShippingLogToday()
-        {
-            return _OrderDAL.GetOrderShippingLogToday();
-        }
-
-        public Task<OrderViewModel> CheckOrderDetail(long Id)
-        {
-            return _OrderDAL.CheckOrderDetail(Id);
+            return model;
         }
     }
 }

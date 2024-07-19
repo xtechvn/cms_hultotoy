@@ -13,7 +13,7 @@ namespace Repositories.IRepositories
         public Task<string> UpdateProvince(Province updatedItem);
         public int CheckProvinceExists(Province newProvince, bool for_update=false);
         public Task<Province> GetLastestProvinceWithIDAsync();
-
+        public Task<Province> GetProvinceById(long province_id);
     }
     public interface IDistrictRepository
     {

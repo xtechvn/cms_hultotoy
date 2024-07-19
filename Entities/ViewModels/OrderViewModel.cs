@@ -1,148 +1,284 @@
 ﻿using Entities.Models;
+using Entities.ViewModels.HotelBooking;
+using Entities.ViewModels.Tour;
+using Entities.ViewModels.VinWonder;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Entities.ViewModels
 {
-    public class OrderViewModel : Order
+    public class OrderViewModel
     {
-        public string Voucher { get; set; }
-        public string VoucherDescription { get; set; }
-    }
-
-    public class OrderApiViewModel : Order
-    {
-        public string Voucher { get; set; }
-        public string VoucherDescription { get; set; }
-
-        public long ClientMapId { get; set; }
-        public string Province { get; set; }
-        public string District { get; set; }
-        public string Ward { get; set; }
-    }
-
-    public class OrderItemViewModel
-    {
-        public long OrderItemMapId { get; set; }
-        public long ProductId { get; set; }
-        public int LabelId { get; set; }
-        public long ProductMapId { get; set; } // productId map voi Id product o DB cu 
-        public long OrderId { get; set; } // order id cua db moi sau khi insert thanh cong
-        public string ProductName { get; set; }
-        public string ProductCode { get; set; }
-        public string ProductImage { get; set; }
-        public string ProductPath { get; set; }
-        public double Price { get; set; }
-        public double FirstPoundFee { get; set; }
-        public double DiscountShippingFirstPound { get; set; } // Chiết khấu khi mua từ 2 sp trở lên
-        public double NextPoundFee { get; set; }
-        public double LuxuryFee { get; set; }
-        public double ShippingFeeUs { get; set; }
-        public int Quantity { get; set; }
-        public int SpecialLuxuryId { get; set; }
-        public double RateCurrent { get; set; }
-        public double Weight { get; set; } // trong luong sp tinh bang POUND
-    }
-
-    public class OrderGridModel : Order
-    {
-        public string OrderStatusName { get; set; }
-        public string PaymentStatusName { get; set; }
-        public string PaymentTypeName { get; set; }
-        public string VoucherCode { get; set; }
-    }
-
-    public class OrderSearchModel
-    {
-        public string OrderNo { get; set; }
-        public string FromDate { get; set; }
-        public string ToDate { get; set; }
+        public string OrderId { get; set; }
+        public string OrderCode { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
         public string ClientName { get; set; }
-        public string Phone { get; set; }
-        public string OrderStatus { get; set; }
-        public string VoucherNo { get; set; }
+        public long? ClientId { get; set; }
+        public string ClientNumber { get; set; }
+        public string ClientEmail { get; set; }
+        public string Note { get; set; }
+        public double Payment { get; set; }
+        public double Amount { get; set; }
         public string UtmSource { get; set; }
+        public double Profit { get; set; }
+        //public List<Source> StatusDetail { get; set; } = new List<Source>();
+        public string Status { get; set; }
+        public int StatusCode { get; set; }
+        public int PayDetailId { get; set; }
+        public string CreateDate { get; set; }
+        public string CreateName { get; set; }
+        public string UpdateName { get; set; }
+        public string UpdateDate { get; set; }
+        public string SalerName { get; set; }
+        public string SalerUserName { get; set; }
+        public string SalerEmail { get; set; }
+        public string SaleGroupName { get; set; }
+        public string PaymentStatus { get; set; }
+        public double TotalDisarmed { get; set; }
+        public double TotalAmount{ get; set; }
+        public double TotalNeedPayment { get; set; }
+        public string UsUpdateName { get; set; }
+        public string CreatedName { get; set; }
+        public string ServiceType { get; set; }
+        public string Vouchercode { get; set; }
+        public bool IsChecked { get; set; }
+        public bool IsDisabled { get; set; }
+        public string PaymentStatusName { get; set; }
+        public string PermisionTypeName { get; set; }
+        public string OperatorIdName { get; set; }
         public string UtmMedium { get; set; }
-        public int PaymentType { get; set; }
-        public int PaymentStatus { get; set; }
-        public string PaymentDate { get; set; }
-        public int IsErrorOrder { get; set; }
-        public string ProductCode { get; set; }
-        public int IsAffialiate { get; set; }
-        public int LabelId { get; set; }
-    }
+        public int IsFinishPayment { get; set; }
 
+
+
+    }
+    public class TotalValueOrder
+    {
+        public string TotalAmmount { get; set; }
+        public string TotalProductService { get; set; }
+        public string TotalDone { get; set; }
+        public string TotalProfit { get; set; }
+
+    }
+    public class ProductServiceName
+    {
+        public string OrderId { get; set; }
+        public string ServiceName { get; set; }
+        public string StatusName { get; set; }      
+        public string ServiceId { get; set; }      
+        public string Note { get; set; }      
+        public int Status { get; set; }      
+        public string Type { get; set; }      
+    }
+    public class AllCodeData
+    {
+        public int Status { get; set; }
+        public string Msg { get; set; }
+        public List<AllCode> Data { get; set; }
+    }
+    public class Source
+    {
+        public int Key { get; set; }
+        public int Value { get; set; }
+    }
+    public class FilterOrder
+    {
+        public TotalValueOrder TotalValueOrder { get; set; }
+        public long Totalrecord { get; set; }
+        public long TotalData { get; set; }
+        public long Totalrecord1 { get; set; }
+        public long Totalrecord2 { get; set; }
+        public long Totalrecord3 { get; set; }
+        public long Totalrecord4 { get; set; }
+        public long TotalrecordErr { get; set; }
+        public List<AllCode> SysTemType { get; set; }
+        public List<AllCode> Source { get; set; }
+        public List<AllCode> Type { get; set; }
+        public List<AllCode> Customers { get; set; }
+        public List<AllCode> Status { get; set; }
+        public string[] SuggestOrder { get; set; }
+
+    }
+    public class OrderViewSearchModel
+    {
+        public int SysTemType { get; set; } = -1;
+        public string PaymentStatus { get; set; } 
+        public string PermisionType { get; set; } 
+        public string[] HINHTHUCTT { get; set; }
+
+        public string OrderNo { get; set; }
+        public DateTime? StartDateFrom { get; set; }
+        public DateTime? StartDateTo { get; set; }
+        public DateTime? EndDateFrom { get; set; }
+        public DateTime? EndDateTo { get; set; }
+        public string Note { get; set; }
+        public string UtmSource { get; set; }
+        public List<int>? ServiceType { get; set; }
+        public List<int>? Status { get; set; }
+        public string CreateTime { get; set; }
+        public string ToDateTime { get; set; }
+        public string CreateName { get; set; }
+        public string OperatorId { get; set; }
+        public string Sale { get; set; }
+        public string SaleGroup { get; set; }
+        public string ClientId { get; set; }
+        public string SalerPermission { get; set; }
+        public string BoongKingCode { get; set; }
+        public int StatusTab { get; set; } = 99;
+        public int PageIndex { get; set; } 
+        public int pageSize { get; set; } 
+    }
+    public class SearchOrder
+    {
+        public string Id { get; set; }
+        public string Deposit_type { get; set; }
+        public string ImageScreen { get; set; }
+        public string UserVerifyId { get; set; }
+        public string VerifyDate { get; set; }
+        public string NoteReject { get; set; }
+        public string OrderId { get; set; }
+        public string OrderNo { get; set; }
+        public string ServiceType { get; set; }
+        public DateTime CreateTime { get; set; }
+        public decimal Amount { get; set; }
+        public string PaymentStatus { get; set; }
+        public string ClientId { get; set; }
+        public string ContactClientId { get; set; }
+        public string SmsContent { get; set; }
+        public string PaymentType { get; set; }
+        public string BankCode { get; set; }
+        public string PaymentDate { get; set; }
+        public string PaymentNo { get; set; }
+        public string ColorCode { get; set; }
+        public string Discount { get; set; }
+        public string Profit { get; set; }
+        public string ExpriryDate { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
+        public string ProductService { get; set; }
+        public string Note { get; set; }
+        public string UtmSource { get; set; }
+        public string UpdateLast { get; set; }
+        public string SalerId { get; set; }
+        public string SalerGroupId { get; set; }
+        public string UserUpdateId { get; set; }
+        public string SystemType { get; set; }
+        public string AccountClientId { get; set; }
+        public string ContactClient { get; set; }
+        public string Contract { get; set; }
+        public object Passenger { get; set; }
+    }
+    public class SearchOrderModels
+    {
+        public string Status { get; set; }
+        public string Msg { get; set; }
+        public List<SearchOrder> Data { get; set; }
+    }
     public class OrderDetailViewModel
     {
-        public OrderViewModel OrderInfo { get; set; }
-
-        public List<OrderItemViewModel> OrderItemList { get; set; }
-    }
-
-    public class RevenueMinMax
-    {
-        public double Min { get; set; }
-        public double Max { get; set; }
-    }
-
-    public class OrderReportModel
-    {
-        public long OrderId { get; set; }
+        public string OrderId { get; set; }
         public string OrderNo { get; set; }
+        public string Label { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime CreateTime { get; set; }
+        public double Amount { get; set; }
+        public string OrderStatus { get; set; }
+        public int Status { get; set; }
+        public string PaymentStatus { get; set; }
+        public string PermisionTypeName { get; set; }
+        public string FullName { get; set; }
+        public double AmountPay { get; set; }
+        public string ClientName { get; set; }
         public string Email { get; set; }
-        public double TotalDiscount2ndVnd { get; set; }
-        public double TotalDiscountVoucherVnd { get; set; }
-        public double PaymentAmount { get; set; }
-        public double CashbackAmount { get; set; }
-        public double OrderAmount { get; set; }
-        public double RateCurrent { get; set; }
-        public DateTime PaymentDate { get; set; }
-        public string StoreName { get; set; }
-        public string UtmSource { get; set; }
-        public string UtmMedium { get; set; }
-        public string OrderStatusName { get; set; }
-        public int USExpressAff { get; set; }
-        public string CustomerName { get; set; }
-        public string Address { get; set; }
-        public string USExpressAffEmail { get; set; }
+        public string Phone { get; set; }
+        public string TaxNo { get; set; }
+        public string BusinessAddress { get; set; }
+        public double Id { get; set; }
+        public long ClientId { get; set; }
+        public int ContactClientId { get; set; }
+        public int SalerId { get; set; }
 
     }
-
-    public class OrderItemReportModel
+    public class OrderServiceViewModel
     {
-        public long Id { get; set; }
-        public long OrderId { get; set; }
-        public double Price { get; set; }
-        public int Quantity { get; set; }
-        public double Weight { get; set; }
-        public double FirstPoundFee { get; set; }
-        public double NextPoundFee { get; set; }
-        public double LuxuryFee { get; set; }
-    }
-    public class OrderAppModel
-    {
-        public object order { get; set; }
-        public object order_detail { get; set; }
-
-    }
-
-    public class OrderKerryProgressModel
-    {
-        public string status_date { get; set; }
-        public string warehouse { get; set; }
-        public string delivery_man { get; set; }
-        public string phone_number { get; set; }
-        public int giaohangthanhcong { get; set; }
-    }
-    public class OrderLastestProgressExportModel
-    {
+        public string OrderId { get; set; }
         public string OrderNo { get; set; }
-        public int TotalOrderProgressDay { get; set; }
-        public int LastestOrderProgressDay { get; set; }
+        public string ServiceId { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime CreateTime { get; set; }
+        public string Id { get; set; }
+        public double Amount { get; set; }
+        public double Price { get; set; }
+        public double Profit { get; set; }
+        public double Refund { get; set; }
+        public double Discount { get; set; }
+        public double OrderAmount { get; set; }
+        public string Type { get; set; }
+        public string FullName { get; set; }
+        public string code { get; set; }
+        public string Note { get; set; }
+        public string StatusName { get; set; }
+        public string ServiceCode { get; set; }
+        public int  Status { get; set; }
+        public TourViewModel tour { get; set; }
+        public List< HotelBookingViewModel> Hotel { get; set; }
+        public Bookingdetail Flight { get; set; }
+        public List<OtherBookingViewModel> OtherBooking { get; set; }
+        public List<VinWonderDetailViewModel> VinWonderBooking { get; set; }
+
     }
-    public class OrderExpectedExportModel : OrderReportModel
+    public class FieldOrder
     {
-        public int OrderStatus { get; set; }
+        public bool OrderNo { get; set; }
+        public bool  DateOrder { get; set; }
+        public bool ClientOrder { get; set; }
+        public bool NoteOrder { get; set; }
+        public bool PayOrder { get; set; }
+        public bool UtmSource { get; set; }
+        public bool ProfitOrder { get; set; }
+        public bool SttOrder { get; set; }
+        public bool StartDateOrder { get; set; }
+        public bool CreatedName { get; set; }
+        public bool UpdatedDate { get; set; }
+        public bool UpdatedName { get; set; }
+        public bool MainEmp { get; set; }
+        public bool SubEmp { get; set; }
+        public bool Voucher { get; set; }
+        public bool Operator { get; set; }
+        public bool HINHTHUCTT { get; set; }
+        public bool KHACHPT { get; set; }
+        public bool tum_medium { get; set; }
+    }
+    public class OrderPaymentRequest
+    {
+        public string OrderId { get; set; }
+        public string OrderNo { get; set; }
+        public int Type { get; set; }
+        public int Status { get; set; }
+        public double Amount { get; set; }
+        public string ClientId { get; set; }
+    }
+    public class OrderandService
+    {
+        public string OrderId { get; set; }
+        public string OrderStatus { get; set; }
+        public string PaymentStatus { get; set; }
+        public List<TourViewModel> ListTour { get; set; }
+        public List<HotelBookingViewModel> ListHotel { get; set; }
+        public List<Bookingdetail> ListFly { get; set; }
+        public List<OtherBookingViewModel> ListOther { get; set; }
+        public List<VinWonderDetailViewModel> ListVin { get; set; }
+    }
+    public class TotalCountSumOrder
+    {
+        public double Amount { get; set; }
+        public double Profit { get; set; }
+        public double Price { get; set; }
+   
     }
 }

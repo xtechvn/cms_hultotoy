@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Utilities;
 
 namespace DAL
 {
@@ -41,8 +42,9 @@ namespace DAL
                     return data;
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                LogHelper.InsertLogTelegram("GetListByOrderId - CashbackDAL: " + ex.ToString());
                 return null;
             }
         }
@@ -56,8 +58,9 @@ namespace DAL
                     return await _DbContext.Cashback.Where(s => s.OrderId == orderId).SumAsync(s => s.Amount);
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                LogHelper.InsertLogTelegram("GetOrderCashbackAmount - CashbackDAL: " + ex.ToString());
                 return 0;
             }
         }

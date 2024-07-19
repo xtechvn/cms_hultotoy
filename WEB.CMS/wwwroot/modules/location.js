@@ -649,68 +649,7 @@ var _location = {
         };
         $('#onapply_location').css('display', 'none');
     },
-    MappingLocation: function () {
-        if (location_type == "" || location_type == null || sync_data == null || sync_data == "") {
-            _msgalert.error('Vui lòng kiểm tra lại dữ liệu.');
-            return;
-        }
-    },
-    SyncDataFromSelect: function () {
-        $('#e_p_notselect').addClass("mfp-hide");
-        $('#e_d_notselect').addClass("mfp-hide");
-        var sync_data = null;
-        var location_type = -1;
-        if (selected_p == null || selected_p == "") {
-            $(".div_error").css({ 'display': '' });
-            $('#e_p_notselect').removeClass("mfp-hide");
-            return;
-        }
-        else {
-            if (selected_d == null || selected_d == "") {
-                sync_data = selected_p;
-                location_type = 0;
-            }
-            else {
-                if (selected_w == null || selected_w == "") {
-                    sync_data = selected_d;
-                    location_type = 1;
-                }
-                else {
-                    sync_data = selected_w;
-                    location_type = 2;
-                }
-            }
-        }
-        if (sync_data == null || sync_data == "" || location_type == null || location_type < 0) {
-            _msgalert.error('Vui lòng kiểm tra lại thông tin');
-        }
-        else {
-            _location.SyncData(sync_data, location_type);
-        }
-    },
-    SyncData: function (sync_data, location_type) {
-        var data = {
-            data: JSON.stringify(sync_data),
-            location_type: location_type
-        };
-        $.ajax({
-            url: "/location/SyncData",
-            type: "POST",
-            data: data,
-            success: function (result) {
-                if (result.status == 0) {
-                    _msgalert.success(result.msg);
-                }
-                else {
-                    _msgalert.error(result.msg);
-
-                }
-            },
-            error: function (result) {
-                _msgalert.error(result.msg);
-            }
-        });
-    }
+    
 };
 
 

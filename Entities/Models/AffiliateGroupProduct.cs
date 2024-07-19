@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Entities.Models;
+// Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
+// If you have enabled NRTs for your project, then un-comment the following line:
+// #nullable disable
 
-public partial class AffiliateGroupProduct
+namespace Entities.Models
 {
-    public int Id { get; set; }
-
-    public int GroupProductId { get; set; }
-
-    public int AffType { get; set; }
+    public partial class AffiliateGroupProduct
+    {
+        public int Id { get; set; }
+        public int GroupProductId { get; set; }
+        public int AffType { get; set; }
+    }
 }

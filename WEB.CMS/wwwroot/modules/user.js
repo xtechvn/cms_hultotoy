@@ -65,6 +65,7 @@ $('#grid-data').on('click', 'tr.line-item', function () {
                 seft.after(result);
                 seft.data('ajaxdetail', "true");
                 $('.info-detail').children('td').attr('colspan', colSpan);
+
             }
         });
     }
@@ -138,11 +139,12 @@ $('#grid-data').on('click', '.btn-change-user-status', function () {
     });
 });
 
-var _user =  {
+var _user = {
 
     Init: function (data) {
         this.SearchParam = data;
         this.Search(data);
+        this.modal_element = $('#global_modal_popup');
     },
 
     Search: function (input) {
@@ -203,22 +205,156 @@ var _user =  {
     OnOpenCreateForm: function () {
         let title = 'Thêm người dùng';
         let url = '/user/AddOrUpdate';
-        let param = { Id: 0 };
-        _magnific.OpenLargerPopup(title, url, param);
+        _user.modal_element.find('.modal-title').html(title);
+        _user.modal_element.find('.modal-dialog').css('max-width', '900px');
+        _ajax_caller.get(url, { Id: 0 }, function (result) {
+            _user.modal_element.find('.modal-body').html(result);
+            $('.select2_modal').select2();
+            $('.DepartmentId').select2({
+                placeholder: "Chọn phòng ban"
+            });
+            $('.UserPositionId').select2({
+                placeholder: "Chọn chức vụ"
+            });
+            $('.select2_modal_multiple').select2({
+                placeholder: "Chọn vai trò"
+            });
+            $('.select2_modal_multiple').select2({
+                placeholder : "Chọn vai trò"
+            });
+            $('.datepicker-input').daterangepicker({
+                singleDatePicker: true,
+                showDropdowns: true,
+                minYear: 1901,
+                maxYear: parseInt(moment().format('YYYY'), 10),
+                locale: {
+                    format: 'DD/MM/YYYY'
+                }
+            }, function (start, end, label) {
+                $(this).val(start.format('MM/DD/YYYY'));
+                $(this).change();
+            });
+            _user.modal_element.modal('show');
+        });
+
+        //let param = { Id: 0 };
+        //_magnific.OpenLargerPopup(title, url, param);
     },
 
     OnOpenEditForm: function (id) {
         let title = 'Cập nhật người dùng';
         let url = '/user/AddOrUpdate';
-        let param = { Id: id };
-        _magnific.OpenLargerPopup(title, url, param);
-    },
 
+        _user.modal_element.find('.modal-title').html(title);
+        _user.modal_element.find('.modal-dialog').css('max-width', '900px');
+        _ajax_caller.get(url, { Id: id }, function (result) {
+            _user.modal_element.find('.modal-body').html(result);
+            $('.select2_modal').select2();
+            $('.select2_modal_multiple').select2({
+                placeholder: "Chọn vai trò"
+            });
+            $('.DepartmentId').select2({
+                placeholder: "Chọn phòng ban"
+            });
+            $('.UserPositionId').select2({
+                placeholder: "Chọn chức vụ"
+            });
+            $('.select2_modal_multiple').select2({
+                placeholder: "Chọn vai trò"
+            });
+            $('.datepicker-input').daterangepicker({
+                singleDatePicker: true,
+                showDropdowns: true,
+                minYear: 1901,
+                maxYear: parseInt(moment().format('YYYY'), 10),
+                locale: {
+                    format: 'DD/MM/YYYY'
+                }
+            }, function (start, end, label) {
+                $(this).val(start.format('MM/DD/YYYY'));
+                $(this).change();
+            });
+            _user.modal_element.modal('show');
+        });
+
+
+        //let param = { Id: id };
+        //_magnific.OpenLargerPopup(title, url, param);
+    },
+    OnOpenGenQrFrom: function (id) {
+        let url = '/User/ViewConfirm';
+        let param = {
+            id: id
+        };
+        _magnific.OpenSmallPopup('', url, param);
+       
+    },
+    ConfirmQRCodeUser: function (id) {
+        _global_function.AddLoading()
+        $.ajax({
+            url: '/user/ConfirmPassQr',
+            type: 'POST',
+            data: {
+                id: id,
+                pass: $('#ConfirmUserPass').val()
+            },
+            success: function (result) {
+              
+                if (result.isSuccess) {
+                    _global_function.RemoveLoading()
+                    _user.GenQRCodeUser(id)
+
+                } else {
+                    _global_function.RemoveLoading()
+                    _msgalert.error(result.message);
+                   
+                }
+            },
+        });
+    },
+    GenQRCodeUser: function (id) {
+        let url = '/User/QrCodeUser';
+        let param = {
+            id: id
+        };
+        _magnific.OpenSmallPopup('', url, param);
+        setTimeout(function () {
+            $('#QrCode').removeClass('placeholder placeholderqr')
+        }, 10)
+    },
     OnOpenCopyForm: function (id) {
         let title = 'Thêm người dùng';
         let url = '/user/AddOrUpdate';
-        let param = { Id: id, IsClone: true };
-        _magnific.OpenLargerPopup(title, url, param);
+
+        _user.modal_element.find('.modal-title').html(title);
+        _user.modal_element.find('.modal-dialog').css('max-width', '900px');
+        _ajax_caller.get(url, { Id: id, IsClone: true }, function (result) {
+            _user.modal_element.find('.modal-body').html(result);
+            $('.DepartmentId').select2({
+                placeholder: "Chọn phòng ban"
+            });
+            $('.UserPositionId').select2({
+                placeholder: "Chọn chức vụ"
+            });
+            $('.select2_modal_multiple').select2({
+                placeholder: "Chọn vai trò"
+            });
+            $('.select2_modal').select2();
+
+            $('.datepicker-input').daterangepicker({
+                singleDatePicker: true,
+                showDropdowns: true,
+                minYear: 1901,
+                maxYear: parseInt(moment().format('YYYY'), 10),
+                locale: {
+                    format: 'DD/MM/YYYY'
+                }
+            }, function (start, end, label) {
+                $(this).val(start.format('MM/DD/YYYY'));
+                $(this).change();
+            });
+            _user.modal_element.modal('show');
+        });
     },
 
     OnChangeImage: function () {
@@ -264,6 +400,15 @@ var _user =  {
                 RePassword: {
                     required: 'Vui lòng nhập lại mật khẩu',
                     equalTo: 'Mật khẩu không chính xác'
+                },
+                RoleId: {
+                    required: 'Vui lòng chọn vai trò cho người dùng',
+                },
+                DepartmentId: {
+                    required: 'Vui lòng chọn phòng ban cho người dùng',
+                },
+                Level: {
+                    required: 'Vui lòng chọn chức vụ của người dùng',
                 }
             }
         });
@@ -271,6 +416,49 @@ var _user =  {
         if (FromCreate.valid()) {
             let form = document.getElementById('form-create-user');
             var formData = new FormData(form);
+            let roles = $('#RoleId').val();
+            let UserPositionId = $('#UserPositionId').val();
+            let Rank = $('#UserPositionId').find(':selected').attr('data-lvl');
+            formData.set("RoleId", roles != null ? roles.join(',') : "");
+            formData.set("UserPositionId", UserPositionId != null ? UserPositionId : 0);
+            formData.set("Rank", Rank != null ? Rank : 0);
+            var company_type = ''
+            $('.company-type:checked').each(function (index, item) {
+                var element = $(this)
+                if (company_type.trim() == '') {
+                    company_type = '' + element.val()
+                }
+                else {
+                    company_type += ',' + element.val()
+                }
+            })
+            formData.set("CompanyType", company_type);
+            formData.set("UserName", $('#UserName').val());
+            formData.set("BirthDay", _global_function.GetDayText($('#datepicker').data('daterangepicker').startDate._d, true));
+            formData.set("OldCompanyType", $('#form-create-user').attr('data-companytype'))
+
+            /*
+            var model = {
+                RoleId: roles != null ? roles.join(',') : "",
+                UserPositionId: UserPositionId != null ? UserPositionId : 0,
+                Rank: Rank != null ? Rank : 0,
+                Phone: $('#Phone').val() != undefined ? $('#Phone').val() : '',
+                Id: $('#Id').val() != undefined ? $('#Id').val() :0,
+                Address: $('#Address').val() != undefined ? $('#Address').val() : '',
+                UserName: $('#UserName').val() != undefined ? $('#UserName').val() : '',
+                BirthDay: _global_function.GetDayText($('#datepicker').data('daterangepicker').endDate._d,true).split(' ')[0],
+                Email: $('#Email').val() != undefined ? $('#Email').val() : '',
+                Address: $('#Address').val() != undefined ? $('#Address').val() : '',
+                Status: $('#Status').find(':selected').val(),
+                DepartmentId: $('#DepartmentId').find(':selected').val(),
+                Note: $('#Note').val(),
+            }
+            
+            var list_file=[]
+            $($('input[name="imagefile"]')[0].files).each(function (index, item) {
+                list_file.push(item)
+            });
+            */
             $.ajax({
                 url: '/user/upsert',
                 type: 'POST',
@@ -281,7 +469,7 @@ var _user =  {
                     if (result.isSuccess) {
                         _msgalert.success(result.message);
                         _user.ReLoad();
-                        $.magnificPopup.close();
+                        _user.modal_element.modal('hide');
                     } else {
                         _msgalert.error(result.message);
                     }
@@ -300,6 +488,12 @@ var _user =  {
 
         if (type === 0) {
             $('.data-left[data-id=' + userid + '] li.active').each(function () {
+                let _roleid = $(this).data('id');
+                let _rolename = $(this).html();
+                _arrRole.push(parseInt(_roleid));
+                _arrRoleData.push({ roleid: _roleid, rolename: _rolename })
+            });
+            $('.data-right[data-id=' + userid + ']').each(function () {
                 let _roleid = $(this).data('id');
                 let _rolename = $(this).html();
                 _arrRole.push(parseInt(_roleid));
@@ -339,7 +533,7 @@ var _user =  {
                 }
             });
         }
-
+       
     },
 
     OnResetPassword: function (id) {
@@ -379,5 +573,6 @@ var _user =  {
                 }
             });
         });
-    }
+    },
+    
 };

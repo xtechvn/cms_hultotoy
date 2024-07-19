@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using Utilities.ConfigModels;
+using System.IO;
+using TheArtOfDev.HtmlRenderer.PdfSharp;
+using PdfSharp;
 
 namespace Utilities
 {
@@ -91,7 +93,7 @@ namespace Utilities
                 return (int)ResponseType.ERROR;
             }
         }
-
+        /*
         public static async Task SendMailAsync(string receive_email, string email_title, string email_body, string cc_email, string bcc_email)
         {
             string token = string.Empty;
@@ -117,6 +119,47 @@ namespace Utilities
             catch (Exception ex)
             {
                 LogHelper.InsertLogTelegram("SendMail - " + ex.Message.ToString() + " Token:" + token);
+            }
+        }*/
+        public static bool ByteArrayToFile(string fileName, byte[] byteArray)
+        {
+            try
+            {
+                using (var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+                {
+                    fs.Write(byteArray, 0, byteArray.Length);
+                    fs.Dispose();
+                    fs.Close();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("ByteArrayToFile(fileName = " + fileName + ") - EmailHelper: " + ex);
+                return false;
+            }
+        }
+        public static byte[] PdfSharpConvert(String html)
+        {
+            if (string.IsNullOrEmpty(html))
+                return null;
+
+            try
+            {
+                using (var outputStream = new MemoryStream())
+                {
+                    PdfGenerateConfig pdfGenerateConfig = new PdfGenerateConfig();
+                    pdfGenerateConfig.PageSize = PageSize.A4;
+                    var pdf = PdfGenerator.GeneratePdf(html, pdfGenerateConfig, null, null);
+                    pdf.Save(outputStream);
+                    var result = outputStream.ToArray();
+                    pdf.Dispose();
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                return null;
             }
         }
     }

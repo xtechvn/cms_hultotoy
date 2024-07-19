@@ -33,7 +33,7 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetByIdAddressClient - AddressClientDAL: " + ex);
+                LogHelper.InsertLogTelegram("GetByClientId - AddressClientDAL: " + ex);
                 return null;
             }
         }

@@ -1,9 +1,11 @@
 ﻿using Entities.ConfigModels;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text;
 using Utilities;
 
@@ -52,6 +54,13 @@ namespace DAL.StoreProcedure
                         }
                         catch (Exception ex)
                         {
+                            string data_log = "";
+                            if(parameters!=null && parameters.Length > 0)
+                            {
+                                data_log = string.Join(",", parameters.Select(x => x.ParameterName)) + ":" + string.Join(",", parameters.Select(x => x.Value == null ? "NULL" : x.Value.ToString())) ;
+                              
+                            }
+                            LogHelper.InsertLogTelegram("SP Name: " + procedureName + "\n" + "Params: " + data_log + "\nGetDataTable - Transaction Rollback - DbWorker: " + ex);
                             oTransaction.Rollback();
                             throw;
                         }
@@ -69,7 +78,13 @@ namespace DAL.StoreProcedure
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetDataTable - DbWorker: " + ex);
+                string data_log = "";
+                if (parameters != null && parameters.Length > 0)
+                {
+                    data_log = string.Join(",", parameters.Select(x => x.ParameterName)) + ":" + string.Join(",", parameters.Select(x => x.Value == null ? "NULL" : x.Value.ToString()));
+
+                }
+                LogHelper.InsertLogTelegram("SP Name: " + procedureName + "\n" + "Params: " + data_log +"Error" + ex);
             }
             return _dataTable;
         }
@@ -106,8 +121,16 @@ namespace DAL.StoreProcedure
                             oTransaction.Commit();
                             oCommand.Parameters.Clear();
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            string data_log = "";
+                            if (parameters != null && parameters.Length > 0)
+                            {
+                                data_log = string.Join(",", parameters.Select(x => x.ParameterName)) + ":" + string.Join(",", parameters.Select(x => x.Value == null ? "NULL" : x.Value.ToString()));
+
+                            }
+                            LogHelper.InsertLogTelegram("SP Name: " + procedureName + "\n" + "Params GetDataTable - Transaction Rollback - DbWorker: " + data_log + "\nGetDataSet - Transaction Rollback - DbWorker: " + ex);
+
                             oTransaction.Rollback();
                         }
                         finally
@@ -204,6 +227,14 @@ namespace DAL.StoreProcedure
                         }
                         catch (Exception ex)
                         {
+                            string data_log = "";
+                            if (parameters != null && parameters.Length > 0)
+                            {
+                                data_log = string.Join(",", parameters.Select(x => x.ParameterName)) + ":" + string.Join(",", parameters.Select(x => x.Value == null ? "NULL" : x.Value.ToString()));
+
+                            }
+                            LogHelper.InsertLogTelegram("SP Name: " + procedureName + "\n" + "Params GetDataTable - Transaction Rollback - DbWorker: " + data_log + "\n ExecuteNonQuery - Transaction Rollback - DbWorker: " + ex);
+
                             oTransaction.Rollback();
                             oCommand.Parameters.Clear();
                             return -1;
@@ -251,8 +282,18 @@ namespace DAL.StoreProcedure
                             oCommand.ExecuteNonQuery();
                             oTransaction.Commit();
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            string data_log = "";
+                            if (parameters != null && parameters.Length > 0)
+                            {
+                                foreach (var param in parameters)
+                                {
+                                    data_log = string.Join(",", parameters.Select(x => x.ParameterName)) + ":" + string.Join(",", parameters.Select(x => x.Value == null ? "NULL" : x.Value.ToString()));
+                                }
+                            }
+                            LogHelper.InsertLogTelegram("SP Name: " + procedureName + "\n" + "Params GetDataTable - Transaction Rollback - DbWorker: " + data_log + "\n ExecuteNonQueryNoIdentity - Transaction Rollback - DbWorker: " + ex);
+
                             oTransaction.Rollback();
                             oCommand.Parameters.Clear();
                         }
@@ -300,8 +341,9 @@ namespace DAL.StoreProcedure
                             oAdapter.Fill(_dataSet);
                             oTransaction.Commit();
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
+                            LogHelper.InsertLogTelegram("ExecuteSqlString - Transaction Rollback - DbWorker: " + ex);
                             oTransaction.Rollback();
                         }
                         finally
@@ -321,6 +363,74 @@ namespace DAL.StoreProcedure
                 // LogHelper.InsertLogTelegram("ExecuteScalar - DbWorker: " + ex);
             }
             return _dataSet;
+        }
+
+        public void ExecuteActionTransaction(Action<SqlConnection, SqlTransaction> act)
+        {
+            try
+            {
+                using (SqlConnection oConnection = new SqlConnection(_connection))
+                {
+                    oConnection.Open();
+                    using (SqlTransaction oTransaction = oConnection.BeginTransaction())
+                    {
+                        try
+                        {
+                            act(oConnection, oTransaction);
+                            oTransaction.Commit();
+                        }
+                        catch
+                        {
+                            oTransaction.Rollback();
+                            throw;
+                        }
+                        finally
+                        {
+                            if (oConnection.State == ConnectionState.Open) oConnection.Close();
+                            oConnection.Dispose();
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public T ExecuteFuncTransaction<T>(Func<SqlConnection, SqlTransaction, T> func)
+        {
+            try
+            {
+                T result;
+                using (SqlConnection oConnection = new SqlConnection(_connection))
+                {
+                    oConnection.Open();
+                    using (SqlTransaction oTransaction = oConnection.BeginTransaction())
+                    {
+                        try
+                        {
+                            result = func(oConnection, oTransaction);
+                            oTransaction.Commit();
+                        }
+                        catch
+                        {
+                            oTransaction.Rollback();
+                            throw;
+                        }
+                        finally
+                        {
+                            if (oConnection.State == ConnectionState.Open) oConnection.Close();
+                            oConnection.Dispose();
+                        }
+                    }
+                }
+                return result;
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }

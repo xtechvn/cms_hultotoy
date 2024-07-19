@@ -32,7 +32,7 @@
                     counter++;
                     <tr>
                         <td class="center">@counter</td>
-                        <td class="center"><img width="35" src="@(item.Image11 ?? item.Image43 ?? item.Image169)" onerror="_imageError(this)"></td>
+                        <td class="center"><img width="35" src="@(item.Image11 ??  item.Image43 ?? item.Image169)" onerror="_imageError(this)"></td>
                         <td>
                             <div><a href="/news/detail/@item.Id">@item.Title</a></div>
                             <a href="#" class="italic blue">@item.ArticleCategoryName</a>

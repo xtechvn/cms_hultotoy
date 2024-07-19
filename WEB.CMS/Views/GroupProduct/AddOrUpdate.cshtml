@@ -8,7 +8,6 @@
 
 @{
     var PositionList = (List<Position>)ViewBag.PositionList;
-    var LabelList = (List<Label>)ViewBag.LabelList;
 }
 
 <style>
@@ -78,11 +77,7 @@
                     <span class="checkmark"></span>
                     Footer
                 </label>
-                <label class="check-list inline">
-                    @Html.CheckBoxFor(s => s.IsBrandBox)
-                    <span class="checkmark"></span>
-                    Box thương hiệu
-                </label>
+
             </div>
         </div>
 
@@ -126,52 +121,13 @@
             </div>
         </div>
 
-        <div class="mapping-menu">
-            <div class="title">Mapping Label Menu</div>
-            <div class="mfp-hide select-box-data">
-                <select class="form-control dropdown-store">
-                    <option value="-1" selected="selected">Chọn nhãn hàng</option>
-                    @foreach (var data in LabelList)
-                    {
-                        <option value="@data.Id" domain="@data.Domain">@data.StoreName</option>
-                    }
-                </select>
+        <div class="form-group">
+            <label class="lbl">
+                ID Sản phẩm
+            </label>
+            <div class="wrap_input">
+                <input type="text" style="width: 200px;" class="form-control" asp-for="@Model.Code" />
             </div>
-            <div id="grid-mapping-label">
-                @if (Model.GroupProductStores != null && Model.GroupProductStores.Count > 0)
-                {
-                    foreach (var item in Model.GroupProductStores)
-                    {
-                        <div class="row itemt">
-                            <div class="col-sm-4 mb10">
-                                <select class="form-control dropdown-store">
-                                    <option value="-1">Chọn nhãn hàng</option>
-                                    @foreach (var labelItem in LabelList)
-                                    {
-                                        if (labelItem.Id == item.LabelId)
-                                        {
-                                            <option value="@labelItem.Id" selected="selected" domain="@labelItem.Domain">@labelItem.StoreName</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="@labelItem.Id" domain="@labelItem.Domain">@labelItem.StoreName</option>
-                                        }
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-sm-7 mb10">
-                                <textarea class="form-control link-store" style="resize:none;">@Html.Raw(item.LinkStoreMenu)</textarea>
-                            </div>
-                            <div class="col-sm-1 mb10 text-center blue" style="padding-top:6px;">
-                                <a class="cur-pointer blue detail-product-link" title="Xem Link chi tiết"><i class="fa fa-eye"></i></a>
-                            </div>
-                            <a class="cur-pointer call" data-groupid="@Model.Id" onclick="_groupProduct.OnCrawl(this);"><img src="images/icons/web-crawler.svg"></a>
-                            <a class="delete" onclick="$(this).closest('.itemt').remove();"><i class="fa fa-times"></i></a>
-                        </div>
-                    }
-                }
-            </div>
-            <button type="button" class="btn btn-default white" onclick="OnCreateLabel();">+ Tạo nhãn</button>
         </div>
 
         <div class="form-group align-right mt20 mb0 block">

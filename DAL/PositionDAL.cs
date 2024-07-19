@@ -33,7 +33,7 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetListAllData - PositionDAL. " + ex.Message);
+                LogHelper.InsertLogTelegram("GetListAllData - PositionDAL. " + ex);
                 return null;
             }
         }
@@ -54,7 +54,7 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetByPositionName - PositionDAL: " + ex.Message);
+                LogHelper.InsertLogTelegram("GetByPositionName - PositionDAL: " + ex);
                 return null;
             }
         }

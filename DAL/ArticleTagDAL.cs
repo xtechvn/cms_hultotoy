@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Utilities;
 
 namespace DAL
 {
@@ -30,8 +31,9 @@ namespace DAL
                     }
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                LogHelper.InsertLogTelegram("GetTagIDByArticleID - ArticleTagDAL: " + ex);
             }
             return null;
         }

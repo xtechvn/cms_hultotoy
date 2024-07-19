@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Entities.ViewModels.Contract;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,8 +12,13 @@ namespace Entities.ViewModels
         public int PageSize { get; set; }
         public int TotalPage { get; set; }
         public long TotalRecord { get; set; }
+        public long TotalRecord1 { get; set; }
+        public long TotalRecord2{ get; set; }
+        public long TotalRecord3 { get; set; }
+        public long TotalRecord4 { get; set; }
+        public long TotalrecordErr { get; set; }
 
-        public static implicit operator GenericViewModel<TEntity>(GenericViewModel<ProductViewModel> v)
+        public GenericViewModel<ContractViewModel> where()
         {
             throw new NotImplementedException();
         }
@@ -25,6 +31,7 @@ namespace Entities.ViewModels
         public int TotalPage { get; set; }
         public long TotalRecord { get; set; }
         public string PageAction { get; set; }
+        public string PageSelectPageSize { get; set; }
         public string RecordName { get; set; }
     }
 }

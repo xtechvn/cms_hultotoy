@@ -16,12 +16,10 @@ namespace Entities.ViewModels
 
     public class GroupProductDetailModel : GroupProduct
     {
-        public List<GroupProductStore> GroupProductStores { get; set; }
     }
 
     public class GroupProductUpsertModel : GroupProduct
     {
-        public string GroupProductStores { get; set; }
         public string imageSize { get; set; }
         public string ImageBase64 { get; set; }
     }

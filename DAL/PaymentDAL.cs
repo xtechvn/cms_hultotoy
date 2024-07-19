@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Utilities;
 using Utilities.Contants;
 
 namespace DAL
@@ -35,7 +36,7 @@ namespace DAL
                                           PaymentType = _payment.PaymentType,
                                           OrderId = _payment.OrderId,
                                           PaymentTypeName = _paymentType.Description,
-                                          UserId = _payment.UserId,
+                                          //UserId = _payment.UserId,
                                           Note = _payment.Note,
                                           CreatedOn = _payment.CreatedOn,
                                           ModifiedOn = _payment.ModifiedOn
@@ -45,8 +46,9 @@ namespace DAL
                     return data;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("GetListByOrderId - PaymentDAL: " + ex);
                 return null;
             }
         }
@@ -60,8 +62,9 @@ namespace DAL
                     return await _DbContext.Payment.Where(s => s.OrderId == orderId).SumAsync(s => s.Amount);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("GetOrderPaymentAmount - PaymentDAL: " + ex);
                 return 0;
             }
         }
@@ -72,14 +75,62 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    return await _DbContext.Payment.Where(s => s.OrderId == orderId && s.UserId == 36).FirstOrDefaultAsync();
+                    return await _DbContext.Payment.Where(s => s.OrderId == orderId).FirstOrDefaultAsync();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("GetFirstPaymentOrder - PaymentDAL: " + ex);
                 return null;
             }
         }
 
+        public async Task<List<Payment>> GetByDepositHistoryIds(List<int> depositHistoryIds)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    return await _DbContext.Payment.Where(s => depositHistoryIds.Contains((int)s.OrderId) && s.DepositPaymentType == (int)DepositHistoryConstant.DEPOSIT_PAYMENT_TYPE.NAP_QUY).ToListAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByDepositHistoryIds - PaymentDAL: " + ex);
+                return new List<Payment>();
+            }
+        }
+        public List<Payment> GetPaymentClientId(long cilentId)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    var data = _DbContext.Payment.Where(s => s.ClientId == cilentId).ToList();
+                    return data;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetPaymentClientId - PaymentDAL: " + ex);
+                return null;
+            }
+        }
+        public Payment GetPaymentDateClientId(long cilentId)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    var data = _DbContext.Payment.OrderByDescending(x => x.CreatedOn).ToList();
+                    return data[0];
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetPaymentDateClientId - PaymentDAL: " + ex);
+                return null;
+            }
+        }
     }
 }

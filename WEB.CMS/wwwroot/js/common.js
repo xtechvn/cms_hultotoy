@@ -29,7 +29,6 @@
             scrollContainer.scrollbar();
         }
     }
-
     //resizeSite
     function resizeSite() {
         var checkPoint = 1200,
@@ -41,12 +40,13 @@
 
         }
     }
-
     //magnificPopup
     function magnificPopup() {
+        var currentPopup;
         $('.open-popup').magnificPopup({
             type: 'inline',
             midClick: true,
+            closeOnBgClick: false, // tránh đóng khi người dùng nhấn vào vùng ngoài
             mainClass: 'mfp-with-zoom',
             fixedContentPos: false,
             fixedBgPos: true,
@@ -55,40 +55,81 @@
             preloader: false,
             removalDelay: 300,
         });
+        $('#popup-tao-don-hang .open-popup').click(function () {
+            e.preventDefault();
+            $.magnificPopup.open({
+                items: {
+                    src: '#popup-chi-tiet-cong-no'
+                },
+                type: 'inline',
+                midClick: true,
+                callbacks: {
+                    beforeOpen: function () {
+                        this.st.mainClass = currentPopup.st.mainClass;
+                    }
+                }
+            });
+        });
     }
-
     //fixSticky
-    function fixStickyIE() {
-        var stickyElements = $('.sticky');
-        if (stickyElements.length > 0) {
-            Stickyfill.add(stickyElements);
-        }
-    }
+    // function fixStickyIE() {
+    // 	var stickyElements = $('.sticky');
+    // 	if (stickyElements.length > 0) {
+    // 		Stickyfill.add(stickyElements);
+    // 	}
+    // }
 
     //OnCLick
     function onClickTongle() {
-
         $('.btn_show').click(function () {
             $('body').addClass('show-menu');
         });
-
-        $('.close-menu').click(function () {
+        $('.close-menu,.close-menu2').click(function () {
             $('body').removeClass('show-menu');
         });
 
         $(".all-menu-tablet").click(function () {
             $(this).toggleClass("close-menu-tablet");
         });
-
-        $(".all-menu").click(function () {
-         /*   $(".mask-content").toggle();*/
-            $(".head-top").toggleClass("show-all-menu");
+        $(".onclick-toggle .toggle").click(function () {
+            $(this).toggleClass("active");
         });
-
+        $('.btn_control_menu').click(function () {
+            $(this).toggleClass('active');
+            $('.section-main').toggleClass('full');
+        });
+        $('.accordion-item > .click').click(function (j) {
+            var dropDown = $(this).next();
+            $(this).closest('.accordion').find('.accordion-item').removeClass('active');
+            $(this).closest('.accordion').find('.collapse').not(dropDown).slideUp();
+            if ($(this).hasClass('open')) {
+                $(this).removeClass('open');
+            } else {
+                $(this).closest('.accordion').find('.open').removeClass('open');
+                $(this).addClass('open');
+                $(this).parent().addClass('active');
+            }
+            dropDown.stop(false, true).slideToggle();
+            j.preventDefault();
+        });
+        $(".all-menu").click(function () {
+            $(".mask-content").toggle();
+            $(".head-top").toggleClass("show-all-menu");
+            $(".menu-left").toggleClass("open");
+        });
         $(".mask-content").click(function () {
             $(this).hide();
             $(".all-menu").removeClass("close-menu-tablet");
             $(".head-top").removeClass("show-all-menu");
+            $(".menu-left").removeClass("open");
+        });
+        $('.header-tab .sub-menu').click(function () {
+            $('.header-tab').toggleClass('hidden');
+            $('.menu-level-2').toggleClass('show');
+        });
+        $(".all-menu-tablet").click(function () {
+            $('.header-tab').removeClass('hidden');
+            $('.menu-level-2').removeClass('show');
         });
 
         $(".onclick-togle").click(function () {
@@ -100,6 +141,18 @@
                 $(this).next('.expand').slideUp();
             }
         });
+
+        $(".lever1 .collapsed").click(function () {
+            if (!$(this).hasClass("active")) {
+                $(this).addClass("active");
+                $(this).next('.expand').fadeIn();
+            } else {
+                $(this).removeClass("active");
+                $(this).next('.expand').fadeOut();
+            }
+        });
+
+
         $('.user-hierarchy-ul').find('.onclick').click(function () {
             if (!$(this).parent('li').hasClass("active")) {
                 $(this).parent('li').addClass("active");
@@ -108,6 +161,7 @@
                 $(this).parent('li').removeClass("active");
             }
         });
+
         $(".down-up .onclick").click(function () {
             if (!$(this).hasClass("active")) {
                 $(this).addClass("active");
@@ -133,70 +187,126 @@
                 $('.dropdown').removeClass('active');
             }
         });
-
         $(".dropdown-content").find("li").click(function () {
             var html = $(this).html();
             $(".dropbtn").html(html);
         });
-
-        $(document).click(function (event) {
-            $(".onclick-togle, .dropdown .dropbtn,.down-up .onclick").removeClass('active');
-            $(".dropdown.active").find('.dropdown-content').slideUp();
-            $(".select--v2__content").slideUp();
-            if ($(event.target).closest('.form-down').length == 0) {
+        $(document).click(function () {
+            if ($(event.target).closest('.down-up').length == 0) {
                 $(".form-down").slideUp();
+                $(".onclick-togle, .dropdown .dropbtn,.down-up .onclick").removeClass('active');
+                $(".dropdown.active").find('.dropdown-content').slideUp();
+                $(".select--v2__content").slideUp();
             }
         });
-
-        $(".onclick-togle, .dropdown .dropbtn, .down-up .onclick, .news-dropdown.dropdown-content, .dropdown-content .input_search,.select--v2__content").click(function (event) {
+        $(".onclick-togle, .dropdown .dropbtn,.down-up .onclick, .dropdown-content .form-default, .dropdown-content .input_search").click(function (event) {
             event.stopPropagation();
         });
-    }
 
-    function onClickTab() {
-        $(".tab-default a").click(function (event) {
-            $(".tab-default a").removeClass("active")
+        $(".fillter-wrap .btn").click(function () {
+            $('.fillter-search').slideDown();
+        });
+        $(".fillter-search .cancel").click(function () {
+            $('.fillter-search').slideUp();
+        });
+
+        $(".open-today").click(function () {
             if (!$(this).hasClass("active")) {
                 $(this).addClass("active");
+                $(this).next('.list-today').addClass("show");
+
             } else {
                 $(this).removeClass("active");
+                $(this).next('.list-today').removeClass("show");
             }
-            event.preventDefault();
-            var tab = $(this).attr("href");
-            $(".tab-content > div").not(tab).css("display", "none");
-            $(tab).fadeIn();
+        });
+    }
+    //
+    function onClickTab() {
+        $(".tab-default a").click(function (event) {
+             $(".tab-default a").removeClass("active")
+             if (!$(this).hasClass("active")) {
+                 $(this).addClass("active");
+             } else {
+                 $(this).removeClass("active");
+             }
+             var tab = $(this).attr("href");
+             $(".tab-content > div").not(tab).css("display", "none");
+             $(tab).fadeIn();
+            //event.preventDefault();
+            //let tabContainer = "#" + $(this).parent().data("tab-container");
+            //let target = $(this).data("lbl");
+
+            //$(this).addClass("active").siblings().removeClass("active");
+            //$(tabContainer + " .tab-content").hide();
+            //$(tabContainer + " .tab-content[data-lbl='" + target + "']").show();
         });
 
     }
 
     function datepicker() {
-        $('.datepicker-input').Zebra_DatePicker({
-            format: 'd/m/Y'
+        // $('.datepicker-input').Zebra_DatePicker({
+        // 	format: 'd/m/Y'
+        // });
+        $('input[name="datetimes"]').daterangepicker({
+            timePicker: true,
+            startDate: moment().startOf('hour'),
+            endDate: moment().startOf('hour').add(32, 'hour'),
+            locale: {
+                format: 'M/DD hh:mm A'
+            }
+        });
+        $('input[name="birthday"]').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoUpdateInput: false,
+            locale: {
+                cancelLabel: 'Clear'
+            }
+        });
+
+        $('input[name="birthday"]').on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY'));
+        });
+
+        $('input[name="birthday"]').on('cancel.daterangepicker', function (ev, picker) {
+            $(this).val('');
+        });
+        // $('input[name="birthday"]').daterangepicker({
+        // 	singleDatePicker: true,
+        // 	showDropdowns: true,
+        // 	minYear: 1901,
+        // 	maxYear: parseInt(moment().format('YYYY'), 10)
+        // }, function (start, end, label) {
+        // 	var years = moment().diff(start, 'years');
+        // });
+    }
+
+    function select2() {
+        $('.select2').select2();
+        $('.select2--nosearch').select2({
+            minimumResultsForSearch: -1
         });
     }
 
-    // function select2() {
-    // 	$('.select2').select2();
-    // 	$('.select2--nosearch').select2({
-    // 		minimumResultsForSearch: -1
-    // 	});
-    // }
-
     $(function () {
         scrollBar();
-        // magnificPopup();
-        fixStickyIE();
+        magnificPopup();
+        // fixStickyIE();
         onClickTongle();
-        // onClickTab();
+        onClickTab();
         datepicker();
-        // select2();
+        select2();
         $('[data-toggle="tooltip"]').tooltip({
             html: true
+        });
+        $('.menu-left').find('.logo').click(function () {
+            window.location.href = window.location.origin
         });
     });
 
     $(window).on('load resize', function () {
-        resizeSite();
+        resizeSite()
     });
 
 })(jQuery);

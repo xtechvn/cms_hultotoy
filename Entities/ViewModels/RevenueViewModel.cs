@@ -9,7 +9,6 @@ namespace Entities.ViewModels
         public int TotalOrder { get; set; }
         public double? Revenue { get; set; }
         public string RevenueStr { get; set; }
-        public double CrawlPercent { get; set; }
         public int TotalProductNotFound { get; set; }
     }
 }

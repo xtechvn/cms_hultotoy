@@ -17,6 +17,7 @@ namespace Utilities.Common
                 HttpClient httpClient = new HttpClient();
                 var apiPrefix = "http://worldtimeapi.org/api/timezone/Asia/Bangkok";
                 var rs = await httpClient.GetAsync(apiPrefix);
+                
                 var rs_content = JsonConvert.DeserializeObject<Dictionary<string, string>>(rs.Content.ReadAsStringAsync().Result);
                 result = (Convert.ToDateTime(rs_content["datetime"]) != null) ? Convert.ToDateTime(rs_content["datetime"]).ToUniversalTime() : Convert.ToDateTime(rs_content["utc_datetime"]);
             }

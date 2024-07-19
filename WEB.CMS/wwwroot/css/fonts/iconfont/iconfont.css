@@ -3,11 +3,11 @@ iconfont Webfont
 */
 @font-face {
 	font-family: 'iconfont';
-	src: url('iconfont.eot?1620878199756');
-	src: url('iconfont.eot?#iefix-1620878199756') format('embedded-opentype'),
-		url('iconfont.woff2?1620878199756') format('woff2'),
-		url('iconfont.woff?1620878199756') format('woff'),
-		url('iconfont.ttf?1620878199756') format('truetype');
+	src: url('iconfont.eot?1705549662132');
+	src: url('iconfont.eot?#iefix-1705549662132') format('embedded-opentype'),
+		url('iconfont.woff2?1705549662132') format('woff2'),
+		url('iconfont.woff?1705549662132') format('woff'),
+		url('iconfont.ttf?1705549662132') format('truetype');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -32,56 +32,132 @@ iconfont Webfont
 /*
 Glyphs list
 */
- .iconfont-crawl:before {
+ .iconfont-address:before {
 			content: '\ea01';
 		}
 
-		 .iconfont-elite:before {
+		 .iconfont-bang-gia:before {
 			content: '\ea02';
 		}
 
-		 .iconfont-face:before {
+		 .iconfont-bao-cao:before {
 			content: '\ea03';
 		}
 
-		 .iconfont-hair:before {
+		 .iconfont-box:before {
 			content: '\ea04';
 		}
 
-		 .iconfont-hair2:before {
+		 .iconfont-car:before {
 			content: '\ea05';
 		}
 
-		 .iconfont-history:before {
+		 .iconfont-compass:before {
 			content: '\ea06';
 		}
 
-		 .iconfont-quick-sale:before {
+		 .iconfont-crawl:before {
 			content: '\ea07';
 		}
 
-		 .iconfont-search:before {
+		 .iconfont-dashbroad:before {
 			content: '\ea08';
 		}
 
-		 .iconfont-send:before {
+		 .iconfont-elite:before {
 			content: '\ea09';
 		}
 
-		 .iconfont-setting:before {
+		 .iconfont-face:before {
 			content: '\ea0a';
 		}
 
-		 .iconfont-twiter:before {
+		 .iconfont-hair:before {
 			content: '\ea0b';
 		}
 
-		 .iconfont-user:before {
+		 .iconfont-hair2:before {
 			content: '\ea0c';
 		}
 
-		 .iconfont-web-crawler:before {
+		 .iconfont-he-thong:before {
 			content: '\ea0d';
+		}
+
+		 .iconfont-history:before {
+			content: '\ea0e';
+		}
+
+		 .iconfont-hotel:before {
+			content: '\ea0f';
+		}
+
+		 .iconfont-mail:before {
+			content: '\ea10';
+		}
+
+		 .iconfont-map:before {
+			content: '\ea11';
+		}
+
+		 .iconfont-menu:before {
+			content: '\ea12';
+		}
+
+		 .iconfont-Out:before {
+			content: '\ea13';
+		}
+
+		 .iconfont-payment:before {
+			content: '\ea14';
+		}
+
+		 .iconfont-plane:before {
+			content: '\ea15';
+		}
+
+		 .iconfont-quick-sale:before {
+			content: '\ea16';
+		}
+
+		 .iconfont-search:before {
+			content: '\ea17';
+		}
+
+		 .iconfont-send:before {
+			content: '\ea18';
+		}
+
+		 .iconfont-setting:before {
+			content: '\ea19';
+		}
+
+		 .iconfont-shipped:before {
+			content: '\ea1a';
+		}
+
+		 .iconfont-smartphone:before {
+			content: '\ea1b';
+		}
+
+		 .iconfont-twiter:before {
+			content: '\ea1c';
+		}
+
+		 .iconfont-user:before {
+			content: '\ea1d';
+		}
+
+		 .iconfont-user2:before {
+			content: '\ea1e';
+		}
+
+		 .iconfont-vector:before {
+			content: '\ea1f';
+		}
+
+		 .iconfont-web-crawler:before {
+			content: '\ea20';
 		}
 
 		

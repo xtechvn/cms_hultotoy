@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -7,7 +6,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Utilities.Models;
+using Utilities.ViewModels.Article;
 
 namespace Utilities
 {
@@ -337,5 +336,11 @@ namespace Utilities
             }
             return (buf);
         }
+         
+        public static string GenFileName(string base_name, int user_id,string extension)
+        {
+            return base_name + "_" + user_id + "_" + DateTime.Now.ToString("yyyyMMddhhmmss") + "." + extension;
+        }
+     
     }
 }

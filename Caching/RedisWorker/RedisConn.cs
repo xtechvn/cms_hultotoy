@@ -2,7 +2,7 @@
 using System;
 using StackExchange.Redis;
 using System.Threading.Tasks;
-using Nest;
+
 
 namespace Caching.RedisWorker
 {
@@ -29,13 +29,13 @@ namespace Caching.RedisWorker
         {
             try
             {
-                var configString = $"{_redisHost}:{_redisPort},connectRetry=5";
+                var configString = $"{_redisHost}:{_redisPort},connectRetry=5,allowAdmin=true";
                 _redis = ConnectionMultiplexer.Connect(configString);
             }
             catch (RedisConnectionException err)
             {
 
-                throw err;
+               // throw err;
             }
             // Log.Debug("Connected to Redis");
         }
@@ -74,6 +74,10 @@ namespace Caching.RedisWorker
         {
             var db = _redis.GetDatabase(db_index);
             await db.KeyDeleteAsync(key);
+        }
+        public async void FlushDatabaseByIndex( int db_index)
+        {
+            await _redis.GetServer(_redisHost,_redisPort).FlushDatabaseAsync(db_index);
         }
     }
 }

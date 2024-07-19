@@ -8,8 +8,17 @@ namespace Entities.ViewModels
 {
     public class UserViewModel : User
     {
-        public int RoleId { get; set; }
+        public string RoleId { get; set; }
         public string BirthDayPicker { get; set; }
+        public string CompanyType { get; set; }
+        public string OldCompanyType { get; set; }
+    }
+
+    public class UserDataViewModel : User
+    {
+        public string DepartmentName{ get; set; }
+        public string UserPositionName{ get; set; }
+        public List<int> RoleIdList { get; set; }
     }
 
     public class UserDetailViewModel
@@ -21,6 +30,8 @@ namespace Entities.ViewModels
     public class UserGridModel : User
     {
         public List<Role> RoleList { get; set; }
+        public Entities.Models.Department UserDepartment { get; set; }
+        public Entities.Models.UserPosition UserPosition { get; set; }
     }
 
     public class AccountModel

@@ -34,7 +34,7 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                // LogHelper.InsertLogTelegram("get_MFA_DetailByClientID - MFADAL: " + ex);
+                LogHelper.InsertLogTelegram("get_MFA_DetailByClientID - MFADAL: " + ex);
                 return null;
             }
         }

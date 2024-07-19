@@ -60,7 +60,7 @@
                 <button class="btn btn-default open-popup" onclick="_user.OnOpenCreateForm()">
                     + Thêm mới
                 </button>
-                <div class="down-up">
+                <div class="down-up right">
                     <a class="btn btn-default onclick" href="javascript:;">
                         <i class="fa fa-bars"></i>
                         <i class="fa fa-caret-down"></i>
@@ -97,17 +97,27 @@
                             Vai trò
                         </label>
                         <label class="check-list mb10 mr25">
-                            <input type="checkbox" class="checkbox-tb-column" data-id="8" />
+                            <input type="checkbox" checked="checked" class="checkbox-tb-column" disabled="disabled" data-id="8" />
+                            <span class="checkmark"></span>
+                            Phòng ban
+                        </label>
+                        <label class="check-list mb10 mr25">
+                            <input type="checkbox" checked="checked" class="checkbox-tb-column" disabled="disabled" data-id="9" />
+                            <span class="checkmark"></span>
+                            Chức vụ
+                        </label>
+                        <label class="check-list mb10 mr25">
+                            <input type="checkbox" class="checkbox-tb-column" data-id="10" />
                             <span class="checkmark"></span>
                             Địa chỉ
                         </label>
                         <label class="check-list mb10 mr25">
-                            <input type="checkbox" class="checkbox-tb-column" data-id="9" />
+                            <input type="checkbox" class="checkbox-tb-column" data-id="11" />
                             <span class="checkmark"></span>
                             Trạng thái
                         </label>
                         <label class="check-list mb10 mr25">
-                            <input type="checkbox" class="checkbox-tb-column" data-id="10" />
+                            <input type="checkbox" class="checkbox-tb-column" data-id="12" />
                             <span class="checkmark"></span>
                             Ngày tạo
                         </label>
@@ -125,4 +135,6 @@
 
 @section scripts {
     <script src="~/modules/user.js"></script>
+    <script type="text/javascript" src="~/lib/qrcode-js/qrcode.min.js"></script>
+
 }

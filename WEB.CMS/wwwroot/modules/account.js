@@ -1,73 +1,65 @@
-﻿var _loginModel = {
-    OpenResetPasswordPopup: function () {
-        $('#form-forget-password')[0].reset();
-        $("#panel-login").addClass("mfp-hide");
-        $("#panel-reset-password").removeClass("mfp-hide");
-    },
-
-    OpenLoginPopup: function () {
-        $("#panel-reset-password").addClass("mfp-hide");
-        $("#panel-login").removeClass("mfp-hide");
-    },
-
-    OnRegistry: function () {
-        let elPopup = $('#magnific-popup-registry');
-        elPopup.find('.magnific-body').html("Xin vui lòng liên hệ với bộ phận kỹ thuật để được cấp tài khoản");
-        jQuery.magnificPopup.open({
-            items: {
-                src: elPopup
-            },
-            type: 'inline',
-            midClick: true,
-            mainClass: 'mfp-with-zoom',
-            fixedContentPos: false,
-            fixedBgPos: true,
-            overflowY: 'auto',
-            closeBtnInside: true,
-            preloader: false,
-            removalDelay: 300
+﻿var _login = {
+    Token: '',
+    DotText:'',
+    OnLoggingText: '<i class="fa fa-sign-in"></i>Đang đăng nhập',
+    LoginSucess: false,
+    Initialization: function () {
+        $('#user-name').keyup(function (e) {
+            $('#validate-username').html('')
+            $('#validate-general').html('')
+        });
+        $('#password').keyup(function (e) {
+            $('#validate-password').html('')
+            $('#validate-general').html('')
         });
     },
 
-    OnResetPassword: function () {
-        let Form = $('#form-forget-password');
-        Form.validate({
-            rules: {
-                EmailOrUserName: "required",
-            },
-            messages: {
-                EmailOrUserName: "Vui lòng nhập Tên đăng nhập hoặc Email",
+    Login: function () {
+        _login.LoopDisplayLoading()
+        $('.btn-login').attr('disabled', true);
+        var model = {
+            UserName: $('#user-name').val(),
+            Password: $('#password').val(),
+            RememberMe: false,
+            ReturnUrl: $('#form-login').attr('data-url')
+        }
+        if ($('#remember-me').is(":checked")) {
+            model.RememberMe=true
+        }
+        if (model.UserName == undefined || model.UserName.trim() == '') {
+            $('#validate-username').html('Tài khoản không được để trống, vui lòng thử lại')
+        }
+        if (model.Password == undefined || model.Password.trim() == '') {
+            $('#validate-password').html('Mật khẩu không được để trống, vui lòng thử lại')
+        }
+        $.ajax({
+            url: "ConfirmLogin",
+            type: "post",
+            data: { model: model },
+            success: function (result) {
+                _login.LoginSucess = true
+                $('.btn-login').removeAttr('disabled');
+                if (result != undefined && result.status == 0) {
+                    window.location.href = result.direct;
+                }
+                else {
+                    $('#validate-general').html(result.msg);
+                    $('.img_loading_summit').remove()
+
+                }
+
             }
         });
-
-        if (Form.valid()) {
-            $.ajax({
-                url: '/Account/resetpassword',
-                type: "post",
-                data: { EmailOrUserName: $("#EmailOrUserName").val().trim() },
-                success: function (data) {
-                    let elPopup = $('#magnific-popup-registry');
-                    elPopup.find('.magnific-body').html(data.message);
-                    jQuery.magnificPopup.open({
-                        items: {
-                            src: elPopup
-                        },
-                        type: 'inline',
-                        midClick: true,
-                        mainClass: 'mfp-with-zoom',
-                        fixedContentPos: false,
-                        fixedBgPos: true,
-                        overflowY: 'auto',
-                        closeBtnInside: true,
-                        preloader: false,
-                        removalDelay: 300
-                    });
-
-                    if (data.isSuccess) {
-                        _loginModel.OpenLoginPopup();
-                    }
-                }
-            });
-        }
-    }
-};
+    },
+    LoopDisplayLoading: function () {
+        setTimeout(function () {
+            if (_login.DotText.trim() == '...') _login.DotText = ''
+            $('.btn-login').html(_login.OnLoggingText + _login.DotText)
+            _login.DotText = _login.DotText + '.'
+            if (!_login.LoginSucess) _login.LoopDisplayLoading()
+            else {
+                $('.btn-login').html('<i class="fa fa-sign-in"></i>Đăng nhập');
+            }
+        }, 1000)
+    },
+}

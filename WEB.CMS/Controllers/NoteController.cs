@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Aspose.Cells;
-using Entities.Models;
+﻿using Entities.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Repositories.IRepositories;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using WEB.CMS.Customize;
 
 namespace WEB.CMS.Controllers
 {
+    [CustomAuthorize]
+
     public class NoteController : Controller
     {
         private readonly INoteRepository _NoteRepository;

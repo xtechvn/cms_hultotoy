@@ -78,8 +78,7 @@ var _groupProduct = {
         this.AFFList = [];
         this.SearchParam = searchData;
         this.Search(searchData);
-        this.OnLoadTotalCrawl();
-        this.OnLoadAffiliateType();
+       
     },
 
     Search: function (input) {
@@ -234,59 +233,19 @@ var _groupProduct = {
                 Name: "required",
             },
             messages: {
-                Name: "Vui lòng nhập tên nhóm hàng"
+                Name: "Vui lòng nhập tên chuyên mục"
             }
         });
-        var arrGroupStore = [];
-        $('#grid-mapping-label .itemt').each(function () {
-            var seft = $(this);
-            var _LabelId = parseInt(seft.find('.dropdown-store').val());
-            var _Domain = seft.find('.dropdown-store option:selected').attr('domain');
-            var _LinkStoreMenu = seft.find('.link-store').val().trim();
-
-            if (_LabelId == -1 || _LinkStoreMenu == "") {
-                _msgalert.error('Bạn phải chọn nhãn hàng và nhập Link Mapping. Vui lòng kiểm tra lại');
-                valid = false;
-                return false;
-            }
-
-            var hostName = _groupProduct.IsValidHttpUrl(_LinkStoreMenu);
-            if (hostName == false) {
-                _msgalert.error('Link Mapping sai định dạng. Vui lòng kiểm tra lại');
-                valid = false;
-                return false;
-            } else if (hostName != _Domain) {
-                _msgalert.error('Link Mapping không thuộc nhãn hàng. Vui lòng kiểm tra lại');
-                valid = false;
-                return false;
-            }
-
-            var duplicateCount = arrGroupStore.filter(x => x.LabelId == _LabelId && x.LinkStoreMenu == _LinkStoreMenu).length;
-            if (duplicateCount > 0) {
-                _msgalert.error('Mapping nhãn hàng đang bị trùng. Vui lòng kiểm tra lại');
-                valid = false;
-                return false;
-            }
-
-            arrGroupStore.push({
-                LabelId: _LabelId,
-                LinkStoreMenu: _LinkStoreMenu
-            });
-        });
-
+       
         if (valid && formvalid.valid()) {
             let form = document.getElementById('form-group-product');
             var formData = new FormData(form);
             var imagedata = $('.image-preview').attr('src');
 
-            //var mime = imagedata.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
-            //if (mime && mime.length > 0) {
-            //    formData.append('imageFile', this.ConvertBase64toFile(imagedata, 'cropedimage.png'));
-            //}
+         
 
             formData.append('ImageBase64', imagedata);
             formData.append('imageSize', $('.sl-image-size option:selected').attr('size'));
-            formData.append('GroupProductStores', JSON.stringify(arrGroupStore));
 
             var _modelId = formData.get("Id");
             var _modelName = formData.get("Name");
@@ -295,8 +254,8 @@ var _groupProduct = {
 
             // Check status of group product 
             if (_modelStatus == 1 && _modelId > 0) {
-                let title = "Xác nhận khóa nhóm hàng";
-                let description = "Nhóm hàng và các nhóm con của nó sẽ bị khóa, Bạn có muốn lưu lại không?";
+                let title = "Xác nhận khóa chuyên mục";
+                let description = "Chuyên mục và các nhóm con của nó sẽ bị khóa, Bạn có muốn lưu lại không?";
                 _msgconfirm.openDialog(title, description, function () {
                     $.ajax({
                         url: '/groupproduct/upsert',
@@ -308,7 +267,6 @@ var _groupProduct = {
                             if (result.isSuccess) {
                                 _msgalert.success(result.message);
                                 _groupProduct.ReLoadElement(result.modelId, _modelStatus, _modelName, _modelParentId, result.isHasLink);
-                                _groupProduct.OnLoadTotalCrawl();
                                 $.magnificPopup.close();
                             } else {
                                 _msgalert.error(result.message);
@@ -331,7 +289,6 @@ var _groupProduct = {
                         if (result.isSuccess) {
                             _msgalert.success(result.message);
                             _groupProduct.ReLoadElement(result.modelId, _modelStatus, _modelName, _modelParentId, result.isHasLink);
-                            _groupProduct.OnLoadTotalCrawl();
                             $.magnificPopup.close();
                         } else {
                             _msgalert.error(result.message);
@@ -362,12 +319,12 @@ var _groupProduct = {
         var siblingLength = SeftDOM.siblings().length;
 
         if (childLength > 0) {
-            _msgalert.error('Nhóm hàng đang có cấp con.Bạn không thể xóa.');
+            _msgalert.error('chuyên mục đang có cấp con.Bạn không thể xóa.');
             return;
         }
 
         let title = 'Thông báo xác nhận';
-        let description = "Bạn có chắc chắn muốn xóa nhóm hàng này?";
+        let description = "Bạn có chắc chắn muốn xóa chuyên mục này?";
         _msgconfirm.openDialog(title, description, function () {
             $.ajax({
                 url: "/groupproduct/delete",
@@ -381,7 +338,6 @@ var _groupProduct = {
                             SeftDOM.parent().siblings('.btn-expand-child').remove();
                         }
                         SeftDOM.remove();
-                        _groupProduct.OnLoadTotalCrawl();
                         $.magnificPopup.close();
                     } else {
                         _msgalert.error(result.message);
@@ -389,26 +345,6 @@ var _groupProduct = {
                 }
             });
         });
-    },
-
-    OnSetupAutoCrawler: function (id, type) {
-        //let title = 'Thông báo xác nhận';
-        //let description = "Bạn có chắc chắn muốn xóa nhóm hàng này?";
-        //_msgconfirm.openDialog(title, description, function () {
-        $.ajax({
-            url: "/groupproduct/SetupAutoCrawler",
-            type: "post",
-            data: { id: id, type: type },
-            success: function (result) {
-                if (result.isSuccess) {
-                    _msgalert.success(result.message);
-                    _groupProduct.OnLoadTotalCrawl();
-                } else {
-                    _msgalert.error(result.message);
-                }
-            }
-        });
-        //});
     },
 
     GetAllPosition: function () {
@@ -579,21 +515,6 @@ var _groupProduct = {
             error: function (jqXHR) {
             },
             complete: function (jqXHR, status) {
-            }
-        });
-    },
-
-    OnLoadTotalCrawl: function () {
-        $.ajax({
-            url: "/groupproduct/GetGroupProductCrawledCount",
-            type: "post",
-            success: function (result) {
-                if (result.isSuccess) {
-                    $('.item-crawl-on-data').html(result.crawlOn);
-                    $('.item-crawl-off-data').html(result.crawlOff);
-                } else {
-                    _msgalert.error(result.message);
-                }
             }
         });
     },

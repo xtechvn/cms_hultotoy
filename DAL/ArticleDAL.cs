@@ -34,12 +34,12 @@ namespace DAL
 
                 if (!string.IsNullOrEmpty(searchModel.FromDate))
                 {
-                    _FromDate = DateTime.ParseExact(searchModel.FromDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                    _FromDate = DateTime.ParseExact(searchModel.FromDate, "d/M/yyyy", null);
                 }
 
                 if (!string.IsNullOrEmpty(searchModel.ToDate))
                 {
-                    _ToDate = DateTime.ParseExact(searchModel.ToDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                    _ToDate = DateTime.ParseExact(searchModel.ToDate, "d/M/yyyy", null);
                 }
 
                 if (searchModel.ArrCategoryId != null && searchModel.ArrCategoryId.Length > 0)
@@ -106,7 +106,6 @@ namespace DAL
                 {
                     var entity = new Article
                     {
-                        Id = model.Id,
                         Title = model.Title,
                         Lead = model.Lead,
                         Body = model.Body,
@@ -118,8 +117,8 @@ namespace DAL
                         AuthorId = model.AuthorId,
                         CreatedOn = DateTime.Now,
                         ModifiedOn = DateTime.Now,
-                        PublishDate = model.PublishDate == DateTime.MinValue ? (DateTime?)null : model.PublishDate,
-                        UpTime = model.PublishDate == DateTime.MinValue ? (DateTime?)null : model.PublishDate,
+                        PublishDate = model.PublishDate == DateTime.MinValue ? DateTime.Now : model.PublishDate,
+                        UpTime = model.PublishDate == DateTime.MinValue ? DateTime.Now : model.PublishDate,
                         DownTime = model.DownTime == DateTime.MinValue ? (DateTime?)null : model.DownTime,
                         Position = (short?)model.Position
                     };
@@ -127,8 +126,9 @@ namespace DAL
                 }
                 return articleId;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("SaveArticle - ArticleDAL: " + ex);
                 return 0;
             }
         }
@@ -183,8 +183,9 @@ namespace DAL
 
                             transaction.Commit();
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            LogHelper.InsertLogTelegram("GetArticleDetail - Transaction Rollback - ArticleDAL: " + ex);
                             transaction.Rollback();
                             return null;
                         }
@@ -192,8 +193,9 @@ namespace DAL
                 }
                 return model;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("GetArticleDetail - ArticleDAL: " + ex);
                 return null;
             }
         }
@@ -235,8 +237,9 @@ namespace DAL
 
                             transaction.Commit();
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            LogHelper.InsertLogTelegram("MultipleInsertArticleTag - Transaction Rollback - ArticleDAL: " + ex);
                             transaction.Rollback();
                             return 0;
                         }
@@ -244,8 +247,9 @@ namespace DAL
                 }
                 return 1;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("MultipleInsertArticleTag - ArticleDAL: " + ex);
                 return 0;
             }
         }
@@ -287,8 +291,9 @@ namespace DAL
 
                             transaction.Commit();
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            LogHelper.InsertLogTelegram("MultipleInsertArticleCategory - Transaction Rollback - ArticleDAL: " + ex);
                             transaction.Rollback();
                             return 0;
                         }
@@ -296,8 +301,9 @@ namespace DAL
                 }
                 return 1;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("MultipleInsertArticleCategory - ArticleDAL: " + ex);
                 return 0;
             }
         }
@@ -339,8 +345,9 @@ namespace DAL
 
                             transaction.Commit();
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            LogHelper.InsertLogTelegram("MultipleInsertArticleRelation - Transaction Rollback - ArticleDAL: " + ex);
                             transaction.Rollback();
                             return 0;
                         }
@@ -404,8 +411,9 @@ namespace DAL
 
                             transaction.Commit();
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            LogHelper.InsertLogTelegram("DeleteArticle - Transaction Rollback - ArticleDAL: " + ex);
                             transaction.Rollback();
                             return -1;
                         }
@@ -413,8 +421,9 @@ namespace DAL
                 }
                 return Id;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("DeleteArticle - ArticleDAL: " + ex);
                 return -1;
             }
         }
@@ -456,8 +465,9 @@ namespace DAL
                             transaction.Commit();
                             return list_article;
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            LogHelper.InsertLogTelegram("getArticleListByCategoryId - Transaction Rollback - ArticleDAL: " + ex);
                             transaction.Rollback();
                             return null;
                         }
@@ -506,8 +516,9 @@ namespace DAL
 
                             transaction.Commit();
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            LogHelper.InsertLogTelegram("GetArticleDetailLite - Transaction Rollback - ArticleDAL: " + ex);
                             transaction.Rollback();
                             return null;
                         }
@@ -537,38 +548,19 @@ namespace DAL
                 {
                     using (var transaction = _DbContext.Database.BeginTransaction())
                     {
-                        try
-                        {
-                            var arr_cate_child_help_id = _DbContext.GroupProduct.Where(n => n.ParentId == parent_cate_faq_id).Select(x => x.Id).ToArray();
-
-                            if (arr_cate_child_help_id.Count() > 0)
-                            {
-                                list_article = await (from article in _DbContext.Article.AsNoTracking()
-                                                      join a in _DbContext.ArticleCategory on article.Id equals a.ArticleId into af
-                                                      from detail in af.DefaultIfEmpty()
-                                                      where arr_cate_child_help_id.Contains(detail.CategoryId ?? -1) && article.Status == ArticleStatus.PUBLISH && article.Title.ToUpper().Contains(title.ToUpper())
-                                                      select new ArticleViewModel
-                                                      {
-                                                          Id = detail.Id,
-                                                          Title = article.Title.Trim(),
-                                                          PublishDate = article.PublishDate ?? DateTime.Now,
-                                                          Lead = article.Lead.Trim(),
-                                                          Body = article.Body
-                                                      }
-                                                        ).ToListAsync();
-                            }
-                            else
-                            {
-                                return null;
-                            }
-                            transaction.Commit();
-                        }
-                        catch (Exception ex)
-                        {
-                            transaction.Rollback();
-                            LogHelper.InsertLogTelegram("[title = " + title + "] FindArticleByTitle - ArticleDAL: transaction.Commit " + ex);
-                            return null;
-                        }
+                        list_article = await (from article in _DbContext.Article.AsNoTracking()
+                                              join a in _DbContext.ArticleCategory on article.Id equals a.ArticleId into af
+                                              from detail in af.DefaultIfEmpty()
+                                              where article.Status == ArticleStatus.PUBLISH && article.Title.ToUpper().Contains(title.ToUpper())
+                                              select new ArticleViewModel
+                                              {
+                                                  Id = detail.Id,
+                                                  Title = article.Title.Trim(),
+                                                  PublishDate = article.PublishDate ?? DateTime.Now,
+                                                  Lead = article.Lead.Trim(),
+                                                  Body = article.Body
+                                              }
+                                                          ).ToListAsync();
                     }
                 }
                 return list_article;
@@ -666,8 +658,9 @@ namespace DAL
                             result.total_item_count = list_article.Count;
                             return result;
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            LogHelper.InsertLogTelegram("getArticleListByCategoryIdOrderByDate - Transaction Rollback - ArticleDAL: " + ex);
                             transaction.Rollback();
                             return null;
                         }
@@ -676,7 +669,7 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("getArticleListByCategoryId - ArticleDAL: " + ex);
+                LogHelper.InsertLogTelegram("getArticleListByCategoryIdOrderByDate - ArticleDAL: " + ex);
                 return null;
             }
         }
@@ -721,8 +714,9 @@ namespace DAL
                             transaction.Commit();
                             return article;
                         }
-                        catch
+                        catch(Exception ex)
                         {
+                            LogHelper.InsertLogTelegram("getPinnedArticleByPostition - Transaction Rollback - ArticleDAL: " + ex);
                             transaction.Rollback();
                             return null;
                         }
@@ -731,7 +725,7 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("getArticleListByCategoryId - ArticleDAL: " + ex);
+                LogHelper.InsertLogTelegram("getPinnedArticleByPostition - ArticleDAL: " + ex);
                 return null;
             }
         }

@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using DAL.StoreProcedure;
+﻿using DAL.StoreProcedure;
 using Entities.ConfigModels;
-using Entities.Models;
+using Entities.ViewModels.DashBoard;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Repositories.IRepositories;
+using System;
+using System.Data;
+using System.Linq;
+using System.Security.Claims;
+using Utilities;
 using WEB.CMS.Customize;
-using WEB.CMS.Models;
 
 namespace WEB.CMS.Controllers
 {
@@ -23,96 +19,70 @@ namespace WEB.CMS.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private static DbWorker _DbWorker;
-        public HomeController(IOptions<DataBaseConfig> dataBaseConfig, ILogger<HomeController> logger)
+        private readonly IDashboardRepository _DashboardRepository;
+
+        public HomeController(ILogger<HomeController> logger, IDashboardRepository dashboardRepository)
         {
             _logger = logger;
-            _DbWorker = new DbWorker(dataBaseConfig.Value.SqlServer.ConnectionString);
+            _DashboardRepository = dashboardRepository;
         }
+
         public IActionResult Index()
         {
             try
             {
-                //Assembly asm = Assembly.GetExecutingAssembly();
-                //var controlleractionlist = asm.GetTypes()
-                //        .Where(type => typeof(Controller).IsAssignableFrom(type))
-                //        .SelectMany(type => type.GetMethods(BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.Public))
-                //        .Where(m => !m.GetCustomAttributes(typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute), true).Any())
-                //        .Select(x => new {
-                //            Controller = x.DeclaringType.Name,
-                //            Action = x.Name,
-                //            ReturnType = x.ReturnType.Name,
-                //            Attributes = String.Join(",", x.GetCustomAttributes().Select(a => a.GetType().Name.Replace("Attribute", "")))
-                //        })
-                //        .OrderBy(x => x.Controller).ThenBy(x => x.Action).ToList();
                 var _UserId = "";
-                if (HttpContext.User.FindFirst(ClaimTypes.Name) != null)
+                if (HttpContext.User.FindFirst(ClaimTypes.Name) == null)
                 {
                     _UserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
                 }
+
+                var historyDataTable = _DashboardRepository.GetOrderDashboard();
+
+                var histories = historyDataTable.AsEnumerable().Select(s => new HistoryViewModel
+                {
+                    UserVerify = s["UserVerify"].ToString(),
+                    OrderNo = s["OrderNo"].ToString(),
+                    OrderId = long.Parse(s["OrderId"].ToString()),
+                    OrderStatus = s["OrderStatus"].ToString(),
+                    UserCreated = s["UserCreated"].ToString(),
+                    UpdateLast = string.IsNullOrEmpty(s["UpdateLast"].ToString()) ? (DateTime?)null : DateTime.Parse(s["UpdateLast"].ToString()),
+                    CreateTime = string.IsNullOrEmpty(s["CreateTime"].ToString()) ? (DateTime?)null : DateTime.Parse(s["CreateTime"].ToString())
+                }).AsEnumerable();
+
                 ViewBag.UserId = _UserId;
+                ViewBag.Histories = histories;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
+                LogHelper.InsertLogTelegram("Index - HomeController: " + ex);
             }
             return View();
         }
 
         public IActionResult DataMonitor()
         {
-            //return View();
-            return RedirectToAction("Error", "Home");
+            return RedirectToAction("Index", "Error");
         }
 
         public IActionResult ExecuteQuery(string dataQuery)
         {
-            /*
-            try
-            {
-                var dataSet = _DbWorker.ExecuteSqlString(dataQuery);
-             
-                if (!string.IsNullOrEmpty(dataQuery))
-                {
-                    return new JsonResult(new
-                    {
-                        isSuccess = true,
-                        message = "Thực thi thành công",
-                        dataSet = JsonConvert.SerializeObject(dataSet),
-                        tableCount = dataSet.Tables.Count
-                    });
-                }
-                else
-                {
-                    return new JsonResult(new
-                    {
-                        isSuccess = false,
-                        message = "Thực thi thất bại"
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                return new JsonResult(new
-                {
-                    isSuccess = false,
-                    message = ex.Message.ToString()
-                });
-            }
-            */
-            return RedirectToAction("Error", "Home");
+
+            return RedirectToAction("Index", "Error");
         }
 
         public IActionResult Privacy()
         {
             return View();
         }
-
+        [HttpGet]
         [AllowAnonymous]
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            ViewBag.UserName = "";
+            return View();
         }
     }
+    
 }

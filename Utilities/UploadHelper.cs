@@ -6,13 +6,15 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Utilities.ConfigModels;
-using Utilities.Models;
+using Utilities.ViewModels.Article;
 
 namespace Utilities
 {
     public class UpLoadHelper
     {
+        static string apiPrefix = "https://static-image.adavigo.com/images/upload";
+        static string apiUploadVideo = "https://localhost:44377/Video/upload-video";
+        static string key_token_api = "wVALy5t0tXEgId5yMDNg06OwqpElC9I0sxTtri4JAlXluGipo6kKhv2LoeGQnfnyQlC07veTxb7zVqDVKwLXzS7Ngjh1V3SxWz69";
         /// <summary>
         /// UploadImageBase64
         /// </summary>
@@ -24,9 +26,7 @@ namespace Utilities
             string tokenData = string.Empty;
             try
             {
-                var configApiCms = FileHelpers<ApiCmsConfig>.LoadConfig("config.json");
-                var apiPrefix = configApiCms.API_CMS_UPLOAD;
-                var key_token_api = configApiCms.KEY_CMS_UPLOAD;
+               
                 var j_param = new Dictionary<string, string> {
                     { "data_file", modelImage.ImageData },
                     { "extend", modelImage.ImageExtension }};
@@ -34,12 +34,11 @@ namespace Utilities
                 using (HttpClient httpClient = new HttpClient())
                 {
                     tokenData = CommonHelper.Encode(JsonConvert.SerializeObject(j_param), key_token_api);
-                    var contentObj = " {\"token\": \"" + tokenData + "\"}";
-
-                    var content = new StringContent(contentObj, Encoding.UTF8, "application/json");
+                    var contentObj = new { token = tokenData };
+                    var content = new StringContent(JsonConvert.SerializeObject(contentObj), Encoding.UTF8, "application/json");
                     var result = await httpClient.PostAsync(apiPrefix, content);
                     dynamic resultContent = Newtonsoft.Json.Linq.JObject.Parse(result.Content.ReadAsStringAsync().Result);
-                    if (resultContent.status == "success")
+                    if (resultContent.status == 0)
                     {
                         return resultContent.url_path;
                     }
@@ -64,10 +63,19 @@ namespace Utilities
                 if (objimage != null)
                 {
                     objimage.ImageData = ResizeBase64Image(objimage.ImageData, out string FileType);
-                    if (objimage.ImageData == null || objimage.ImageData.Trim() == "") objimage.ImageData = ImageSrc;
                     if (!string.IsNullOrEmpty(FileType)) objimage.ImageExtension = FileType;
-
-                    return await UploadImageBase64(objimage);
+                    if (string.IsNullOrEmpty(objimage.ImageData))
+                    {
+                        try
+                        {
+                            objimage.ImageData = ImageSrc.Split(',')[1];
+                        }
+                        catch
+                        {
+                            objimage.ImageData = ImageSrc;
+                        }
+                    }
+                        return await UploadImageBase64(objimage);
                 }
                 else
                 {
@@ -129,6 +137,6 @@ namespace Utilities
                 return null;
             }
         }
-
+       
     }
 }

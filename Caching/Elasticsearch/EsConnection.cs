@@ -1,11 +1,6 @@
 ﻿using Elasticsearch.Net;
-using Entities.ViewModels;
 using Nest;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using Utilities;
 
 namespace Caching.Elasticsearch
 {
@@ -70,23 +65,7 @@ namespace Caching.Elasticsearch
             }
         }
 
-        //public ElasticClient EsClient()
-        //{
-        //    var elasticClient = new ElasticClient();
-        //    try
-        //    {
-        //        var nodes = new Uri[] { new Uri(_ElasticHost) };
-        //        var connectionPool = new StaticConnectionPool(nodes);
-        //        var connectionSettings = new ConnectionSettings(connectionPool).DisableDirectStreaming().DefaultIndex("people");
-        //        elasticClient = new ElasticClient(connectionSettings);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-        //    return elasticClient;
-        //}
-
+     
         
 
     }

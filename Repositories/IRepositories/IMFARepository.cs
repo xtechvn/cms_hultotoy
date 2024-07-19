@@ -10,6 +10,6 @@ namespace Repositories.IRepositories
     {
         public Task<Mfauser> get_MFA_DetailByUserID(long client_id);
         public Task<long> CreateAsync(Mfauser mfa_record);
-        public Task<string> UpdateAsync(Mfauser mfa_record);
+        public Task<bool> UpdateAsync(Mfauser mfa_record);
     }
 }

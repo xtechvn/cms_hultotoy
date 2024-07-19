@@ -27,7 +27,7 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                //LogHelper.InsertLogTelegram("getMFADetailByClientID - UserRepository: " + ex);
+                LogHelper.InsertLogTelegram("CreateAsync - MFARepository: " + ex);
                 return -1;
             }
         }
@@ -39,22 +39,23 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                // LogHelper.InsertLogTelegram("getMFADetailByClientID - UserRepository: " + ex);
+                LogHelper.InsertLogTelegram("get_MFA_DetailByUserID - MFARepository: " + ex);
                 return null;
             }
         }
-        public async Task<string> UpdateAsync(Mfauser mfa_record)
+        public async Task<bool> UpdateAsync(Mfauser mfa_record)
         {
             try
             {
                 await _mFADAL.UpdateAsync(mfa_record);
-                return "Success";
+                return true;
             }
             catch (Exception ex)
             {
-               // LogHelper.InsertLogTelegram("getMFADetailByClientID - UserRepository: " + ex);
-                return null;
+                LogHelper.InsertLogTelegram("UpdateAsync - MFARepository: " + ex);
             }
+            return false;
+
         }
     }
 }

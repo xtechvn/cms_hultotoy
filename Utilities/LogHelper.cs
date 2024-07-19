@@ -2,23 +2,75 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types.InputFiles;
+using Utilities.Contants;
 
 namespace Utilities
 {
     public static class LogHelper
     {
-        public const string botToken_monitor_order = "1372498309:AAH0fVJfnZQFg5Qaqro47y1o5mIIcwVkR3k";
-        public const string group_id_monitor_order = "-366580623";
-        
+        public static string botToken = "5321912147:AAFhcJ9DolwPWL74WbMjOOyP6-0G7w88PWY";
+        public static string group_Id = "-739120187";
+        public static string enviromment = "DEV";
+        public static string CompanyType = " ";
+        public static int CompanyTypeInt = 0;
 
+       
+        private static void LoadConfig()
+        {
 
-        public const string botToken = "1264151832:AAFKCM7CoaBerVhcYCHQba1AyY13X41rT5s";
-        public const string group_Id = "-1001530489681";
+            using (StreamReader r = new StreamReader("appsettings.json"))
+            {
+                AppSettings _appconfig = new AppSettings();
+                string json = r.ReadToEnd();
+                _appconfig = JsonConvert.DeserializeObject<AppSettings>(json);
+                enviromment = _appconfig.BotSetting.environment;
+                botToken = _appconfig.BotSetting.bot_token;
+                group_Id = _appconfig.BotSetting.bot_group_id;
+                string company_type = _appconfig.CompanyType;
+                if (company_type!=null && company_type.Trim()!="")
+                {
+                    CompanyTypeInt = Convert.ToInt32(company_type);
+                    switch (CompanyTypeInt)
+                    {
+                        case 0:
+                            {
+                                CompanyType = " Travel ";
+                            }
+                            break;
+                        case 1:
+                            {
+                                CompanyType = " Phu Quoc ";
+                            }
+                            break;
+                        case 2:
+                            {
+                                CompanyType = " Dai Viet ";
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+        public static int InsertLogTelegram(string message)
+        {
+            var rs = 1;
+            try
+            {
+                LoadConfig();
+                TelegramBotClient alertMsgBot = new TelegramBotClient(botToken);
+                var rs_push=  alertMsgBot.SendTextMessageAsync(group_Id, "[" + enviromment + "-"+CompanyType+"] - " + message).Result;
+            }
+            catch (Exception ex)
+            {
+                rs = -1;
+            }
+            return rs;
+        }
+        /*
         /// <summary>
         /// function ghi log vao telegram
         /// </summary>
@@ -35,7 +87,7 @@ namespace Utilities
             try
             {
                 TelegramBotClient alertMsgBot = new TelegramBotClient(botToken);
-                alertMsgBot.SendTextMessageAsync(group_Id, message);
+                alertMsgBot.SendTextMessageAsync(group_Id, "AdavigoCMS - " + message);
             }
             catch (Exception ex)
             {
@@ -43,38 +95,9 @@ namespace Utilities
             }
             return rs;
         }
-
-        public static int InsertLogTelegram(string message)
+        public static async Task<bool> InsertImageTelegramAsync(InputOnlineFile image, string imgpath = null)
         {
-            var rs = 1;
-            try
-            {
-                TelegramBotClient alertMsgBot = new TelegramBotClient(botToken);
-                alertMsgBot.SendTextMessageAsync(group_Id, message);
-            }
-            catch (Exception)
-            {
-                rs = -1;
-            }
-            return rs;
-        }
-        public static int InsertLogTelegram(string message,string app_id)
-        {
-            var rs = 1;
-            try
-            {
-                TelegramBotClient alertMsgBot = new TelegramBotClient(botToken);
-                alertMsgBot.SendTextMessageAsync(group_Id,app_id+" - "+ message);
-            }
-            catch (Exception)
-            {
-                rs = -1;
-            }
-            return rs;
-        }
-        public static async Task<bool> InsertImageTelegramAsync(InputOnlineFile image, string imgpath=null)
-        {
-            var rs= true;
+            var rs = true;
             try
             {
                 TelegramBotClient alertMsgBot = new TelegramBotClient(botToken);
@@ -90,9 +113,10 @@ namespace Utilities
             }
             return rs;
         }
+
         public static void InsertLogTelegramByUrl(string bot_token, string id_group, string msg)
         {
-            string JsonContent = string.Empty;            
+            string JsonContent = string.Empty;
             string url_api = "https://api.telegram.org/bot" + bot_token + "/sendMessage?chat_id=" + id_group + "&text=" + msg;
             try
             {
@@ -106,7 +130,6 @@ namespace Utilities
 
             }
         }
-
 
         public static void WriteLogActivity(string AppPath, string log_content)
         {
@@ -152,7 +175,32 @@ namespace Utilities
                     sLogFile.Close();
                 }
             }
-        }
-
+        }*/
     }
+    public class AppSettings
+    {
+        public BotSetting BotSetting { get; set; }
+        public string CompanyType { get; set; }
+      
+    }
+
+    public class BotSetting
+    {
+        public string bot_token { get; set; }
+        public string bot_group_id { get; set; }
+        public string environment { get; set; }
+    }
+    public class SystemLog
+    {
+
+        public int SourceID { get; set; } // log từ nguồn nào, quy định trong SystemLogSourceID
+        public string Type { get; set; } // nội dung: booking, order,....
+        public string KeyID { get; set; } // Key: mã đơn, mã khách hàng, mã booking,....
+        public string ObjectType { get; set; } // ObjectType: Dùng để phân biệt các đối tượng cần log với nhau. Ví dụ: log cho đơn hàng, khách hàng, hợp đồng, Phiếu thu...
+        public int CompanyType { get; set; }//dùng để phân biệt company nào
+        public string Log { get; set; } // nội dung log
+        public DateTime CreatedTime { get; set; } // thời gian tạo
+    }
+
 }
+

@@ -3,7 +3,7 @@
         roleName: '',
         strUserId: '',
         currentPage: 1,
-        pageSize: 8
+        pageSize: 30
     };
     _role.Init(_searchData);
 
@@ -86,6 +86,7 @@ $('#grid-data').on('click', '.tab-default a', function () {
         let id = parseInt(seft.data('id'));
         _role.OnLoadMenuPermission(id, function (result) {
             seft.closest('tr').find('.grid-menu-permission').html(result);
+            $(".scrollbar-inner").scrollbar();
         });
     }
 

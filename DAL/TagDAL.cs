@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Utilities;
 
 namespace DAL
 {
@@ -61,8 +62,9 @@ namespace DAL
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("MultipleInsertTag - TagDAL: " + ex);
                 return null;
             }
             return ListResult;
@@ -77,8 +79,9 @@ namespace DAL
                     return await _DbContext.Tag.Where(s => s.TagName.Trim().ToLower().Contains(name.ToLower())).Select(s => s.TagName).Take(10).ToListAsync();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("GetSuggestionTag - TagDAL: " + ex);
                 return null;
             }
         }
@@ -91,8 +94,9 @@ namespace DAL
                     return await _DbContext.Tag.Where(s => tag_id_list.Contains(s.Id)).Select(s=>s.TagName).ToListAsync();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("GetTagByListID - TagDAL: " + ex);
                 return null;
             }
         }

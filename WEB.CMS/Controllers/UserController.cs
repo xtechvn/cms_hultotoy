@@ -1,17 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Entities.Models;
+﻿using Entities.Models;
 using Entities.ViewModels;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Repositories.IRepositories;
+using System;
+using System.IO;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Utilities;
+using Utilities.Contants;
+using WEB.Adavigo.CMS.Service;
 using WEB.CMS.Customize;
 
 namespace WEB.CMS.Controllers
@@ -21,14 +23,28 @@ namespace WEB.CMS.Controllers
     {
         private readonly IWebHostEnvironment _WebHostEnvironment;
         private readonly IUserRepository _UserRepository;
+        private readonly IDepartmentRepository _DepartmentRepository;
         private readonly IRoleRepository _RoleRepository;
         private readonly IMFARepository _mFARepository;
-        public UserController(IUserRepository userRepository, IRoleRepository roleRepository, IWebHostEnvironment hostEnvironment, IMFARepository mFARepository)
+        private readonly IOrderRepository _orderRepository;
+        private readonly ManagementUser _ManagementUser;
+        private readonly APIService _aPIService;
+        private readonly IConfiguration _configuration;
+
+
+        public UserController(IUserRepository userRepository, IRoleRepository roleRepository,
+            IWebHostEnvironment hostEnvironment, IMFARepository mFARepository,
+            IDepartmentRepository departmentRepository, ManagementUser managementUser, IOrderRepository orderRepository, IConfiguration configuration)
         {
             _UserRepository = userRepository;
             _RoleRepository = roleRepository;
             _WebHostEnvironment = hostEnvironment;
             _mFARepository = mFARepository;
+            _DepartmentRepository = departmentRepository;
+            _ManagementUser = managementUser;
+            _orderRepository = orderRepository;
+            _configuration = configuration;
+            _aPIService = new APIService(configuration, userRepository);
         }
 
         public IActionResult Index()
@@ -44,12 +60,15 @@ namespace WEB.CMS.Controllers
                 var suggestionlist = userlist.Select(s => new
                 {
                     id = s.Id,
-                    name = s.UserName
+                    name = s.UserName,
+                    fullname = s.FullName,
+                    email = s.Email
                 }).ToList();
                 return JsonConvert.SerializeObject(suggestionlist);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("GetUserSuggestionList - UserController: " + ex);
                 return null;
             }
         }
@@ -62,42 +81,64 @@ namespace WEB.CMS.Controllers
             {
                 model = _UserRepository.GetPagingList(userName, strRoleId, status, currentPage, pageSize);
             }
-            catch
+            catch (Exception ex)
             {
-
+                LogHelper.InsertLogTelegram("Search - UserController: " + ex);
             }
             return PartialView(model);
         }
 
         public async Task<IActionResult> AddOrUpdate(int Id, bool IsClone = false)
         {
-            var model = new User();
-            if (Id != 0)
+            try
             {
-                model = await _UserRepository.FindById(Id);
-                if (IsClone)
+                var model = new User();
+                ViewBag.UserRoleList = null;
+                ViewBag.CompanyType = "";
+                if (Id != 0)
                 {
-                    model = new User
-                    {
-                        FullName = model.FullName,
-                        UserName = model.UserName,
-                        Email = model.Email,
-                        Address = model.Address,
-                        BirthDay = model.BirthDay,
-                        Gender = model.Gender,
-                        Status = model.Status,
-                        Note = model.Note,
-                        Phone = model.Phone,
-                    };
-                }
-            }
-            else
-            {
-                model.Gender = 1;
-            }
 
-            ViewBag.RoleList = await _RoleRepository.GetAll();
-            return View(model);
+                    model = await _UserRepository.FindById(Id);
+                    if (IsClone)
+                    {
+                        model = new User
+                        {
+                            FullName = model.FullName,
+                            UserName = model.UserName,
+                            Email = model.Email,
+                            Address = model.Address,
+                            BirthDay = model.BirthDay,
+                            Gender = model.Gender,
+                            Status = model.Status,
+                            Note = model.Note,
+                            DepartmentId = model.DepartmentId,
+                            Phone = model.Phone,
+                        };
+                    }
+                    var list_role_active = await _UserRepository.GetUserActiveRoleList(model.Id);
+                    if (list_role_active != null && list_role_active.Count > 0)
+                    {
+                        ViewBag.UserRoleList = list_role_active.Select(x => x.Id).ToList();
+                    }
+                    var user = await _aPIService.GetByUserDetail(model.Id,model.UserName,model.Email);
+                    ViewBag.CompanyType = user != null && user.Id > 0 ? user.CompanyType : "";
+                }
+                else
+                {
+                    model.Gender = 1;
+                }
+
+                ViewBag.DepartmentList = await _DepartmentRepository.GetAll(String.Empty);
+                ViewBag.RoleList = await _RoleRepository.GetAll();
+                ViewBag.UserPosition = _UserRepository.GetUserPositions();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("AddOrUpdate - UserController: " + ex);
+                return Content("");
+            }
+           
         }
 
         [HttpPost]
@@ -130,6 +171,46 @@ namespace WEB.CMS.Controllers
                 }
 
                 int rs = 0;
+                if(model.UserPositionId!=null && model.UserPositionId > 0)
+                {
+                    var active_position = await _UserRepository.GetUserPositionsByID((int)model.UserPositionId);
+                    if (active_position != null) model.Level = active_position.Rank;
+                }
+                if(model.CompanyType==null || model.CompanyType.Trim() == "")
+                {
+                    model.CompanyType = _configuration["CompanyType"];
+                }
+                var _UserLogin = 0;
+                if (HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
+                {
+                    _UserLogin = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                }
+                model.CreatedBy = _UserLogin;
+                model.ModifiedBy = _UserLogin;
+                if (model.Phone == null) model.Phone = "";
+                if (model.Avata == null) model.Avata = "";
+                if (model.Address == null) model.Address = "";
+                //-- Update dbUser:
+                var success = await _aPIService.UpdateUser(model);
+                if (success > 0 )
+                {
+                    var exists = await _UserRepository.GetById(model.Id);
+                    if(exists==null || exists.Id <= 0)
+                    {
+                        rs = await _UserRepository.Create(model);
+
+                    }
+                    else
+                    {
+                        rs = await _UserRepository.Update(model);
+
+                    }
+                }
+                else
+                {
+                    rs = -2;
+                }
+                  /*
                 if (model.Id != 0)
                 {
                     rs = await _UserRepository.Update(model);
@@ -138,9 +219,11 @@ namespace WEB.CMS.Controllers
                 {
                     rs = await _UserRepository.Create(model);
                 }
-
+               */
                 if (rs > 0)
                 {
+
+
                     return new JsonResult(new
                     {
                         isSuccess = true,
@@ -166,6 +249,7 @@ namespace WEB.CMS.Controllers
             }
             catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("UpSert - UserController: " + ex);
                 return new JsonResult(new
                 {
                     isSuccess = false,
@@ -177,16 +261,18 @@ namespace WEB.CMS.Controllers
         [HttpPost]
         public async Task<IActionResult> GetDetail(int Id)
         {
-            var model = new UserDetailViewModel();
+            var model = new UserDataViewModel();
             try
             {
-                model = await _UserRepository.GetDetailUser(Id);
+                model = await _UserRepository.GetUser(Id);
                 var mfa_record = await _mFARepository.get_MFA_DetailByUserID(Id);
                 ViewBag.RoleList = await _RoleRepository.GetAll();
+                model.UserPositionName = model.UserPositionId != null && model.UserPositionId > 0 ? _UserRepository.GetUserPositionsByID((int)model.UserPositionId).Result.Name : "";
                 ViewBag.IsMFAEnabled = (mfa_record != null && mfa_record.UserId == Id);
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("GetDetail - UserController: " + ex);
                 ViewBag.IsMFAEnabled = false;
             }
             return PartialView(model);
@@ -218,6 +304,7 @@ namespace WEB.CMS.Controllers
             }
             catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("UpdateUserRole - UserController: " + ex);
                 return new JsonResult(new
                 {
                     isSuccess = false,
@@ -252,6 +339,7 @@ namespace WEB.CMS.Controllers
             }
             catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("ChangeUserStatus - UserController: " + ex);
                 return new JsonResult(new
                 {
                     isSuccess = false,
@@ -266,7 +354,10 @@ namespace WEB.CMS.Controllers
             try
             {
                 var rs = await _UserRepository.ResetPasswordByUserId(userId);
-                if (!string.IsNullOrEmpty(rs))
+                var current_user = await _UserRepository.GetById(userId);
+                var user = await _aPIService.GetByUserDetail(current_user.Id, current_user.UserName, current_user.Email);
+                var result_2 = await _aPIService.ChangePassword(current_user.UserName, current_user.Password);
+                if (result_2 > 0)
                 {
                     return new JsonResult(new
                     {
@@ -286,6 +377,7 @@ namespace WEB.CMS.Controllers
             }
             catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("ResetPasswordByUserId - UserController: " + ex);
                 return new JsonResult(new
                 {
                     isSuccess = false,
@@ -296,15 +388,38 @@ namespace WEB.CMS.Controllers
 
         public async Task<IActionResult> UserProfile()
         {
-            var model = new User();
-            int userid = 0;
-            if (HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
+            try
             {
-                userid = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-                model = await _UserRepository.FindById(userid);
+                var current_user = _ManagementUser.GetCurrentUser();
+                var model = await _UserRepository.GetUser(current_user.Id);
+                ViewBag.RoleList = await _RoleRepository.GetRoleListByUserId(current_user.Id);
+                return PartialView(model);
             }
-            ViewBag.RoleList = await _RoleRepository.GetRoleListByUserId(userid);
-            return PartialView(model);
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UserProfile - UserController: " + ex);
+                return Content("");
+            }
+        
+        }
+
+        public IActionResult UserChangePass()
+        {
+            try
+            {
+                var current_user = _ManagementUser.GetCurrentUser();
+                var model = new UserDataViewModel()
+                {
+                    Id = current_user.Id
+                };
+                return PartialView(model);
+            }
+            catch ( Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UserChangePass - UserController: " + ex);
+                return Content("");
+            }
+          
         }
 
         [HttpPost]
@@ -313,6 +428,10 @@ namespace WEB.CMS.Controllers
             try
             {
                 var rs = await _UserRepository.ChangePassword(model);
+                var current_user = await _UserRepository.GetById(model.Id);
+                var user = await _aPIService.GetByUserDetail(current_user.Id, current_user.UserName, current_user.Email);
+                var NewPassword = EncodeHelpers.MD5Hash(model.NewPassword);
+                var result_2 = _aPIService.ChangePassword(current_user.UserName, NewPassword);
                 if (rs > 0)
                 {
                     return new JsonResult(new
@@ -326,7 +445,7 @@ namespace WEB.CMS.Controllers
                 {
                     return new JsonResult(new
                     {
-                        isSuccess = true,
+                        isSuccess = false,
                         message = "Mật khẩu hiện tại không chính xác",
                         result = rs
                     });
@@ -342,6 +461,7 @@ namespace WEB.CMS.Controllers
             }
             catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("ChangePassword - UserController: " + ex);
                 return new JsonResult(new
                 {
                     isSuccess = false,
@@ -357,7 +477,10 @@ namespace WEB.CMS.Controllers
                 var detail = await _mFARepository.get_MFA_DetailByUserID(id);
                 detail.Status = 0;
                 var rs = await _mFARepository.UpdateAsync(detail);
-                if (rs == "Success")
+                var user_local = await _UserRepository.GetById(detail.UserId);
+                var user = await _aPIService.GetByUserDetail(user_local.Id, user_local.UserName, user_local.Email);
+
+                if (rs)
                     return new JsonResult(new
                     {
                         isSuccess = true,
@@ -369,8 +492,10 @@ namespace WEB.CMS.Controllers
                         isSuccess = false,
                         message = "Cập nhật thất bại",
                     });
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("ResetMFA - UserController: " + ex);
                 return new JsonResult(new
                 {
                     isSuccess = false,
@@ -379,5 +504,121 @@ namespace WEB.CMS.Controllers
             }
 
         }
+        [HttpPost]
+        public async Task<IActionResult> UpdateAllOrderDetail()
+        {
+            try
+            {
+                var order = _orderRepository.GetAllOrderIDs();
+                if(order!=null && order.Count > 0)
+                {
+                    var _UserLogin = 0;
+                    if (HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
+                    {
+                        _UserLogin = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                    }
+
+                    foreach (var id in order)
+                    {
+                        await _orderRepository.UpdateOrderDetail(id, _UserLogin);
+                    }
+                }
+                return Ok(new
+                {
+                    status = (int)ResponseType.SUCCESS,
+                    message = "Update Order Success",
+                });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdateAllOrderDetail - UserController: " + ex);
+                return Ok(new
+                {
+                    status = (int)ResponseType.ERROR,
+                    message = ex.Message.ToString(),
+                });
+            }
+
+        }
+        public async Task<IActionResult> ViewConfirm(long id)
+        {
+            try
+            {
+                ViewBag.id = id;
+         
+                return PartialView();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("ViewConfirm - UserController: " + ex);
+                return PartialView();
+            }
+
+        }
+        public async Task<IActionResult> ConfirmPassQr(long id,string pass)
+        {
+            try
+            {
+               
+                var user =await _UserRepository.GetById(id);
+                string passqr = user.UserName + DateTime.Now.Year + DateTime.Now.Month + DateTime.Now.ToString("dd");
+                if(pass== passqr)
+                {
+                    return new JsonResult(new
+                    {
+                        isSuccess = true,
+                        message = "Mật khẩu chính xác"
+                    });
+                }
+                else
+                {
+                    return new JsonResult(new
+                    {
+                        isSuccess = false,
+                        message = "mật khẩu không đúng"
+                    });
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("ConfirmPassQr - UserController: " + ex);
+                return new JsonResult(new
+                {
+                    isSuccess = false,
+                    message = "Đã sẩy ra lỗi vui lòng liên hệ IT"
+                });
+            }
+
+        }
+        public async Task<IActionResult> QrCodeUser(long id)
+        {
+            try
+            {
+                var mfa_record = new Mfauser();
+                var model = await _UserRepository.GetById(id);
+                APIService apiService = new APIService(_configuration, _UserRepository);
+                string enviroment = _configuration["Config:OTP_Enviroment"];
+                if (enviroment == null) enviroment = "";
+           
+                mfa_record.Username = model.UserName;
+                mfa_record.Id = model.Id;
+                var data = await apiService.GenQrCode(model.UserName);
+                if (data != null)
+                {
+                   ViewBag.manual_entry_key = data.manual_entry_key;
+                    mfa_record.SecretKey = data.manual_entry_key;
+                }
+                ViewBag.key = MFAService.GenerateQRCode(mfa_record, enviroment);
+                return PartialView();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("QrCodeUser - UserController: " + ex);
+                return Content("");
+            }
+
+        }
+       
     }
 }

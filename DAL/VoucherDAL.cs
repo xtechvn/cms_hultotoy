@@ -64,5 +64,22 @@ namespace DAL
                 return null;
             }
         }
+        public async Task<string> FindByVoucherid(int voucherId)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+
+                    var Voucher = await _DbContext.Voucher.FirstOrDefaultAsync(s => s.Id == voucherId);
+                    return Voucher.Code;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("FindByVoucherCode - VoucherDAL: " + ex.ToString());
+                return null;
+            }
+        }
     }
 }

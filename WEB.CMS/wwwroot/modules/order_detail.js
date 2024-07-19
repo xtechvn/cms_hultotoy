@@ -1,460 +1,711 @@
-﻿$(document).ready(function () {
-    var orderid = $('#param-order-id').val();
-    _cashback.LoadGrid(orderid);
-    _payment.LoadGrid(orderid);
-    $('#btn_updateaff').prop('disabled', true);
-});
+﻿var _order_detail_create = {
+    Initialization: function () {
+        _order_detail_create.ClientSuggesstion()
+        _order_detail_common.Select2WithFixedOptionAndNoSearch($("#branch"))
+        $('#main-staff').select2();
+        $('#sub-staff').select2();
 
-$("#ip-kup-orderno").autocomplete({
-    minLength: 4,
-    source: function (request, response) {
-        $.ajax({
-            url: "/Order/GetSuggestionOrder",
-            data: {
-                orderNo: request.term
+        _order_detail_create.DynamicBindClientInput();
+        _order_detail_create.UserSuggesstion();
+    },
+    ClientSuggesstion: function () {
+        $("#client-select").select2({
+            ajax: {
+                url: "/Contract/ClientSuggestion",
+                type: "post",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    var query = {
+                        txt_search: params.term,
+                    }
+
+                    return query;
+                },
+                processResults: function (response) {
+                    
+                    var data_modified = $.map(response.data, function (obj) {
+                        /*
+                        if (obj.clienttype <= 0 || obj.clienttype == undefined) {
+                            obj.disabled = true; // or use logical statement
+                            return null;
+                        }*/
+                        return obj;
+                    });
+                    return { results: data_modified };
+
+                },
+                cache: true
             },
-            success: function (data) {
-                response(JSON.parse(data));
-            }
+            escapeMarkup: function (markup) { return markup; },
+            minimumInputLength: 1,
+            templateResult: _order_detail_create.ClientTemplateResult,
+            templateSelection: _order_detail_create.ClientTemplateSelection
+
         });
+        
     },
-    focus: function (event, ui) {
-        event.preventDefault();
-        this.value = ui.item.OrderNo;
-        return false;
-    },
-    select: function (event, ui) {
-        event.preventDefault();
-        this.value = ui.item.OrderNo;
-        location.href = "/order/detail/" + ui.item.Id;
-    },
-    keyup: function (event, ui) {
-        event.preventDefault();
-        this.value = ui.item.OrderNo;
-        return false;
-    },
-    keydown: function (event, ui) {
-        event.preventDefault();
-        this.value = ui.item.OrderNo;
-        return false;
-    }
-}).data("ui-autocomplete")._renderItem = function (ul, item) {
-    $item = $("<li></li>").data("ui-autocomplete-item", item)
-        .append("<strong style='font-size:14px;'>" + item.OrderNo + "</strong>"
-            + "<br />"
-            + "<strong style='color:#BABABA;font-size:13px;'>Khách hàng: " + item.ClientName + "</strong>"
-            + "<br />"
-            + "<strong style='color:#BABABA;font-size:13px;'>Địa chỉ: " + item.Address + "</strong>");
-    return $item.appendTo(ul);
-};
+    ClientTemplateResult: function (item) {
+        if (item.loading) {
+            return item.text;
+        }
+        var type_name = '';
+        var color_text = '';
 
-$('#ip-kup-orderno').keyup(function (e) {
-    if (e.which === 13) {
-        _orderDetail.OnMoveOrder();
-    }
-});
+        if ([1, 2, 3, 4].includes(item.clienttype)) {
+            type_name = 'Khách hàng B2B'
+        }
+        else if (item.clienttype == 5) type_name = 'Khách hàng B2C'
+        else if (item.clienttype == 6) type_name = 'Saler'
+        var $container = $(
+            _order_detail_html.html_option_client_suggesstion.replaceAll('{if_danger}', color_text).replaceAll('{Name}', item.clientname).replaceAll('{ClientType}', type_name).replaceAll('{Email}', item.email).replaceAll('{phone}', item.phone)
+        );
+        return $container;
 
-var _orderDetail = {
-    OnMoveOrder: function () {
-        let _orderNo = $('#ip-kup-orderno').val().trim();
+    },
+    ClientTemplateSelection: function (item) {
         $.ajax({
-            url: "/Order/FindOrderIdByOrderNo",
-            data: {
-                orderNo: _orderNo
-            },
-            success: function (data) {
-                if (data != 0) {
-                    location.href = "/order/detail/" + data;
-                } else {
-                    _msgalert.error("Đơn hàng không tồn tại trong hệ thống");
-                }
-            }
-        });
-    },
-
-    GetOrderAmount: function (_orderId) {
-        $.ajax({
-            url: "/Order/GetOrderTotalAmount",
-            data: {
-                Id: _orderId
-            },
-            success: function (data) {
-                $('#data-order-amount').val(formatNumber(data.toString()));
-            }
-        });
-    },
-
-    OnShowHistory: function (_orderNo) {
-        let title = 'Lịch sử đơn hàng ' + _orderNo;
-        let url = '/Order/OrderHistory';
-        let param = { OrderNo: _orderNo };
-        _magnific.OpenSmallPopupWithHeader(title, url, param);
-    },
-
-    PushOrderToAffilliate: function (_orderId, aff_name) {
-        $.ajax({
-            url: "/Order/PushOrderToAffilliate",
+            url: "GetActiveContractByClientId",
             type: "post",
-            data: {
-                orderId: _orderId,
-                aff_network: aff_name
-            },
+            data: { client_id: item.id},
             success: function (result) {
-                if (result.status == 0) {
-                    _msgalert.success(result.msg);
-                    $('#btn_updateaff').prop('disabled', false);
-                    $('#btn_pushaff').prop('disabled', true);
+                if (result != undefined && result.status == 0) {
+                    $('.error_client_select').hide()
+                    $('#btn_summit_order').removeAttr('disabled')
                 }
                 else {
-                    _msgalert.error(result.msg);
+                    $('.error_client_select').show()
+                    $('.error_client_select_p').html(result.msg)
+                    $('#btn_summit_order').attr('disabled', 'disabled');
                 }
+
             }
         });
+
+       return (item.clientname + ' ( ' + item.phone + ' - ' + item.email + ' )')
     },
-
-    UpdateOrderAffilliate: function (_orderId, aff_name) {
-        $.ajax({
-            url: "/Order/UpdateOrderAffilliate",
-            type: "post",
-            data: {
-                orderId: _orderId,
-                aff_network: aff_name
-            },
-            success: function (result) {
-                if (result.status == 0) {
-                    _msgalert.success(result.msg);
-                    $('#btn_updateaff').prop('disabled', true);
-
-                }
-                else {
-                    _msgalert.error(result.msg);
-                }
-            }
-        });
-    },
-
-    OnEditAddress: function (address_id, order_id) {
-        let title = 'Thông tin giao hàng';
-        let url = '/Order/OrderAddress';
-        let param = { addressId: address_id, orderId: order_id };
-        _magnific.OpenSmallPopupWithHeader(title, url, param, function () {
-            $('#cbo-province').trigger('change');
-        });
-    },
-
-    UpdateOrder: function () {
-        var Payment_Date;
-
-        var Str_PaymentDate = $('#PaymentDate').val();
-        if (Str_PaymentDate != "" && Str_PaymentDate != null) {
-            Payment_Date = ConvertToJSONDateTime(Str_PaymentDate);
+    ClientPreOptionSuggesstion: function (item) {
+        if (item.loading) {
+            return item.text;
         }
-
-        var objParam = {
-            OrderId: $('#param-order-id').val(),
-            OrderStatus: $('#OrderStatus').val(),
-            PaymentType: $('#PaymentType').val(),
-            PaymentDate: Payment_Date
+        var type_name = '';
+        var color_text = ''
+        if (item.clienttype <= 0 || item.clienttype == undefined) {
+            type_name = 'Khách hàng chưa được kích hoạt'
+            color_text = 'red'
         }
-
-        $.ajax({
-            url: '/Order/UpdateOrder',
-            type: 'POST',
-            data: objParam,
-            success: function (result) {
-                if (result.isSuccess) {
-                    _msgalert.success(result.message);
-                } else {
-                    _msgalert.error(result.message);
-                }
-            },
-            error: function (jqXHR) {
-            }
-        });
+        else if (item.clienttype == 5) type_name = 'Khách hàng B2C'
+        else type_name = 'Khách hàng B2B'
+        return _order_detail_html.html_option_client_suggesstion.replaceAll('{if_danger}', color_text).replaceAll('{Name}', item.clientname).replaceAll('{ClientType}', type_name).replaceAll('{Email}', item.email).replaceAll('{phone}', item.phone)
     },
-
-    OnChangeProvince: function (value, selected_district) {
-        $.ajax({
-            url: "/client/getdistrictlist",
-            type: "post",
-            data: { provinceId: value },
-            success: function (result) {
-                var data = JSON.parse(result);
-                var DistrictHtml = '<option value="">Quận / Huyện</option>';
-                var WardHtml = '<option value="">Phường / Xã</option>';
-                if (data != null && data.length > 0) {
-                    data.map(function (obj) {
-                        DistrictHtml += '<option value="' + obj.Value + '" ' + (selected_district == obj.Value ? "selected" : "") + '>' + obj.Text + '</option>';
-                    });
-                }
-                $('#cbo-district').html(DistrictHtml);
-                $('#cbo-district').trigger('change');
-                $('#cbo-ward').html(WardHtml);
-            }
-        });
-    },
-
-    OnChangeDistrict: function (value, selected_ward) {
-        $.ajax({
-            url: "/client/getWardlist",
-            type: "post",
-            data: { districtId: value },
-            success: function (result) {
-                var data = JSON.parse(result);
-                var WardHtml = '<option value="">Phường / Xã</option>';
-                if (data != null && data.length > 0) {
-                    data.map(function (obj) {
-                        WardHtml += '<option value="' + obj.Value + '" ' + (selected_ward == obj.Value ? "selected" : "") + ' >' + obj.Text + '</option>';
-                    });
-                }
-                $('#cbo-ward').html(WardHtml);
-            }
-        });
-    },
-
-    UpdateAddress: function () {
-        let FromCreate = $('#form-data-address');
-        FromCreate.validate({
+    Summit: function () {
+        let Form = $("#form-create-order-manual")
+        Form.validate({
             rules: {
-                ReceiverName: "required",
-                ProvinceId: "required",
-                DistrictId: "required",
-                WardId: "required",
-                Address: "required",
-                Phone: "required"
+                "client": {
+                    required: true,
+                },
+                "order_label": {
+                    required: true,
+                }
             },
             messages: {
-                ReceiverName: "Vui lòng nhập tên khách hàng",
-                ProvinceId: "Vui lòng chọn tỉnh thành",
-                DistrictId: "Vui lòng chọn quận huyện",
-                WardId: "Vui lòng chọn phường xã",
-                Address: "Vui lòng nhập địa chỉ",
-                Phone: "Vui lòng nhập số điện thoại"
+                "client": {
+                    required: "Thông tin khách hàng không được để trống",
+                },
+                "order_label": {
+                    required: "Nhãn đơn không được để trống",
+                }
+            },
+
+        });
+
+        if ($('#client-select').find(':selected').val() == undefined || parseInt($('#client-select').find(':selected').val()) <= 0) {
+            _msgalert.error("Vui lòng nhập / chọn đúng khách hàng cho đơn hàng này");
+            return;
+        }
+        var order_label = $('#order_label').val()
+        if (order_label == undefined || order_label.trim()=='') {
+            _msgalert.error("Vui lòng nhập đơn nhãn cho đơn hàng này");
+            return;
+        }
+        if (order_label.trim().length > 60) {
+            _msgalert.error("Nhãn đơn của đơn hàng không được vượt quá 60 ký tự");
+            debugger;
+            return;
+        }
+        var selected_branch = $('#branch').find(":selected").val();
+        if (selected_branch == undefined || parseInt(selected_branch) <= 0) {
+            _msgalert.error("Vui lòng chọn đúng chi nhánh cho đơn hàng");
+            return;
+        }
+        $('#btn_summit_order').hide();
+        $('.img_loading_summit').show();
+
+        var summit_model = {
+            client_id: $('#client-select').val(),
+            main_sale_id: $("#main-staff").select2("val"),
+            sub_sale_id: $("#sub-staff").select2("val"),
+            branch: $('#branch').find(":selected").val(),
+            order_source: "CMS",
+            note: $('#note').val(),
+            label: $('#order_label').val()
+        };
+        $.ajax({
+            url: "CreateManualOrder",
+            type: "post",
+            data: summit_model,
+            success: function (result) {
+                $('#img_loading_summit').hide();
+                if (result.status != 0) {
+                    _msgalert.error(result.msg);
+                    $('#btn_summit_order').show();
+                    return;
+                }
+                _msgalert.success(result.msg);
+                $('#btn_summit_order').prop("onclick", null).off("click");;
+                $('#btn_summit_order').text('Tạo đơn hàng thành công');
+                $('#btn_summit_order').show();
+                $('.img_loading_summit').hide();
+
+                setTimeout(function () {
+                    window.location.href = "/Order/" + result.order_id;
+                }, 1000);
+                return;
+
             }
         });
 
-        if (FromCreate.valid()) {
-            let form = document.getElementById('form-data-address');
-            var formData = new FormData(form);
+    },
+    DynamicBindClientInput: function () {
+        $('body').on('click', '.modal-order', function (event) {
+            if (!$(event.target).hasClass('modal-dialog')) {
+                $(event.target).closest('.modal').removeClass('show');
+                setTimeout(function () {
+                    $(event.target).closest('.modal').remove();
+                }, 300);
+            }
 
+        });
+
+
+    },
+    UserSuggesstion: function () {
+        $('#main-staff').select2();
+        $('#sub-staff').select2();
+
+        $.ajax({
+            url: "UserSuggestion",
+            type: "post",
+            data: { txt_search: "" },
+            success: function (result) {
+                if (result != undefined && result.data != undefined && result.data.length > 0) {
+                    result.data.forEach(function (item) {
+                        $('#main-staff').append(_order_detail_html.html_user_option.replaceAll('{user_id}', item.id).replace('{user_email}', item.email).replace('{user_name}', item.username).replace('{user_phone}', item.phone == undefined ? "" : ' - '+ item.phone))
+                        $('#sub-staff').append(_order_detail_html.html_user_option.replaceAll('{user_id}', item.id).replace('{user_email}', item.email).replace('{user_name}', item.username).replace('{user_phone}', item.phone == undefined ? "" : ' - '+item.phone))
+
+                    });
+                    $("#main-staff").trigger('change');
+                    $("#sub-staff").trigger('change');
+                    $('#main-staff').val(result.selected).trigger('change');
+                }
+                else {
+                    $("#main-staff").trigger('change');
+                    $("#sub-staff").trigger('change');
+                }
+
+            }
+        });
+    }
+}
+var _order_detail_create_service = {
+    Initialization: function (hotel_booking_id) {
+        $('body').on('click', '.onclick-button', function (event) {
+            if (!$(this).hasClass("active")) {
+                $(this).addClass("active");
+                $(this).next('.form-down').slideDown();
+                $('.form-down input').focus();
+
+            } else {
+                $(this).removeClass("active");
+                $(this).next('.form-down').slideUp();
+            }
+        });
+    },
+    ServiceHotel: function (hotel_booking_id) {
+        _global_function.AddLoading()
+        if (hotel_booking_id == undefined || parseInt(hotel_booking_id) < 0) return;
+        if ($('#AddHotelService').length) {
+            $('#AddHotelService').removeClass('show')
+            setTimeout(function () {
+                $('#AddHotelService').remove();
+            }, 300);
+
+        }
+        $.ajax({
+            url: "AddHotelService",
+            type: "post",
+            data: { hotel_booking_id: hotel_booking_id },
+            success: function (result) {
+                $('body').append(result);
+                setTimeout(function () {
+                    _order_detail_create_service.StopScrollingBody();
+                    _order_detail_hotel.Initialization(hotel_booking_id);
+                    _global_function.RemoveLoading()
+
+                }, 300);
+
+            }
+        });
+    },
+    FlyingTicket: function (order_id, group_fly) {
+        _global_function.AddLoading()
+
+        if ($('#FlyBooking-Service').length) {
+            $('#FlyBooking-Service').removeClass('show')
+            setTimeout(function () {
+                $('#FlyBooking-Service').remove();
+            }, 300);
+
+        }
+        $.ajax({
+            url: "AddFlyBookingService",
+            type: "post",
+            data: {
+                order_id: order_id,
+                group_fly: group_fly
+            },
+            success: function (result) {
+                $('body').append(result);
+                setTimeout(function () {
+                    _order_detail_create_service.StopScrollingBody();
+                    _order_detail_fly.Initialization(order_id, group_fly);
+                    _global_function.RemoveLoading()
+
+                }, 300);
+
+            }
+        });
+    },
+    Tour: function (order_id, tour_id) {
+        _global_function.AddLoading()
+
+        if ($('#add-service-tour').length) {
+            $('#add-service-tour').removeClass('show')
+            setTimeout(function () {
+                $('#add-service-tour').remove();
+            }, 300);
+
+        }
+        $.ajax({
+            url: "AddTourService",
+            type: "post",
+            data: {
+                order_id: order_id,
+                tour_id:tour_id
+            },
+            success: function (result) {
+                $('body').append(result);
+                setTimeout(function () {
+                    _order_detail_create_service.StopScrollingBody();
+                    _order_detail_tour.Initialization(order_id, tour_id);
+                    _global_function.RemoveLoading()
+
+                }, 300);
+
+            }
+        });
+    },
+    OtherService: function (order_id, booking_id) {
+        _global_function.AddLoading()
+
+        if ($('#add-service-other').length) {
+            $('#add-service-other').removeClass('show')
+            setTimeout(function () {
+                $('#add-service-other').remove();
+            }, 300);
+
+        }
+        $.ajax({
+            url: "AddOtherService",
+            type: "post",
+            data: {
+                order_id: order_id,
+                other_booking_id: booking_id
+            },
+            success: function (result) {
+                $('body').append(result);
+                setTimeout(function () {
+                    _order_detail_create_service.StopScrollingBody();
+                    _order_detail_other.Initialization(order_id, booking_id);
+                    _global_function.RemoveLoading()
+
+                }, 300);
+
+            }
+        });
+    },
+    VinWonderService: function (order_id, booking_id) {
+        _global_function.AddLoading()
+
+        if ($('#add-service-other').length) {
+            $('#add-service-other').removeClass('show')
+            setTimeout(function () {
+                $('#add-service-other').remove();
+            }, 300);
+
+        }
+        $.ajax({
+            url: "AddVinWonderService",
+            type: "post",
+            data: {
+                order_id: order_id,
+                booking_id: booking_id
+            },
+            success: function (result) {
+                $('body').append(result);
+                setTimeout(function () {
+                    _order_detail_create_service.StopScrollingBody();
+                    _order_detail_vinwonder.Initialization(order_id, booking_id);
+                    _global_function.RemoveLoading()
+
+                }, 300);
+
+            }
+        });
+    },
+    WaterSportService: function (order_id, booking_id) {
+        if ($('#add-service-watersport').length) {
+            $('#add-service-watersport').removeClass('show')
+            setTimeout(function () {
+                $('#add-service-watersport').remove();
+            }, 300);
+
+        }
+        $.ajax({
+            url: "AddWaterSportService",
+            type: "post",
+            data: {
+                order_id: order_id,
+                booking_id: booking_id
+            },
+            success: function (result) {
+                $('body').append(result);
+                setTimeout(function () {
+                    _order_detail_create_service.StopScrollingBody();
+                    _order_detail_watersport.Initialization(order_id, booking_id);
+                }, 300);
+
+            }
+        });
+    },
+    StopScrollingBody: function () {
+        $('body').addClass('stop-scrolling');
+    },
+    StartScrollingBody: function () {
+        $('body').removeClass('stop-scrolling');
+
+    },
+    DeleteHotel: function (hotel_booking_id) {
+        var title = _order_detail_html.confirmbox_delete_service_title.replaceAll('{service}', 'Khách sạn')
+        var description = _order_detail_html.confirmbox_delete_service_description
+        _msgconfirm.openDialog(title, description, function () {
+            _global_function.AddLoading()
             $.ajax({
-                url: '/Order/UpdateOrderAddress',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
+                url: "DeleteService",
+                type: "post",
+                data: { service_type: 1, id: hotel_booking_id },
                 success: function (result) {
-                    if (result.isSuccess) {
-                        _msgalert.success('Cập nhật thành công');
-                        $.magnificPopup.close();
+                    if (result != undefined && result.status == 0) {
+                        _msgalert.success(result.msg);
                         setTimeout(function () {
                             window.location.reload();
-                        }, 500);
-                    } else {
-                        _msgalert.error('Cập nhật thất bại');
-                        console.log(result.message);
+                        }, 300);
                     }
-                },
-                error: function (jqXHR) {
-                },
-                complete: function (jqXHR, status) {
-                }
-            });
-        }
-    }
-};
-
-var _cashback = {
-    Search: function (orderid) {
-        $.ajax({
-            url: "/Order/Cashback",
-            data: {
-                orderId: orderid
-            },
-            success: function (data) {
-                $('#grid-cashback-order').html(data);
-            }
-        });
-    },
-
-    LoadGrid: function (id) {
-        this.Search(id);
-    },
-
-    FillUpdateItem: function (id, date, amount, note) {
-        $('#model-cashback-id').val(id);
-        $('#model-cashback-date').val(date);
-        $('#model-cashback-note').val(note);
-        $('#model-cashback-amount').val(formatNumber(amount));
-    },
-
-    Save: function () {
-        let valid = true;
-
-        var obj = {
-            Id: $('#model-cashback-id').val() == "" ? 0 : parseFloat($('#model-cashback-id').val()),
-            OrderId: $('#param-order-id').val(),
-            Amount: $('#model-cashback-amount').val() == "" ? 0 : parseFloat($('#model-cashback-amount').val().replace(/,/g, "")),
-            CashbackDate: ConvertToJSONDateTime($('#model-cashback-date').val()),
-            Note: $('#model-cashback-note').val()
-        };
-
-        if (obj.CashbackDate == null) {
-            _msgalert.error("Bạn phải chọn ngày hoàn tiền");
-            return;
-        }
-
-        if (obj.Amount <= 0) {
-            _msgalert.error("Bạn phải nhập số tiền hoàn lại");
-            return;
-        }
-
-        if (valid) {
-            $.ajax({
-                url: "/Order/SaveCashback",
-                type: "post",
-                data: { model: obj },
-                success: function (result) {
-                    if (result.isSuccess) {
-                        _msgalert.success(result.message);
-                        _cashback.LoadGrid(obj.OrderId);
-                        _orderDetail.GetOrderAmount(obj.OrderId);
-                    } else {
-                        _msgalert.error(result.message);
+                    else {
+                        _msgalert.error(result.msg);
                     }
-                }
-            });
-        }
-    },
+                    _global_function.RemoveLoading()
 
-    Delete: function (id) {
-        let orderid = $('#param-order-id').val();
-        let title = 'Thông báo xác nhận';
-        let description = 'Bạn có chắc chắn muốn xóa?';
+                }
+            })
+        })
+    },
+    DeleteFlyBookingDetail: function (order_id,group_booking_id) {
+        var title = _order_detail_html.confirmbox_delete_service_title.replaceAll('{service}', 'Vé máy bay')
+        var description = _order_detail_html.confirmbox_delete_service_description
         _msgconfirm.openDialog(title, description, function () {
+            _global_function.AddLoading()
             $.ajax({
-                url: "/Order/DeleteCashback",
+                url: "DeleteService",
                 type: "post",
-                data: { cashbackId: id },
+                data: { service_type: 3, id: group_booking_id },
                 success: function (result) {
-                    if (result.isSuccess) {
-                        _msgalert.success(result.message);
-                        _cashback.LoadGrid(orderid);
-                        _orderDetail.GetOrderAmount(orderid);
-                    } else {
-                        _msgalert.error(result.message);
+                    if (result != undefined && result.status == 0) {
+                        _msgalert.success(result.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
                     }
-                }
-            });
-        });
-    },
-
-    ResetForm: function () {
-        $('#model-cashback-id').val(0);
-        $('#model-cashback-date').val('');
-        $('#model-cashback-note').val('');
-        $('#model-cashback-amount').val('');
-    }
-};
-
-var _payment = {
-    Search: function (orderid) {
-        $.ajax({
-            url: "/Order/Payment",
-            data: {
-                orderId: orderid
-            },
-            success: function (data) {
-                $('#grid-payment-order').html(data);
-            }
-        });
-    },
-
-    LoadGrid: function (id) {
-        this.Search(id);
-    },
-
-    FillUpdateItem: function (id, date, type, amount, note) {
-        $('#model-payment-id').val(id);
-        $('#model-payment-date').val(date);
-        $('#model-payment-note').val(note);
-        $('#model-payment-amount').val(formatNumber(amount));
-        $('#model-payment-type').val(type);
-    },
-
-    Save: function () {
-        let valid = true;
-
-        var obj = {
-            Id: $('#model-payment-id').val() == "" ? 0 : parseFloat($('#model-payment-id').val()),
-            OrderId: $('#param-order-id').val(),
-            Amount: $('#model-payment-amount').val() == "" ? 0 : parseFloat($('#model-payment-amount').val().replace(/,/g, "")),
-            PaymentType: parseInt($('#model-payment-type').val()),
-            PaymentDate: ConvertToJSONDateTime($('#model-payment-date').val()),
-            Note: $('#model-payment-note').val()
-            // ProductId: parseFloat($('#model-payment-productid').val()),
-        };
-
-        if (obj.PaymentDate == null) {
-            _msgalert.error("Bạn phải chọn ngày thanh toán");
-            return;
-        }
-
-        if (obj.Amount <= 0) {
-            _msgalert.error("Bạn phải nhập số tiền thanh toán");
-            return;
-        }
-
-        if (obj.PaymentType <= 0) {
-            _msgalert.error("Bạn phải chọn hình thức thanh toán");
-            return;
-        }
-
-        if (valid) {
-            $.ajax({
-                url: "/Order/SavePayment",
-                type: "post",
-                data: { model: obj },
-                success: function (result) {
-                    if (result.isSuccess) {
-                        _msgalert.success(result.message);
-                        _payment.LoadGrid(obj.OrderId);
-                        _orderDetail.GetOrderAmount(obj.OrderId);
-                    } else {
-                        _msgalert.error(result.message);
+                    else {
+                        _msgalert.error(result.msg);
                     }
-                }
-            });
-        }
-    },
+                    _global_function.RemoveLoading()
 
-    Delete: function (id) {
-        let orderid = $('#param-order-id').val();
-        let title = 'Thông báo xác nhận';
-        let description = 'Bạn có chắc chắn muốn xóa?';
+                }
+            })
+        })
+    },
+    DeleteTour: function (tour_id) {
+        var title = _order_detail_html.confirmbox_delete_service_title.replaceAll('{service}', 'Tour')
+        var description = _order_detail_html.confirmbox_delete_service_description
         _msgconfirm.openDialog(title, description, function () {
+            _global_function.AddLoading()
             $.ajax({
-                url: "/Order/DeletePayment",
+                url: "DeleteService",
                 type: "post",
-                data: { paymentId: id },
+                data: { service_type: 5, id: tour_id },
                 success: function (result) {
-                    if (result.isSuccess) {
-                        _msgalert.success(result.message);
-                        _payment.LoadGrid(orderid);
-                        _orderDetail.GetOrderAmount(orderid);
-                    } else {
-                        _msgalert.error(result.message);
+                    if (result != undefined && result.status == 0) {
+                        _msgalert.success(result.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
                     }
-                }
-            });
-        });
-    },
+                    else {
+                        _msgalert.error(result.msg);
+                    }
+                    _global_function.RemoveLoading()
 
-    ResetForm: function () {
-        $('#model-payment-id').val(0);
-        $('#model-payment-date').val('');
-        $('#model-payment-note').val('');
-        $('#model-payment-amount').val('');
-        $('#model-payment-type').val(0);
-    }
-};
+                }
+            })
+        })
+    },
+    DeleteOtherBookingDetail: function (id) {
+        var title = _order_detail_html.confirmbox_delete_service_title.replaceAll('{service}', '')
+        var description = _order_detail_html.confirmbox_delete_service_description
+        _msgconfirm.openDialog(title, description, function () {
+            _global_function.AddLoading()
+            $.ajax({
+                url: "DeleteService",
+                type: "post",
+                data: { service_type: 9, id: id },
+                success: function (result) {
+                    if (result != undefined && result.status == 0) {
+                        _msgalert.success(result.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
+                    }
+                    else {
+                        _msgalert.error(result.msg);
+                    }
+                    _global_function.RemoveLoading()
+
+                }
+            })
+        })
+    },
+    DeleteVinwondereBookingDetail: function (id) {
+        var title = _order_detail_html.confirmbox_delete_service_title.replaceAll('{service}', '')
+        var description = _order_detail_html.confirmbox_delete_service_description
+        _msgconfirm.openDialog(title, description, function () {
+            _global_function.AddLoading()
+            $.ajax({
+                url: "DeleteService",
+                type: "post",
+                data: { service_type: 6, id: id },
+                success: function (result) {
+                    if (result != undefined && result.status == 0) {
+                        _msgalert.success(result.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
+                    }
+                    else {
+                        _msgalert.error(result.msg);
+                    }
+                    _global_function.RemoveLoading()
+
+                }
+            })
+        })
+    },
+    DeleteWaterSportBookingDetail: function (id) {
+        var title = _order_detail_html.confirmbox_delete_service_title.replaceAll('{service}', '')
+        var description = _order_detail_html.confirmbox_delete_service_description
+        _msgconfirm.openDialog(title, description, function () {
+            _global_function.AddLoading()
+            $.ajax({
+                url: "DeleteService",
+                type: "post",
+                data: { service_type: 9, id: id },
+                success: function (result) {
+                    if (result != undefined && result.status == 0) {
+                        _msgalert.success(result.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
+                    }
+                    else {
+                        _msgalert.error(result.msg);
+                    }
+                    _global_function.RemoveLoading()
+
+                }
+            })
+        })
+    },
+    CancelHotel: function (hotel_booking_id) {
+        var title = _order_detail_html.confirmbox_cancel_service_title.replaceAll('{service}', 'Khách sạn')
+        var description = _order_detail_html.confirmbox_delete_service_description
+        _msgconfirm.openDialog(title, description, function () {
+            _global_function.AddLoading()
+            $.ajax({
+                url: "CancelService",
+                type: "post",
+                data: { service_type: 1, id: hotel_booking_id },
+                success: function (result) {
+                    if (result != undefined && result.status == 0) {
+                        _msgalert.success(result.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
+                    }
+                    else {
+                        _msgalert.error(result.msg);
+                    }
+                    _global_function.RemoveLoading()
+
+                }
+            })
+        })
+    },
+    CancelFlyBookingDetail: function (group_booking_id) {
+        var title = _order_detail_html.confirmbox_cancel_service_title.replaceAll('{service}', 'Vé máy bay')
+        var description = _order_detail_html.confirmbox_delete_service_description
+        _msgconfirm.openDialog(title, description, function () {
+            _global_function.AddLoading()
+            $.ajax({
+                url: "CancelService",
+                type: "post",
+                data: { service_type: 3, id: group_booking_id },
+                success: function (result) {
+                    if (result != undefined && result.status == 0) {
+                        _msgalert.success(result.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
+                    }
+                    else {
+                        _msgalert.error(result.msg);
+                    }
+                    _global_function.RemoveLoading()
+
+                }
+            })
+        })
+    },
+    CancelTour: function (tour_id) {
+        var title = _order_detail_html.confirmbox_cancel_service_title.replaceAll('{service}', 'Tour')
+        var description = _order_detail_html.confirmbox_delete_service_description
+        _msgconfirm.openDialog(title, description, function () {
+            _global_function.AddLoading()
+            $.ajax({
+                url: "CancelService",
+                type: "post",
+                data: { service_type: 5, id: tour_id },
+                success: function (result) {
+                    if (result != undefined && result.status == 0) {
+                        _msgalert.success(result.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
+                    }
+                    else {
+                        _msgalert.error(result.msg);
+                    }
+                    _global_function.RemoveLoading()
+
+                }
+            })
+        })
+    },
+    CancelOthers: function (id) {
+        var title = _order_detail_html.confirmbox_cancel_service_title.replaceAll('{service}', '')
+        var description = _order_detail_html.confirmbox_delete_service_description
+        _msgconfirm.openDialog(title, description, function () {
+            _global_function.AddLoading()
+            $.ajax({
+                url: "CancelService",
+                type: "post",
+                data: { service_type: 9, id: id },
+                success: function (result) {
+                    if (result != undefined && result.status == 0) {
+                        _msgalert.success(result.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
+                    }
+                    else {
+                        _msgalert.error(result.msg);
+                    }
+                    _global_function.RemoveLoading()
+
+                }
+            })
+        })
+    },
+    CancelVinwonder: function (id) {
+        var title = _order_detail_html.confirmbox_cancel_service_title.replaceAll('{service}', '')
+        var description = _order_detail_html.confirmbox_delete_service_description
+        _msgconfirm.openDialog(title, description, function () {
+            _global_function.AddLoading()
+            $.ajax({
+                url: "CancelService",
+                type: "post",
+                data: { service_type: 6, id: id },
+                success: function (result) {
+                    if (result != undefined && result.status == 0) {
+                        _msgalert.success(result.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
+                    }
+                    else {
+                        _msgalert.error(result.msg);
+                    }
+                    _global_function.RemoveLoading()
+
+                }
+            })
+        })
+    },
+    CancelWaterSport: function (id) {
+        var title = _order_detail_html.confirmbox_cancel_service_title.replaceAll('{service}', '')
+        var description = _order_detail_html.confirmbox_delete_service_description
+        _msgconfirm.openDialog(title, description, function () {
+            _global_function.AddLoading()
+            $.ajax({
+                url: "CancelService",
+                type: "post",
+                data: { service_type: 9, id: id },
+                success: function (result) {
+                    if (result != undefined && result.status == 0) {
+                        _msgalert.success(result.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
+                    }
+                    else {
+                        _msgalert.error(result.msg);
+                    }
+                    _global_function.RemoveLoading()
+
+                }
+            })
+        })
+    },
+}
+
+

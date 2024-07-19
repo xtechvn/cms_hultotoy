@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Entities.Models;
+﻿using Entities.Models;
 using Entities.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Repositories.IRepositories;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Utilities;
 using WEB.CMS.Customize;
-using WEB.CMS.Models;
 
 namespace WEB.CMS.Controllers
 {
@@ -49,8 +46,9 @@ namespace WEB.CMS.Controllers
 
                 return JsonConvert.SerializeObject(suggestionlist);
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("GetRoleSuggestionList - RoleController: " + ex);
                 return null;
             }
         }
@@ -63,9 +61,9 @@ namespace WEB.CMS.Controllers
             {
                 model = _RoleRepository.GetPagingList(roleName, strUserId, currentPage, pageSize);
             }
-            catch
+            catch (Exception ex)
             {
-
+                LogHelper.InsertLogTelegram("Search - RoleController: " + ex);
             }
             return PartialView(model);
         }
@@ -83,9 +81,9 @@ namespace WEB.CMS.Controllers
                     userRoleModel.ListUser = await _RoleRepository.GetListUserOfRole(Id);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-
+                LogHelper.InsertLogTelegram("GetDetail - RoleController: " + ex);
             }
             ViewBag.TabActive = tabActive;
             ViewBag.ListUserInRole = userRoleModel;
@@ -100,24 +98,23 @@ namespace WEB.CMS.Controllers
                 model.RoleId = Id;
                 model.ListUser = await _RoleRepository.GetListUserOfRole(Id);
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("RoleListUser - RoleController: " + ex);
             }
             return View(model);
         }
 
         public async Task<IActionResult> RolePermission(int Id)
         {
-            var memuList = await _MenuRepository.GetMenuParentAndChildAll();
+            var memuList = await _MenuRepository.GetAll(String.Empty, String.Empty);
             var permissionList = await _MenuRepository.GetPermissionList();
             var rolePermission = await _RoleRepository.GetRolePermissionById(Id);
-            var userList = await _RoleRepository.GetListUserOfRole(Id);
-            var arrayUser = userList.Select(s => new { id = s.Id, name = s.UserName });
 
             ViewBag.MenuList = memuList;
+            ViewBag.MenuPermission = await _MenuRepository.GetAllMenuHasPermission();
             ViewBag.RoleId = Id;
             ViewBag.PermissionList = permissionList;
-            ViewBag.UserList = JsonConvert.SerializeObject(arrayUser);
 
             return View(rolePermission);
         }
@@ -164,6 +161,7 @@ namespace WEB.CMS.Controllers
             }
             catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("UpSert - RoleController: " + ex);
                 return new JsonResult(new
                 {
                     isSuccess = false,
@@ -205,8 +203,9 @@ namespace WEB.CMS.Controllers
                     });
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("UpdateUserRole - RoleController: " + ex);
                 return new JsonResult(new
                 {
                     isSuccess = false,
@@ -247,6 +246,7 @@ namespace WEB.CMS.Controllers
             }
             catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("UpdateRolePermission - RoleController: " + ex);
                 return new JsonResult(new
                 {
                     isSuccess = false,
@@ -287,6 +287,7 @@ namespace WEB.CMS.Controllers
             }
             catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("Delete - RoleController: " + ex);
                 return new JsonResult(new
                 {
                     isSuccess = false,

@@ -1,1411 +1,983 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Text;
-using System.Linq;
-using System.Threading.Tasks;
-using DAL.Generic;
+﻿using DAL.Generic;
 using DAL.StoreProcedure;
 using Entities.Models;
 using Entities.ViewModels;
+using Entities.ViewModels.Funding;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Utilities.Contants;
-using static Utilities.Contants.Constants;
+using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
-using static Utilities.Contants.OrderConstants;
+using System.Linq;
+using System.Threading.Tasks;
 using Utilities;
-using Newtonsoft.Json;
-using Entities.ViewModels.Orders;
-using Entities.ViewModels.Affiliate;
+using Utilities.Contants;
 
 namespace DAL
 {
     public class OrderDAL : GenericService<Order>
     {
         private static DbWorker _DbWorker;
-
         public OrderDAL(string connection) : base(connection)
         {
             _DbWorker = new DbWorker(connection);
+
         }
 
-        public DataTable GetPagingList(OrderSearchModel searchModel, int currentPage, int pageSize)
+        public async Task<DataTable> GetPagingList(OrderViewSearchModel searchModel, int currentPage, int pageSize, string proc)
         {
             try
             {
-                DateTime _FromDate = DateTime.MinValue;
-                DateTime _ToDate = DateTime.MinValue;
-                DateTime _PaymentDate = DateTime.MinValue;
 
-                if (!string.IsNullOrEmpty(searchModel.FromDate))
+                SqlParameter[] objParam = new SqlParameter[24];
+
+
+                objParam[0] = (CheckDate(searchModel.CreateTime) == DateTime.MinValue) ? new SqlParameter("@CreateTime", DBNull.Value) : new SqlParameter("@CreateTime", CheckDate(searchModel.CreateTime));
+                objParam[1] = (CheckDate(searchModel.ToDateTime) == DateTime.MinValue) ? new SqlParameter("@ToDateTime", DBNull.Value) : new SqlParameter("@ToDateTime", CheckDate(searchModel.ToDateTime).AddDays(1));
+                objParam[2] = new SqlParameter("@SysTemType", searchModel.SysTemType);
+                objParam[3] = new SqlParameter("@OrderNo", searchModel.OrderNo);
+                objParam[4] = new SqlParameter("@Note", searchModel.Note);
+                objParam[5] = new SqlParameter("@ServiceType", searchModel.ServiceType == null ? "" : string.Join(",", searchModel.ServiceType));
+                objParam[6] = new SqlParameter("@UtmSource", searchModel.UtmSource == null ? "" : searchModel.UtmSource);
+                objParam[7] = new SqlParameter("@status", searchModel.Status == null ? "" : string.Join(",", searchModel.Status));
+                objParam[8] = new SqlParameter("@CreateName", searchModel.CreateName);
+                if (searchModel.Sale == null)
                 {
-                    _FromDate = DateTime.ParseExact(searchModel.FromDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                    objParam[9] = new SqlParameter("@Sale", DBNull.Value);
+
+                }
+                else
+                {
+                    objParam[9] = new SqlParameter("@Sale", searchModel.Sale);
+
+                }
+                objParam[10] = new SqlParameter("@SaleGroup", searchModel.SaleGroup);
+                objParam[11] = new SqlParameter("@PageIndex", currentPage);
+                objParam[12] = new SqlParameter("@PageSize", pageSize);
+                objParam[13] = new SqlParameter("@StatusTab", searchModel.StatusTab);
+                objParam[14] = new SqlParameter("@ClientId", searchModel.ClientId);
+                objParam[15] = new SqlParameter("@SalerPermission", searchModel.SalerPermission);
+                objParam[16] = new SqlParameter("@OperatorId", searchModel.OperatorId);
+                if (searchModel.StartDateFrom == null)
+                {
+                    objParam[17] = new SqlParameter("@StartDateFrom", DBNull.Value);
+
+                }
+                else
+                {
+                    objParam[17] = new SqlParameter("@StartDateFrom", searchModel.StartDateFrom);
+
+                }
+                if (searchModel.StartDateTo == null)
+                {
+                    objParam[18] = new SqlParameter("@StartDateTo", DBNull.Value);
+
+                }
+                else
+                {
+                    objParam[18] = new SqlParameter("@StartDateTo", searchModel.StartDateTo);
+
+                }
+                if (searchModel.EndDateFrom == null)
+                {
+                    objParam[19] = new SqlParameter("@EndDateFrom", DBNull.Value);
+
+                }
+                else
+                {
+                    objParam[19] = new SqlParameter("@EndDateFrom", searchModel.EndDateFrom);
+
+                }
+                if (searchModel.EndDateTo == null)
+                {
+                    objParam[20] = new SqlParameter("@EndDateTo", DBNull.Value);
+
+                }
+                else
+                {
+                    objParam[20] = new SqlParameter("@EndDateTo", searchModel.EndDateTo);
+
+                }
+                if (searchModel.PermisionType == null)
+                {
+                    objParam[21] = new SqlParameter("@PermisionType", DBNull.Value);
+
+                }
+                else
+                {
+                    objParam[21] = new SqlParameter("@PermisionType", searchModel.PermisionType);
+
+                }
+                if (searchModel.PaymentStatus == null)
+                {
+                    objParam[22] = new SqlParameter("@PaymentStatus", DBNull.Value);
+
+                }
+                else
+                {
+                    objParam[22] = new SqlParameter("@PaymentStatus", searchModel.PaymentStatus);
+
                 }
 
-                if (!string.IsNullOrEmpty(searchModel.ToDate))
-                {
-                    _ToDate = DateTime.ParseExact(searchModel.ToDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
-                }
+                objParam[23] = new SqlParameter("@OrderId", searchModel.BoongKingCode);
 
-                if (!string.IsNullOrEmpty(searchModel.PaymentDate))
-                {
-                    _PaymentDate = DateTime.ParseExact(searchModel.PaymentDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
-                }
 
-                SqlParameter[] objParam = new SqlParameter[18];
-                objParam[0] = new SqlParameter("@OrderNo", searchModel.OrderNo ?? string.Empty);
-
-                if (_FromDate != DateTime.MinValue)
-                    objParam[1] = new SqlParameter("@FromDate", _FromDate);
-                else
-                    objParam[1] = new SqlParameter("@FromDate", DBNull.Value);
-
-                if (_ToDate != DateTime.MinValue)
-                    objParam[2] = new SqlParameter("@ToDate", _ToDate);
-                else
-                    objParam[2] = new SqlParameter("@ToDate", DBNull.Value);
-
-                objParam[3] = new SqlParameter("@ClientName", searchModel.ClientName ?? string.Empty);
-                objParam[4] = new SqlParameter("@Phone", searchModel.Phone ?? string.Empty);
-                objParam[5] = new SqlParameter("@OrderStatus", searchModel.OrderStatus ?? string.Empty);
-                objParam[6] = new SqlParameter("@VoucherNo", searchModel.VoucherNo ?? string.Empty);
-                objParam[7] = new SqlParameter("@UtmSource", searchModel.UtmSource ?? string.Empty);
-                objParam[8] = new SqlParameter("@PaymentType", searchModel.PaymentType);
-                objParam[9] = new SqlParameter("@PaymentStatus", searchModel.PaymentStatus);
-
-                if (_PaymentDate != DateTime.MinValue)
-                    objParam[10] = new SqlParameter("@PaymentDate", _PaymentDate);
-                else
-                    objParam[10] = new SqlParameter("@PaymentDate", DBNull.Value);
-
-                objParam[11] = new SqlParameter("@IsErrorOrder", searchModel.IsErrorOrder);
-                objParam[12] = new SqlParameter("@ProductCode", searchModel.ProductCode ?? string.Empty);
-                objParam[13] = new SqlParameter("@CurentPage", currentPage);
-                objParam[14] = new SqlParameter("@PageSize", pageSize);
-                objParam[15] = new SqlParameter("@IsAffialiate", searchModel.IsAffialiate);
-                objParam[16] = new SqlParameter("@UtmMedium", searchModel.UtmMedium ?? string.Empty);
-                objParam[17] = new SqlParameter("@LabelId", searchModel.LabelId);
-
-                return _DbWorker.GetDataTable(ProcedureConstants.ORDER_SEARCH, objParam);
+                return _DbWorker.GetDataTable(proc, objParam);
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetPagingList - OrderDAL: " + ex);
+                LogHelper.InsertLogTelegram("GetPagingList - OrderDal: " + ex);
             }
             return null;
         }
-
-        public DataSet GetOrderReport(OrderSearchModel searchModel)
+        private DateTime CheckDate(string dateTime)
         {
-            try
+            DateTime _date = DateTime.MinValue;
+            if (!string.IsNullOrEmpty(dateTime))
             {
-                DateTime _FromDate = DateTime.MinValue;
-                DateTime _ToDate = DateTime.MinValue;
-                DateTime _PaymentDate = DateTime.MinValue;
-
-                if (!string.IsNullOrEmpty(searchModel.FromDate))
-                {
-                    _FromDate = DateTime.ParseExact(searchModel.FromDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
-                }
-
-                if (!string.IsNullOrEmpty(searchModel.ToDate))
-                {
-                    _ToDate = DateTime.ParseExact(searchModel.ToDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
-                }
-
-                if (!string.IsNullOrEmpty(searchModel.PaymentDate))
-                {
-                    _PaymentDate = DateTime.ParseExact(searchModel.PaymentDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
-                }
-
-                SqlParameter[] objParam = new SqlParameter[14];
-                objParam[0] = new SqlParameter("@OrderNo", searchModel.OrderNo ?? string.Empty);
-
-                if (_FromDate != DateTime.MinValue)
-                    objParam[1] = new SqlParameter("@FromDate", _FromDate);
-                else
-                    objParam[1] = new SqlParameter("@FromDate", DBNull.Value);
-
-                if (_ToDate != DateTime.MinValue)
-                    objParam[2] = new SqlParameter("@ToDate", _ToDate);
-                else
-                    objParam[2] = new SqlParameter("@ToDate", DBNull.Value);
-
-                objParam[3] = new SqlParameter("@ClientName", searchModel.ClientName ?? string.Empty);
-                objParam[4] = new SqlParameter("@Phone", searchModel.Phone ?? string.Empty);
-                objParam[5] = new SqlParameter("@OrderStatus", searchModel.OrderStatus ?? string.Empty);
-                objParam[6] = new SqlParameter("@VoucherNo", searchModel.VoucherNo ?? string.Empty);
-                objParam[7] = new SqlParameter("@UtmSource", searchModel.UtmSource ?? string.Empty);
-                objParam[8] = new SqlParameter("@PaymentType", searchModel.PaymentType);
-                objParam[9] = new SqlParameter("@PaymentStatus", searchModel.PaymentStatus);
-
-                if (_PaymentDate != DateTime.MinValue)
-                    objParam[10] = new SqlParameter("@PaymentDate", _PaymentDate);
-                else
-                    objParam[10] = new SqlParameter("@PaymentDate", DBNull.Value);
-
-                objParam[11] = new SqlParameter("@IsAffialiate", searchModel.IsAffialiate);
-                objParam[12] = new SqlParameter("@UtmMedium", searchModel.UtmMedium ?? string.Empty);
-                objParam[13] = new SqlParameter("@LabelId", searchModel.LabelId);
-
-                return _DbWorker.GetDataSet(ProcedureConstants.ORDER_REPORT, objParam);
+                _date = DateTime.ParseExact(dateTime, "d/M/yyyy", CultureInfo.InvariantCulture);
             }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetPagingList - OrderDAL: " + ex);
-            }
-            return null;
+
+            return _date != DateTime.MinValue ? _date : DateTime.MinValue;
         }
-        public DataSet GetOrderExpectedReport()
-        {
-            try
-            {
-               
-                return _DbWorker.GetDataSet(ProcedureConstants.OrderExpected_Export);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderExpectedReport - OrderDAL: " + ex);
-            }
-            return null;
-        }
-
-        public double GetRevenuDay()
-        {
-            try
-            {
-                var result = _DbWorker.ExecuteScalar(ProcedureConstants.GET_REVENU_DAY);
-                if (result == null)
-                    return 0;
-                return Math.Round((double)result, 2);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetRevenuDay - OrderDAL: " + ex);
-                return 0;
-            }
-        }
-
-        public long GetTotalErrorOrderCount()
-        {
-            try
-            {
-                return _DbWorker.ExecuteNonQuery(ProcedureConstants.ORDER_GetErrorOrderCount);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetTotalErrorOrderCount - OrderDAL: " + ex);
-                return 0;
-            }
-        }
-
-
-        /// <summary>
-        /// get doanh thu theo thoi gian
-        /// </summary>
-        /// <param name="searchModel"></param>
-        /// <returns></returns>
-        public DataTable GetRevenuByDateRange(OrderSearchModel searchModel)
-        {
-            try
-            {
-                DateTime? _FromDate = DateTime.MinValue;
-                DateTime? _ToDate = DateTime.MinValue;
-
-                if (!string.IsNullOrEmpty(searchModel.FromDate))
-                {
-                    _FromDate = DateTime.ParseExact(searchModel.FromDate, "dd/MM/yyyy"
-                        , CultureInfo.InvariantCulture);
-                    var fromDate = _FromDate.Value;
-                    _FromDate = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day);
-                }
-
-                if (!string.IsNullOrEmpty(searchModel.ToDate))
-                {
-                    _ToDate = DateTime.ParseExact(searchModel.ToDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
-                    var toDate = _ToDate.Value;
-                    _ToDate = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
-                }
-
-                SqlParameter[] objParam = new SqlParameter[2];
-                if (_FromDate != DateTime.MinValue)
-                    objParam[0] = new SqlParameter("@FromDate", _FromDate);
-                else
-                    objParam[0] = new SqlParameter("@FromDate", DBNull.Value);
-
-                if (_ToDate != DateTime.MinValue)
-                    objParam[1] = new SqlParameter("@ToDate", _ToDate);
-                else
-                    objParam[1] = new SqlParameter("@ToDate", DBNull.Value);
-                var result = _DbWorker.GetDataTable(ProcedureConstants.GET_REVENU_DATE_RANGE, objParam);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetRevenuByDateRange - OrderDAL: " + ex);
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// get doanh thu label theo thoi gian
-        /// </summary>
-        /// <param name="searchModel"></param>
-        /// <returns></returns>
-        public DataTable GetLabelRevenuByDateRange(OrderSearchModel searchModel)
-        {
-            try
-            {
-                DateTime? _FromDate = DateTime.MinValue;
-                DateTime? _ToDate = DateTime.MinValue;
-
-                if (!string.IsNullOrEmpty(searchModel.FromDate))
-                {
-                    _FromDate = DateTime.ParseExact(searchModel.FromDate, "dd/MM/yyyy"
-                        , CultureInfo.InvariantCulture);
-                    var fromDate = _FromDate.Value;
-                    _FromDate = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day);
-                }
-
-                if (!string.IsNullOrEmpty(searchModel.ToDate))
-                {
-                    _ToDate = DateTime.ParseExact(searchModel.ToDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
-                    var toDate = _ToDate.Value;
-                    _ToDate = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
-                }
-
-                SqlParameter[] objParam = new SqlParameter[2];
-                if (_FromDate != DateTime.MinValue)
-                    objParam[0] = new SqlParameter("@FromDate", _FromDate);
-                else
-                    objParam[0] = new SqlParameter("@FromDate", DBNull.Value);
-
-                if (_ToDate != DateTime.MinValue)
-                    objParam[1] = new SqlParameter("@ToDate", _ToDate);
-                else
-                    objParam[1] = new SqlParameter("@ToDate", DBNull.Value);
-                var result = _DbWorker.GetDataTable(ProcedureConstants.GET_LABEL_REVENU_DATE_RANGE, objParam);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetLabelRevenuByDateRange - OrderDAL: " + ex);
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// get so luong order store theo thoi gian
-        /// </summary>
-        /// <param name="searchModel"></param>
-        /// <returns></returns>
-        public DataTable GetLabelQuantityByDateRange(OrderSearchModel searchModel)
-        {
-            try
-            {
-                DateTime? _FromDate = DateTime.MinValue;
-                DateTime? _ToDate = DateTime.MinValue;
-
-                if (!string.IsNullOrEmpty(searchModel.FromDate))
-                {
-                    _FromDate = DateTime.ParseExact(searchModel.FromDate, "dd/MM/yyyy"
-                        , CultureInfo.InvariantCulture);
-                    var fromDate = _FromDate.Value;
-                    _FromDate = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day);
-                }
-
-                if (!string.IsNullOrEmpty(searchModel.ToDate))
-                {
-                    _ToDate = DateTime.ParseExact(searchModel.ToDate, "dd/MM/yyyy", CultureInfo.InvariantCulture);
-                    var toDate = _ToDate.Value;
-                    _ToDate = new DateTime(toDate.Year, toDate.Month, toDate.Day, 23, 59, 59);
-                }
-
-                SqlParameter[] objParam = new SqlParameter[2];
-                if (_FromDate != DateTime.MinValue)
-                    objParam[0] = new SqlParameter("@FromDate", _FromDate);
-                else
-                    objParam[0] = new SqlParameter("@FromDate", DBNull.Value);
-
-                if (_ToDate != DateTime.MinValue)
-                    objParam[1] = new SqlParameter("@ToDate", _ToDate);
-                else
-                    objParam[1] = new SqlParameter("@ToDate", DBNull.Value);
-                var result = _DbWorker.GetDataTable(ProcedureConstants.GET_LABEL_QUANTITY_DATE_RANGE, objParam);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetLabelQuantityByDateRange - OrderDAL: " + ex);
-                return null;
-            }
-        }
-        public async Task<OrderViewModel> GetOrderDetail(long orderId)
+        public Order GetByOrderId(long OrderId)
         {
             try
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = await (from _order in _DbContext.Order.AsNoTracking()
-                                        join a in _DbContext.Voucher.AsNoTracking() on _order.VoucherId equals a.Id into af
-                                        from _voucher in af.DefaultIfEmpty()
-                                        where _order.Id == orderId
-                                        select new OrderViewModel
-                                        {
-                                            Id = _order.Id,
-                                            OrderNo = _order.OrderNo,
-                                            ClientName = _order.ClientName,
-                                            Address = _order.Address,
-                                            Phone = _order.Phone,
-                                            AmountUsd = _order.AmountUsd,
-                                            RateCurrent = _order.RateCurrent,
-                                            OrderStatus = _order.OrderStatus,
-                                            UtmSource = _order.UtmSource,
-                                            UtmMedium = _order.UtmMedium,
-                                            Voucher = _voucher.Code,
-                                            VoucherDescription = _voucher.Description,
-                                            TrackingId = _order.TrackingId,
-                                            PaymentType = _order.PaymentType,
-                                            CreatedOn = _order.CreatedOn,
-                                            PaymentDate = _order.PaymentDate,
-                                            AmountVnd = _order.AmountVnd,
-                                            TotalDiscount2ndUsd = _order.TotalDiscount2ndUsd,
-                                            TotalDiscount2ndVnd = _order.TotalDiscount2ndVnd,
-                                            TotalDiscountVoucherUsd = _order.TotalDiscountVoucherUsd,
-                                            TotalDiscountVoucherVnd = _order.TotalDiscountVoucherVnd,
-                                            OrderMapId = _order.OrderMapId,
-                                            ClientId = _order.ClientId,
-                                            AddressId = _order.AddressId
-                                        }).FirstOrDefaultAsync();
-                    return detail;
+
+                    return _DbContext.Order.AsNoTracking().FirstOrDefault(s => s.OrderId == OrderId);
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetOrderDetail - OrderDAL: " + ex);
+                LogHelper.InsertLogTelegram("GetByOrderId - OrderDal: " + ex);
                 return null;
             }
         }
 
-        public async Task<OrderViewModel> GetOrderDetail(string orderNo)
+        public List<Order> GetByOrderIds(List<long> orderIds)
         {
             try
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = await (from _order in _DbContext.Order.AsNoTracking()
-                                        where _order.OrderNo == orderNo
-                                        select new OrderViewModel
-                                        {
-                                            Id = _order.Id,
-                                            OrderNo = _order.OrderNo,
-                                            ClientName = _order.ClientName,
-                                            ClientId = _order.ClientId,
-                                            Email = _order.Email,
-                                            UserId = _order.UserId,
-                                            PriceVnd = _order.PriceVnd,
-                                            Note = _order.Note,
-                                            Address = _order.Address,
-                                            Phone = _order.Phone,
-                                            AmountUsd = _order.AmountUsd,
-                                            RateCurrent = _order.RateCurrent,
-                                            OrderStatus = _order.OrderStatus,
-                                            UtmSource = _order.UtmSource,
-                                            TrackingId = _order.TrackingId,
-                                            PaymentType = _order.PaymentType,
-                                            CreatedOn = _order.CreatedOn,
-                                            PaymentDate = _order.PaymentDate,
-                                            AmountVnd = _order.AmountVnd,
-                                            VoucherId = _order.VoucherId,
-                                            Discount = _order.Discount,
-                                            PriceUsd = _order.PriceUsd,
-                                            PaymentStatus = _order.PaymentStatus,
-                                            LabelId = _order.LabelId,
-                                            TotalDiscount2ndUsd = _order.TotalDiscount2ndUsd,
-                                            TotalDiscount2ndVnd = _order.TotalDiscount2ndVnd,
-                                            TotalDiscountVoucherUsd = _order.TotalDiscountVoucherUsd,
-                                            TotalDiscountVoucherVnd = _order.TotalDiscountVoucherVnd
-                                        }).FirstOrDefaultAsync();
-                    if (detail.VoucherId != null && detail.VoucherId > 0)
+
+                    return _DbContext.Order.AsNoTracking().Where(s => orderIds.Contains(s.OrderId)).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByOrderIds - OrderDal: " + ex);
+                return new List<Order>();
+            }
+        }
+        public List<Order> GetByOrderNos(List<string> orderNos)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+
+                    return _DbContext.Order.AsNoTracking().Where(s => orderNos.Contains(s.OrderNo)).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByOrderNos - OrderDal: " + ex);
+                return new List<Order>();
+            }
+        }
+        public List<Order> GetByClientId(long Client_Id)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+
+                    return _DbContext.Order.AsNoTracking().Where(s => s.ClientId == Client_Id).OrderByDescending(s => s.CreateTime).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByClientId - OrderDal: " + ex);
+                return null;
+            }
+        }
+        public async Task<long> CreateOrder(Order order)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    if (order.OrderNo == null || order.OrderNo.Trim() == "")
                     {
-                        var voucherInfo = _DbContext.Voucher.FirstOrDefault(n => n.Id == detail.VoucherId);
-                        detail.Voucher = voucherInfo != null ? voucherInfo.Code : "";
-                    }
-                    return detail;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderDetail(orderNo) - OrderDAL: " + ex);
-                return null;
-            }
-        }
+                        return -1;
 
-        public async Task<List<OrderItemViewModel>> GetOrderItemList(long orderId)
-        {
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    var data = await (from _orderitem in _DbContext.OrderItem.AsNoTracking()
-                                      join a in _DbContext.Product.AsNoTracking() on _orderitem.ProductId equals a.Id into af
-                                      from _product in af.DefaultIfEmpty()
-                                      where _orderitem.OrderId == orderId
-                                      select new OrderItemViewModel
-                                      {
-                                          ProductId = _product.Id,
-                                          OrderId = orderId,
-                                          DiscountShippingFirstPound = _orderitem.DiscountShippingFirstPound != null
-                                           ? _orderitem.DiscountShippingFirstPound.Value : 0,
-                                          Weight = _orderitem.Weight != null ? _orderitem.Weight.Value : 0,
-                                          ProductName = _product.Title,
-                                          ProductCode = _product.ProductCode,
-                                          ProductImage = _orderitem.ImageThumb,
-                                          LabelId = _product.LabelId,
-                                          ProductPath = _product.Path,
-                                          Price = _orderitem.Price,
-                                          Quantity = (int)_orderitem.Quantity,
-                                          FirstPoundFee = (double)_orderitem.FirstPoundFee,
-                                          NextPoundFee = (double)_orderitem.NextPoundFee,
-                                          LuxuryFee = (double)_orderitem.LuxuryFee,
-                                          ShippingFeeUs = (double)_orderitem.ShippingFeeUs,
-                                          OrderItemMapId = _orderitem.OrderItempMapId != null ? _orderitem.OrderItempMapId.Value : 0,
-                                          SpecialLuxuryId = _orderitem.SpecialLuxuryId != null ? _orderitem.SpecialLuxuryId.Value : 0,
-                                          ProductMapId = _product.ProductMapId != null ? _product.ProductMapId.Value : -1
-                                      }).ToListAsync();
-                    return data;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderItemList - OrderDAL: " + ex);
-                return null;
-            }
-        }
-
-        public async Task<Order> FindByOrderNo(string orderNo)
-        {
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    return await _DbContext.Order.FirstOrDefaultAsync(s => s.OrderNo == orderNo);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("FindByOrderNo - OrderDAL: " + ex);
-                return null;
-            }
-        }
-
-        public async Task<Order> FindByOrderId(int orderId)
-        {
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    return await _DbContext.Order.
-                        FirstOrDefaultAsync(s => s.Id == orderId);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("FindByOrderId - OrderDAL: " + ex);
-                return null;
-            }
-        }
-
-        public async Task<object> GetOrderSuggestionList(string orderNo)
-        {
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    return await _DbContext.Order.Where(s => s.OrderNo.Contains(orderNo)).Take(5)
-                                                     .Select(m => new
-                                                     {
-                                                         m.Id,
-                                                         m.OrderNo,
-                                                         m.ClientName,
-                                                         m.Address,
-                                                         m.Phone
-                                                     }).ToListAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderSuggestionList - OrderDAL: " + ex);
-                return null;
-            }
-        }
-
-        public RevenueViewModel SummaryRevenuToday()
-        {
-            RevenueViewModel revenueViewModel = new RevenueViewModel();
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    var listOrder = _DbContext.Order.Where(s =>
-                    (s.PaymentDate ?? s.CreatedOn).Value.Date == DateTime.Today
-                    && s.PaymentStatus == (int)Payment_Status.DA_THANH_TOAN
-                    && s.OrderStatus != (int)OrderStatus.CANCEL_ORDER).ToList();
-
-                    revenueViewModel.TotalOrder = listOrder.Count;
-                    revenueViewModel.Revenue = listOrder.Sum(n => n.AmountVnd);
-                    revenueViewModel.RevenueStr = revenueViewModel.Revenue.Value.ToString("N0");
-                    return revenueViewModel;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("SummaryRevenuToday - OrderDAL: " + ex);
-                return revenueViewModel;
-            }
-        }
-
-        public RevenueViewModel SummaryRevenuTodayTemp()
-        {
-            RevenueViewModel revenueViewModel = new RevenueViewModel();
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    var listOrder = _DbContext.Order.Where(s => s.CreatedOn.Value.Date ==
-                    DateTime.Today && s.PaymentStatus == (int)Payment_Status.CHUA_THANH_TOAN).ToList();
-                    revenueViewModel.TotalOrder = listOrder.Count;
-                    revenueViewModel.Revenue = listOrder.Sum(n => n.AmountVnd);
-                    revenueViewModel.RevenueStr = revenueViewModel.Revenue.Value.ToString("N0");
-                    return revenueViewModel;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("SummaryRevenuTodayTemp - OrderDAL: " + ex);
-                return revenueViewModel;
-            }
-        }
-
-        public async Task<List<OrderGridModel>> GetOrderListByClientId(long clientId)
-        {
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    var models = await (from _order in _DbContext.Order.AsNoTracking()
-                                        join a in _DbContext.AllCode.Where(s => s.Type == AllCodeType.ORDER_STATUS).AsNoTracking() on _order.OrderStatus equals a.CodeValue into af
-                                        from _orderStatus in af.DefaultIfEmpty()
-                                        join b in _DbContext.AllCode.Where(s => s.Type == AllCodeType.PAYMENT_TYPE).AsNoTracking() on _order.PaymentType equals b.CodeValue into bf
-                                        from _orderPayment in bf.DefaultIfEmpty()
-                                        where _order.ClientId == clientId
-                                        select new OrderGridModel
-                                        {
-                                            Id = _order.Id,
-                                            OrderNo = _order.OrderNo,
-                                            CreatedOn = _order.CreatedOn,
-                                            AmountVnd = _order.AmountVnd,
-                                            TotalShippingFeeVnd = _order.TotalShippingFeeVnd,
-                                            OrderStatus = _order.OrderStatus,
-                                            OrderStatusName = _orderStatus.Description,
-                                            PaymentStatus = _order.PaymentStatus,
-                                            PaymentType = _order.PaymentType,
-                                            PaymentTypeName = _orderPayment.Description
-                                        }
-                                   ).OrderByDescending(s => s.CreatedOn).ToListAsync();
-                    return models;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderListByClientId - OrderDAL: " + ex);
-                return null;
-            }
-        }
-
-        public async Task<List<OrderGridModel>> GetOrderListByReferralId(string ReferralId)
-        {
-            try
-            {
-                if (!string.IsNullOrEmpty(ReferralId))
-                {
-                    using (var _DbContext = new EntityDataContext(_connection))
-                    {
-                        var models = await (from _order in _DbContext.Order.AsNoTracking()
-                                            join a in _DbContext.AllCode.Where(s => s.Type == AllCodeType.ORDER_STATUS).AsNoTracking() on _order.OrderStatus equals a.CodeValue into af
-                                            from _orderStatus in af.DefaultIfEmpty()
-                                            join b in _DbContext.AllCode.Where(s => s.Type == AllCodeType.PAYMENT_TYPE).AsNoTracking() on _order.PaymentType equals b.CodeValue into bf
-                                            from _orderPayment in bf.DefaultIfEmpty()
-                                            where _order.UtmMedium == ("us_" + ReferralId)
-                                            select new OrderGridModel
-                                            {
-                                                Id = _order.Id,
-                                                OrderNo = _order.OrderNo,
-                                                CreatedOn = _order.CreatedOn,
-                                                AmountVnd = _order.AmountVnd,
-                                                TotalShippingFeeVnd = _order.TotalShippingFeeVnd,
-                                                OrderStatus = _order.OrderStatus,
-                                                OrderStatusName = _orderStatus.Description,
-                                                PaymentStatus = _order.PaymentStatus,
-                                                PaymentType = _order.PaymentType,
-                                                PaymentTypeName = _orderPayment.Description
-                                            }
-                                       ).OrderByDescending(s => s.CreatedOn).ToListAsync();
-                        return models;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderListByClientId - OrderDAL: " + ex);
-            }
-
-            return null;
-        }
-
-        public async Task<RevenueMinMax> GetMinMaxAmountOrder()
-        {
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    var datas = await _DbContext.Order.Where(s => s.PaymentStatus == (int)OrderConstants.Payment_Status.DA_THANH_TOAN)
-                                                      .Select(s => s.AmountVnd).ToListAsync();
-                    var model = new RevenueMinMax
-                    {
-                        Min = (double)datas.Min(),
-                        Max = (double)datas.Max()
-                    };
-                    return model;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetMinMaxAmountOrder - OrderDAL: " + ex);
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Lấy ra tổng số order đc khởi tạo trong ngày
-        /// </summary>
-        /// <returns></returns>
-        public async Task<int> getTotalOrderByCurrentDate()
-        {
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    DateTime current = DateTime.Now;
-                    DateTime startDate = new DateTime(current.Year, current.Month, current.Day, 0, 0, 0);
-
-                    int total_order = await _DbContext.Order.CountAsync(s => s.CreatedOn >= startDate && s.CreatedOn <= current);
-
-                    return total_order;
-                }
-            }
-            catch (Exception ex)
-            {
-                var rd = new Random();
-                LogHelper.InsertLogTelegram("getTotalOrderByDate - OrderDAL: " + ex);
-                return rd.Next(100, 999);
-
-            }
-        }
-
-        /// <summary>
-        /// Hàm này sẽ lấy thông tin đơn hàng bắn sang hệ thống cũ
-        /// </summary>
-        /// <param name="orderId"></param>
-        /// <returns></returns>
-        public async Task<OrderApiViewModel> GetOrderByIdForAPI(long orderId)
-        {
-            try
-            {
-
-                string _provinceId = "-1";
-                string _districtId = "-1";
-                string _wardId = "-1";
-
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-
-                    var order_detail = await this.GetOrderDetail(orderId);
-
-                    var address_detail = await _DbContext.AddressClient.AsNoTracking().FirstOrDefaultAsync(x => x.Id == order_detail.AddressId);
-
-                    if (address_detail != null)
-                    {
-                        _provinceId = address_detail.ProvinceId;
-                        _districtId = address_detail.DistrictId;
-                        _wardId = address_detail.DistrictId;
                     }
                     else
                     {
-                        var address_detail_2 = await _DbContext.AddressClient.AsNoTracking().FirstOrDefaultAsync(x => x.ClientId == order_detail.ClientId); //addressID
-                        if (address_detail_2 == null)
-                        {
-                            LogHelper.InsertLogTelegram("[DAL] GetOrderByIdForAPI - OrderDAL: khong tim thay dia chi cho khach hang nay. Không thể bắn order " + orderId + " sang us old");
-                        }
-                        else
-                        {
-                            _provinceId = address_detail_2.ProvinceId;
-                            _districtId = address_detail_2.DistrictId;
-                            _wardId = address_detail_2.DistrictId;
-                        }
+                        _DbContext.Order.Add(order);
+                        await _DbContext.SaveChangesAsync();
+                        return order.OrderId;
                     }
 
-                    var detail = await (from _order in _DbContext.Order.AsNoTracking()
-                                        join a in _DbContext.Voucher.AsNoTracking() on _order.VoucherId equals a.Id into af
-                                        from _voucher in af.DefaultIfEmpty()
-                                        join b in _DbContext.Client.AsNoTracking() on _order.ClientId equals b.Id into bf
-                                        from _client in bf.DefaultIfEmpty()
-                                        where _order.Id == orderId
-                                        select new OrderApiViewModel
-                                        {
-                                            Id = _order.Id,
-                                            OrderNo = _order.OrderNo,
-                                            OrderStatus = _order.OrderStatus,
-
-                                            ClientId = _order.ClientId,
-                                            UserId = _order.UserId,
-                                            LabelId = _order.LabelId,
-                                            ClientName = _order.ClientName,
-                                            Email = _order.Email,
-                                            Phone = _order.Phone,
-                                            Address = _order.Address,
-
-                                            RateCurrent = _order.RateCurrent,
-                                            Discount = _order.Discount,
-
-                                            PriceVnd = _order.AmountVnd, // priceVND sẽ là số tiền sau giảm bên hệ thống cũ
-                                            PriceUsd = _order.PriceUsd,
-                                            AmountUsd = _order.AmountUsd,
-                                            AmountVnd = _order.AmountVnd,
-
-                                            TotalDiscount2ndUsd = _order.TotalDiscount2ndUsd,
-                                            TotalDiscount2ndVnd = _order.TotalDiscount2ndVnd,
-                                            TotalDiscountVoucherUsd = _order.TotalDiscountVoucherUsd,
-                                            TotalDiscountVoucherVnd = _order.TotalDiscountVoucherVnd,
-                                            TotalShippingFeeUsd = _order.TotalShippingFeeUsd,
-                                            TotalShippingFeeVnd = _order.TotalShippingFeeVnd,
-
-                                            VoucherId = _order.VoucherId,
-                                            Voucher = _voucher.Code,
-                                            VoucherDescription = _voucher.Description,
-
-                                            CreatedOn = _order.CreatedOn,
-
-                                            PaymentStatus = _order.PaymentStatus,
-                                            PaymentType = _order.PaymentType,
-                                            PaymentDate = _order.PaymentDate,
-                                            Note = _order.Note,
-
-                                            UtmSource = _order.UtmSource,
-                                            UtmMedium = _order.UtmMedium,
-                                            UtmFirstTime = _order.UtmFirstTime,
-                                            UtmCampaign = _order.UtmCampaign,
-                                            TrackingId = _order.TrackingId,
-
-                                            ClientMapId = _client.ClientMapId ?? 0,
-                                            Province = _provinceId,
-                                            District = _districtId,
-                                            Ward = _wardId
-
-                                        }).FirstOrDefaultAsync();
-                    return detail;
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetOrderDetail - OrderDAL: " + ex);
-                return null;
+                LogHelper.InsertLogTelegram("CreateOrder - OrderDal: " + ex);
+                return -2;
             }
         }
-
-        public async Task<long> UpdateOrderMapId(long OrderId, long OrderMapId)
-        {
-            try
-            {
-                var model = await FindAsync(OrderId);
-                model.OrderMapId = OrderMapId;
-                await UpdateAsync(model);
-                return OrderId;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("UpdateOrderMapId - OrderDAL: " + ex);
-                return 0;
-            }
-        }
-
-        /// <summary>
-        /// Lấy ra số lần voucher được dùng. Trừ những đơn HỦY
-        /// </summary>
-        /// <param name="orderId"></param>
-        /// <returns></returns>
-        public int GetTotalVoucherUse(long voucher_id, string email_client)
+        public static long CountOrderInYear()
         {
             try
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = _DbContext.Order.AsNoTracking().Where(x => x.VoucherId == voucher_id && x.Email == (email_client.IndexOf("@") == -1 ? x.Email : email_client) && x.OrderStatus != (Int16)OrderStatus.CANCEL_ORDER);
-
-                    return detail.Count();
+                    return _DbContext.Order.AsNoTracking().Where(x => (x.CreateTime ?? DateTime.Now).Year == DateTime.Now.Year).Count();
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetTotalVoucherUse - OrderDAL:(email = " + email_client + ", voucher_id =" + voucher_id + ") " + ex);
+                LogHelper.InsertLogTelegram("CountOrderInYear - OrderDAL: " + ex.ToString());
                 return -1;
             }
         }
-
-        public object GetOrderListByClientId(int clientId, string orderNo, int orderStatus = -1, int curentPage = 1, int pageSize = 10)
+        public static async Task<string> getOrderNoByOrderNo(string order_no)
         {
             try
             {
-                SqlParameter[] objParam = new SqlParameter[5];
-                objParam[0] = new SqlParameter("@ClientId", clientId);
-                objParam[1] = new SqlParameter("@OrderNo", orderNo ?? string.Empty);
-                objParam[2] = new SqlParameter("@OrderStatus", orderStatus);
-                objParam[3] = new SqlParameter("@CurentPage", curentPage);
-                objParam[4] = new SqlParameter("@PageSize", pageSize);
-                var dataTable = _DbWorker.GetDataTable(ProcedureConstants.ORDER_GetListByClientId, objParam);
-
-                var _TotalRow = 0;
-                if (dataTable != null && dataTable.Rows.Count > 0)
+                using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    _TotalRow = Convert.ToInt32(dataTable.Rows[0]["TotalRow"]);
+
+                    var data = _DbContext.Order.AsNoTracking().FirstOrDefault(s => s.OrderNo == order_no);
+                    return data == null ? "" : data.OrderNo;
                 }
-
-                var _dataList = (from dr in dataTable.AsEnumerable()
-                                 select new
-                                 {
-                                     Id = Convert.ToInt64(!dr["Id"].Equals(DBNull.Value) ? dr["Id"] : 0),
-                                     OrderNo = dr["OrderNo"].ToString(),
-                                     CreatedOn = Convert.ToDateTime(!dr["CreatedOn"].Equals(DBNull.Value) ? dr["CreatedOn"] : DateTime.MinValue),
-                                     OrderStatus = Convert.ToInt32(!dr["OrderStatus"].Equals(DBNull.Value) ? dr["OrderStatus"] : 0),
-                                     OrderStatusName = dr["OrderStatusName"].ToString(),
-                                     AmountVnd = Convert.ToDouble(!dr["AmountVnd"].Equals(DBNull.Value) ? dr["AmountVnd"] : 0),
-                                     ProductCode = dr["ProductCode"].ToString(),
-                                     Title = dr["Title"].ToString(),
-                                     Quantity = Convert.ToInt32(!dr["Quantity"].Equals(DBNull.Value) ? dr["Quantity"] : 0),
-                                     ImageThumb = dr["ImageThumb"].ToString()
-                                     //LinkSource = dr["LinkSource"].ToString()
-                                 }).GroupBy(s => new
-                                 {
-                                     s.Id,
-                                     s.OrderNo,
-                                     s.CreatedOn,
-                                     s.OrderStatus,
-                                     s.OrderStatusName,
-                                     s.AmountVnd
-                                 }).Select(s => new
-                                 {
-                                     Id = s.Key.Id,
-                                     OrderNo = s.Key.OrderNo,
-                                     CreatedOn = s.Key.CreatedOn,
-                                     OrderStatus = s.Key.OrderStatus,
-                                     OrderStatusName = s.Key.OrderStatusName,
-                                     AmountVnd = Convert.ToDecimal(s.Key.AmountVnd).ToString("#,##0.00"),
-                                     Product = s.Select(m => new
-                                     {
-                                         ProductCode = m.ProductCode,
-                                         Title = m.Title,
-                                         Quantity = m.Quantity,
-                                         ImageThumb = m.ImageThumb
-                                         //LinkSource = m.LinkSource
-                                     })
-                                 }).ToList();
-
-                return new
-                {
-                    totalOrder = _TotalRow,
-                    curentPage = curentPage,
-                    pageSize = pageSize,
-                    dataList = _dataList
-                };
             }
             catch (Exception ex)
             {
+                LogHelper.InsertLogTelegram("getOrderNoByOrderNo - OrderDAL: " + ex);
+                return "";
+            }
+        }
+        public Order GetByOrderNo(string orderNo)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+
+                    return _DbContext.Order.AsNoTracking().FirstOrDefault(s => s.OrderNo == orderNo);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByOrderNo - OrderDal: " + ex);
                 return null;
             }
         }
+        public async Task<long> UpdataOrder(Order order)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    _DbContext.Order.Update(order);
+                    await _DbContext.SaveChangesAsync();
+                    var OrderId = order.OrderId;
+                    return OrderId;
 
-        public object GetFeOrderDetailById(int OrderId)
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdataOrder - OrderDal: " + ex.ToString());
+                return 0;
+            }
+        }
+
+        public DataTable GetListOrderByClientId(long clienId, string proc, int status = 0)
+        {
+            try
+            {
+                SqlParameter[] objParam = new SqlParameter[3];
+                objParam[0] = new SqlParameter("@ClientId", clienId);
+                objParam[1] = new SqlParameter("@IsFinishPayment", DBNull.Value);
+                if (status == 0)
+                    objParam[2] = new SqlParameter("@OrderStatus", DBNull.Value);
+                else
+                    objParam[2] = new SqlParameter("@OrderStatus", status);
+
+                return _DbWorker.GetDataTable(proc, objParam);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetListOrderByClientId - OrderDal: " + ex);
+            }
+            return null;
+        }
+        public async Task<DataTable> GetDetailOrderServiceByOrderId(int OrderId)
         {
             try
             {
                 SqlParameter[] objParam = new SqlParameter[1];
                 objParam[0] = new SqlParameter("@OrderId", OrderId);
-                var dataTable = _DbWorker.GetDataSet(ProcedureConstants.ORDER_FE_GetDetailById, objParam);
 
-                var order = (from dr in dataTable.Tables[0].AsEnumerable()
-                             select new
-                             {
-                                 Id = Convert.ToInt64(!dr["Id"].Equals(DBNull.Value) ? dr["Id"] : 0),
-                                 ClientId = Convert.ToInt64(!dr["ClientId"].Equals(DBNull.Value) ? dr["ClientId"] : 0),
-                                 OrderNo = dr["OrderNo"].ToString(),
-                                 CreatedOn = Convert.ToDateTime(!dr["CreatedOn"].Equals(DBNull.Value) ? dr["CreatedOn"] : DateTime.MinValue),
-                                 OrderStatus = Convert.ToInt32(!dr["OrderStatus"].Equals(DBNull.Value) ? dr["OrderStatus"] : 0),
-                                 PaymentStatus = Convert.ToInt16(!dr["PaymentStatus"].Equals(DBNull.Value) ? dr["PaymentStatus"] : 1),
-                                 OrderStatusName = dr["OrderStatusName"].ToString(),
-                                 AmountVnd = Convert.ToDouble(!dr["AmountVnd"].Equals(DBNull.Value) ? dr["AmountVnd"] : 0),
-                                 TotalDiscount2ndVnd = Convert.ToDouble(!dr["TotalDiscount2ndVnd"].Equals(DBNull.Value) ? dr["TotalDiscount2ndVnd"] : 0),
-                                 TotalDiscountVoucherVnd = Convert.ToDouble(!dr["TotalDiscountVoucherVnd"].Equals(DBNull.Value) ? dr["TotalDiscountVoucherVnd"] : 0),
-                                 PaymentType = Convert.ToInt32(!dr["PaymentType"].Equals(DBNull.Value) ? dr["PaymentType"] : 0),
-                                 PaymentTypeName = dr["PaymentTypeName"].ToString(),
-                                 ClientName = dr["ClientName"].ToString(),
-                                 Address = dr["Address"].ToString(),
-                                 Phone = dr["Phone"].ToString(),
-                                 StoreName = dr["StoreName"].ToString(),
-                                 RateCurrent = Convert.ToDouble(!dr["RateCurrent"].Equals(DBNull.Value) ? dr["RateCurrent"] : 0),
-                                 Note = dr["Note"].ToString(),
-                                 addressId = Convert.ToInt32(dr["AddressId"])
-                             }).FirstOrDefault();
-
-                var products = (from dr in dataTable.Tables[1].AsEnumerable()
-                                select new
-                                {
-                                    ImageThumb = dr["ImageThumb"].ToString(),
-                                    ProductCode = dr["ProductCode"].ToString(),
-                                    Title = dr["Title"].ToString(),
-                                    Price = Convert.ToDouble(!dr["Price"].Equals(DBNull.Value) ? dr["Price"] : 0),
-                                    Quantity = Convert.ToInt32(!dr["Quantity"].Equals(DBNull.Value) ? dr["Quantity"] : 0),
-                                    FirstPoundFee = Convert.ToDouble(!dr["FirstPoundFee"].Equals(DBNull.Value) ? dr["FirstPoundFee"] : 0),
-                                    NextPoundFee = Convert.ToDouble(!dr["NextPoundFee"].Equals(DBNull.Value) ? dr["NextPoundFee"] : 0),
-                                    LuxuryFee = Convert.ToDouble(!dr["LuxuryFee"].Equals(DBNull.Value) ? dr["LuxuryFee"] : 0),
-                                    Weight = Convert.ToDouble(!dr["Weight"].Equals(DBNull.Value) ? dr["Weight"] : 0),
-                                    Path = dr["Path"].ToString(),
-                                    SellerName = dr["SellerName"].ToString(),
-                                    LinkSource = dr["LinkSource"].ToString()
-                                }).ToList();
-
-
-                string _PaymentTypeName = string.Empty;
-
-                switch (order.PaymentType)
-                {
-                    case 3:
-                    case 5:
-                        _PaymentTypeName = "Thanh toán bằng thẻ ATM";
-                        break;
-                    case 4:
-                    case 6:
-                        _PaymentTypeName = "Thanh toán bằng thẻ VISA";
-                        break;
-                }
-
-                var data = new
-                {
-                    Id = order.Id,
-                    ClientId = order.ClientId,
-                    OrderNo = order.OrderNo,
-                    CreatedOn = order.CreatedOn,
-                    OrderStatus = order.OrderStatus,
-                    OrderStatusName = order.OrderStatusName,
-                    AmountVnd = order.AmountVnd,
-                    TotalDiscount2ndVnd = order.TotalDiscount2ndVnd,
-                    TotalDiscountVoucherVnd = order.TotalDiscountVoucherVnd,
-                    PaymentType = order.PaymentType,
-                    PaymentTypeName = !string.IsNullOrEmpty(_PaymentTypeName) ? _PaymentTypeName : order.PaymentTypeName,
-                    ClientName = order.ClientName,
-                    Address = order.Address,
-                    Phone = order.Phone,
-                    StoreName = order.StoreName,
-                    RateCurrent = order.RateCurrent,
-                    PaymentStatus = order.PaymentStatus,
-                    Note = order.Note,
-                    AddressId = order.addressId,
-                    ProductList = products.Select(s => new
-                    {
-                        ImageThumb = s.ImageThumb,
-                        ProductCode = s.ProductCode,
-                        Title = s.Title,
-                        Price = s.Price * order.RateCurrent,
-                        Quantity = s.Quantity,
-                        FirstPoundFee = s.FirstPoundFee,
-                        NextPoundFee = s.NextPoundFee,
-                        LuxuryFee = s.LuxuryFee,
-                        Weight = s.Weight,
-                        Path = s.Path,
-                        SellerName = s.SellerName,
-                        LinkSource = s.LinkSource,
-                        Cost = (s.FirstPoundFee + s.NextPoundFee + s.LuxuryFee) * s.Quantity * order.RateCurrent
-                    })
-                };
-                return data;
+                return _DbWorker.GetDataTable(StoreProcedureConstant.SP_GetDetailOrderServiceByOrderId, objParam);
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetFeOrderDetailById - OrderDAL: " + ex);
-                return null;
+                LogHelper.InsertLogTelegram("GetDetailOrderServiceByOrderId - OrderDal: " + ex);
             }
-
+            return null;
         }
-
-        public object GetLastestRecordByClientID(int ClientId)
+        public async Task<DataTable> GetDetailOrderByOrderId(int OrderId)
         {
             try
             {
                 SqlParameter[] objParam = new SqlParameter[1];
-                objParam[0] = new SqlParameter("@ClientId", ClientId);
-                var dataTable = _DbWorker.GetDataSet(ProcedureConstants.Order_FE_SelectLatestOrderbyClientID, objParam);
+                objParam[0] = new SqlParameter("@OrderId", OrderId);
 
-                var order = (from dr in dataTable.Tables[0].AsEnumerable()
-                             select new
-                             {
-                                 Id = Convert.ToInt64(!dr["Id"].Equals(DBNull.Value) ? dr["Id"] : 0),
-                                 OrderNo = dr["OrderNo"].ToString(),
-                                 CreatedOn = Convert.ToDateTime(!dr["CreatedOn"].Equals(DBNull.Value) ? dr["CreatedOn"] : DateTime.MinValue),
-                                 OrderStatus = Convert.ToInt32(!dr["OrderStatus"].Equals(DBNull.Value) ? dr["OrderStatus"] : 0),
-                                 OrderStatusName = dr["OrderStatusName"].ToString(),
-                                 UpdateLast = Convert.ToDateTime(!dr["UpdateLast"].Equals(DBNull.Value) ? dr["UpdateLast"] : DateTime.MinValue),
-                                 AmountVnd = Convert.ToDouble(!dr["AmountVnd"].Equals(DBNull.Value) ? dr["AmountVnd"] : 0),
-                                 PaymentType = Convert.ToInt32(!dr["PaymentType"].Equals(DBNull.Value) ? dr["PaymentType"] : 0),
-                                 PaymentTypeName = dr["PaymentTypeName"].ToString(),
-                                 PaymentStatus = Convert.ToInt16(!dr["PaymentStatus"].Equals(DBNull.Value) ? dr["PaymentStatus"] : 1)
-                             }).FirstOrDefault();
-                if (order != null) // cuonglv bổ sung đoạn check null
+                return _DbWorker.GetDataTable(StoreProcedureConstant.SP_GetDetailOrderByOrderId, objParam);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("SP_GetDetailOrderByOrderId - OrderDal: " + ex);
+            }
+            return null;
+        }
+
+        public async Task<double> UpdateOrderDetail(long OrderId, long user_id)
+        {
+            try
+            {
+                List<int> order_status_not_allowed = new List<int>() { (int)OrderStatus.FINISHED, (int)OrderStatus.WAITING_FOR_ACCOUNTANT, (int)OrderStatus.CANCEL, (int)OrderStatus.ACCOUNTANT_DECLINE, (int)OrderStatus.CREATED_ORDER, (int)OrderStatus.CONFIRMED_SALE };
+
+                using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var data = new
+                    var data = _DbContext.Order.AsNoTracking().FirstOrDefault(s => s.OrderId == OrderId);
+                    double amount = 0;
+                    double price = 0;
+                    double discount = 0;
+                    double profit = 0;
+                    double commission = 0;
+                    List<int> product_service = new List<int>();
+                    data.StartDate = null;
+                    data.EndDate = null;
+                    List<int> other_servicetype_main = new List<int>() { (int)ServiceOtherType.WaterSport };
+                    if (data != null && data.OrderId > 0)
                     {
-                        Id = order.Id,
-                        OrderNo = order.OrderNo,
-                        CreatedOn = order.CreatedOn.ToString("dd/MM/yyyy HH:mm"),
-                        CreatedOnDate = order.CreatedOn.ToString("dd/MM/yyyy"),
-                        CreatedOnTime = order.CreatedOn.ToString("HH:MM"),
-                        OrderStatus = order.OrderStatus,
-                        OrderStatusName = order.OrderStatusName,
-                        AmountVnd = Convert.ToDecimal(order.AmountVnd).ToString("#,##0.00"),
-                        PaymentType = order.PaymentType,
-                        PaymentTypeName = order.PaymentTypeName,
-                        PaymentStatus = order.PaymentStatus
-                    };
-                    return data;
+                        if (data.VoucherId != null && data.VoucherId > 0)
+                        {
+                            amount -= (data.Discount == null ? 0 : (double)data.Discount);
+                        }
+                        var order_status_old = data.OrderStatus;
+                        var list_other_booking_all = await _DbContext.OtherBooking.AsNoTracking().Where(s => s.OrderId == OrderId).ToListAsync();
+                        var vinWonderBookings_all = await _DbContext.VinWonderBooking.AsNoTracking().Where(s => s.OrderId == OrderId).ToListAsync();
+                        var list_tour_booking_all = await _DbContext.Tour.AsNoTracking().Where(s => s.OrderId == OrderId).ToListAsync();
+                        var list_flybooking_all = await _DbContext.FlyBookingDetail.AsNoTracking().Where(s => s.OrderId == OrderId).ToListAsync();
+                        var list_hotel_booking_all = await _DbContext.HotelBooking.AsNoTracking().Where(s => s.OrderId == OrderId).ToListAsync();
+                        var list_watersport = await _DbContext.OtherBooking.AsNoTracking().Where(s => s.OrderId == OrderId && s.ServiceType > 0 && s.ServiceType == (int)ServiceOtherType.WaterSport).ToListAsync();
+
+
+                        var list_flybooking = list_flybooking_all.Where(s => s.Status != (int)ServiceStatus.Cancel).ToList();
+                        var list_flybooking_id = list_flybooking.Select(x => x.Id);
+                        var list_flybooking_optional = await _DbContext.FlyBookingPackagesOptional.AsNoTracking().Where(s => list_flybooking_id.Contains(s.BookingId)).ToListAsync();
+                        if (list_flybooking != null && list_flybooking.Count > 0)
+                        {
+                            amount += list_flybooking.Sum(x => x.Amount);
+                            if (list_flybooking_optional != null && list_flybooking_optional.Count > 0)
+                            {
+                                price += list_flybooking_optional.Sum(x => x.Amount);
+                            }
+                            else
+                            {
+                                price += list_flybooking.Sum(x => x.Amount + (x.TotalDiscount != null ? (double)x.TotalDiscount : 0) - (x.Profit != null ? (double)x.Profit : 0)); //- (x.Adgcommission != null ? (double)x.Adgcommission : 0) - (x.OthersAmount != null ? (double)x.OthersAmount : 0));
+                            }
+                            //discount += list_flybooking.Sum(x => x.TotalDiscount != null ? (double)x.TotalDiscount : 0);
+                            profit += list_flybooking.Sum(x => x.Profit != null ? (double)x.Profit : 0);
+                            product_service.Add((int)ServicesType.FlyingTicket);
+                            var min_date = list_flybooking.OrderBy(x => x.StartDate).FirstOrDefault();
+                            var max_date = list_flybooking.OrderByDescending(x => x.EndDate).FirstOrDefault();
+                            if (data.StartDate == null || data.StartDate > min_date.StartDate) data.StartDate = min_date.StartDate;
+                            if (data.EndDate == null || data.EndDate < max_date.EndDate) data.EndDate = max_date.EndDate;
+                            commission += list_flybooking.Sum(x => x.Adgcommission != null ? (double)x.Adgcommission : 0);
+
+                        }
+
+                        var list_hotel_booking = list_hotel_booking_all.Where(s => s.Status != (int)ServiceStatus.Cancel).ToList();
+                        var list_hotel_booking_id = list_hotel_booking.Select(x => x.Id);
+                        var list_hotel_optional = await _DbContext.HotelBookingRoomsOptional.AsNoTracking().Where(s => list_hotel_booking_id.Contains(s.HotelBookingId)).ToListAsync();
+                        if (list_hotel_booking != null && list_hotel_booking.Count > 0)
+                        {
+                            amount += list_hotel_booking.Sum(x => x.TotalAmount);
+                            if (list_hotel_optional != null && list_hotel_optional.Count > 0)
+                            {
+                                price += list_hotel_optional.Where(x => x.IsRoomFund == null || x.IsRoomFund == false).Sum(x => x.TotalAmount);
+                            }
+                            else
+                            {
+                                price += list_hotel_booking.Sum(x => x.TotalAmount - (double)x.TotalProfit);  // - (x.TotalDiscount != null ? (double)x.TotalDiscount : 0) - (x.TotalOthersAmount != null ? (double)x.TotalOthersAmount : 0));
+                            }
+                            // discount += list_hotel_booking.Sum(x => x.TotalDiscount != null ? (double)x.TotalDiscount : 0);
+                            profit += list_hotel_booking.Sum(x => x.TotalProfit);
+                            product_service.Add((int)ServicesType.VINHotelRent);
+                            var min_date = list_hotel_booking.OrderBy(x => x.ArrivalDate).FirstOrDefault();
+                            var max_date = list_hotel_booking.OrderByDescending(x => x.DepartureDate).FirstOrDefault();
+                            if (data.StartDate == null || data.StartDate > min_date.ArrivalDate) data.StartDate = min_date.ArrivalDate;
+                            if (data.EndDate == null || data.EndDate < max_date.DepartureDate) data.EndDate = max_date.DepartureDate;
+                            commission += list_hotel_booking.Sum(x => x.TotalDiscount != null ? (double)x.TotalDiscount : 0);
+
+                        }
+                        var hotel_extra = await _DbContext.HotelBookingRoomExtraPackages.AsNoTracking().Where(s => list_hotel_booking_id.Contains((long)s.HotelBookingId)).ToListAsync();
+                        if (hotel_extra != null && hotel_extra.Count > 0)
+                        {
+                            price += hotel_extra.Sum(x => x.UnitPrice != null ? (double)x.UnitPrice : 0);
+                        }
+
+                        var list_tour_booking = list_tour_booking_all.Where(s => s.Status != (int)ServiceStatus.Cancel).ToList();
+                        var list_tour_id = list_tour_booking.Select(x => x.Id);
+                        var list_tour_optional = await _DbContext.TourPackagesOptional.AsNoTracking().Where(s => list_tour_id.Contains(s.TourId != null ? (long)s.TourId : 0)).ToListAsync();
+                        if (list_tour_booking != null && list_tour_booking.Count > 0)
+                        {
+                            amount += list_tour_booking.Sum(x => x.Amount != null ? (double)x.Amount : 0);
+                            if (list_tour_optional != null && list_tour_optional.Count > 0)
+                            {
+                                price += list_tour_optional.Sum(x => x.Amount != null ? (double)x.Amount : 0);
+                            }
+                            else
+                            {
+                                price += list_tour_booking.Sum(x => x.Amount != null ? (double)x.Amount - (x.Profit != null ? (double)x.Profit : 0) : 0); // - (x.Commission != null ? (double)x.Commission : 0) - (x.OthersAmount != null ? (double)x.OthersAmount : 0) : 0);
+                            }
+
+                            // discount += list_tour_booking.Sum(x => x.TotalDiscount != null ? (double)x.TotalDiscount : 0);
+                            profit += list_tour_booking.Sum(x => x.Profit != null ? (double)x.Profit : 0);
+                            product_service.Add((int)ServicesType.Tourist);
+                            var min_date = list_tour_booking.OrderBy(x => x.StartDate).FirstOrDefault();
+                            var max_date = list_tour_booking.OrderByDescending(x => x.EndDate).FirstOrDefault();
+                            if (data.StartDate == null || data.StartDate > min_date.StartDate) data.StartDate = min_date.StartDate;
+                            if (data.EndDate == null || data.EndDate < max_date.EndDate) data.EndDate = max_date.EndDate;
+                            commission += list_tour_booking.Sum(x => x.Commission != null ? (double)x.Commission : 0);
+
+                        }
+
+                        var vinWonderBookings = vinWonderBookings_all.Where(s => s.Status != (int)ServiceStatus.Cancel).ToList();
+                        if (vinWonderBookings != null && vinWonderBookings.Count > 0)
+                        {
+                            amount += vinWonderBookings.Sum(x => x.Amount != null ? (double)x.Amount : 0);
+                            // price += vinWonderBookings.Sum(x => (x.Amount != null ? (double)x.Amount : 0) - (x.TotalProfit != null ? (double)x.TotalProfit : 0));
+                            // discount += list_other_booking.Sum(x => x.TotalDiscount != null ? (double)x.TotalDiscount : 0);
+                            profit += vinWonderBookings.Sum(x => (x.TotalProfit != null ? (double)x.TotalProfit : 0));
+                            price += vinWonderBookings.Sum(x => x.TotalUnitPrice == null ? ((double)x.Amount - (double)x.TotalProfit) : (double)x.TotalUnitPrice); //- (x.Commission != null ? (double)x.Commission : 0) - (x.OthersAmount != null ? (double)x.OthersAmount : 0)) : (double)x.TotalUnitPrice);
+                            product_service.Add((int)ServicesType.VinWonder);
+                            var min_date = vinWonderBookings.OrderBy(x => x.CreatedDate).FirstOrDefault();
+                            var max_date = vinWonderBookings.OrderByDescending(x => x.CreatedDate).FirstOrDefault();
+                            var VinWonderBooking_Ticket_min_date = await _DbContext.VinWonderBookingTicket.FirstOrDefaultAsync(s => s.BookingId == min_date.Id);
+                            var VinWonderBooking_Ticket_max_date = await _DbContext.VinWonderBookingTicket.FirstOrDefaultAsync(s => s.BookingId == max_date.Id);
+
+                            if (data.StartDate == null || data.StartDate > min_date.CreatedDate) data.StartDate = VinWonderBooking_Ticket_min_date.DateUsed;
+                            if (data.EndDate == null || data.EndDate < max_date.CreatedDate) data.EndDate = VinWonderBooking_Ticket_max_date.DateUsed;
+                            commission += vinWonderBookings.Sum(x => x.Commission != null ? (double)x.Commission : 0);
+
+
+                        }
+                        var list_other_booking = list_other_booking_all.Where(s => s.Status != (int)ServiceStatus.Cancel).ToList();
+                        var list_other_id = list_other_booking.Select(x => x.Id);
+                        var list_other_optional = await _DbContext.OtherBookingPackagesOptional.AsNoTracking().Where(s => list_other_id.Contains(s.BookingId)).ToListAsync();
+                        if (list_other_booking != null && list_other_booking.Count > 0)
+                        {
+                            amount += list_other_booking.Sum(x => x.Amount);
+                            if (list_other_optional != null && list_other_optional.Count > 0)
+                            {
+                                price += list_other_optional.Sum(x => x.Amount);
+                            }
+                            else
+                            {
+                                price += list_other_booking.Sum(x => x.Amount - x.Profit);// - (x.Commission != null ? (double)x.Commission : 0) - (x.OthersAmount != null ? (double)x.OthersAmount : 0));
+                            }
+                            // discount += list_other_booking.Sum(x => x.TotalDiscount != null ? (double)x.TotalDiscount : 0);
+                            profit += list_other_booking.Sum(x => x.Profit);
+                            product_service.Add((int)ServicesType.Other);
+                            var min_date = list_other_booking.OrderBy(x => x.StartDate).FirstOrDefault();
+                            var max_date = list_other_booking.OrderByDescending(x => x.EndDate).FirstOrDefault();
+                            if (data.StartDate == null || data.StartDate > min_date.StartDate) data.StartDate = min_date.StartDate;
+                            if (data.EndDate == null || data.EndDate < max_date.EndDate) data.EndDate = max_date.EndDate;
+                            commission += list_other_booking.Sum(x => x.Commission != null ? (double)x.Commission : 0);
+
+                        }
+
+                        var list_ws_booking = list_watersport.Where(s => s.Status != (int)ServiceStatus.Cancel).ToList();
+                        if (list_ws_booking != null && list_ws_booking.Count > 0)
+                        {
+                            product_service.Add((int)ServicesType.WaterSport);
+                        }
+                        DataTable contract_pay_list = await GetContractPayByOrderId(OrderId);
+                        var listData_contract_pay = contract_pay_list.ToList<ContractPayDetaiByOrderIdlViewModel>();
+                        double contract_pay_total_amount = listData_contract_pay.Sum(x => x.AmountPay);
+                        if (amount > contract_pay_total_amount && data.PaymentStatus == (int)PaymentStatus.PAID)
+                        {
+                            data.PaymentStatus = (int)PaymentStatus.PAID_NOT_ENOUGH;
+                            data.IsFinishPayment = 0;
+                        }
+                        data.Amount = amount;
+                        data.Price = price;
+                        data.Profit = profit;
+                        //data.Discount = discount;
+                        data.Commission = commission;
+                        data.ProductService = string.Join(",", product_service);
+                        data.UpdateLast = DateTime.Now;
+                        data.UserUpdateId = user_id;
+                        if (data.StartDate == null) data.StartDate = DateTime.Now;
+                        if (data.EndDate == null) data.EndDate = DateTime.Now.AddHours(2);
+                        // Update Order Status:
+                        bool status_confirm = false;
+                        //-- Case CANCEL:
+                        bool has_other_than_cancel = (list_flybooking_all != null && list_flybooking_all.Count > 0 && list_flybooking_all.Any(x => x.Status != (int)ServiceStatus.Cancel))
+                            || (list_hotel_booking_all != null && list_hotel_booking_all.Count > 0 && list_hotel_booking_all.Any(x => x.Status != (int)ServiceStatus.Cancel))
+                            || (list_tour_booking_all != null && list_tour_booking_all.Count > 0 && list_tour_booking_all.Any(x => x.Status != (int)ServiceStatus.Cancel))
+                            || (vinWonderBookings_all != null && vinWonderBookings_all.Count > 0 && vinWonderBookings_all.Any(x => x.Status != (int)ServiceStatus.Cancel))
+                            || (list_other_booking_all != null && list_other_booking_all.Count > 0 && list_other_booking_all.Any(x => x.Status != (int)ServiceStatus.Cancel));
+                        bool atleast_has_one = (list_flybooking_all != null && list_flybooking_all.Count > 0)
+                           || (list_hotel_booking_all != null && list_hotel_booking_all.Count > 0)
+                           || (list_tour_booking_all != null && list_tour_booking_all.Count > 0)
+                           || (vinWonderBookings_all != null && vinWonderBookings_all.Count > 0)
+                           || (list_other_booking_all != null && list_other_booking_all.Count > 0);
+
+                        if (!has_other_than_cancel && atleast_has_one && order_status_old == (int)OrderStatus.OPERATOR_DECLINE)
+                        {
+                            data.OrderStatus = (int)OrderStatus.CANCEL;
+                            status_confirm = true;
+                        }
+                        //-- Case Waiting Accountant:
+                        if (!status_confirm)
+                        {
+                            bool has_other_than_payment = (list_flybooking_all != null && list_flybooking_all.Count > 0 && list_flybooking_all.Any(x => x.Status != (int)ServiceStatus.Payment && x.Status != (int)ServiceStatus.Cancel))
+                          || (list_hotel_booking_all != null && list_hotel_booking_all.Count > 0 && list_hotel_booking_all.Any(x => x.Status != (int)ServiceStatus.Payment && x.Status != (int)ServiceStatus.Cancel))
+                          || (list_tour_booking_all != null && list_tour_booking_all.Count > 0 && list_tour_booking_all.Any(x => x.Status != (int)ServiceStatus.Payment && x.Status != (int)ServiceStatus.Cancel))
+                          || (vinWonderBookings_all != null && vinWonderBookings_all.Count > 0 && vinWonderBookings_all.Any(x => x.Status != (int)ServiceStatus.Payment && x.Status != (int)ServiceStatus.Cancel))
+                          || (list_other_booking_all != null && list_other_booking_all.Count > 0 && list_other_booking_all.Any(x => x.Status != (int)ServiceStatus.Payment && x.Status != (int)ServiceStatus.Cancel));
+                            atleast_has_one = false;
+                            atleast_has_one = (list_flybooking != null && list_flybooking.Count > 0)
+                               || (list_hotel_booking != null && list_hotel_booking.Count > 0)
+                               || (list_tour_booking != null && list_tour_booking.Count > 0)
+                               || (vinWonderBookings != null && vinWonderBookings.Count > 0)
+                               || (list_other_booking != null && list_other_booking.Count > 0);
+
+                            if (!has_other_than_payment && atleast_has_one && order_status_old == (int)OrderStatus.WAITING_FOR_OPERATOR)
+                            {
+                                data.OrderStatus = (int)OrderStatus.WAITING_FOR_ACCOUNTANT;
+                                status_confirm = true;
+                            }
+                        }
+
+                        _DbContext.Order.Update(data);
+                        await _DbContext.SaveChangesAsync();
+                        UpdateOrderOperator(OrderId);
+                        return amount;
+                    }
+                    else return -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdateOrderAmount - OrderDal: " + ex);
+            }
+            return -2;
+
+        }
+
+        public async Task<int> UpdateOrderStatus(long OrderId, long Status, long UpdatedBy, long UserVerify)
+        {
+            try
+            {
+                SqlParameter[] objParam = new SqlParameter[4];
+                objParam[0] = new SqlParameter("@OrderId", OrderId);
+                objParam[1] = new SqlParameter("@Status", Status);
+                objParam[2] = new SqlParameter("@UpdatedBy", UpdatedBy);
+                objParam[3] = UserVerify == 0 ? new SqlParameter("@UserVerify", DBNull.Value) : new SqlParameter("@UserVerify", UserVerify);
+
+                return _DbWorker.ExecuteNonQuery(StoreProcedureConstant.SP_UpdateOrderStatus, objParam);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetDetailOrderServiceByOrderId - OrderDal: " + ex);
+            }
+            return 0;
+        }
+
+        public async Task<DataTable> GetAllServiceByOrderId(long OrderId)
+        {
+            try
+            {
+                SqlParameter[] objParam = new SqlParameter[1];
+                objParam[0] = new SqlParameter("@OrderId", OrderId);
+                return _DbWorker.GetDataTable(StoreProcedureConstant.SP_GetAllServiceByOrderId, objParam);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetAllServiceByOrderId - OrderDal: " + ex);
+            }
+            return null;
+        }
+        public int UpdateOrder(Order model)
+        {
+            try
+            {
+                SqlParameter[] objParam_order = new SqlParameter[34];
+                objParam_order[0] = model.OrderNo == null ? new SqlParameter("@OrderNo", DBNull.Value) : new SqlParameter("@OrderNo", model.OrderNo);
+                objParam_order[1] = model.ServiceType == null ? new SqlParameter("@ServiceType", DBNull.Value) : new SqlParameter("@ServiceType", model.ServiceType);
+                objParam_order[2] = model.Amount == null ? new SqlParameter("@Amount", DBNull.Value) : new SqlParameter("@Amount", model.Amount);
+                objParam_order[3] = model.CreateTime == null ? new SqlParameter("@CreateTime", DBNull.Value) : new SqlParameter("@CreateTime", model.CreateTime);
+                objParam_order[4] = model.ClientId == null ? new SqlParameter("@ClientId", DBNull.Value) : new SqlParameter("@ClientId", model.ClientId);
+                objParam_order[5] = model.ContactClientId == null ? new SqlParameter("@ContactClientId", DBNull.Value) : new SqlParameter("@ContactClientId", model.ContactClientId);
+                objParam_order[6] = model.OrderStatus == null ? new SqlParameter("@OrderStatus", DBNull.Value) : new SqlParameter("@OrderStatus", model.OrderStatus);
+                if (model.ContractId != null)
+                {
+                    objParam_order[7] = new SqlParameter("@ContractId", model.ContractId);
                 }
                 else
                 {
-                    return null;
+                    objParam_order[7] = new SqlParameter("@ContractId", DBNull.Value);
+                }
+                objParam_order[8] = model.PaymentType == null ? new SqlParameter("@PaymentType", DBNull.Value) : new SqlParameter("@PaymentType", model.PaymentType);
+                objParam_order[9] = model.BankCode == null ? new SqlParameter("@BankCode", DBNull.Value) : new SqlParameter("@BankCode", model.BankCode);
+                if (model.PaymentDate != null)
+                {
+                    objParam_order[10] = new SqlParameter("@PaymentDate", model.PaymentDate);
+                }
+                else
+                {
+                    objParam_order[10] = new SqlParameter("@PaymentDate", DBNull.Value);
+                }
+
+                if (model.PaymentNo != null)
+                {
+                    objParam_order[11] = new SqlParameter("@PaymentNo", model.PaymentNo);
+                }
+                else
+                {
+                    objParam_order[11] = new SqlParameter("@PaymentNo", DBNull.Value);
+                }
+                objParam_order[12] = model.Profit == null ? new SqlParameter("@Profit", DBNull.Value) : new SqlParameter("@Profit", model.Profit);
+                objParam_order[13] = model.Discount == null ? new SqlParameter("@Discount", DBNull.Value) : new SqlParameter("@Discount", model.Discount);
+                objParam_order[14] = model.PaymentStatus == null ? new SqlParameter("@PaymentStatus", DBNull.Value) : new SqlParameter("@PaymentStatus", model.PaymentStatus);
+                objParam_order[15] = new SqlParameter("@OrderId", model.OrderId);
+                objParam_order[16] = model.ExpriryDate == null ? new SqlParameter("@ExpriryDate", DBNull.Value) : new SqlParameter("@ExpriryDate", model.ExpriryDate);
+                objParam_order[17] = model.ProductService == null ? new SqlParameter("@ProductService", DBNull.Value) : new SqlParameter("@ProductService", model.ProductService.ToString());
+                objParam_order[18] = model.AccountClientId == null ? new SqlParameter("@AccountClientId", DBNull.Value) : new SqlParameter("@AccountClientId", model.AccountClientId);
+                objParam_order[19] = model.StartDate == null ? new SqlParameter("@StartDate", DBNull.Value) : new SqlParameter("@StartDate", model.StartDate);
+                objParam_order[20] = model.EndDate == null ? new SqlParameter("@EndDate", DBNull.Value) : new SqlParameter("@EndDate", model.EndDate);
+                objParam_order[21] = model.SystemType == null ? new SqlParameter("@SystemType", DBNull.Value) : new SqlParameter("@SystemType", model.SystemType);
+                objParam_order[22] = model.SalerId == null ? new SqlParameter("@SalerId", DBNull.Value) : new SqlParameter("@SalerId", model.SalerId);
+                if (model.SalerId != null)
+                {
+                    objParam_order[22] = new SqlParameter("@SalerId", model.SalerId);
+                }
+                else
+                {
+                    objParam_order[22] = new SqlParameter("@SalerId", DBNull.Value);
+                }
+                objParam_order[23] = model.SalerGroupId == null ? new SqlParameter("@SalerGroupId", DBNull.Value) : new SqlParameter("@SalerGroupId", model.SalerGroupId);
+                objParam_order[24] = model.UserUpdateId == null ? new SqlParameter("@UserUpdateId", DBNull.Value) : new SqlParameter("@UserUpdateId", model.UserUpdateId);
+
+                if (model.PercentDecrease != null)
+                {
+                    objParam_order[25] = new SqlParameter("@PercentDecrease", model.PercentDecrease);
+                }
+                else
+                {
+                    objParam_order[25] = new SqlParameter("@PercentDecrease", DBNull.Value);
+                }
+
+                if (model.Price != null)
+                {
+                    objParam_order[26] = new SqlParameter("@Price", model.Price);
+                }
+                else
+                {
+                    objParam_order[26] = new SqlParameter("@Price", DBNull.Value);
+                }
+
+                if (model.Label != null)
+                {
+                    objParam_order[27] = new SqlParameter("@Label", model.Label);
+                }
+                else
+                {
+                    objParam_order[27] = new SqlParameter("@Label", DBNull.Value);
+                }
+
+                if (model.VoucherId != null)
+                {
+                    objParam_order[28] = new SqlParameter("@VoucherId", model.VoucherId);
+                }
+                else
+                {
+                    objParam_order[28] = new SqlParameter("@VoucherId", DBNull.Value);
+                }
+                objParam_order[29] = model.CreatedBy == null ? new SqlParameter("@CreatedBy", DBNull.Value) : new SqlParameter("@CreatedBy", model.CreatedBy);
+                model.SupplierId = 0;
+                objParam_order[30] = new SqlParameter("@SupplierId", model.SupplierId);
+                objParam_order[31] = model.Note == null ? new SqlParameter("@Note", DBNull.Value) : new SqlParameter("@Note", model.Note);
+                objParam_order[32] = model.UtmMedium == null ? new SqlParameter("@UtmMedium", DBNull.Value) : new SqlParameter("@UtmMedium", model.UtmMedium);
+                objParam_order[33] = model.UtmSource == null ? new SqlParameter("@UtmSource", DBNull.Value) : new SqlParameter("@UtmSource", model.UtmSource);
+
+
+
+                var id = _DbWorker.ExecuteNonQuery(StoreProcedureConstant.CreateOrder, objParam_order);
+                model.OrderId = id;
+                return id;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdateOrder - OrderDal: " + ex);
+                return -1;
+            }
+        }
+        public async Task<long> UpdateOrderSaler(long order_id, int user_commit)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    var exists = _DbContext.Order.AsNoTracking().FirstOrDefault(s => s.OrderId == order_id);
+                    if (exists != null && exists.OrderId > 0)
+                    {
+                        exists.UpdateLast = DateTime.Now;
+                        exists.UserUpdateId = user_commit;
+                        exists.SalerId = user_commit;
+                        if (exists.OrderStatus == (int)OrderStatus.CREATED_ORDER)
+                        {
+                            exists.OrderStatus = (int)OrderStatus.CONFIRMED_SALE;
+                        }
+                        _DbContext.Order.Update(exists);
+                        await _DbContext.SaveChangesAsync();
+                    }
+                    return 1;
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetLastestRecordByClientID - OrderDAL: " + ex);
-                return null;
+                LogHelper.InsertLogTelegram("UpdateOrderSaler - OrderDal: " + ex);
+                return -2;
             }
         }
+        public int IsClientAllowedToDebtNewService(double service_amount, long client_id, long order_id, int service_type)
+        {
+            try
+            {
+                SqlParameter[] objParam_order = new SqlParameter[4];
+                objParam_order[0] = new SqlParameter("@ClientId", client_id);
+                objParam_order[1] = new SqlParameter("@Amount", service_amount);
+                objParam_order[2] = new SqlParameter("@OrderId", order_id);
+                objParam_order[3] = new SqlParameter("@ServiceType", service_type);
 
-        public object GetOrderCountByClientID(int ClientId)
+                var table = _DbWorker.GetDataTable(StoreProcedureConstant.SP_CheckClientDebt, objParam_order);
+                if (table != null && table.Rows.Count > 0)
+                {
+                    int id = -1;
+                    id = (from row in table.AsEnumerable()
+                          select new
+                          {
+                              IsPayable = Convert.ToInt32(row["IsPayable"])
+                          }).First().IsPayable;
+                    return id;
+                }
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("IsClientAllowedToDebtNewService - OrderDal: " + ex);
+                return -1;
+            }
+        }
+        public async Task<bool> IsClientAllowedToDebtNewServiceLinq(long service_amount, long client_id, long order_id, int service_type)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    var client = await _DbContext.Client.AsNoTracking().Where(x => x.Id == client_id).FirstOrDefaultAsync();
+                    if (client == null || client.ClientType == (int)ClientType.kl) return false;
+                    Contract active_contract = await _DbContext.Contract.AsNoTracking().Where(x => (((DateTime?)x.ExpireDate) >= DateTime.Now) && x.ContractStatus == ContractStatus.DA_DUYET && x.ClientId == client_id).FirstOrDefaultAsync();
+                    if (active_contract == null || active_contract.PolicyId == null || active_contract.PolicyId <= 0)
+                    {
+                        return false;
+                    }
+                    var policy_detail = await _DbContext.PolicyDetail.AsNoTracking().Where(x => x.PolicyId == active_contract.PolicyId).FirstOrDefaultAsync();
+                    double max_debt = 0;
+                    if (policy_detail != null)
+                    {
+                        switch (service_type)
+                        {
+                            case (int)ServicesType.VINHotelRent:
+                                {
+                                    max_debt = Convert.ToDouble(policy_detail.HotelDebtAmout);
+                                }
+                                break;
+                            case (int)ServicesType.FlyingTicket:
+                                {
+                                    max_debt = Convert.ToDouble(policy_detail.ProductFlyTicketDebtAmount);
+
+                                }
+                                break;
+                        }
+                        if (max_debt <= 0) return false;
+                        double total_debt = (from a in _DbContext.FlyBookingDetail.AsNoTracking().Where(x => x.Status == (int)ServiceStatus.Payment)
+                                             join b in _DbContext.Order.AsNoTracking().Where(x => x.ClientId == client_id) on a.OrderId equals b.OrderId
+                                             join d in _DbContext.ContractPayDetail.AsNoTracking() on a.OrderId equals d.DataId
+                                             join c in _DbContext.ContractPay.AsNoTracking().Where(s => s.Type == 1) on d.PayId equals c.PayId
+                                             select new { amount = a.Amount }).Sum(x => x.amount);
+                        if (max_debt - total_debt >= service_amount) return true;
+                        else return false;
+                    }
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("IsClientAllowedToDebtNewServiceLinq - OrderDal: " + ex);
+                return false;
+            }
+        }
+        public int UpdateOrderOperator(long order_id)
+        {
+            try
+            {
+                SqlParameter[] objParam_order = new SqlParameter[1];
+                objParam_order[0] = new SqlParameter("@Orderid", order_id);
+                var id = _DbWorker.ExecuteNonQuery(StoreProcedureConstant.SP_UpdateOperatorByOrderid, objParam_order);
+                return id;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdateOrderOperator - OrderDal: " + ex);
+                return -1;
+            }
+        }
+        public async Task<long> UpdateOrderFinishPayment(long OrderId, long Status)
+        {
+            try
+            {
+                SqlParameter[] objParam_updateFinishPayment = new SqlParameter[5];
+                objParam_updateFinishPayment[0] = new SqlParameter("@OrderId", OrderId);
+                objParam_updateFinishPayment[1] = new SqlParameter("@IsFinishPayment", DBNull.Value);
+                objParam_updateFinishPayment[2] = new SqlParameter("@PaymentStatus", DBNull.Value);
+                objParam_updateFinishPayment[3] = new SqlParameter("@Status", Status);
+                objParam_updateFinishPayment[4] = new SqlParameter("@DebtStatus", DBNull.Value);
+                var data = _DbWorker.ExecuteNonQuery(StoreProcedureConstant.SP_UpdateOrderFinishPayment, objParam_updateFinishPayment);
+                return data;
+
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdateOrderFinishPayment - OrderDal: " + ex);
+                return -1;
+            }
+        }
+        public async Task<long> UpdateServiceStatusByOrderId(long OrderId, long StatusFilter, long Status)
+        {
+            try
+            {
+                SqlParameter[] objParam_updateFinishPayment = new SqlParameter[3];
+                objParam_updateFinishPayment[0] = new SqlParameter("@OrderId", OrderId);
+                objParam_updateFinishPayment[1] = new SqlParameter("@StatusFilter", StatusFilter);
+                objParam_updateFinishPayment[2] = new SqlParameter("@Status", Status);
+                var data = _DbWorker.ExecuteNonQuery(StoreProcedureConstant.SP_UpdateServiceStatusByOrderId, objParam_updateFinishPayment);
+                return data;
+
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdateServiceStatusByOrderId - OrderDal: " + ex);
+                return -1;
+            }
+        }
+        public async Task<long> UpdateAllServiceStatusByOrderId(long OrderId, long Status)
+        {
+            try
+            {
+                SqlParameter[] objParam_updateFinishPayment = new SqlParameter[2];
+                objParam_updateFinishPayment[0] = new SqlParameter("@OrderId", OrderId);
+                objParam_updateFinishPayment[1] = new SqlParameter("@Status", Status);
+
+                var data = _DbWorker.ExecuteNonQuery(StoreProcedureConstant.SP_UpdateAllServiceStatusByOrderId, objParam_updateFinishPayment);
+                return data;
+
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdateServiceStatusByOrderId - OrderDal: " + ex);
+                return -1;
+            }
+        }
+        public async Task<long> RePushDeclineServiceToOperator(long OrderId)
         {
             try
             {
                 SqlParameter[] objParam = new SqlParameter[1];
-                objParam[0] = new SqlParameter("@ClientId", ClientId);
-                var dataTable = _DbWorker.GetDataSet(ProcedureConstants.Order_FE_GetOrderCountByClientID, objParam);
-
-                var order = (from dr in dataTable.Tables[0].AsEnumerable()
-                             select new
-                             {
-                                 AllOders = Convert.ToInt64(!dr["AllOders"].Equals(DBNull.Value) ? dr["AllOders"] : 0),
-                                 WaitToReceiveCount = Convert.ToInt64(!dr["WaitToReceiveCount"].Equals(DBNull.Value) ? dr["WaitToReceiveCount"] : 0),
-                                 WaitForPaymentCount = Convert.ToInt64(!dr["WaitForPaymentCount"].Equals(DBNull.Value) ? dr["WaitForPaymentCount"] : 0),
-                                 ReceivedOrderCount = Convert.ToInt64(!dr["ReceivedOrderCount"].Equals(DBNull.Value) ? dr["ReceivedOrderCount"] : 0),
-                                 FailedOrderCount = Convert.ToInt64(!dr["FailedOrderCount"].Equals(DBNull.Value) ? dr["FailedOrderCount"] : 0),
-
-                             }).FirstOrDefault();
-                var data = new
-                {
-                    AllOders = order.AllOders,
-                    WaitToReceiveCount = order.WaitToReceiveCount,
-                    WaitForPaymentCount = order.WaitForPaymentCount,
-                    ReceivedOrderCount = order.ReceivedOrderCount,
-                    FailedOrderCount = order.FailedOrderCount
-                };
+                objParam[0] = new SqlParameter("@OrderId", OrderId);
+                var data = _DbWorker.ExecuteNonQuery(StoreProcedureConstant.SP_UpdateServiceStatusFromDecline, objParam);
                 return data;
+
+
             }
             catch (Exception ex)
             {
-                return null;
-            }
-        }
-
-        public async Task<long> UpdatePaymentReChecOut(long order_id, string receiver_name, string address, string phone, short pay_type)
-        {
-            try
-            {
-                var model = await FindAsync(order_id);
-
-                model.ClientName = receiver_name; // người nhận hàng
-                model.Address = address; // địa chỉ nhận hàng
-                model.Phone = phone; // phone người nhận
-                model.PaymentType = pay_type; // hình thức thanh toán
-                model.UpdateLast = DateTime.Now;
-                await UpdateAsync(model);
-                return order_id;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("UpdatePaymentReChecOut - OrderDAL: " + ex);
+                LogHelper.InsertLogTelegram("UpdateServiceStatusByOrderId - OrderDal: " + ex);
                 return -1;
             }
         }
-
-        public async Task<Order> getTotalOrderByEmail(string email)
+        public async Task<DataTable> GetAllContractPayByOrderID(long OrderId)
         {
             try
             {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    return await _DbContext.Order.FirstOrDefaultAsync(s => s.Email.ToUpper() == email.Trim().ToUpper());
-                }
+                SqlParameter[] objParam = new SqlParameter[1];
+                objParam[0] = new SqlParameter("@OrderId", OrderId);
+                return _DbWorker.GetDataTable(StoreProcedureConstant.SP_GetAllServiceByOrderId, objParam);
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("getTotalOrderByEmail - OrderDAL: " + ex);
+                LogHelper.InsertLogTelegram("GetAllServiceByOrderId - OrderDal: " + ex);
+            }
+            return null;
+        }
+        public async Task<DataTable> GetContractPayByOrderId(long OrderId)
+        {
+            try
+            {
+
+                SqlParameter[] objParam_contractPay = new SqlParameter[1];
+                objParam_contractPay[0] = new SqlParameter("@OrderId", OrderId);
+
+                return _DbWorker.GetDataTable(StoreProcedureConstant.SP_GetContractPayByOrderId, objParam_contractPay);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetContractPayByOrderId - ContractPayDAL. " + ex);
                 return null;
             }
         }
-
-        #region api for south-us
-        public async Task<OrderAppModel> GetOrderDetailByOrderNo(string order_no)
+        public List<long> GetAllOrderIDs()
         {
             try
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var order = await _DbContext.Order.AsNoTracking().Where(s => s.OrderNo == order_no)
-                        .Join(_DbContext.AllCode.AsNoTracking().Where(s => s.Type == AllCodeType.ORDER_STATUS),
-                         ord => ord.OrderStatus,
-                         ost => ost.CodeValue,
-                         (ord, ost) => new
-                         {
-                             id = ord.Id,
-                             order_no = ord.OrderNo,
-                             create_date = ord.CreatedOn,
-                             total_amount = ord.AmountUsd,
-                             total_amount_vnd = ord.AmountVnd,
-                             recipient_name = ord.ClientName,
-                             recipient_phone = ord.Phone,
-                             recipient_address = ord.Address,
-                             order_status = ord.OrderStatus,
-                             rate_current = ord.RateCurrent,
-                             order_status_name = ost != null ? ost.Description : string.Empty
-                         }).FirstOrDefaultAsync();
-
-                    var order_detail = await _DbContext.OrderItem.AsNoTracking().Where(s => s.OrderId == order.id).Join(_DbContext.Product.AsNoTracking(),
-                        oitem => oitem.ProductId,
-                        prod => prod.Id,
-                        (oitem, prod) => new
-                        {
-                            product_code = prod != null ? prod.ProductCode : string.Empty,
-                            product_name = prod != null ? prod.Title : string.Empty,
-                            price = oitem.Price,
-                            quantity = oitem.Quantity,
-                            weight = oitem.Weight,
-                            shipping_fee = (oitem.FirstPoundFee + oitem.NextPoundFee + oitem.LuxuryFee) * oitem.Quantity,
-                            shipping_fee_vnd = (oitem.FirstPoundFee + oitem.NextPoundFee + oitem.LuxuryFee) * oitem.Quantity * order.rate_current,
-                            amount = (oitem.Price + oitem.FirstPoundFee + oitem.NextPoundFee + oitem.LuxuryFee) * oitem.Quantity,
-                            amount_vnd = (oitem.Price + oitem.FirstPoundFee + oitem.NextPoundFee + oitem.LuxuryFee) * oitem.Quantity * order.rate_current
-                        }).ToListAsync();
-
-                    return new OrderAppModel()
-                    {
-                        order = order,
-                        order_detail = order_detail
-                    };
+                    return _DbContext.Order.AsNoTracking().Select(x => x.OrderId).ToList();
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetOrderDetailByOrderNo - OrderDAL: " + ex);
-                return new OrderAppModel();
-            }
-        }
-
-        public async Task<object> GetOrderListByClientPhone(string client_phone)
-        {
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-
-                    return await _DbContext.Order.AsNoTracking().Where(s => s.Phone == client_phone)
-                        .Join(_DbContext.AllCode.AsNoTracking().Where(s => s.Type == AllCodeType.ORDER_STATUS),
-                         ord => ord.OrderStatus,
-                         ost => ost.CodeValue,
-                         (s, t) => new
-                         {
-                             order_no = s.OrderNo,
-                             phone = s.Phone,
-                             create_date = s.CreatedOn,
-                             // total_amount = s.AmountUsd,
-                             total_amount_vnd = s.AmountVnd,
-                             status = t.Description,
-                             // rate_current = s.RateCurrent
-                         }).ToListAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderListByClientPhone - OrderDAL: " + ex);
-                return new List<object>();
-            }
-        }
-        public async Task<object> GetOrderTrackingByOrderNo(string order_no)
-        {
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    return await _DbContext.OrderProgress.AsNoTracking().Where(s => s.OrderNo == order_no).Join(_DbContext.AllCode.AsNoTracking().Where(s => s.Type == AllCodeType.ORDER_STATUS),
-                         prog => prog.OrderStatus,
-                         ost => ost.CodeValue,
-                         (prog, ost) => new
-                         {
-                             order_no = prog.OrderNo,
-                             create_date = prog.CreateDate,
-                             order_status = ost != null ? ost.Description : string.Empty
-                         }).ToListAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderTrackingByOrderNo - OrderDAL: " + ex);
-                return new List<object>();
-            }
-        }
-        #endregion
-        public async Task<string> UpdateOrderStatus(string order_no, int order_status_update)
-        {
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    var order = await _DbContext.Order.FirstOrDefaultAsync(s => s.OrderNo == order_no);
-                    if (order == null || order.OrderNo == null || order.OrderNo != order_no)
-                    {
-                        return "Không tìm thấy đơn hàng " + order_no;
-                    }
-                    if (order.OrderStatus == (int)OrderStatus.CLIENT_TRANSPORT_ORDER || order.OrderStatus == (int)OrderStatus.VN_STORAGE_ORDER || order.OrderStatus == (int)OrderStatus.VN_TRANSPORT_STORAGE_ORDER)
-                    {
-                        order.OrderStatus = order_status_update;
-                        await UpdateAsync(order);
-                        return null;
-                    }
-                    return "Đơn hàng này không thể chuyển đổi status";
-
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("UpdateOrderStatus - OrderDAL: " + ex);
-            }
-            return "Error on Excution";
-        }
-        public async Task<List<AffOrder>> GetAffiliateOrders(DateTime time_gte, DateTime time_lte, List<string> utm_source)
-        {
-            List<AffOrder> list = null;
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    list = new List<AffOrder>();
-                    foreach (var utm in utm_source)
-                    {
-                        var orders = await _DbContext.Order.Where(s => (DateTime)s.CreatedOn >= time_gte && (DateTime)s.CreatedOn <= time_lte && s.UtmSource.Trim().ToLower().Contains(utm.Trim().ToLower()) && s.PaymentStatus == 1).ToListAsync();
-                        if (orders != null && orders.Count > 0)
-                        {
-                            foreach (var order in orders)
-                            {
-                                if (order.Id > 0)
-                                {
-                                    list.Add(new AffOrder()
-                                    {
-                                        aff_name = order.UtmSource,
-                                        order_id = order.Id
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetAffiliateOrders - OrderDAL: " + ex);
-            }
-            return list;
-        }
-        public List<OrderLogShippingDateViewModel> GetOrderShippingLogToday()
-        {
-            List<OrderLogShippingDateViewModel> result = null;
-            try
-            {
-                var dataTable = _DbWorker.GetDataSet(ProcedureConstants.Order_GetShippingExpectedDays);
-
-                var orders = (from dr in dataTable.Tables[0].AsEnumerable()
-                              select new OrderLogShippingDateViewModel
-                              {
-                                  Id = Convert.ToInt64(!dr["Id"].Equals(DBNull.Value) ? dr["Id"] : 0),
-                                  OrderNo = dr["OrderNo"].ToString(),
-                                  LabelId = Convert.ToInt32(!dr["LabelId"].Equals(DBNull.Value) ? dr["LabelId"] : 0),
-                                  OrderStatus = Convert.ToInt32(!dr["OrderStatus"].Equals(DBNull.Value) ? dr["OrderStatus"] : 0),
-                                  OrderStatusName = dr["OrderStatusName"].ToString(),
-                                  CreatedOn = Convert.ToDateTime(!dr["CreatedOn"].Equals(DBNull.Value) ? dr["CreatedOn"] : DateTime.MinValue),
-                                  PaymentDate = Convert.ToDateTime(!dr["PaymentDate"].Equals(DBNull.Value) ? dr["PaymentDate"] : DateTime.MinValue),
-                                  LastestOrderProgressDay = Convert.ToInt32(!dr["LastestOrderProgressDay"].Equals(DBNull.Value) ? dr["LastestOrderProgressDay"] : DateTime.MinValue),
-                                  TotalOrderProgressDay = Convert.ToInt32(!dr["TotalOrderProgressDay"].Equals(DBNull.Value) ? dr["TotalOrderProgressDay"] : DateTime.MinValue)
-                              });
-
-                result = orders.ToList();
-                //return orders;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderShippingLogToday - OrderDAL: " + ex);
-
-            }
-            return result;
-
-        }
-        public async Task<OrderViewModel> CheckOrderDetail(long orderId)
-        {
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    var detail = await (from _order in _DbContext.Order.AsNoTracking()
-                                        join a in _DbContext.Voucher.AsNoTracking() on _order.VoucherId equals a.Id into af
-                                        from _voucher in af.DefaultIfEmpty()
-                                        where _order.Id == orderId
-                                        select new OrderViewModel
-                                        {
-                                            Id = _order.Id,
-                                            OrderNo = _order.OrderNo,
-                                            ClientName = _order.ClientName,
-
-                                            OrderStatus = _order.OrderStatus,
-                                            LabelId=_order.LabelId,
-                                            PaymentType = _order.PaymentType,
-                                            CreatedOn = _order.CreatedOn,
-                                            PaymentDate = _order.PaymentDate,
-                                            AmountVnd = _order.AmountVnd,
-
-                                            OrderMapId = _order.OrderMapId,
-                                            ClientId = _order.ClientId,
-                                            AddressId = _order.AddressId
-                                        }).FirstOrDefaultAsync();
-                    return detail;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetOrderDetail - OrderDAL: " + ex);
-                return null;
+                LogHelper.InsertLogTelegram("GetAllOrderIDs - OrderDal: " + ex);
+                return new List<long>();
             }
         }
     }

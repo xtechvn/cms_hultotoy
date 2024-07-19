@@ -68,7 +68,7 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                string msg = "GetProvinceByName - ProvinceRepository: " + ex;
+                string msg = "CheckProvinceExists - ProvinceRepository: " + ex;
                 //LogHelper.InsertLogTelegram(msg);
                 return -2;
             }
@@ -84,6 +84,19 @@ namespace Repositories.Repositories
             {
                 string msg = "GetLastestProvinceWithIDAsync - ProvinceRepository: " + ex;
                 //LogHelper.InsertLogTelegram(msg);
+                return null;
+            }
+        }
+        public async Task<Province> GetProvinceById(long province_id)
+        {
+            try
+            {
+                var province = await _provinceDAL.GetProvinceById(province_id);
+                return province;
+            }
+            catch (Exception ex)
+            {
+                string msg = "GetProvinceById - ProvinceRepository: " + ex;
                 return null;
             }
         }
@@ -120,7 +133,7 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                string msg = "GetDistrictByNameAndProvinceID - DistrictRepository: " + ex;
+                string msg = "CheckDistrictExists - DistrictRepository: " + ex;
                 //LogHelper.InsertLogTelegram(msg);
                 return -2;
             }
@@ -201,7 +214,7 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                string msg = "GetWardByNameAndDistrictID - WardRepository: " + ex;
+                string msg = "CheckWardExists - WardRepository: " + ex;
                 //LogHelper.InsertLogTelegram(msg);
                 return -2;
             }

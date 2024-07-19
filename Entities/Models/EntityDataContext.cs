@@ -14,6 +14,8 @@ namespace Entities.Models
             _connection = connection;
         }
 
+       
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)

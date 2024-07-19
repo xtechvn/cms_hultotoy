@@ -1,7 +1,12 @@
 ﻿// form validate extension method
-$.validator.addMethod("valueNotEquals", function (value, element, arg) {
+jQuery.validator.addMethod("valueNotEquals", function (value, element, arg) {
     return arg !== value;
 }, "Value must not equal arg.");
+
+jQuery.validator.addMethod("exactlength", function (value, element, param) {
+    return this.optional(element) || value.length == param;
+}, $.validator.format("Please enter exactly {0} characters."));
+
 // ----------------------
 
 function ConvertToJSONDate(strdate) {
@@ -143,6 +148,10 @@ function formatDecimalCurrency(input, blur) {
     caret_pos = updated_len - original_len + caret_pos;
     input[0].setSelectionRange(caret_pos, caret_pos);
 }
+
+function ConvertMoneyToNumber(strMoney) {
+    return parseFloat(strMoney.replace(/,/g, ""));
+}
 //----------- End input curency number------
 
 function LoadingComponent() {
@@ -159,6 +168,7 @@ function LoadingComponent() {
 }
 
 $(document).ready(function () {
+    /*
     $('.datepicker-input').Zebra_DatePicker({
         format: 'd/m/Y',
         onSelect: function () {
@@ -166,24 +176,55 @@ $(document).ready(function () {
         }
     }).removeAttr('readonly');
 
+
     $('.datetimepicker-input').Zebra_DatePicker({
         format: 'd/m/Y H:i',
         onSelect: function () {
             $(this).change();
         }
     }).removeAttr('readonly');
+    */
+    $('.datetimepicker-input').daterangepicker({
+        singleDatePicker: true,
+        timePicker: true,
+        minYear: 1901,
+        startDate: moment().startOf('hour'),
+        endDate: moment().startOf('hour').add(32, 'hour'),
+        locale: {
+            format: 'M/DD hh:mm A'
+        }
+    }, function (start, end, label) {
+        $(this).val(start.format('MM/DD/YYYY HH:mm:ss'));
+        $(this).change();
+
+    });
+
+    $('.datepicker-input').daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 1901,
+        maxYear: parseInt(moment().format('YYYY'), 10),
+        locale: {
+            format: 'DD/M/YYYY'
+        }
+    }, function (start, end, label) {
+        $(this).val(start.format('MM/DD/YYYY'));
+        $(this).change();
+
+    });
 
     $('.select2').select2();
-    var path = window.location.pathname;
-    var a_filter = ' li > a[href$="' + path + '"]';
-    $(a_filter).css('background-color', 'var(--color-main2)');
+
+    //var path = window.location.pathname;
+    //var a_filter = ' li > a[href$="' + path + '"]';
+    //$(a_filter).css('background-color', 'var(--color-main2)');
 });
 
 var _common = {
-    tinyMce: function (element_id) {
+    tinyMce: function (element_id, height = 600) {
         var useDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
         tinymce.init({
-            selector: '#' + element_id,
+            selector: element_id,
             plugins: 'print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons',
             imagetools_cors_hosts: ['picsum.photos'],
             menubar: 'file edit view insert format tools table help',
@@ -231,7 +272,7 @@ var _common = {
             ],
             template_cdate_format: '[Date Created (CDATE): %m/%d/%Y : %H:%M:%S]',
             template_mdate_format: '[Date Modified (MDATE): %m/%d/%Y : %H:%M:%S]',
-            height: 600,
+            height: height,
             image_caption: true,
             quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote quickimage quicktable',
             noneditable_noneditable_class: 'mceNonEditable',
@@ -412,7 +453,6 @@ var _magnific = {
             removalDelay: 300
         });
     },
-
     OpenSmallPopupWithHeader: function (title, url, param, callback = null) {
         let elPopup = $('#magnific-popup-small-header');
         let elTitle = elPopup.find('.magnific-title');
@@ -496,6 +536,42 @@ var _magnific = {
     }
 };
 
+var _ajax_caller = {
+    post: function (url, param = null, callback = null) {
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: param,
+            success: function (result) {
+                callback(result);
+            }
+        });
+    },
+
+    postJson: function (url, param = null, callback = null) {
+        $.ajax({
+            url: url,
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(param),
+            success: function (result) {
+                callback(result);
+            }
+        });
+    },
+
+    get: function (url, param = null, callback = null) {
+        $.ajax({
+            url: url,
+            type: "GET",
+            data: param,
+            success: function (result) {
+                callback(result);
+            }
+        });
+    }
+};
+
 var _account = {
     OnGetDatailUser: function () {
         let title = 'Thông tin cá nhân';
@@ -513,6 +589,12 @@ var _account = {
         if (file) {
             reader.readAsDataURL(file);
         }
+    },
+
+    OnGetChangePassUser: function () {
+        let title = 'Thay đổi mật khẩu cá nhân';
+        let url = '/user/UserChangePass';
+        _magnific.OpenLargerPopup(title, url);
     },
 
     OnUpdate: function () {
@@ -546,6 +628,7 @@ var _account = {
                 success: function (result) {
                     if (result.isSuccess) {
                         _msgalert.success(result.message);
+                        $.magnificPopup.close();
                     } else {
                         _msgalert.error(result.message);
                     }
@@ -606,6 +689,7 @@ var _account = {
                         var content = "Mật khẩu của bạn đã được đổi thành công";
                         _msgalert.success(content, title);
                         FormValid.trigger("reset");
+                        $.magnificPopup.close();
                     } else {
                         _msgalert.error(result.message);
                     }
@@ -616,7 +700,10 @@ var _account = {
                 }
             });
         }
-    }
+    },
+    logOut: function () {
+        localStorage.removeItem('url_redirect');
+    },
 };
 
 var _chart = {
@@ -713,201 +800,5 @@ var _chart = {
             $('#' + id).html()
         }
         chart.render();
-    }
-};
-
-var _productCost = {
-    DomainFE: "https://beta.usexpress.vn",
-
-    DataCurrent: null,
-
-    OnOpenForm: function () {
-        let title = 'Báo giá sản phẩm thủ công <span class="red txt_12">(Dấu * là dấu bắt buộc phải nhập)</span>';
-        let url = '/product/productcost';
-        let param = {};
-        _magnific.OpenSmallPopup(title, url, param);
-    },
-
-    OnGetDetailProductCost: function () {
-        $('#product_link_success').addClass('mfp-hide');
-        let FromValid = $('#form-product-cost');
-        FromValid.validate({
-            rules: {
-                Pound: "required",
-                Unit: { min: 0 },
-                Price: "required",
-                RateCurrent: "required",
-                LabelId: { min: 0 },
-                ShippingUSFee: "required"
-            },
-            messages: {
-                Pound: "Bạn phải nhập cân nặng",
-                Unit: { min: "Bạn phải chọn đợn vị cân nặng" },
-                Price: "Bạn phải nhập giá sản phẩm",
-                RateCurrent: "Bạn phải nhập tỉ giá chuyển đổi",
-                LabelId: { min: "Bạn phải chọn nhãn hàng" },
-                ShippingUSFee: "Bạn phải nhập phí ship nội địa",
-            }
-        });
-
-        if (FromValid.valid()) {
-            let form = document.getElementById('form-product-cost');
-            var formData = new FormData(form);
-
-            $.ajax({
-                url: '/product/GetDetailProductCost',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (result) {
-                    var data = JSON.parse(result);
-                    _productCost.DataCurrent = data;
-                    var strHtml = '<tbody>';
-                    if (data.PRODUCT_PRICE != undefined && data.PRODUCT_PRICE > 0) {
-                        strHtml += _productCost.RenderHtmlText('PRODUCT_PRICE', data.PRODUCT_PRICE, true);
-                    }
-                    if (data.FIRST_POUND_FEE != undefined && data.FIRST_POUND_FEE > 0) {
-                        strHtml += _productCost.RenderHtmlText('FIRST_POUND_FEE', data.FIRST_POUND_FEE);
-                    }
-                    if (data.NEXT_POUND_FEE != undefined && data.NEXT_POUND_FEE > 0) {
-                        strHtml += _productCost.RenderHtmlText('NEXT_POUND_FEE', data.NEXT_POUND_FEE);
-                    }
-                    if (data.LUXURY_FEE != undefined && data.LUXURY_FEE > 0) {
-                        strHtml += _productCost.RenderHtmlText('LUXURY_FEE', data.LUXURY_FEE);
-                    }
-                    if (data.TOTAL_SHIPPING_FEE != undefined && data.TOTAL_SHIPPING_FEE > 0) {
-                        strHtml += _productCost.RenderHtmlText('TOTAL_SHIPPING_FEE', data.TOTAL_SHIPPING_FEE, true);
-                    }
-                    if (data.SHIPPING_US_FEE != undefined && data.SHIPPING_US_FEE > 0) {
-                        strHtml += _productCost.RenderHtmlText('SHIPPING_US_FEE', data.SHIPPING_US_FEE, true);
-                    }
-                    if (data.RATE_CURRENT != undefined && data.RATE_CURRENT > 0) {
-                        strHtml += _productCost.RenderHtmlText('RATE_CURRENT', data.RATE_CURRENT);
-                    }
-                    if (data.TOTAL_FEE != undefined && data.TOTAL_FEE > 0) {
-                        strHtml += _productCost.RenderHtmlText('TOTAL_FEE', data.TOTAL_FEE, true);
-                    }
-                    strHtml += '</tbody>';
-                    $('#grid-product-cost table').html(strHtml);
-                    $('#grid-product-cost').removeClass('mfp-hide');
-
-                    $('#btn_show_mapping').removeClass('mfp-hide');
-                    $('#btn_save_mapping').addClass('mfp-hide');
-                    $('#block_sync_product').addClass('mfp-hide');
-                    $('#sync_product_code').val('');
-
-                },
-                error: function (jqXHR) {
-                },
-                complete: function (jqXHR, status) {
-                }
-            });
-        }
-    },
-
-    RenderHtmlText: function (type, value, isred) {
-        let strType = null;
-        let strUnit = "$";
-        switch (type) {
-            case "PRODUCT_PRICE":
-                strType = "Giá sản phẩm";
-                break;
-            case "FIRST_POUND_FEE":
-                strType = "Phí mua hộ pound đầu tiên";
-                break;
-            case "NEXT_POUND_FEE":
-                strType = "Phí mua hộ pound tiếp theo";
-                break;
-            case "LUXURY_FEE":
-                strType = "Phụ thu hàng hóa đặc biệt";
-                break;
-            case "SHIPPING_US_FEE":
-                strType = "Phí ship nội địa";
-                break;
-            case "TOTAL_SHIPPING_FEE":
-                strType = "Tổng phí mua hộ";
-                break;
-            case "RATE_CURRENT":
-                strType = "Tỉ giá hiện tại";
-                strUnit = "đ";
-                break;
-            case "TOTAL_FEE":
-                strType = "Giá về tay";
-                strUnit = "đ";
-        }
-
-        if (value != 0) {
-            strHtml = '<tr>'
-                + '<td>' + strType + '</td>'
-                + '<td ' + (isred ? 'class="red"' : '') + '>' + Number((parseFloat(value)).toFixed(2)).toLocaleString('en') + ' ' + strUnit + '</td>'
-                + '</tr>';
-        }
-        return strHtml;
-    },
-
-    OnMappingProduct: function () {
-        if (this.DataCurrent != null) {
-            $('#btn_show_mapping').addClass('mfp-hide');
-            $('#btn_save_mapping').removeClass('mfp-hide');
-            $('#block_sync_product').removeClass('mfp-hide');
-        } else {
-            _msgalert.error('Bạn thực hiện báo giá trước khi mapping sản phẩm');
-        }
-    },
-
-    OnSyncProduct: function () {
-        var productCode = $('#sync_product_code').val().trim();
-
-        if (productCode == null || productCode == "") {
-            _msgalert.error('Bạn phải nhập mã sản phẩm để đồng bộ');
-            return;
-        }
-
-        var productData = this.DataCurrent;
-
-        var objParam = {
-            LABEL_ID: productData.LABEL_ID,
-            PRODUCT_CODE: $('#sync_product_code').val(),
-            PRODUCT_PRICE: productData.PRODUCT_PRICE,
-            TOTAL_FEE: productData.TOTAL_FEE,
-            RATE_CURRENT: productData.RATE_CURRENT,
-            ITEM_WEIGHT: productData.ITEM_WEIGHT,
-            ORIGINAL_WEIGHT: productData.ORIGINAL_WEIGHT,
-            FIRST_POUND_FEE: productData.FIRST_POUND_FEE,
-            NEXT_POUND_FEE: productData.NEXT_POUND_FEE,
-            LUXURY_FEE: productData.LUXURY_FEE,
-            TOTAL_SHIPPING_FEE: productData.TOTAL_SHIPPING_FEE,
-            PRICE_LAST: productData.PRICE_LAST,
-            SHIPPING_US_FEE: productData.SHIPPING_US_FEE != undefined ? productData.SHIPPING_US_FEE : 0
-        }
-
-        $.ajax({
-            url: "/Product/SyncRedisProduct",
-            type: "POST",
-            data: { product: objParam },
-            success: function (result) {
-                if (result.isSuccess) {
-                    _msgalert.success(result.message);
-
-                    $('#btn_save_mapping').addClass('mfp-hide');
-                    $('#block_sync_product').addClass('mfp-hide');
-                    $('#sync_product_code').val('');
-
-                    var strHtml = 'Đồng bộ sản phẩm thành công!.'
-                        + '<a class="color-main2" href="' + _productCost.DomainFE + result.product_link + '" target="_blank"> Click vào đây</a>'
-                        + ' để kiểm tra sản phẩm';
-
-                    $('#product_link_success').html(strHtml);
-                    $('#product_link_success').removeClass('mfp-hide');
-
-                } else {
-                    _msgalert.error(result.message);
-                }
-            },
-            error: function (result) {
-                _msgalert.error(result.message);
-            }
-        });
     }
 };

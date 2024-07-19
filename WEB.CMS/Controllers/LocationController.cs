@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Caching.RedisWorker;
+﻿using Caching.RedisWorker;
 using Entities.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Repositories.IRepositories;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Utilities;
-using Utilities.Contants;
 using WEB.CMS.Customize;
-using WEB.CMS.Models;
-using WEB.CMS.Models.Location;
 
 namespace CMS.Controllers
 {
@@ -156,8 +150,7 @@ namespace CMS.Controllers
                                                 p.Id = Convert.ToInt32(result);
                                                 msg = "Thêm mới " + p.Type + " " + p.Name + " thành công.";
                                                 stt_code = 1;
-                                                var push_data_to_old = (OkObjectResult)SyncData(JsonConvert.SerializeObject(p), 0).Result;
-                                                msg += ".\nSync: " + (push_data_to_old.Value.ToString());
+                                                
                                                 data = p;
                                             }
                                             else
@@ -209,8 +202,7 @@ namespace CMS.Controllers
                                                 d.Id = Convert.ToInt32(result);
                                                 msg = "Thêm mới " + d.Type + " " + d.Name + " thành công.";
                                                 stt_code = 1;
-                                                var push_data_to_old = (OkObjectResult)SyncData(JsonConvert.SerializeObject(d), 1).Result;
-                                                msg += ".\nSync: " + (push_data_to_old.Value.ToString());
+                                                
                                                 data = d;
                                             }
                                             else
@@ -263,8 +255,7 @@ namespace CMS.Controllers
                                                 w.Id = Convert.ToInt32(result);
                                                 msg = "Thêm mới " + w.Type + " " + w.Name + " thành công.";
                                                 stt_code = 1;
-                                                var push_data_to_old = (OkObjectResult)SyncData(JsonConvert.SerializeObject(w), 2).Result;
-                                                msg += ".\nSync: " + (push_data_to_old.Value.ToString());
+                                               
                                                 data = w;
                                             }
                                             else
@@ -355,9 +346,7 @@ namespace CMS.Controllers
                                                 int db_index = Convert.ToInt32(_Configuration["Redis:Database:db_common"]) > -1 ? Convert.ToInt32(_Configuration["Redis:Database:db_common"]) : 0;
                                                 _RedisService.clear("PROVINCE", db_index);
                                                 stt_code = 1;
-                                                var push_data_to_old = (OkObjectResult)SyncData(location_data_json, 0).Result;
-                                                string sync_rs = push_data_to_old.Value.ToString();
-                                                msg += ".\nSync: " + (push_data_to_old.Value.ToString());
+                                               
                                                 data = p;
                                             }
                                             else
@@ -406,8 +395,7 @@ namespace CMS.Controllers
                                                 _RedisService.clear("DISTRICT_" + d.Id, db_index);
                                                 stt_code = 1;
                                                 msg = "District Updated: " + result;
-                                                var push_data_to_old = (OkObjectResult)SyncData(location_data_json, 1).Result;
-                                                msg += ".\nSync: " + (push_data_to_old.Value.ToString());
+                                                
                                                 data = d;
 
                                             }
@@ -458,9 +446,7 @@ namespace CMS.Controllers
                                                 _RedisService.clear("WARD_" + w.Id, db_index);
                                                 stt_code = 1;
                                                 msg = "Ward Updated: " + result;
-                                                var push_data_to_old = (OkObjectResult)SyncData(location_data_json, 2).Result;
-                                                string sync_rs = push_data_to_old.Value.ToString();
-                                                msg += ".\nSync: " + (push_data_to_old.Value.ToString());
+                                               
                                                 data = w;
                                             }
                                             else
@@ -604,158 +590,6 @@ namespace CMS.Controllers
                 return Content(error);
             }
         }
-        [HttpPost]
-        public async Task<IActionResult> SyncData(string data, int location_type)
-        {
-            int status = (int)ResponseType.FAILED;
-            string msg = "Dữ liệu gửi lên không chính xác, vui lòng thử lại";
-            try
-            {
-                if (data == null || data == "" || location_type < 0)
-                {
-                    return Ok(new
-                    {
-                        status = status,
-                        msg = msg,
-                    });
-                }
-                RegionModel item = null;
-                switch (location_type)
-                {
-                    case 0:
-                        {
-                            Province p = JsonConvert.DeserializeObject<Province>(data);
-                            if (p == null || p.Name == "" || p.Name == null || p.Type == null || p.Type == "" || p.Id < 0)
-                            {
-
-                            }
-                            else
-                            {
-                                item = new RegionModel()
-                                {
-                                    id = p.ProvinceId,
-                                    name = p.Name,
-                                    typename = p.Type,
-                                    parentid = "-1",
-                                    type = 0
-                                };
-                            }
-
-                        }
-                        break;
-                    case 1:
-                        {
-                            District p = JsonConvert.DeserializeObject<District>(data);
-                            if (p == null || p.Id < 0 || p.Name == "" || p.Name == null || p.Type == null || p.Type == "" || p.ProvinceId == null || p.ProvinceId == "")
-                            {
-
-                            }
-                            else
-                            {
-                                item = new RegionModel()
-                                {
-                                    id = p.DistrictId,
-                                    name = p.Name,
-                                    typename = p.Type,
-                                    parentid = p.ProvinceId,
-                                    type = 1
-                                };
-                            }
-
-                        }
-                        break;
-                    case 2:
-                        {
-                            Ward p = JsonConvert.DeserializeObject<Ward>(data);
-                            if (p == null || p.Id < 0 || p.Name == "" || p.Name == null || p.Type == null || p.Type == "" || p.DistrictId == null || p.DistrictId == "")
-                            {
-
-                            }
-                            else
-                            {
-                                item = new RegionModel()
-                                {
-                                    id = p.WardId,
-                                    name = p.Name,
-                                    typename = p.Type,
-                                    parentid = p.DistrictId,
-                                    type = 2
-                                };
-                            }
-                        }
-                        break;
-                    default:
-                        {
-                            status = (int)ResponseType.FAILED;
-                            msg = "Dữ liệu gửi lên không chính xác, vui lòng thử lại";
-                        }
-                        break;
-                }
-                if (item != null)
-                {
-                    string url = ReadFile.LoadConfig().API_USEXPRESS + ReadFile.LoadConfig().API_SYNC_LOCATION;
-                    var key_token_api = ReadFile.LoadConfig().KEY_TOKEN_API;
-                    HttpClient httpClient = new HttpClient();
-                    var j_param = JsonConvert.SerializeObject(item);
-                    string token = CommonHelper.Encode(JsonConvert.SerializeObject(j_param), key_token_api);
-                    var content = new FormUrlEncodedContent(new[]
-                    {
-                             new KeyValuePair<string, string>("token", token),
-                        });
-                    try
-                    {
-                        var result = await httpClient.PostAsync(url, content);
-                        if (result.StatusCode != System.Net.HttpStatusCode.OK)
-                        {
-                            status = (int)ResponseType.FAILED;
-
-                            msg = "Cannot Connect API UsExpress-OLD.";
-                        }
-                        else
-                        {
-                            dynamic resultContent = Newtonsoft.Json.Linq.JObject.Parse(result.Content.ReadAsStringAsync().Result);
-                            if (resultContent != null && result.StatusCode == System.Net.HttpStatusCode.OK && resultContent.status == "success")
-                            {
-
-                                status = (int)ResponseType.SUCCESS;
-                                msg = resultContent.msg;
-                            }
-                            else if (resultContent != null && resultContent.status == "error")
-                            {
-                                LogHelper.InsertLogTelegram("Sync Data - LocationController - From API: " + resultContent.msg);
-                                msg = resultContent.msg;
-                            }
-                            else
-                            {
-                                msg = resultContent.msg;
-                            }
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        status = (int)ResponseType.FAILED;
-
-                        msg = "Cannot Connect or Excute API UsExpress-OLD.";
-
-                    }
-                }
-                else
-                {
-                    status = (int)ResponseType.FAILED;
-                    msg = "Dữ liệu gửi lên không chính xác, vui lòng thử lại";
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("Sync Data - LocationController: " + ex);
-                status = (int)ResponseType.ERROR;
-                msg = "Error on Excution";
-            }
-            return Ok(new
-            {
-                status = status,
-                msg = msg,
-            });
-        }
+       
     }
 }

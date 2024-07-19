@@ -20,7 +20,7 @@ namespace DAL
                 return await GetAllAsync();
             } catch(Exception e)
             {
-                string msg = "GetProvincesList - LocationDAL: " + e;
+                string msg = "GetProvincesList - ProvinceDAL: " + e;
                 return null;
             }
         }
@@ -33,7 +33,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "GetProvincesList - LocationDAL: " + e;
+                string msg = "AddNewProvince - ProvinceDAL: " + e;
                 return null;
             }
         }
@@ -59,7 +59,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "CheckProvinceExists - LocationDAL: " + e;
+                string msg = "CheckProvinceExists - ProvinceDAL: " + e;
                 return -1;
             }
         }
@@ -74,7 +74,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "UpdateProvince - LocationDAL: " + e;
+                string msg = "UpdateProvince - ProvinceDAL: " + e;
                 return msg;
             }
         }
@@ -88,7 +88,21 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "GetLastestProvince - LocationDAL: " + e;
+                string msg = "GetLastestProvince - ProvinceDAL: " + e;
+            }
+            return lastest_item;
+        }
+        public async Task<Province> GetProvinceById(long province_id)
+        {
+            Province lastest_item = null;
+            try
+            {
+                var _DbContext = new EntityDataContext(_connection);
+                lastest_item = await _DbContext.Province.AsNoTracking().FirstOrDefaultAsync(x=>x.Id==province_id);
+            }
+            catch (Exception e)
+            {
+                string msg = "GetProvinceById - ProvinceDAL: " + e;
             }
             return lastest_item;
         }
@@ -106,7 +120,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "GetDistrictsList - LocationDAL: " + e;
+                string msg = "GetDistrictsList - DistrictDAL: " + e;
                 return null;
             }
         }
@@ -120,7 +134,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "GetDistrictsListByProvinceID - LocationDAL: " + e;
+                string msg = "GetDistrictsListByProvinceID - DistrictDAL: " + e;
                 return null;
             }
         }
@@ -133,7 +147,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "AddNewDistrict - LocationDAL: " + e;
+                string msg = "AddNewDistrict - DistrictDAL: " + e;
                 return null;
             }
         }
@@ -147,7 +161,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "UpdateDistrict - LocationDAL: " + e;
+                string msg = "UpdateDistrict - DistrictDAL: " + e;
                 return msg;
             }
         }
@@ -172,7 +186,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "CheckDistrictExists - LocationDAL: " + e;
+                string msg = "CheckDistrictExists - DistrictDAL: " + e;
                 return -1;
             }
         }
@@ -186,7 +200,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "GetLastestProvince - LocationDAL: " + e;
+                string msg = "GetLastestProvince - DistrictDAL: " + e;
             }
             return lastest_item;
         }
@@ -205,7 +219,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "GetDistrictsList - LocationDAL: " + e;
+                string msg = "GetDistrictsList - WardDAL: " + e;
                 return null;
             }
         }
@@ -219,7 +233,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "GetDistrictsListByProvinceID - LocationDAL: " + e;
+                string msg = "GetDistrictsListByProvinceID - WardDAL: " + e;
                 return null;
             }
         }
@@ -232,7 +246,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "AddNewProvince - LocationDAL: " + e;
+                string msg = "AddNewProvince - WardDAL: " + e;
                 return null;
             }
         }
@@ -246,7 +260,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "UpdateWard - LocationDAL: " + e;
+                string msg = "UpdateWard - WardDAL: " + e;
                 return msg;
             }
         }
@@ -270,7 +284,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "CheckWardExists - LocationDAL: " + e;
+                string msg = "CheckWardExists - WardDAL: " + e;
                 return -1;
             }
         }
@@ -284,7 +298,7 @@ namespace DAL
             }
             catch (Exception e)
             {
-                string msg = "GetLastestProvince - LocationDAL: " + e;
+                string msg = "GetLastestProvince - WardDAL: " + e;
             }
             return lastest_item;
         }

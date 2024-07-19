@@ -72,7 +72,7 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetById - ProductClassificationDAL: " + ex.Message);
+                LogHelper.InsertLogTelegram("GetById - AllCodeDAL: " + ex);
                 return null;
             }
         }
@@ -91,7 +91,7 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetLastestCodeValueByType - ProductClassificationDAL: " + ex.Message);
+                LogHelper.InsertLogTelegram("GetLastestCodeValueByType - AllCodeDAL: " + ex);
             }
             return -1;
         }
@@ -110,7 +110,7 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetLastestOrderNoByType - ProductClassificationDAL: " + ex.Message);
+                LogHelper.InsertLogTelegram("GetLastestOrderNoByType - AllCodeDAL: " + ex);
             }
             return -1;
         }
@@ -129,7 +129,7 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetLastestOrderNoByType - ProductClassificationDAL: " + ex.Message);
+                LogHelper.InsertLogTelegram("GetIDIfValueExists - AllCodeDAL: " + ex);
             }
             return null;
         }
@@ -149,9 +149,28 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetListByType - AllCodeDAL. " + ex);
+                LogHelper.InsertLogTelegram("GetListSortByName - AllCodeDAL. " + ex);
                 return null;
             }
+        }
+        public async Task<AllCode> GetIfDescriptionExists(string type, string description)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    var detail = await _DbContext.AllCode.AsNoTracking().Where(x => x.Type == type && x.Description.ToLower().Contains(description.Trim().ToLower())).FirstOrDefaultAsync();
+                    if (detail != null)
+                    {
+                        return detail;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetIDIfValueExists - AllCodeDAL: " + ex);
+            }
+            return null;
         }
     }
 }

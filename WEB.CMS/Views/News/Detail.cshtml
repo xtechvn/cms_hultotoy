@@ -9,7 +9,9 @@
 @model ArticleModel
 @{
     var _StrTreeViewCate = (string)ViewBag.StringTreeViewCate;
+
 }
+
 
 <link href="~/lib/tags-input/bootstrap-tagsinput.css" rel="stylesheet" />
 
@@ -29,6 +31,20 @@
     .user-hierarchy-tag ul .lever2 {
         padding-left: 15px;
     }
+    .loading {
+        position: absolute;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.479);
+    }
+
+   .loading img {
+        width: 2rem;
+   }
 </style>
 <div class="row-main container" style="max-width: 1180px;">
     <h2 class="title_page">ĐĂNG BÀI VIẾT</h2>
@@ -44,7 +60,7 @@
             <div class="form-default2">
                 <div class="form-group none-flex">
                     <label><strong>Mô tả</strong> <sup class="red">*</sup></label>
-                    <textarea class="form-control" asp-for="@Model.Lead" placeholder="Nhập mô tả bài viết giới hạn 500 ký tự..."
+                    <textarea class="form-control" asp-for="@Model.Lead" placeholder="Nhập mô tả bài viết giới hạn 400 ký tự..."
                               style="height: 105px;"></textarea>
                 </div>
             </div>
@@ -55,11 +71,11 @@
                         <label><strong>Nội dung</strong> <sup class="red">*</sup></label>
                         <div class="list-radio flex mb10" style="margin-left: 20px">
                             <label class="radio-inline">
-                                <input type="radio" asp-for="@Model.ArticleType" value="0">
+                                <input  onclick="_newsDetail.Onchen('0')" type="radio" asp-for="@Model.ArticleType" value="0">
                                 Bài thường
                             </label>
                             <label class="radio-inline">
-                                <input type="radio" asp-for="@Model.ArticleType" value="1">
+                                <input onclick="_newsDetail.Onchen('1')" type="radio" asp-for="@Model.ArticleType" value="1">
                                 Bài video
                             </label>
                         </div>
@@ -67,15 +83,66 @@
                         {
                             <div class="mb10 text-right" style="margin-left: auto;">
                                 <a class="bold"
-                                style="color: #236852;text-decoration:underline;" 
-                                href="@("http://dropshipping.x-tech.vn"+CommonHelper.genLinkNewsV2(Model.Title,Model.Id.ToString()))" title="Xem trên trang chủ" target="_blank">Link bài</a>
+                                   style="color: #236852;text-decoration:underline;"
+                                   href="@("https://adavigo.com/tin-tuc"+CommonHelper.genLinkNewsV2(Model.Title,Model.Id.ToString()))" title="Xem trên trang chủ" target="_blank">Link bài</a>
                             </div>
                         }
                     </div>
-
-                    <div class="mb20">
+                    <!-- Dạng bình thường -->
+                    <div id="normal_post" class="mb20">
                         <textarea id="text-editor" asp-for="@Model.Body" style="resize:none;height: 1000px;"></textarea>
                     </div>
+                    <!-- Dạng bài video -->
+                    <div id="video_post" class="mb20" style="display:none">
+                        <div class="border pd10">
+                            
+                            
+                            <div style="max-width: 100%;margin: 0 auto;">
+                                <div>
+                                    <div class="col-md">
+                                        <div class=" loading" id="loading">
+                                            <img src="~/images/graphics/loading.gif" alt="loading">
+                                        </div>
+                                        <label id="video-preview" class="choose choose-wrap" style="padding-bottom: 56.25%;">
+                                            <input type="file" id="video-file">
+                                            <div class="choose-content">
+                                                <img src="/images/icons/upload.png">
+                                                <span style="color: #ADB0B1;padding: 0 15px;">
+                                                    Kích cỡ tối đa: 100 MB
+                                                    Định dạng: mp4, video
+                                                </span>
+                                            </div>
+                                            <div class="choose-btn">
+                                                <div class="btn-default">Chọn tập tin</div>
+                                            </div>
+
+                                        </label>
+                                        <div id="video-content">
+
+                                        </div>
+                                        <div>
+                                            @if (Model.Body != null)
+                                            {
+                                            <video class="col-md" id="iframe-video" src="@Model.Body" controls></video>
+                                            <div class="choose-btn" onclick="_newsDetail.DeleteVideo()">
+                                                <div class="btn-default">Chọn video khác</div>
+                                            </div>
+                                            }
+                                        </div>
+                                        <div class="lightgallery" id="lightgallery">
+
+                                            <div style="display:none" id="uploadvieo" class="choose-btn">
+                                                <button type="button" class="btn-default" onclick="_newsDetail.OnseverVideo()">Upload video</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Add Tags -->
                     <div class="add-tags">
                         <label class="txt-add">Add Tags</label>
                         <div class="flex">
@@ -219,22 +286,22 @@
                         <div class="form-group none-flex" style="border: 1px solid #CCCCCC;padding:15px">
                             <label class="mb10"><strong>Giờ lên bài</strong></label>
                             <div class="datepicker-wrap">
-                                <input id="PublishDate"
+                                <input id="PublishDate" name="single_pick_date"
                                        class="datepicker-input form-control"
                                        type="text"
-                                       value="@(Model.PublishDate != DateTime.MinValue ? Model.PublishDate.ToString("dd/MM/yyyy HH:mm") :string.Empty)"
+                                       value="@(Model.PublishDate != DateTime.MinValue ? Model.PublishDate.ToString("dd/MM/yyyy HH:mm") : DateTime.Now.ToString("dd/MM/yyyy HH:mm"))"
                                        placeholder="Ngày đăng">
                             </div>
-                            <label class="mb10" style="padding-top:10px;"><strong>Giờ hạ bài</strong></label>
-                            <div class="datepicker-wrap">
-                                <input id="DowntimeDate"
+                            <label class="mb10" style="padding-top:10px; display: none !important"><strong>Giờ hạ bài</strong></label>
+                            <div class="datepicker-wrap" style="display: none !important">
+                                <input id="DowntimeDate" name="single_pick_date"
                                        class="datepicker-input form-control"
                                        type="text"
                                        value="@(Model.DownTime != DateTime.MinValue ? Model.DownTime.ToString("dd/MM/yyyy HH:mm") :string.Empty)"
                                        placeholder="Ngày hạ bài">
                             </div>
                             <label class="mb10" style="padding-top:10px;"><strong>Vị trí ghim bài</strong></label>
-                            <input type="number" class="form-control" asp-for="@Model.Position" min="0" max="3" placeholder="Vị trí">
+                            <input type="number" class="form-control" asp-for="@Model.Position" min="0" max="@(Model.ArticleType==0?"7":"8")" placeholder="Vị trí">
                         </div>
                         <div class="mb20">
                             <div style="border: 1px solid #CCCCCC;padding:15px">
@@ -253,10 +320,11 @@
             </div>
         </form>
     </div>
+
 </div>
 
 @section scripts {
-<script src="~/lib/tags-input/bootstrap-tagsinput.js"></script>
-<script src="~/lib/tags-input/typeahead.js"></script>
-<script src="~/modules/news_detail.js?v=8"></script>
+    <script src="~/lib/tags-input/bootstrap-tagsinput.js"></script>
+    <script src="~/lib/tags-input/typeahead.js"></script>
+    <script src="~/modules/news_detail.js?v=8"></script>
 }

@@ -2,6 +2,7 @@
 using Entities.ConfigModels;
 using Entities.Models;
 using Entities.ViewModels.GroupProducts;
+using ENTITIES.ViewModels.Articles;
 using Microsoft.Extensions.Options;
 using Repositories.IRepositories;
 using System;
@@ -16,8 +17,7 @@ namespace Repositories.Repositories
 {
     public class GroupProductRepository : IGroupProductRepository
     {
-        private const int US_CATEGORY_ID = 90;
-        private const int NEWS_CATEGORY_ID = 91;
+        private const int NEWS_CATEGORY_ID = 39;
         private readonly GroupProductDAL _GroupProductDAL;
         private readonly AllCodeDAL _AllCodeDAL;
 
@@ -58,14 +58,11 @@ namespace Repositories.Repositories
                     entity.Status = model.Status;
                     entity.Path = model.Path + "-" + model.Id;
                     entity.Description = model.Description;
-                    entity.IsShowHeader = model.IsShowHeader;
                     entity.PositionId = model.PositionId;
-                    entity.IsShowFooter = model.IsShowFooter;
-                    entity.IsBrandBox = model.IsBrandBox;
                     entity.ModifiedOn = DateTime.Now;
-                    entity.LinkCount = model.LinkCount;
-                    entity.UpdateTime = DateTime.Now;
-                    entity.IsDelete = false;
+                    entity.IsShowHeader = model.IsShowHeader;
+                    entity.IsShowFooter = model.IsShowFooter;
+                    entity.Code = model.Code;
                     await _GroupProductDAL.UpdateAsync(entity);
 
                     // Update children status
@@ -93,9 +90,6 @@ namespace Repositories.Repositories
                 else
                 {
                     model.CreatedOn = DateTime.Now;
-                    model.UpdateTime = DateTime.Now;
-                    model.IsDelete = false;
-                    model.IsAutoCrawler = 0;
 
                     var id = (int)await _GroupProductDAL.CreateAsync(model);
                     model.Path = model.Path + "-" + model.Id;
@@ -106,15 +100,12 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("Update - GroupProductRepository" + ex);
+                LogHelper.InsertLogTelegram("UpSert - GroupProductRepository" + ex);
                 return 0;
             }
         }
 
-        public async Task<List<int?>> GetListGroupProductCrawled()
-        {
-            return await _GroupProductDAL.GetListGroupProductCrawled();
-        }
+      
 
         public async Task<int> Delete(int id)
         {
@@ -127,7 +118,6 @@ namespace Repositories.Repositories
             try
             {
                 var _parentList = new List<GroupProduct>();
-                var _listAffData = _AllCodeDAL.GetListByType(AllCodeType.AFF_NAME);
                 var _groupList = await _GroupProductDAL.GetAllAsync();
                 var _listSearch = _groupList;
 
@@ -146,11 +136,11 @@ namespace Repositories.Repositories
                     _parentList.Add(GetParentModel(item, _groupList));
                 }
 
-                _parentList = _parentList.Distinct().OrderBy(s => s.OrderNo).ToList();
+                _parentList = _parentList.Where(x=>x!=null).Distinct().OrderBy(s => s.OrderNo).ToList();
 
                 foreach (var item in _parentList)
                 {
-                    _strHtml.Append(RenderHtmlTreeView(item.Id, _groupList, _listAffData));
+                    _strHtml.Append(RenderHtmlTreeView(item.Id, _groupList));
                 }
             }
             catch (Exception ex)
@@ -181,11 +171,10 @@ namespace Repositories.Repositories
             }
         }
 
-        public string RenderHtmlTreeView(int parentId, List<GroupProduct> listData, List<AllCode> listAffData)
+        public string RenderHtmlTreeView(int parentId, List<GroupProduct> listData)
         {
             var _strHtml = new StringBuilder();
             var _parentModel = listData.Where(s => s.Id == parentId).FirstOrDefault();
-            var IsShowCrawler = _parentModel.LinkCount > 0 ? true : false;
             var _childList = listData.Where(s => s.ParentId == parentId).OrderBy(s => s.OrderNo);
 
             _strHtml.Append(@"<li class=" + "item-category-" + _parentModel.Id + " >");
@@ -202,31 +191,6 @@ namespace Repositories.Repositories
             _strHtml.Append(@"<a class=""btn-edit-group-product"" data-id=" + _parentModel.Id + "><img src=/images/icons/edit.png /></a>");
             _strHtml.Append(@"</div>");
 
-            if (_parentModel.ParentId > 0 && IsShowCrawler)
-            {
-                _strHtml.Append(@"<label class=""switch""><input type = ""checkbox"" class=""ckb-auto-crawl"" " + (_parentModel.IsAutoCrawler == 1 ? "checked" : string.Empty) + "  data-id=" + _parentModel.Id + ">" + @"<span class=""slider round""></span></label>");
-                _strHtml.Append(@"<div class=""group__aff_checkbox"">");
-                if (listAffData != null && listAffData.Count > 0)
-                {
-                    var ListGroupAff = _GroupProductDAL.GetGroupAffById(_parentModel.Id).Result;
-                    foreach (var affItem in listAffData)
-                    {
-                        _strHtml.Append(@"<label class=""check-list"">");
-                        if (_parentModel.IsAutoCrawler == 1)
-                        {
-                            var isCheckedAff = ListGroupAff.Any(s => s.AffType == affItem.CodeValue);
-                            _strHtml.Append(@"<input class=""ckb-aff-category"" type=""checkbox"" " + (isCheckedAff ? "checked" : string.Empty) + " value=" + affItem.CodeValue + ">");
-                        }
-                        else
-                        {
-                            _strHtml.Append(@"<input class=""ckb-aff-category"" type=""checkbox"" disabled value=" + affItem.CodeValue + ">");
-                        }
-                        _strHtml.Append(@"<span class=""checkmark""></span>" + affItem.Description + "</label>");
-                    }
-                }
-                _strHtml.Append(@"</div>");
-            }
-
             if (_parentModel.Status == 1)
                 _strHtml.Append(@"<span class=""text-inactive"">(Ngừng hoạt động)</span>");
 
@@ -238,7 +202,7 @@ namespace Repositories.Repositories
 
                 foreach (var item in _childList)
                 {
-                    _strHtml.Append(RenderHtmlTreeView(item.Id, listData, listAffData));
+                    _strHtml.Append(RenderHtmlTreeView(item.Id, listData));
                 }
 
                 _strHtml.Append(@"</ul>");
@@ -253,7 +217,7 @@ namespace Repositories.Repositories
         {
             try
             {
-                if (item.ParentId != -1)
+                if (item!=null && item.ParentId != -1)
                 {
                     var _model = groupList.Where(s => s.Id == item.ParentId).FirstOrDefault();
                     return GetParentModel(_model, groupList);
@@ -278,7 +242,7 @@ namespace Repositories.Repositories
             {
                 var _parentList = new List<GroupProduct>();
                 var _groupList = await _GroupProductDAL.GetAllAsync();
-
+                _groupList = _groupList.Where(s => s.Status == (int)StatusType.BINH_THUONG).ToList();
                 var _relationCheckedList = new List<int>();
                 if (CheckedList != null && CheckedList.Count > 0)
                     CheckedList.ForEach(s => GetFullParentIdFromListChecked(s, _groupList, ref _relationCheckedList));
@@ -290,7 +254,7 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetListTreeView - GroupProductRepository: " + ex);
+                LogHelper.InsertLogTelegram("GetListTreeViewCheckBox - GroupProductRepository: " + ex);
             }
             return _strHtml.ToString();
         }
@@ -316,7 +280,7 @@ namespace Repositories.Repositories
                         _strHtml.Append(@"<a class=""cur-pointer btn-toggle-cate plus""></a>");
                 }
 
-                if (parentId != NEWS_CATEGORY_ID && parentId != US_CATEGORY_ID)
+                if (parentId != NEWS_CATEGORY_ID /*true*/)
                 {
                     _strHtml.Append(@"<label class=""check-list mb10 mr25"">");
                     var strChecked = string.Empty;
@@ -358,7 +322,7 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetListTreeView - RenderHtmlTreeViewCheckBox: " + ex);
+                LogHelper.InsertLogTelegram("RenderHtmlTreeViewCheckBox - GroupProductRepository: " + ex);
                 return string.Empty;
             }
         }
@@ -379,7 +343,7 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("[CMS] GroupProductRepository - GroupProductRepository: " + ex);
+                LogHelper.InsertLogTelegram("[CMS] getCategoryByParentId - GroupProductRepository: " + ex);
                 return null;
             }
         }
@@ -402,36 +366,12 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("[CMS-Repository] GroupProductRepository - getCategoryDetailByCategoryId: " + ex);
+                LogHelper.InsertLogTelegram("[CMS-Repository] getCategoryDetailByCategoryId - GroupProductRepository: " + ex);
                 return null;
             }
         }
 
-        public async Task<List<GroupProduct>> getCategoryDetailByCampaignId(int campaign_id, int skip, int take)
-        {
-            try
-            {
-                var cate_list = await _GroupProductDAL.getCategoryDetailByCampaignId(campaign_id, skip, take);
-
-                return cate_list;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("[CMS-Repository] GroupProductRepository - getCategoryDetailByCampaignId: " + ex);
-                return null;
-            }
-        }
-
-        public async Task<List<GroupProductStore>> GetGroupProductStoresByGroupProductId(int GroupProductId)
-        {
-            return await _GroupProductDAL.GetGroupProductStoresByGroupProductId(GroupProductId);
-        }
-
-        public async Task<long> UpsertGroupProductStores(int groupProductId, List<GroupProductStore> models)
-        {
-            return await _GroupProductDAL.UpsertGroupProductStore(groupProductId, models);
-        }
-
+      
         public void GetFullParentIdFromListChecked(int checkListId, List<GroupProduct> GroupList, ref List<int> Result)
         {
             var dataModel = GroupList.Where(s => s.Id == checkListId).FirstOrDefault();
@@ -442,15 +382,7 @@ namespace Repositories.Repositories
             }
         }
 
-        public async Task<int> UpdateAutoCrawler(int id, int type)
-        {
-            return await _GroupProductDAL.UpdateAutoCrawler(id, type);
-        }
-
-        public async Task<List<GroupProduct>> GetActiveCrawlGroupProducts()
-        {
-            return await _GroupProductDAL.GetActiveCrawl();
-        }
+      
 
         public async Task<List<GroupProduct>> getAllGroupProduct()
         {
@@ -477,7 +409,7 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetListTreeView - GroupProductRepository: " + ex);
+                LogHelper.InsertLogTelegram("GetHtmlHorizontalMenu - GroupProductRepository: " + ex);
             }
             return _strHtml.ToString();
         }
@@ -545,39 +477,30 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetGroupProductNameAsync: " + ex);
+                LogHelper.InsertLogTelegram("GetGroupProductNameAsync - GroupProductRepository: : " + ex);
             }
             return group_name;
         }
-
-        public async Task<int> UpdateAffiliateCategory(int cateId, int affId, int type)
+        public async Task<bool> IsGroupHeader(List<int> groups)
         {
-            return await _GroupProductDAL.UpdateAffiliateCategory(cateId,affId,type);
+            return await _GroupProductDAL.IsGroupHeader(groups);
         }
-
-        public async Task<List<GroupProductFeaturedViewModel>> GetGroupProductFeatureds(string img_domain,string position)
-        {
-            return await _GroupProductDAL.GetGroupProductFeatureds(img_domain,position);
-        }
-
-        public async Task<List<LocationProduct>> getProductCodeByGroupId(int group_product_id)
+        public async Task<List<ProductGroupViewModel>> GetProductGroupByParentID(long parent_id, string url_static)
         {
             try
             {
-                return await _GroupProductDAL.getProductList(group_product_id);
+                var group = _GroupProductDAL.GetByParentId(parent_id);
+                var list = new List<ProductGroupViewModel>();
+                list.AddRange(group.Select(x => new ProductGroupViewModel() { id = x.Id, image = url_static + x.ImagePath, name = x.Name, code = Convert.ToInt32(x.Code), link = CommonHelper.RemoveSpecialCharacters(CommonHelper.RemoveUnicode(x.Name.ToLower())).Replace(" ", "-").Replace("--", "-") }).ToList());
+                return list;
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("getProductCodeByGroupId: " + ex);
-                return null;
+                LogHelper.InsertLogTelegram("GetProductGroupByParentID - GroupProductRepository: " + ex);
             }
+            return null;
         }
-        public async Task<int> DeleteById(int id)
-        {
-            var entity = await _GroupProductDAL.FindAsync(id);
-            entity.IsDelete = true;
-            await _GroupProductDAL.UpdateAsync(entity);
-            return id;
-        }
+
+
     }
 }

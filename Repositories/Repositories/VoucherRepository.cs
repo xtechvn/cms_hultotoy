@@ -29,7 +29,7 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("[Repository] getDetailVoucher in VoucherRepository" + ex);
+                LogHelper.InsertLogTelegram("[Repository] getDetailVoucher in VoucherRepository: " + ex);
                 return null;
             }
         }
@@ -42,7 +42,7 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("[Repository] getVoucherPublic in VoucherRepository" + ex);
+                LogHelper.InsertLogTelegram("[Repository] getVoucherPublic in VoucherRepository: " + ex);
                 return null;
             }
         }

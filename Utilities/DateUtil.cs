@@ -42,7 +42,7 @@ namespace Utilities
             }
         }
 
-        public static DateTime? StringToDate(string dateStr, string dateFormat = "d/M/yyyy")
+        public static DateTime? StringToDate(string dateStr, string dateFormat = "dd/MM/yyyy")
         {
             try
             {

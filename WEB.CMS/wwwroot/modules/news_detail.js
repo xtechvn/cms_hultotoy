@@ -1,13 +1,42 @@
-﻿$(document).ready(function () {
+﻿var _wrapperImage = $("#video-content");
+var _attachfile = $("#lightgallery");
+$(document).ready(function () {
+    /*
     $('.datepicker-input').Zebra_DatePicker({
         format: 'd/m/Y H:i',
         onSelect: function () {
             $(this).change();
         }
-    }).removeAttr('readonly');
+    }).removeAttr('readonly');*/
+    $('input[name="single_pick_date"]').daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        drops: 'down',
+        timePicker: true,
+        timePicker24Hour: true,
+        minDate: '01/01/2023 00:00',
+        maxDate: '31/12/2052 23:59',
+        locale: {
+            format: 'DD/MM/YYYY HH:mm'
+        }
+    }, function (start, end, label) {
+
+    });
+    var val = $('#PublishDate').attr('value');
+    $('#PublishDate').data('daterangepicker').setStartDate(val);
+
+    if ($('#ArticleType:checked').val() == 1) {
+        $('#normal_post').hide();
+        $('#video_post').show();
+
+        $('#video-preview').hide();
+    };
+
+    _wrapperImage.lightGallery();
+
 });
 
-_common.tinyMce('text-editor');
+_common.tinyMce('#text-editor');
 
 $('#detail-cate-panel .btn-toggle-cate').click(function () {
     var seft = $(this);
@@ -42,7 +71,13 @@ $('#news-tag').tagsinput({
         }
     }
 });
-
+const iconLoading = document.getElementById("loading");
+const showLoading = () => {
+    iconLoading.style.display = "flex";
+};
+const hideLoading = () => {
+    iconLoading.style.display = "none";
+};
 var uploadCrop = $('#croppie-content').croppie({
     viewport: {
         width: 200,
@@ -55,6 +90,7 @@ var uploadCrop = $('#croppie-content').croppie({
     },
     url: '/images/icons/noimage.png'
 });
+
 
 $('.sl-image-size').change(function (e) {
     var value = e.target.value;
@@ -130,6 +166,44 @@ $('#image_file').change(function (event) {
     }
 });
 
+$('#video-file').change(function (event) {
+    var _validFileExtensions = ["mp4"];
+    if (event.target.files && event.target.files[0]) {
+        var fileType = event.target.files[0].name.split('.').pop();
+
+        if (event.target.files[0].size > (100 * 1024 * 1024)) {
+            _msgalert.error('File upload hiện tại có kích thước (' + Math.round(event.target.files[0].size / 1024 / 1024, 2) + ' Mb) vượt quá 100 Mb. Bạn hãy chọn lại ảnh khác');
+            $(this).val('');
+        }
+
+        if (!_validFileExtensions.includes(fileType)) {
+            _msgalert.error('File upload phải thuộc các định dạng : mp4');
+            $(this).val('');
+        }
+
+        if (_validFileExtensions.includes(fileType) && event.target.files[0].size <= (100 * 1024 * 1024)) {
+            var reader = new FileReader();
+            $('#video-content').show();
+            $('#video-croppie').show();
+
+            $('#video-preview').hide();
+            showLoading();
+            setTimeout(() => {
+                $('#uploadvieo').show();
+                reader.onload = function (e) {
+                    _wrapperImage.append('<video  class="col-md" id="iframe-video"  src="' + reader.result + '" controls></video>'
+
+                        /*'<iframe style="width: 100 %;" id="iframe-video" src="' + reader.result + '"></iframe>'*/
+                    );
+                };
+                reader.readAsDataURL(event.target.files[0]);
+                hideLoading();
+            }, 2000);
+
+        }
+    }
+});
+
 $('#btn-cropimage').click(function () {
     var size = $('.sl-image-size').val();
     if (size == "") {
@@ -176,6 +250,7 @@ $('#btn-cancel-crop').click(function () {
     // $('.btn-dynamic-enable').prop('disabled', false);
 });
 
+
 var _newsDetail = {
 
     OnOpenRelationForm: function (id) {
@@ -184,10 +259,14 @@ var _newsDetail = {
         let param = { Id: id };
         _magnific.OpenLargerPopup(title, url, param);
     },
+    RefreshlightGallery: function () {
+        _wrapperImage.data('lightGallery').destroy(true);
+        _wrapperImage.lightGallery();
+    },
 
     OnSave: function (articleStatus) {
         let formvalid = $('#form-news');
-
+        var max_pos = $('#ArticleType:checked').val() == "0" ? 7 : 8;
         formvalid.validate({
             rules: {
                 Title: {
@@ -196,11 +275,11 @@ var _newsDetail = {
                 },
                 Lead: {
                     required: true,
-                    maxlength: 500
+                    maxlength: 400
                 },
                 Position: {
-                    min:0,
-                    max:3
+                    min: 0,
+                    max: max_pos
                 }
             },
             messages: {
@@ -211,11 +290,11 @@ var _newsDetail = {
                 },
                 Lead: {
                     required: "Vui lòng nhập mô tả ngắn cho bài viết",
-                    maxlength: "Tiêu đề cho bài viết không được vượt quá 500 ký tự"
+                    maxlength: "Tiêu đề cho bài viết không được vượt quá 400 ký tự"
                 },
                 Position: {
-                    min: "Vị trí bài viết phải trong khoảng 0 đến 3",
-                    max: "Vị trí bài viết phải trong khoảng 0 đến 3"
+                    min: "Vị trí bài viết phải trong khoảng 0 đến " + max_pos,
+                    max: "Vị trí bài viết phải trong khoảng 0 đến " + max_pos
                 }
             }
         });
@@ -242,7 +321,10 @@ var _newsDetail = {
                 _msgalert.error('Bạn phải chọn chuyên mục cho bài viết');
                 return false;
             }
-
+            if ($('#Lead').val().length >= 400) {
+                _msgalert.error('Tiêu đề cho bài viết không được vượt quá 400 ký tự');
+                return false;
+            }
             var _model = {
                 Id: $('#Id').val(),
                 Title: $('#Title').val(),
@@ -259,6 +341,9 @@ var _newsDetail = {
                 PublishDate: ConvertToJSONDateTime($('#PublishDate').val()),
                 DownTime: ConvertToJSONDateTime($('#DowntimeDate').val()),
                 Position: $('#Position').val()
+            }
+            if (_model.ArticleType == 1) {
+                _model.Body = $('#link-video').attr('src') == undefined ? "" : $('#link-video').attr('src');
             }
 
             if (_model.Image169 == "" && _model.Image43 == "" && _model.Image11 == "") {
@@ -318,6 +403,7 @@ var _newsDetail = {
                         _msgalert.success(result.message);
                         setTimeout(function () {
                             window.location.href = "/news/detail/" + result.dataId;
+
                         }, 200);
                     } else {
                         _msgalert.error(result.message);
@@ -352,5 +438,82 @@ var _newsDetail = {
                 }
             });
         });
-    }
+    },
+    Onchen: function (input) {
+        var iframevideo = $('#iframe-video').attr('src') == undefined ? "" : $('#iframe-video').attr('src')
+        if (input == 0 && iframevideo == "") {
+
+            $('#normal_post').show();
+
+            $('#video_post').hide();
+        }
+        if (input == 1 && iframevideo == "") {
+            $('#normal_post').hide();
+            $('#video_post').show();
+            $('#video-preview').show();
+        }
+        if (input == 0 && iframevideo != "") {
+            var result = confirm("Dữ liệu bài video sẽ bị xóa. Bạn có chắc chắn không ?");
+            if (result == true) {
+                $('#normal_post').show();
+                $('#iframe-video').remove();
+                location.reload('#video_post');
+                $('#video_post').hide();
+            }
+
+        }
+        if (input == 1 && iframevideo != "") {
+            var result = confirm("Dữ liệu bài thường sẽ bị xóa. Bạn có chắc chắn không ?");
+            if (result == true) {
+                $('#normal_post').hide();
+                $('#iframe-video').remove();
+                $('#video_post').show();
+
+            }
+        }
+        if (input == 0) {
+            $('#Position').attr('max', '7');
+        }
+        if (input == 1) {
+            $('#Position').attr('max', '8');
+        }
+    },
+    DeleteVideo: function () {
+        $('#iframe-video').remove();
+        $('#video-preview').show();
+        $('#video_post').show();
+    },
+    OnseverVideo: function () {
+        var _model = {
+
+            Body: $('#iframe-video').attr('src') == undefined ? "" : $('#iframe-video').attr('src'),
+            ArticleType: $('#ArticleType:checked').val(),
+        }
+        console.log(_model.Body);
+
+        $.ajax({
+            url: '/AttachFile/UploadFileVideo',
+            type: 'POST',
+            data: JSON.stringify(_model),
+            dataType: 'JSON',
+            contentType: "application/json",
+            traditional: true,
+            // data: { model: _model },
+            success: function (result) {
+                if (result.isSuccess) {
+                    _msgalert.success(result.message);
+
+                    _attachfile.append('<video style="display:none"  class="col-md" id="link-video"  src="' + result.dataId + '" controls></video>');
+
+                    /**/
+                    _newsDetail.RefreshlightGallery();
+                } else {
+                    _msgalert.error(result.message);
+                }
+            },
+            error: function (jqXHR) {
+
+            }
+        });
+    },
 }

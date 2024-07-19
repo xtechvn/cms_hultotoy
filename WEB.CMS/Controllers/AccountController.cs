@@ -1,32 +1,31 @@
-﻿using DAL;
+﻿using Entities.ConfigModels;
 using Entities.Models;
 using Entities.ViewModels;
+using Entities.ViewModels.Login;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using OtpNet;
 using Repositories.IRepositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using Utilities;
 using Utilities.Common;
 using Utilities.Contants;
-using WEB.CMS.Common;
-using WEB.CMS.Customize;
 using WEB.CMS.Models;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json.Linq;
+using WEB.Adavigo.CMS.Service;
+using Microsoft.AspNetCore.Hosting;
+using Caching.RedisWorker;
 
 namespace WEB.CMS.Controllers
 {
@@ -35,469 +34,19 @@ namespace WEB.CMS.Controllers
         private readonly IUserRepository _UserRepository;
         private readonly IMFARepository _mFARepository;
         private readonly IConfiguration _configuration;
-        public AccountController(IUserRepository userRepository, IMFARepository mFARepository, IConfiguration configuration)
+        private readonly APIService _aPIService;
+        private readonly IWebHostEnvironment _WebHostEnvironment;
+        private RedisConn _redisConn;
+
+        public AccountController(IUserRepository userRepository, IMFARepository mFARepository, IConfiguration configuration, IWebHostEnvironment hostEnvironment)
         {
             _UserRepository = userRepository;
             _mFARepository = mFARepository;
             _configuration = configuration;
-        }
-        /// <summary>
-        /// Function Login cũ
-        /// </summary>
-        /// <param name="requestPath"></param>
-        /// <returns></returns>
-        [HttpGet]
-        public IActionResult Login(string requestPath = null)
-        {
-            var model = new AccountModel()
-            {
-                ReturnUrl = requestPath,
-            };
-            return View(model);
-        }
-        /// <summary>
-        /// Function thực hiện xử lý đăng nhập bước 1.
-        /// </summary>
-        /// <param name="entity"> Thông tin đăng nhập</param>
-        /// <returns></returns>
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(AccountModel entity)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    var model = await _UserRepository.CheckExistAccount(entity);
-                    if (model != null)
-                    {
-                        //Kiểm tra trạng thái tài khoản
-                        if (model.Entity.Status != 0)
-                        {
-                            ModelState.AddModelError(string.Empty, "Tài khoản của bạn đã bị khóa");
-                        }
-                        else
-                        {
-                            if (_configuration["Config:On_QC_Environment"] == "1")
-                            {
-                                // Tạo Cookie
-                                var claims = new List<Claim>();
-                                claims.Add(new Claim(ClaimTypes.NameIdentifier, model.Entity.Id.ToString()));
-                                claims.Add(new Claim(ClaimTypes.Name, model.Entity.UserName));
-                                claims.Add(new Claim(ClaimTypes.Email, model.Entity.Email));
-                                claims.Add(new Claim(ClaimTypes.Role, string.Join(",", model.RoleIdList)));
-                                var claimsIdentity = new ClaimsIdentity(
-                                    claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                                var authProperties = new AuthenticationProperties
-                                {
-                                    AllowRefresh = true,
-                                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1),
-                                    IsPersistent = entity.RememberMe,
-                                };
-                                await HttpContext.SignInAsync(
-                                    CookieAuthenticationDefaults.AuthenticationScheme,
-                                    new ClaimsPrincipal(claimsIdentity),
-                                    authProperties);
-                                //Logging successful login to cms:
-                                LoggingActivity.AddLog(model.Entity.Id, model.Entity.UserName, (int)LogActivityType.LOGIN_CMS, "Login user " + model.Entity.UserName + " thành công trong môi trường QC.");
-                                // Redirect
-                                return Redirect(entity.ReturnUrl ?? "/");
-                            }
-                            else
-                            {
-                                // Lấy thông tin:
-                                Mfauser mfa_detail = await _mFARepository.get_MFA_DetailByUserID(model.Entity.Id);
-                                // Nếu tài khoản chưa thiết lập 2FA,  redirect về trang setup 2fa.
-                                if (mfa_detail == null)
-                                {
-                                    var create_2fa_status = await ForceCreateMFA(model);
-                                    if (create_2fa_status)
-                                    {
-                                        var user_detail = new Dictionary<string, string>();
-                                        user_detail.Add("UserID", model.Entity.Id.ToString());
-                                        user_detail.Add("UserName", model.Entity.UserName);
-                                        user_detail.Add("time_exprire", DateTime.Now.ToUniversalTime().AddHours(1).ToString());
-                                        TempData["token"] = Utilities.CommonHelper.Encode(JsonConvert.SerializeObject(user_detail), ReadFile.LoadConfig().KEY_TOKEN_API);
-                                        return RedirectToAction("Setup", "Account");
-                                    }
-                                    else
-                                        ModelState.AddModelError(string.Empty, "Không thể đăng nhập vào lúc này, vui lòng liên hệ với bộ phận kỹ thuật.");
-
-                                }
-                                //Nếu đã thiết lập 2FA:
-                                else
-                                {
-                                    if (mfa_detail.Status == 0)
-                                    {
-                                        var user_detail = new Dictionary<string, string>();
-                                        user_detail.Add("UserID", model.Entity.Id.ToString());
-                                        user_detail.Add("UserName", model.Entity.UserName);
-                                        user_detail.Add("time_exprire", DateTime.Now.ToUniversalTime().AddHours(1).ToString());
-                                        TempData["token"] = Utilities.CommonHelper.Encode(JsonConvert.SerializeObject(user_detail), ReadFile.LoadConfig().KEY_TOKEN_API);
-                                        return RedirectToAction("Setup", "Account");
-                                    }
-                                    else
-                                    {
-                                        //-- Nếu không bắt được url trước khi chuyển hướng tới login, redirect về trang chủ sau khi đăng nhập thành công
-                                        if (entity.ReturnUrl == null) entity.ReturnUrl = "/";
-                                        //-- Tạo temp data rồi đẩy sang trang otp, tránh tình trạng url quá dài và sử dụng lại url để login chỉ bằng otp.
-                                        TempData["token"] = Utilities.CommonHelper.Encode(JsonConvert.SerializeObject(entity), ReadFile.LoadConfig().KEY_TOKEN_API);
-                                        //-- Điều hướng về trang OTP
-                                        return RedirectToAction("Authenticate", "Account");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //Thông tin sai:
-                        ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không chính xác");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-            return View(entity);
-        }
-
-        /// <summary>
-        /// Trả view OTP
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public IActionResult Authenticate(string requestPath = null)
-        {
-            try
-            {
-                // Kiểm tra nếu temp data có token
-                if (TempData.ContainsKey("token"))
-                {
-                    var token = TempData["token"].ToString();
-                    MFAAccountViewModel mFARecord = new MFAAccountViewModel()
-                    {
-                        MFA_token = token,
-                        ReturnUrl = requestPath
-                    };
-                    return View(mFARecord);
-                }
-                else
-                {
-                    //Không được redirect từ trang login, hoặc "login" không truyền token sang, redirect lại về trang
-                    return RedirectToAction("Login", "Account");
-                }
-            }
-            catch (Exception)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-        }
-        /// <summary>
-        /// Xử lý OTP từ google authenticator
-        /// </summary>
-        /// <param name="record"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Authenticate(MFAAccountViewModel record)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    string text_error = "Mã OTP nhập vào không chính xác, vui lòng thử lại.";
-                    if (record.MFA_Code == null)
-                    {
-                        //Nếu sai OTP hoặc quá hạn:
-                        ModelState.AddModelError(string.Empty, text_error);
-                    }
-                    else
-                    {
-                        // Kiểm tra lại token.
-                        AccountModel entity = JsonConvert.DeserializeObject<AccountModel>(Utilities.CommonHelper.Decode(record.MFA_token, ReadFile.LoadConfig().KEY_TOKEN_API));
-                        var model = await _UserRepository.CheckExistAccount(entity);
-                        // Nếu đúng thông tin
-                        if (model != null)
-                        {
-                            // Lấy thông tin MFA
-                            var mfa_record = await _mFARepository.get_MFA_DetailByUserID(model.Entity.Id);
-                            string otp_code = "";
-                            int remainingTime = 0;
-                            switch (record.MFA_type)
-                            {
-                                case 0:
-                                    {
-                                        // Convert sang byte
-                                        var bytes = Base32OTPEncoding.ToBytes(mfa_record.SecretKey.Trim());
-                                        // Xây mã OTP
-                                        var totp = new Totp(bytes);
-                                        otp_code = totp.ComputeTotp();
-                                        remainingTime = totp.RemainingSeconds();
-                                        text_error = "Mã OTP nhập vào không chính xác, vui lòng thử lại.";
-                                        var compare_otp = await CompareOTP(mfa_record.UserId, record.MFA_Code, record.MFA_timenow);
-                                        //Kiểm tra OTP tạo ra với OTP gửi lên và thời gian
-                                        if (compare_otp)
-                                        {
-                                            // Tạo Cookie
-                                            var claims = new List<Claim>();
-                                            claims.Add(new Claim(ClaimTypes.NameIdentifier, model.Entity.Id.ToString()));
-                                            claims.Add(new Claim(ClaimTypes.Name, model.Entity.UserName));
-                                            claims.Add(new Claim(ClaimTypes.Email, model.Entity.Email));
-                                            claims.Add(new Claim(ClaimTypes.Role, string.Join(",", model.RoleIdList)));
-                                            var claimsIdentity = new ClaimsIdentity(
-                                                claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                                            var authProperties = new AuthenticationProperties
-                                            {
-                                                AllowRefresh = true,
-                                                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1),
-                                                IsPersistent = entity.RememberMe,
-                                            };
-                                            await HttpContext.SignInAsync(
-                                                CookieAuthenticationDefaults.AuthenticationScheme,
-                                                new ClaimsPrincipal(claimsIdentity),
-                                                authProperties);
-                                            //Logging successful login to cms:
-                                            LoggingActivity.AddLog(model.Entity.Id, model.Entity.UserName, (int)LogActivityType.LOGIN_CMS, "Login user "+model.Entity.UserName+ " thành công với OTP: " + record.MFA_Code);
-                                            // Redirect
-                                            return Redirect(entity.ReturnUrl ?? "/");
-                                        }
-                                        else
-                                        {
-                                            //Nếu sai OTP hoặc quá hạn:
-                                            ModelState.AddModelError(string.Empty, text_error);
-                                        }
-                                    }
-                                    break;
-                                case 1:
-                                    {
-                                        /*
-                                        otp_code = mfa_record.BackupCode;
-                                        record.MFA_timenow = DateTime.Now.ToUniversalTime().AddSeconds(remainingTime);
-                                        text_error = "Mã dự phòng nhập vào không chính xác, vui lòng thử lại hoặc liên hệ với bộ phận kỹ thuật.";
-
-                                        string backupcode_input = BackupCodeMD5FromInput(record.MFA_Code, mfa_record);
-                                        if (backupcode_input == mfa_record.BackupCode.Trim())
-                                        {
-                                            // Tạo Cookie
-                                            var claims = new List<Claim>();
-                                            claims.Add(new Claim(ClaimTypes.NameIdentifier, model.Entity.Id.ToString()));
-                                            claims.Add(new Claim(ClaimTypes.Name, model.Entity.UserName));
-                                            claims.Add(new Claim(ClaimTypes.Email, model.Entity.Email));
-                                            claims.Add(new Claim(ClaimTypes.Role, string.Join(",", model.RoleIdList)));
-                                            var claimsIdentity = new ClaimsIdentity(
-                                                claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                                            var authProperties = new AuthenticationProperties
-                                            {
-                                                AllowRefresh = true,
-                                                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1),
-                                                IsPersistent = entity.RememberMe,
-                                            };
-                                            await HttpContext.SignInAsync(
-                                                CookieAuthenticationDefaults.AuthenticationScheme,
-                                                new ClaimsPrincipal(claimsIdentity),
-                                                authProperties);
-                                            // Redirect
-                                            return Redirect(entity.ReturnUrl ?? "/");
-                                        }
-                                        else
-                                        {
-                                            //Nếu sai OTP hoặc quá hạn:
-                                            ModelState.AddModelError(string.Empty, text_error);
-                                        }
-                                        */
-                                    }
-                                    break;
-                                default:
-                                    {
-                                        text_error = "Vui lòng chọn phương thức xác thực khác và thử lại.";
-                                        ModelState.AddModelError(string.Empty, text_error);
-                                    }
-                                    break;
-                            }
-
-                        }
-                    }
-
-                }
-                else
-                {
-                    return RedirectToAction("Login", "Account");
-                }
-                return View(record);
-            }
-            catch (Exception)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-        }
-        [HttpGet]
-        public async Task<IActionResult> Setup()
-        {
-            try
-            {
-                if (TempData.ContainsKey("token"))
-                {
-                    string token = TempData["token"].ToString();
-                    var user_json = Utilities.CommonHelper.Decode(token, ReadFile.LoadConfig().KEY_TOKEN_API);
-                    Dictionary<string, string> user_detail = JsonConvert.DeserializeObject<Dictionary<string, string>>(user_json);
-                    if (user_detail != null || user_detail["UserID"] != null || user_detail["UserName"] != null || user_detail["time_exprire"] != null)
-                    {
-                        DateTime time_exprire = DateTime.Parse(user_detail["time_exprire"]);
-                        if (time_exprire > DateTime.Now.ToUniversalTime())
-                        {
-                            var mfa_record = await _mFARepository.get_MFA_DetailByUserID(Convert.ToInt32(user_detail["UserID"]));
-                            ViewBag.token = token;
-                            ViewBag.QRCodeUri = GenerateQRCode(mfa_record);
-                            ViewBag.SecretKey = FormatKey(mfa_record.SecretKey);
-                            ViewBag.UserName = user_detail["UserName"];
-                            ViewBag.Status = mfa_record.Status;
-                            return View();
-                        }
-
-                    }
-                    else
-                    {
-
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-
-            }
-            return RedirectToAction("Login", "Account");
-        }
-        [HttpPost]
-        public async Task<ActionResult> ConfirmMFA(string token)
-        {
-            try
-            {
-                var user_json = Utilities.CommonHelper.Decode(token, ReadFile.LoadConfig().KEY_TOKEN_API);
-                Dictionary<string, string> user_detail = JsonConvert.DeserializeObject<Dictionary<string, string>>(user_json);
-                if (user_detail != null || user_detail["UserID"] != null || user_detail["UserName"] != null || user_detail["time_exprire"] != null)
-                {
-                    DateTime time_exprire = DateTime.Parse(user_detail["time_exprire"]);
-                    if (time_exprire > DateTime.Now.ToUniversalTime())
-                    {
-                        var mfa_detail = await _mFARepository.get_MFA_DetailByUserID(Convert.ToInt32(user_detail["UserID"]));
-                        mfa_detail.Status = 1;
-                        var result = await _mFARepository.UpdateAsync(mfa_detail);
-                        if (result == "Success")
-                        {
-                            return new JsonResult(new
-                            {
-                                status = ResponseType.SUCCESS.ToString(),
-                                msg = "Kích hoạt bảo mật 2 lớp thành công."
-                            });
-                        }
-
-                    }
-                }
-                return new JsonResult(new
-                {
-                    status = ResponseType.FAILED.ToString(),
-                    msg = "Thao tác không thành công, vui lòng thử lại."
-                });
-            }
-            catch (Exception ex)
-            {
-                return new JsonResult(new
-                {
-                    status = ResponseType.ERROR.ToString(),
-                    msg = "Có lỗi trong quá trình xử lý, vui lòng liên hệ bộ phận kỹ thuật."
-                });
-            }
-        }
-        [HttpPost]
-        public async Task<ActionResult> OTPTest(MFAAccountViewModel record)
-        {
-            try
-            {
-                string token = record.MFA_token;
-                var user_json = Utilities.CommonHelper.Decode(token, ReadFile.LoadConfig().KEY_TOKEN_API);
-                Dictionary<string, string> user_detail = JsonConvert.DeserializeObject<Dictionary<string, string>>(user_json);
-                int _UserId = Convert.ToInt32(user_detail["UserID"]);
-                var mfa_record = await _mFARepository.get_MFA_DetailByUserID(_UserId);
-                switch (record.MFA_type)
-                {
-                    case 0:
-                        {
-                            bool compare_value = false;
-                            // Lấy thông tin MFA
-                            // Convert sang byte
-                            var bytes = Base32OTPEncoding.ToBytes(mfa_record.SecretKey.Trim());
-                            // Xây mã OTP
-                            var totp = new Totp(bytes);
-                            var otp_code = totp.ComputeTotp();
-                            //var remainingTime = totp.RemainingSeconds();
-                            //Kiểm tra OTP tạo ra với OTP gửi lên và thời gian
-                            if (record.MFA_Code == otp_code)
-                            {
-                                compare_value = true;
-                            }
-                            else
-                            {
-                                compare_value = false;
-                            }
-                            // var compare_value = await CompareOTP(_UserId, record.MFA_Code, record.MFA_timenow);
-                            if (compare_value)
-                            {
-                                return new JsonResult(new
-                                {
-                                    status = ResponseType.SUCCESS.ToString(),
-                                    msg = "Xác thực thành công đối với mã OTP đã nhập."
-                                });
-                            }
-                            else
-                            {
-                                return new JsonResult(new
-                                {
-                                    status = ResponseType.FAILED.ToString(),
-                                    msg = "Xác thực không thành công, vui lòng kiểm tra lại cài đặt."
-                                });
-                            }
-                        }
-                    case 1:
-                        {
-                            string backupcode_input = BackupCodeMD5FromInput(record.MFA_Code, mfa_record);
-                            if (backupcode_input == mfa_record.BackupCode.Trim())
-                            {
-                                return new JsonResult(new
-                                {
-                                    status = ResponseType.SUCCESS.ToString(),
-                                    msg = "Xác thực thành công đối với mã dự phòng đã nhập."
-                                });
-                            }
-                            else
-                            {
-                                return new JsonResult(new
-                                {
-                                    status = ResponseType.FAILED.ToString(),
-                                    msg = "Xác thực không thành công, vui lòng kiểm tra lại mã."
-                                });
-                            }
-                        }
-                    default:
-                        {
-                            return new JsonResult(new
-                            {
-                                status = ResponseType.FAILED.ToString(),
-                                msg = "OTP nhập lên không thuộc phương thức hợp lệ, vui lòng thử lại"
-                            });
-                        }
-                }
-            }
-            catch (Exception)
-            {
-                return new JsonResult(new
-                {
-                    status = ResponseType.FAILED.ToString(),
-                    msg = "Lỗi trong quá trình xử lý, vui lòng liên hệ với bộ phận kỹ thuật."
-                });
-            }
+            _aPIService = new APIService(configuration, userRepository);
+            _WebHostEnvironment = hostEnvironment;
+            _redisConn = new RedisConn(configuration);
+            _redisConn.Connect();
         }
         /// <summary>
         /// Function Đăng xuất
@@ -507,181 +56,565 @@ namespace WEB.CMS.Controllers
         public IActionResult Logout()
         {
             HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login", "Account");
-        }
+            try
+            {
+                int _UserId = 0;
+                if (HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
+                {
+                    _UserId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                }
+                _redisConn.clear(CacheName.USER_ROLE + _UserId, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
+            }
+            catch { }
+            return Redirect(ReadFile.LoadConfig().LoginURL);
 
-        /// <summary>
-        /// Reset mật khẩu
-        /// </summary>
-        /// <param name="EmailOrUserName"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> ResetPassword(string EmailOrUserName)
+        }
+        public IActionResult RedirectLogin()
         {
             try
             {
-                var rs = await _UserRepository.ResetPassword(EmailOrUserName);
-                if (rs)
+                HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            }
+            catch { }
+            if (_configuration["Config:On_QC_Environment"]!=null && _configuration["Config:On_QC_Environment"].Trim()=="1")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            return Redirect(ReadFile.LoadConfig().LoginURL) ;
+        }
+        /// <summary>
+        /// Login with token
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("login/token/{token_user}")]
+        public async Task<IActionResult> LoginWithToken(string token_user)
+        {
+            try
+            {
+                JArray objParr = null;
+                #region Test:
+
+                //var input_test = new
+                //{
+                //    user_id = 2139,
+                //    user_name = "minh.nq",
+                //    email = "minhnguyen@usexpress.vn",
+                //    time = DateTime.Now
+                //};
+                //var data_product = JsonConvert.SerializeObject(input_test);
+                //token = CommonHelper.Encode(data_product, _configuration["DataBaseConfig:key_api:api_manual"]);
+                //token = token.Replace("//", "_").Replace("+", "-");
+
+
+                #endregion
+                if (CommonHelper.GetParamWithKey(token_user.Replace("_", @"/").Replace("-", "+"), out objParr, _configuration["DataBaseConfig:key_api:api_manual"]))
                 {
-                    return new JsonResult(new
+                    //LogHelper.InsertLogTelegram("CMS Login : login/token/" + token_user + "\n Data:\n " + JsonConvert.SerializeObject(objParr));
+                    int _UserId = 0;
+                    if (HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
                     {
-                        isSuccess = true,
-                        message = "Lấy lại mật khẩu thành công. Vui lòng kiểm tra Email của bạn để lấy mật khẩu"
+                        _UserId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                    }
+                    int user_id = Convert.ToInt32(objParr[0]["user_id"].ToString());
+                    DateTime? token_time  = Convert.ToDateTime(objParr[0]["time"].ToString());
+                    string user_name = objParr[0]["user_name"].ToString();
+                    string email = objParr[0]["email"].ToString();
+                    int token_exprire = ReadFile.LoadConfig().LoginTokenExprire;
+
+                    if (user_id <= 0 || token_time == null || ((DateTime)token_time).AddMinutes(token_exprire) < DateTime.Now)
+                    {
+
+                    }
+                    else
+                    {
+                        var user_exists = await _UserRepository.GetById(user_id);
+                        var model = await _UserRepository.GetDetailUser(user_id);
+                        if (model.Entity == null) model.Entity = new User();
+                        model.Entity.Id = user_id;
+                        model.Entity.UserName = user_name;
+                        model.Entity.Email = email;
+                        await CreateCookieAuthenticate(model);
+                        return RedirectToAction("Index", "Home");
+                       
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("CMS Login : login/token/" + token_user + "\nError: " + ex);
+            }
+            if (_configuration["Config:On_QC_Environment"] != null && _configuration["Config:On_QC_Environment"].Trim() == "1")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            return Redirect(ReadFile.LoadConfig().LoginURL);
+
+        }
+        /// <summary>
+        /// Login with token
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("login/check-login")]
+        public async Task<IActionResult> CheckIfUserLogged([FromForm]string token)
+        {
+            try
+            {
+                JArray objParr = null;
+                #region Test:
+
+                //var input_test = new
+                //{
+                //    user_id = 18,
+
+                //};
+                //var data_product = JsonConvert.SerializeObject(input_test);
+                //token = CommonHelper.Encode(data_product, _configuration["DataBaseConfig:key_api:api_manual"]);
+                //token = token.Replace("//", "_").Replace("+", "-");
+
+
+                #endregion
+                token = token.Replace("_", "//").Replace("-", "+");
+                if (CommonHelper.GetParamWithKey(token, out objParr, _configuration["DataBaseConfig:key_api:api_manual"]))
+                {
+                    int user_id = user_id = Convert.ToInt32(objParr[0]["user_id"].ToString());
+                    int _UserId = 0;
+
+                    if (HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
+                    {
+                        _UserId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                    }
+                    if (_UserId>0 && _UserId == user_id)
+                    {
+                        return Ok(new
+                        {
+                            status = (int)ResponseType.SUCCESS,
+                            Logged = 1
+                        });
+                    }
+                    else
+                    {
+                        return Ok(new
+                        {
+                            status = (int)ResponseType.FAILED,
+                            Logged = 0
+                        });
+                    }
+                }
+               
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("CheckIfUserLogged - AccountController" + ex);
+
+            }
+            return Ok(new
+            {
+                status = (int)ResponseType.FAILED,
+                Logged = -1
+            });
+        }
+        private async Task CreateCookieAuthenticate(UserDetailViewModel model)
+        {
+            try
+            {
+                var claims = new List<Claim>();
+                claims.Add(new Claim(ClaimTypes.NameIdentifier, model.Entity.Id.ToString()));
+                claims.Add(new Claim(ClaimTypes.Name, model.Entity.UserName));
+                claims.Add(new Claim("DepartmentId", (model.Entity.DepartmentId ?? 0).ToString()));
+                claims.Add(new Claim(ClaimTypes.Email, model.Entity.Email));
+                claims.Add(new Claim(ClaimTypes.Role, string.Join(",", model.RoleIdList)));
+
+                //--Get and Cache Permission:
+                UserRoleCacheModel user_role_cache = new UserRoleCacheModel();
+                var role_permission = await _UserRepository.GetUserPermissionById(model.Entity.Id);
+                if (role_permission != null && role_permission.Any())
+                {
+                    user_role_cache.Permission = role_permission.Select(s => new PermissionData
+                    {
+                        MenuId = s.MenuId,
+                        RoleId = s.RoleId,
+                        PermissionId = s.PermissionId
                     });
                 }
                 else
                 {
-                    return new JsonResult(new
+                    user_role_cache.Permission = Enumerable.Empty<PermissionData>();
+                }
+                user_role_cache.UserUnderList = _UserRepository.GetListUserByUserId(model.Entity.Id);
+                var data_encode = JsonConvert.SerializeObject(user_role_cache);
+                string token = CommonHelper.Encode(data_encode, _configuration["DataBaseConfig:key_api:api_manual"]);
+                //string token = data_encode;
+                _redisConn.Set(CacheName.USER_ROLE + model.Entity.Id + "_" + _configuration["CompanyType"], token, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
+
+
+                //-- Login:
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties
+                {
+                    AllowRefresh = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1),
+                    IsPersistent = true
+                };
+
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public IActionResult Login(string url = "/")
+        {
+            ViewBag.ReturnURL = url;
+            return View();
+        }
+
+        /// <summary>
+        /// Function thực hiện xử lý đăng nhập bước 1.
+        /// </summary>
+        /// <param name="entity"> Thông tin đăng nhập</param>
+        /// <returns></returns>
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmLogin(AccountModel model)
+        {
+            try
+            {
+                //-- Validate Input
+                if (model == null || model.UserName == null || model.UserName.Trim() == "" || model.Password == null || model.Password.Trim() == "")
+                {
+                    return Ok(new
                     {
-                        isSuccess = false,
-                        message = "Email hoặc tên đăng nhập không tồn tại."
+                        status = (int)ResponseType.FAILED,
+                        msg = "Tài khoản / Mật khẩu không được để trống, vui lòng thử lại"
                     });
+                }
+                //-- Bỏ ký tự đặc biệt
+                model.ReturnUrl = CommonHelper.RemoveAllSpecialCharacterinURL(model.ReturnUrl);
+                model.UserName = CommonHelper.RemoveAllSpecialCharacterLogin(model.UserName);
+                model.UserName = model.UserName.Replace("+", "").Replace("//", "").Replace("=", "");
+                model.Password = CommonHelper.RemoveAllSpecialCharacterLogin(model.Password);
+                //-- Kiểm tra user/pass
+                var user = await _UserRepository.CheckExistAccount(model);
+                if (user == null || user.Entity == null || user.Entity.Id <= 0)
+                {
+                    return Ok(new
+                    {
+                        status = (int)ResponseType.FAILED,
+                        msg = "Tài khoản / Mật khẩu không chính xác, vui lòng thử lại"
+                    });
+                }
+                //-- Nếu tài khoản bị khóa
+                if (user.Entity.Status != 0)
+                {
+                    return Ok(new
+                    {
+                        status = (int)ResponseType.FAILED,
+                        msg = "Tài khoản của bạn đã bị khóa, vui lòng liên hệ IT"
+                    });
+                }
+                //-- Nếu môi trường QC
+                if (_configuration["Config:On_QC_Environment"] == "1")
+                {
+                    await CreateCookieAuthenticate(user);
+                    return Ok(new
+                    {
+                        status = (int)ResponseType.SUCCESS,
+                        msg = "Đăng nhập thành công",
+                        direct = model.ReturnUrl ?? "/"
+                    });
+                }
+
+                var remoteIpAddress = HttpContext.Request.HttpContext.Connection.RemoteIpAddress;
+
+                //-- Tạo token
+                UserLoginModel login_model = new UserLoginModel()
+                {
+                    id = user.Entity.Id,
+                    date = DateTime.Now.AddHours(4),
+                    url = model.ReturnUrl ?? "/",
+                    user = model.UserName,
+                    pass = model.Password,
+                    ip = remoteIpAddress.ToString()
+                };
+                var key = MFAService.Get_AESKey(MFAService.ConvertBase64StringToByte(ReadFile.LoadConfig().AES_KEY));
+                var iv = MFAService.Get_AESIV(MFAService.ConvertBase64StringToByte(ReadFile.LoadConfig().AES_IV));
+                var encrypt = MFAService.AES_EncryptToByte(JsonConvert.SerializeObject(login_model), key, iv);
+                var token = MFAService.ConvertByteToBase64String(encrypt);
+                //Set Session:
+                HttpContext.Session.SetString("token", token);
+
+                //-- Kiểm tra bảo mật 2 lớp :
+                Mfauser mfa_detail = await _mFARepository.get_MFA_DetailByUserID(user.Entity.Id);
+                //-- Nếu chưa tạo hoặc chưa quét QR
+                if (mfa_detail == null || mfa_detail.Status == 0)
+                {
+                    bool create_2fa_status = false;
+                    //-- Tạo MFA
+                    if (mfa_detail == null)
+                    {
+
+                        var new_2fa_model = await MFAService.Get2FAModel(user);
+                        var mfa_id = await _mFARepository.CreateAsync(new_2fa_model);
+                        if (mfa_id > 0) create_2fa_status = true;
+                    }
+                    //-- Có MFA sẵn
+                    else
+                    {
+                        create_2fa_status = true;
+                    }
+                    //-- Direct To Setup
+                    if (create_2fa_status)
+                    {
+                        return Ok(new
+                        {
+                            status = (int)ResponseType.SUCCESS,
+                            msg = "Tài khoản chưa được thiết lập 2FA, chuyển đến trang cài đặt 2FA ",
+                            direct = "/Account/2FA/",
+                        });
+                    }
+
+                }
+                //Nếu đã thiết lập 2FA:
+                else
+                {
+                    return Ok(new
+                    {
+                        status = (int)ResponseType.SUCCESS,
+                        msg = "Nhập mã OTP",
+                        direct = "/Account/OTP",
+                    });
+                }
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("ConfirmLogin - AccountController" + ex);
+            }
+            return Ok(new
+            {
+                status = (int)ResponseType.FAILED,
+                msg = "Có lỗi xảy ra trong quá trình đăng nhập, vui lòng liên hệ IT"
+            });
+        }
+        public async Task<IActionResult> Setup2FA()
+        {
+            try
+            {
+                string token = HttpContext.Session.GetString("token");
+                if (token != null && token.Trim() != "")
+                {
+                    var remoteIpAddress = HttpContext.Request.HttpContext.Connection.RemoteIpAddress;
+
+                    UserLoginModel login_model = MFAService.DecryptLoginModelFromToken(token);
+                    if (login_model != null && login_model.id > 0 && DateTime.Now < login_model.date && login_model.ip == remoteIpAddress.ToString())
+                    {
+                        var mfa_record = await _mFARepository.get_MFA_DetailByUserID(Convert.ToInt32(login_model.id));
+                        var user = await _UserRepository.GetById(login_model.id);
+                        string enviroment = _configuration["Config:OTP_Enviroment"];
+                        if (enviroment == null) enviroment = "";
+                        ViewBag.QRCodeUri = MFAService.GenerateQRCode(mfa_record, enviroment);
+                        ViewBag.SecretKey = MFAService.FormatKey(mfa_record.SecretKey);
+                        string label_name = "AdavigoCMS_" + enviroment + "-" + user.UserName;
+                        ViewBag.Issurer = label_name;
+                        ViewBag.Status = mfa_record.Status;
+                        return View();
+                    }
                 }
             }
             catch (Exception ex)
             {
-                return new JsonResult(new
-                {
-                    isSuccess = false,
-                    message = ex.Message.ToString()
-                });
+                LogHelper.InsertLogTelegram("Setup2FA - AccountController" + ex);
             }
+            return RedirectToAction("Login", "Account");
         }
-        private async Task<bool> CompareOTP(int user_id, string otp_code_input, DateTime time_now)
+        [HttpPost]
+        public async Task<ActionResult> OTPTest(string otp)
         {
             try
             {
-                // Lấy thông tin MFA
-                var mfa_record = await _mFARepository.get_MFA_DetailByUserID(user_id);
-                // Convert sang byte
-                var bytes = Base32OTPEncoding.ToBytes(mfa_record.SecretKey.Trim());
-                // Xây mã OTP
-                var totp = new Totp(bytes);
-                DateTime time = await Utilities.Common.TimeCorrection.GetCurrentDateTime();
-                var otp_code = totp.ComputeTotp(time);
-                var remainingTime = totp.RemainingSeconds(time);
-                //Kiểm tra OTP tạo ra với OTP gửi lên
-                if (otp_code_input == otp_code)
+                //Set Session:
+                string token = HttpContext.Session.GetString("token");
+                if (token != null && token.Trim() != "")
                 {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+                    UserLoginModel login_model = MFAService.DecryptLoginModelFromToken(token);
+                    var remoteIpAddress = HttpContext.Request.HttpContext.Connection.RemoteIpAddress;
 
-        }
-        private string BackupCodeMD5FromInput(string input, Mfauser mfa_record)
-        {
-            try
-            {
-                MD5 md5_generator = MD5.Create();
-                string hash_str = input.Trim() + "_" + mfa_record.UserId.ToString().Trim() + "_" + mfa_record.Username.ToString().Trim() + "_" + mfa_record.UserCreatedYear.ToString().Trim();
-                byte[] hash_byte = System.Text.Encoding.ASCII.GetBytes(hash_str);
-                string backupcode_input = Base32Encoding.ToString(md5_generator.ComputeHash(hash_byte));
-                return backupcode_input.Trim();
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-        private async Task<bool> ForceCreateMFA(UserDetailViewModel client_detail)
-        {
-            try
-            {
-                Mfauser new_mfa_record = new Mfauser()
-                {
-                    UserId = client_detail.Entity.Id,
-                    Email = client_detail.Entity.Email.Trim(),
-                    Username = client_detail.Entity.UserName.Trim(),
-                    SecretKey = "",
-                    Status = 1,
-                    BackupCode = "",
-                    UserCreatedYear = client_detail.Entity.CreatedOn.Value.Year.ToString()
-                };
-                string secret_key = await GenerateSecretKeyAsync(client_detail.Entity.Id);
-                if (secret_key == null)
-                {
-                    return false;
+                    if (login_model != null && login_model.id > 0 && DateTime.Now < login_model.date && login_model.ip == remoteIpAddress.ToString())
+                    {
+                        //-- Build mã OTP:
+                        var mfa_record = await _mFARepository.get_MFA_DetailByUserID(Convert.ToInt32(login_model.id));
+                        var correct_otp = MFAService.CompareOTP(mfa_record, otp);
+                        if (correct_otp)
+                        {
+                            return Ok(new
+                            {
+                                status = (int)ResponseType.SUCCESS,
+                                msg = "Xác thực thành công đối với mã OTP đã nhập."
+                            });
+                        }
+                        else
+                        {
+                            return Ok(new
+                            {
+                                status = (int)ResponseType.FAILED,
+                                msg = "Xác thực OTP không thành công, vui lòng kiểm tra lại cài đặt."
+                            });
+                        }
+                    }
                 }
-                new_mfa_record.SecretKey = secret_key.Trim();
-                string backupcode = new Random().Next(0, 99999999).ToString(new string('0', 8));
-                string backup_code_md5 = BackupCodeMD5FromInput(backupcode, new_mfa_record);
-                if (backup_code_md5 == null)
-                {
-                    return false;
-
-                }
-                new_mfa_record.BackupCode = backup_code_md5;
-                long result = await _mFARepository.CreateAsync(new_mfa_record);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-        private async Task<string> GenerateSecretKeyAsync(int user_id)
-        {
-            try
-            {
-                SHA256 sHA256 = SHA256.Create();
-                var client_detail = await _UserRepository.GetDetailUser(user_id);
-                /*Secret Key Generate*/
-                string SecretKey = "";
-                string random_int_begin = new Random().Next(0, 99999999).ToString(new string('0', 8));
-                string random_int_last = new Random().Next(0, 99999999).ToString(new string('0', 8));
-                // 12345678_55_minh.nq_11111111_minhnguyen@usexpress.vn
-                string base_text = random_int_begin.Trim() + "_" + client_detail.Entity.Id + "_" + client_detail.Entity.UserName.Trim() + "_" + random_int_last.Trim() + "_" + client_detail.Entity.Email.Trim();
-                byte[] base_text_in_bytes = System.Text.Encoding.ASCII.GetBytes(base_text);
-                byte[] hash_text_sha256 = sHA256.ComputeHash(base_text_in_bytes);
-                SecretKey = Base32OTPEncoding.ToString(hash_text_sha256);
-                //Get 32 first char from base32 string, as google authenticator secret key length
-                SecretKey = SecretKey.Substring(0, 32).Trim();
-                return SecretKey.Trim();
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-        private string GenerateQRCode(Mfauser result) //int user_id
-        {
-            try
-            {
-                if (result != null)
-                {
-                    string label_name = "USExCMS-" + result.Username.Trim();
-                    string secret_key = result.SecretKey.Trim();
-                    string issuer = "US-Express";
-                    string otp_auth_url = @"" + "otpauth://totp/" + issuer + ":" + label_name + "?secret=" + secret_key + "&issuer=" + issuer + "";
-                    return otp_auth_url;
-                }
-                return null;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                LogHelper.InsertLogTelegram("OTPTest - AccountController" + ex);
+
             }
+            return Ok(new
+            {
+                status = (int)ResponseType.FAILED,
+                msg = "Lỗi trong quá trình xử lý, vui lòng liên hệ với IT."
+            });
         }
-        private string FormatKey(string unformattedKey)
+        [HttpPost]
+        public async Task<ActionResult> Confirm2FA()
         {
             try
             {
-                return Regex.Replace(unformattedKey.Trim(), ".{4}", "$0 ");
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
+                string token = HttpContext.Session.GetString("token");
+                if (token != null && token.Trim() != "")
+                {
+                    UserLoginModel login_model = MFAService.DecryptLoginModelFromToken(token);
+                    var remoteIpAddress = HttpContext.Request.HttpContext.Connection.RemoteIpAddress;
 
+                    if (login_model != null && login_model.id > 0 && DateTime.Now < login_model.date && login_model.ip == remoteIpAddress.ToString())
+                    {
+                        //-- Build mã OTP:
+                        var mfa_record = await _mFARepository.get_MFA_DetailByUserID(Convert.ToInt32(login_model.id));
+                        mfa_record.Status = 1;
+                        var result = await _mFARepository.UpdateAsync(mfa_record);
+                        if (result)
+                        {
+                            HttpContext.Session.Remove("token");
+                            return Ok(new
+                            {
+                                status = (int)ResponseType.SUCCESS,
+                                msg = "Kích hoạt bảo mật 2 lớp thành công."
+                            });
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("Confirm2FA - AccountController" + ex);
+
+            }
+            return Ok(new
+            {
+                status = (int)ResponseType.FAILED,
+                msg = "Có lỗi trong quá trình xử lý, vui lòng liên hệ IT."
+            });
+        }
+        /// <summary>
+        /// Trả view OTP
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult OTP()
+        {
+            try
+            {
+                string token = HttpContext.Session.GetString("token");
+                if (token != null && token.Trim() != "")
+                {
+                    UserLoginModel login_model = MFAService.DecryptLoginModelFromToken(token);
+                    var remoteIpAddress = HttpContext.Request.HttpContext.Connection.RemoteIpAddress;
+
+                    if (login_model != null && login_model.id > 0 && DateTime.Now < login_model.date && login_model.ip == remoteIpAddress.ToString())
+                    {
+                        ViewBag.Token = MFAService.Base64StringToURLParam(token);
+                        return View();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("OTP - AccountController" + ex);
+
+            }
+            return RedirectToAction("Login", "Account");
+        }
+        /// <summary>
+        /// Login với OTP
+        /// </summary>
+        /// <param name = "record" ></ param >
+        /// < returns ></ returns >
+        [HttpPost]
+        public async Task<IActionResult> SendOTP(string otp)
+        {
+            try
+            {
+                string token = HttpContext.Session.GetString("token");
+                if (token != null && token.Trim() != "")
+                {
+                    UserLoginModel login_model = MFAService.DecryptLoginModelFromToken(token);
+                    var remoteIpAddress = HttpContext.Request.HttpContext.Connection.RemoteIpAddress;
+
+                    if (login_model != null && login_model.id > 0 && DateTime.Now < login_model.date && login_model.ip == remoteIpAddress.ToString())
+                    {
+                        //-- Build mã OTP:
+                        var mfa_record = await _mFARepository.get_MFA_DetailByUserID(Convert.ToInt32(login_model.id));
+                        var correct_otp = MFAService.CompareOTP(mfa_record, otp);
+                        if (correct_otp)
+                        {
+                            AccountModel account = new AccountModel()
+                            {
+                                UserName = login_model.user,
+                                Password = login_model.pass
+                            };
+                            var model = await _UserRepository.CheckExistAccount(account);
+                            await CreateCookieAuthenticate(model);
+                            HttpContext.Session.Remove("token");
+                            return Ok(new
+                            {
+                                status = (int)ResponseType.SUCCESS,
+                                msg = "Xác thực OTP thành công.",
+                                direct = login_model.url ?? "/"
+                            });
+                        }
+                        else
+                        {
+                            return Ok(new
+                            {
+                                status = (int)ResponseType.FAILED,
+                                msg = "Xác thực OTP không thành công, vui lòng kiểm tra lại mã OTP."
+                            });
+                        }
+                    }
+                }
+
+
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("SendOTP - AccountController" + ex);
+            }
+            return Ok(new
+            {
+                status = (int)ResponseType.FAILED,
+                msg = "Lỗi trong quá trình xác thực OTP, vui lòng liên hệ IT."
+            });
+        }
     }
 }

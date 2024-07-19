@@ -4,7 +4,7 @@ using System.Text;
 namespace Utilities
 {
    public static class EncryptSHA
-    {
+   {
         public static string GenerateSHA256String(string inputString)
         {
             SHA256 sha256 = SHA256Managed.Create();

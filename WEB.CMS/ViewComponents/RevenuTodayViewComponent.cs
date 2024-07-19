@@ -11,14 +11,11 @@ namespace WEB.CMS.ViewComponents
 {
     public class RevenuTodayViewComponent : ViewComponent
     {
-        private readonly IOrderRepository _OrderRepository;
-        public RevenuTodayViewComponent(IOrderRepository orderRepository)
-        {
-            _OrderRepository = orderRepository;
-        }
+
         public IViewComponentResult Invoke()
         {
-            var data = _OrderRepository.SummaryRevenuToday();
+            var data = 0;
+            //var data = _OrderRepository.SummaryRevenuToday();
             return View(data);
         }
     }

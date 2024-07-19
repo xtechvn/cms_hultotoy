@@ -31,7 +31,7 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("FindByLabelId - LabelDAL: " + ex);
+                LogHelper.InsertLogTelegram("getLabelDetailById - LabelDAL: " + ex);
                 return null;
             }
         }

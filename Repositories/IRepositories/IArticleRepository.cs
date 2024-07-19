@@ -10,6 +10,7 @@ namespace Repositories.IRepositories
     {
         GenericViewModel<ArticleViewModel> GetPagingList(ArticleSearchModel searchModel, int currentPage, int pageSize);
         Task<long> SaveArticle(ArticleModel model);
+        string SeverVieo(ArticleModel model);
         Task<ArticleModel> GetArticleDetail(long Id);
         Task<long> ChangeArticleStatus(long Id, int Status);
         Task<List<string>> GetSuggestionTag(string name);

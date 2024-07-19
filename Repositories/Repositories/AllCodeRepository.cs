@@ -1,13 +1,16 @@
 ﻿using DAL;
 using Entities.ConfigModels;
 using Entities.Models;
+using Entities.ViewModels;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Repositories.IRepositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Utilities;
 
@@ -17,11 +20,13 @@ namespace Repositories.Repositories
     {
         private readonly ILogger<AllCodeRepository> _logger;
         private readonly AllCodeDAL _AllCodeDAL;
+        private readonly BankingAccountDAL bankingAccountDAL;
 
         public AllCodeRepository(IOptions<DataBaseConfig> dataBaseConfig, ILogger<AllCodeRepository> logger)
         {
             _logger = logger;
             _AllCodeDAL = new AllCodeDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
+            bankingAccountDAL = new BankingAccountDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
         }
 
         public async Task<long> Create(AllCode model)
@@ -108,7 +113,7 @@ namespace Repositories.Repositories
         }
         public async Task<short> GetLastestCodeValueByType(string type)
         {
-          return await _AllCodeDAL.GetLastestCodeValueByType(type);
+            return await _AllCodeDAL.GetLastestCodeValueByType(type);
         }
         public async Task<short> GetLastestOrderNoByType(string type)
         {
@@ -116,11 +121,49 @@ namespace Repositories.Repositories
         }
         public async Task<AllCode> GetIDIfValueExists(string type, string description)
         {
-            return await _AllCodeDAL.GetIDIfValueExists(type,description);
+            return await _AllCodeDAL.GetIfDescriptionExists(type, description);
         }
         public async Task<List<AllCode>> GetListSortByName(string type_name)
         {
             return await _AllCodeDAL.GetListSortByName(type_name);
+        }
+
+        public async Task<T> GetAllCodeValueByType<T>(string apiPrefix, string keyToken, string key, string type)
+        {
+            HttpClient httpClient = new HttpClient();
+            var j_param = new Dictionary<string, string> {
+                    { key,type }
+                };
+            var token = CommonHelper.Encode(JsonConvert.SerializeObject(j_param), keyToken);
+            var content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("token", token) });
+            var response = await httpClient.PostAsync(apiPrefix, content);
+            var contents = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(contents);
+        }
+
+        public async Task<T> Sendata<T>(string apiPrefix, string keyToken, Dictionary<string, string> keyValuePairs)
+        {
+            HttpClient httpClient = new HttpClient();
+
+            var token = CommonHelper.Encode(JsonConvert.SerializeObject(keyValuePairs), keyToken);
+            var content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("token", token) });
+            var response = await httpClient.PostAsync(apiPrefix, content);
+            var contents = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(contents);
+        }
+
+        public List<BankingAccount> GetBankingAccounts()
+        {
+            return bankingAccountDAL.GetAllBankingAccount();
+        }
+        public BankOnePay GetBankOnePayByBankName(string BankName)
+        {
+            return bankingAccountDAL.GetBankOnePayByBankName(BankName);
+        }
+
+        public List<BankingAccount> GetBankingAccountsBySupplierId(int supplierId)
+        {
+            return bankingAccountDAL.GetBankAccountDataTableBySupplierId(supplierId).ToList<BankingAccount>();
         }
     }
 }

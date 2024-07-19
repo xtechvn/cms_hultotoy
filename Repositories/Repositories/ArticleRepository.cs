@@ -95,7 +95,9 @@ namespace Repositories.Repositories
                                       {
                                           Id = Convert.ToInt64(row["Id"]),
                                           Title = row["Title"].ToString(),
-                                          Image169 = row["Image169"].ToString(),
+                                          Image169 = (row["Image169"].ToString().Trim() == "" || row["Image169"].ToString()==null) ? null: row["Image169"].ToString(),
+                                          Image11 = (row["Image11"].ToString().Trim() == "" || row["Image11"].ToString() == null) ? null : row["Image11"].ToString(),
+                                          Image43 = (row["Image43"].ToString().Trim() == "" || row["Image43"].ToString() == null) ? null : row["Image43"].ToString(),
 
                                           PublishDate = Convert.ToDateTime(!row["PublishDate"].Equals(DBNull.Value) ? row["PublishDate"] : DateTime.MinValue),
                                           ModifiedOn = Convert.ToDateTime(!row["ModifiedOn"].Equals(DBNull.Value) ? row["ModifiedOn"] : DateTime.MinValue),
@@ -117,7 +119,7 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("GetPagingList in OrderRepository" + ex);
+                LogHelper.InsertLogTelegram("GetPagingList - ArticleRepository: " + ex);
             }
             return model;
         }
@@ -131,21 +133,35 @@ namespace Repositories.Repositories
         {
             try
             {
+                Task<string> TBody;
                 #region upload image
-                // upload image inside content to static site
-                var TBody = StringHelpers.ReplaceEditorImage(model.Body, _UrlStaticImage);
+                if (model.ArticleType == 0)
+                {
+                    // upload image inside content to static site
+                    TBody=  StringHelpers.ReplaceEditorImage(model.Body, _UrlStaticImage);
+                    // upload thumb image via api
+                    var T11 = UpLoadHelper.UploadBase64Src(model.Image11, _UrlStaticImage);
+                    var T43 = UpLoadHelper.UploadBase64Src(model.Image43, _UrlStaticImage);
+                    var T169 = UpLoadHelper.UploadBase64Src(model.Image169, _UrlStaticImage);
 
-                // upload thumb image via api
-                var T11 = UpLoadHelper.UploadBase64Src(model.Image11, _UrlStaticImage);
-                var T43 = UpLoadHelper.UploadBase64Src(model.Image43, _UrlStaticImage);
-                var T169 = UpLoadHelper.UploadBase64Src(model.Image169, _UrlStaticImage);
+                    await Task.WhenAll(TBody, T11, T43, T169);
 
-                await Task.WhenAll(TBody, T11, T43, T169);
-
-                model.Body = TBody.Result;
-                model.Image11 = T11.Result;
-                model.Image43 = T43.Result;
-                model.Image169 = T169.Result;
+                    model.Body = TBody.Result;
+                    model.Image11 = T11.Result;
+                    model.Image43 = T43.Result;
+                    model.Image169 = T169.Result;
+                }
+                else
+                {
+                    // upload thumb image via api
+                    var T11 = UpLoadHelper.UploadBase64Src(model.Image11, _UrlStaticImage);
+                    var T43 = UpLoadHelper.UploadBase64Src(model.Image43, _UrlStaticImage);
+                    var T169 = UpLoadHelper.UploadBase64Src(model.Image169, _UrlStaticImage);
+                    await Task.WhenAll( T11, T43, T169);
+                    model.Image11 = T11.Result;
+                    model.Image43 = T43.Result;
+                    model.Image169 = T169.Result;
+                }
 
                 if (!string.IsNullOrEmpty(model.Image11) && !model.Image11.Contains(_UrlStaticImage))
                 {
@@ -173,28 +189,45 @@ namespace Repositories.Repositories
 
                 if (ArticleId > 0)
                 {
-                    #region upsert Tags
-                    var ListTagId = await _TagDAL.MultipleInsertTag(model.Tags);
-                    await _ArticleDAL.MultipleInsertArticleTag(ArticleId, ListTagId);
-                    #endregion
+                    if (ArticleId > 0)
+                    {
+                        #region upsert Tags
+                        var ListTagId = await _TagDAL.MultipleInsertTag(model.Tags);
+                        await _ArticleDAL.MultipleInsertArticleTag(ArticleId, ListTagId);
+                        #endregion
 
-                    #region upsert Categories
-                    await _ArticleDAL.MultipleInsertArticleCategory(ArticleId, model.Categories);
-                    #endregion
+                        #region upsert Categories
+                        await _ArticleDAL.MultipleInsertArticleCategory(ArticleId, model.Categories);
+                        #endregion
 
-                    #region upsert Relation Article
-                    await _ArticleDAL.MultipleInsertArticleRelation(ArticleId, model.RelatedArticleIds);
-                    #endregion
+                        #region upsert Relation Article
+                        await _ArticleDAL.MultipleInsertArticleRelation(ArticleId, model.RelatedArticleIds);
+                        #endregion
+                    }
                 }
 
                 return ArticleId;
             }
-            catch
+            catch(Exception ex)
             {
+                LogHelper.InsertLogTelegram("SaveArticle - ArticleRepository: " + ex);
                 return 0;
             }
         }
 
+        public string SeverVieo(ArticleModel model)
+        {
+            try
+            {
+               var TBody = StringVideoHelpers.ReplaceEditorVideo(model.Body, _UrlStaticImage).Result;
+                return TBody;
+            }
+            catch(Exception ex)
+            {
+                LogHelper.InsertLogTelegram("SeverVieo - ArticleRepository: " + ex);
+                return null;
+            }
+        }
         // Lấy ra danh sách các bài viết theo 1 chuyên mục
         public async Task<List<ArticleViewModel>> getArticleListByCategoryId(int cate_id)
         {

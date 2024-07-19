@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Entities.Models;
+// Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
+// If you have enabled NRTs for your project, then un-comment the following line:
+// #nullable disable
 
-public partial class Job
+namespace Entities.Models
 {
-    public long Id { get; set; }
-
-    /// <summary>
-    /// 1: sync client ; 2 : sync order
-    /// </summary>
-    public int? Type { get; set; }
-
-    public long? DataId { get; set; }
-
-    public int? SubType { get; set; }
+    public partial class Job
+    {
+        public long Id { get; set; }
+        public int? Type { get; set; }
+        public long? DataId { get; set; }
+        public int? SubType { get; set; }
+    }
 }

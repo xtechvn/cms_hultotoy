@@ -1,6 +1,6 @@
 ﻿@using Entities.ViewModels
 @model Paging
-@if (Model.TotalRecord > 0)
+@if (Model.TotalRecord > Model.PageSize)
 {
     <ul id="pagination" class="pagination">
 

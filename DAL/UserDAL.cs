@@ -1,9 +1,12 @@
 ﻿using DAL.Generic;
+using DAL.StoreProcedure;
 using Entities.Models;
 using Entities.ViewModels;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,8 +16,10 @@ namespace DAL
 {
     public class UserDAL : GenericService<User>
     {
+        private static DbWorker _DbWorker;
         public UserDAL(string connection) : base(connection)
         {
+            _DbWorker = new DbWorker(connection);
         }
 
         public List<UserGridModel> GetUserPagingList(string userName, string strRoleId, int status, int currentPage, int pageSize, out int totalRecord)
@@ -67,7 +72,20 @@ namespace DAL
                                         Id = b.Id,
                                         Name = b.Name,
                                         Status = b.Status
-                                    }).ToList()
+                                    }).ToList(),
+                        UserDepartment = (from a in _DbContext.Department.Where(a => a.Id == s.DepartmentId)
+                                          select new Department
+                                          {
+                                              Id = a.Id,
+                                              DepartmentName = a.DepartmentName,
+                                          }).FirstOrDefault(),
+                        UserPosition = (from a in _DbContext.UserPosition.Where(a => a.Id == s.UserPositionId)
+                                        select new UserPosition
+                                        {
+                                            Id = a.Id,
+                                            Name = a.Name,
+                                        }).FirstOrDefault(),
+
                     }).ToList();
                     return data;
                 }
@@ -94,25 +112,43 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    foreach (var roleId in arrayRole)
+                    if (type == 0)
                     {
-                        if (type == 0)
-                        {
-                            var model = new UserRole
-                            {
-                                UserId = userId,
-                                RoleId = roleId
-                            };
-
-                            await _DbContext.UserRole.AddAsync(model);
-                            await _DbContext.SaveChangesAsync();
-                        }
-                        else
+                        foreach (var roleId in arrayRole)
                         {
                             var model = await _DbContext.UserRole.Where(s => s.UserId == userId && s.RoleId == roleId).FirstOrDefaultAsync();
-                            _DbContext.UserRole.Remove(model);
+                            if (model == null || model.Id <= 0)
+                            {
+                                model = new UserRole
+                                {
+                                    UserId = userId,
+                                    RoleId = roleId
+                                };
+
+                                await _DbContext.UserRole.AddAsync(model);
+                                await _DbContext.SaveChangesAsync();
+                            }
+
+                        }
+                        var list = await _DbContext.UserRole.Where(s => s.UserId == userId && !arrayRole.Contains(s.RoleId)).ToListAsync();
+                        if (list != null && list.Count > 0)
+                        {
+                            _DbContext.UserRole.RemoveRange(list);
                             await _DbContext.SaveChangesAsync();
                         }
+                    }
+                    else
+                    {
+                        foreach (var roleId in arrayRole)
+                        {
+                            var model = await _DbContext.UserRole.Where(s => s.UserId == userId && s.RoleId == roleId).FirstOrDefaultAsync();
+                            if (model != null)
+                            {
+                                _DbContext.UserRole.Remove(model);
+                                await _DbContext.SaveChangesAsync();
+                            }
+                        }
+
                     }
                 }
             }
@@ -155,6 +191,74 @@ namespace DAL
             }
         }
 
+        public async Task<List<User>> GetByIds(List<long> userIds)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    return await _DbContext.User.Where(s => userIds.Contains(s.Id)).ToListAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByIds - UserDAL: " + ex);
+                return new List<User>();
+            }
+        }
+
+        public async Task<User> GetById(long userIds)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    return await _DbContext.User.FirstOrDefaultAsync(s => userIds == s.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByIds - UserDAL: " + ex);
+                return null;
+            }
+        }
+
+        public async Task<UserDataViewModel> GetUserInfoById(long user)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    return await (from u in _DbContext.User
+                                  join department in _DbContext.Department on u.DepartmentId equals department.Id into dep
+                                  from subdep in dep.DefaultIfEmpty()
+                                  where u.Id == user
+                                  select new UserDataViewModel
+                                  {
+                                      Id = u.Id,
+                                      UserName = u.UserName,
+                                      FullName = u.FullName,
+                                      Email = u.Email,
+                                      Phone = u.Phone,
+                                      Address = u.Address,
+                                      Avata = u.Avata,
+                                      BirthDay = u.BirthDay,
+                                      DepartmentId = u.DepartmentId,
+                                      DepartmentName = subdep.DepartmentName,
+                                      Status = u.Status,
+                                      Gender = u.Gender,
+                                      UserPositionId = u.UserPositionId,
+                                      Level = u.Level
+                                  }).FirstOrDefaultAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByIds - UserDAL: " + ex);
+                return null;
+            }
+        }
+
         public async Task<User> GetByEmail(string input)
         {
             try
@@ -187,6 +291,236 @@ namespace DAL
                 return new List<int>();
             }
 
+        }
+        public User GetUserIdById(long Id)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+
+                    return _DbContext.User.FirstOrDefault(s => s.Id == Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetUserIdById - UserDAL: " + ex);
+                return null;
+            }
+
+        }
+        public List<User> GetAll()
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+
+                    return _DbContext.User.AsNoTracking().ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetAll - UserDAL: " + ex);
+                return null;
+            }
+        }
+        public async Task<List<User>> GetUserSuggesstion(string txt_search)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    return await _DbContext.User.AsNoTracking().Where(s => s.UserName.ToLower().Contains(txt_search.ToLower())).ToListAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByUserName - UserDAL: " + ex);
+                return null;
+            }
+        }
+
+        public async Task<IEnumerable<RolePermission>> GetUserPermissionById(int user_id)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    return await (from a in _DbContext.RolePermission
+                                  join b in _DbContext.UserRole on a.RoleId equals b.RoleId
+                                  where b.UserId == user_id
+                                  select new RolePermission
+                                  {
+                                      MenuId = a.MenuId,
+                                      RoleId = a.RoleId,
+                                      PermissionId = a.PermissionId
+                                  }).ToListAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetMenuPermissionByUserId - UserDAL: " + ex);
+                return null;
+            }
+        }
+
+        public async Task LogDepartmentOfUser(User model, int current_user_id)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    var user_department_model = await _DbContext.UserDepart.Where(s => s.UserId == model.Id)
+                        .OrderByDescending(s => s.Id)
+                        .FirstOrDefaultAsync();
+
+                    var dataJoinTime = model.CreatedOn;
+
+                    if (user_department_model != null)
+                    {
+                        dataJoinTime = user_department_model.LeaveDate;
+                    }
+
+                    _DbContext.UserDepart.Add(new UserDepart
+                    {
+                        UserId = model.Id,
+                        DepartmentId = model.DepartmentId,
+                        JoinDate = dataJoinTime,
+                        LeaveDate = DateTime.Now,
+                        CreatedBy = current_user_id,
+                        CreatedDate = DateTime.Now
+                    });
+
+                    await _DbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("LogDepartmentOfUser - UserDAL: " + ex);
+                throw;
+            }
+        }
+
+        public string GetListUserByUserId(int user_id)
+        {
+            try
+            {
+                SqlParameter[] objParam = new SqlParameter[1];
+                objParam[0] = new SqlParameter("@UserId", user_id);
+                DataTable dataTable = _DbWorker.GetDataTable(ProcedureConstants.SP_GetListUserByUserId, objParam);
+
+                if (dataTable != null && dataTable.Rows.Count > 0)
+                {
+                    return dataTable.Rows[0]["ListUserId"].ToString();
+                }
+                else
+                {
+                    return user_id.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetPagingList - PolicyDal: " + ex);
+                throw;
+            }
+        }
+        public async Task<User> GetChiefofDepartmentByRoleID(int role_id)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    var user_role = await _DbContext.UserRole.Where(s => s.RoleId == role_id).FirstOrDefaultAsync();
+                    if (user_role != null && user_role.Id > 0)
+                    {
+                        return await _DbContext.User.Where(s => s.Id == user_role.UserId && s.Status == 0).FirstOrDefaultAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetChiefofDepartmentByServiceType - PolicyDal: " + ex);
+            }
+            return null;
+        }
+
+        public async Task<List<User>> GetListChiefofDepartmentByRoleID(int role_id)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    var user_role = _DbContext.UserRole.Where(s => s.RoleId == role_id).ToList();
+                    var listUserId = user_role.Select(n => n.UserId).ToList();
+                    if (listUserId.Count > 0)
+                    {
+                        return await _DbContext.User.Where(s => listUserId.Contains(s.Id) && s.Status == 0).ToListAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetChiefofDepartmentByServiceType - PolicyDal: " + ex);
+            }
+            return new List<User>();
+        }
+
+        public async Task<List<User>> GetListChiefofDepartmentByRoleID(List<int> role_ids)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    var user_role = _DbContext.UserRole.Where(s => role_ids.Contains(s.RoleId)).ToList();
+                    var listUserId = user_role.Select(n => n.UserId).ToList();
+                    if (listUserId.Count > 0)
+                    {
+                        return await _DbContext.User.Where(s => listUserId.Contains(s.Id) && s.Status == 0).ToListAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetChiefofDepartmentByServiceType - PolicyDal: " + ex);
+            }
+            return new List<User>();
+        }
+
+        public List<User> GetListUserByRole(int role_id)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    var user_role = _DbContext.UserRole.Where(s => s.RoleId == role_id).ToList();
+                    var userRoleIds = user_role.Select(n => n.UserId).ToList();
+                    if (userRoleIds.Count > 0)
+                    {
+                        return _DbContext.User.Where(s => userRoleIds.Contains(s.Id) && s.Status == 0).ToList();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetChiefofDepartmentByServiceType - PolicyDal: " + ex);
+            }
+            return new List<User>();
+        }
+        public async Task<List<User>> GetUserSuggesstion(string txt_search,List<int> ids)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    return await _DbContext.User.AsNoTracking().Where(s => s.UserName.ToLower().Contains(txt_search.ToLower()) && ids.Contains(s.Id)).ToListAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByUserName - UserDAL: " + ex);
+                return null;
+            }
         }
     }
 }

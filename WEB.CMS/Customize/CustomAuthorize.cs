@@ -1,16 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Abstractions;
-using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Routing;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using WEB.CMS.Models;
 
 namespace WEB.CMS.Customize
 {
@@ -34,12 +30,13 @@ namespace WEB.CMS.Customize
                     {
                         if (IsAjaxRequest(context.HttpContext.Request))
                         {
-                            context.Result = new RedirectResult("/error/AjaxAuthenticate");
+                            context.Result = new RedirectResult("/Account/RedirectLogin");
                         }
                         else
                         {
                             //context.Result = new RedirectToRouteResult("/account/login?requestPath=" + Uri.EscapeDataString(context.HttpContext.Request.Path));
-                            context.Result = new RedirectResult("/Account/login?requestPath=" + Uri.EscapeDataString(context.HttpContext.Request.Path));
+                            //context.Result = new RedirectResult("/error/index" + Uri.EscapeDataString(context.HttpContext.Request.Path));
+                            context.Result = new RedirectResult("/Account/RedirectLogin");
                         }
                     }
                     else
