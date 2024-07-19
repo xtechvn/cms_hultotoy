@@ -14,38 +14,26 @@ public partial class DataMSContext : DbContext
         : base(options)
     {
     }
-
     public virtual DbSet<Action> Action { get; set; }
     public virtual DbSet<AddressClient> AddressClient { get; set; }
-    public virtual DbSet<AffiliateGroupProduct> AffiliateGroupProduct { get; set; }
     public virtual DbSet<AllCode> AllCode { get; set; }
     public virtual DbSet<Article> Article { get; set; }
     public virtual DbSet<ArticleCategory> ArticleCategory { get; set; }
     public virtual DbSet<ArticleRelated> ArticleRelated { get; set; }
     public virtual DbSet<ArticleTag> ArticleTag { get; set; }
     public virtual DbSet<AttachFile> AttachFile { get; set; }
-    public virtual DbSet<AutomaticPurchaseAmz> AutomaticPurchaseAmz { get; set; }
-    public virtual DbSet<AutomaticPurchaseHistory> AutomaticPurchaseHistory { get; set; }
     public virtual DbSet<CampaignAds> CampaignAds { get; set; }
-    public virtual DbSet<CampaignGroupProduct> CampaignGroupProduct { get; set; }
     public virtual DbSet<Cashback> Cashback { get; set; }
     public virtual DbSet<Client> Client { get; set; }
-    public virtual DbSet<ClientLinkAff> ClientLinkAff { get; set; }
     public virtual DbSet<District> District { get; set; }
     public virtual DbSet<GroupProduct> GroupProduct { get; set; }
-    public virtual DbSet<GroupProductStore> GroupProductStore { get; set; }
     public virtual DbSet<ImageProduct> ImageProduct { get; set; }
     public virtual DbSet<IndustrySpecialLuxury> IndustrySpecialLuxury { get; set; }
-    public virtual DbSet<Job> Job { get; set; }
     public virtual DbSet<Label> Label { get; set; }
-    public virtual DbSet<LocationProduct> LocationProduct { get; set; }
     public virtual DbSet<Menu> Menu { get; set; }
-    public virtual DbSet<Mfauser> Mfauser { get; set; }
     public virtual DbSet<Note> Note { get; set; }
     public virtual DbSet<Order> Order { get; set; }
     public virtual DbSet<OrderItem> OrderItem { get; set; }
-    public virtual DbSet<OrderProgress> OrderProgress { get; set; }
-    public virtual DbSet<PackagesShipment> PackagesShipment { get; set; }
     public virtual DbSet<Payment> Payment { get; set; }
     public virtual DbSet<Permission> Permission { get; set; }
     public virtual DbSet<Position> Position { get; set; }
@@ -65,7 +53,6 @@ public partial class DataMSContext : DbContext
     public virtual DbSet<VoucherCampaign> VoucherCampaign { get; set; }
     public virtual DbSet<VoucherLogActivity> VoucherLogActivity { get; set; }
     public virtual DbSet<Ward> Ward { get; set; }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Data Source=103.163.216.41;Initial Catalog=Hulotoy;Persist Security Info=True;User ID=us;Password=us@585668;TrustServerCertificate=True");

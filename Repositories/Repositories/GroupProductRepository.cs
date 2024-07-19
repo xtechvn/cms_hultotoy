@@ -65,6 +65,7 @@ namespace Repositories.Repositories
                     entity.ModifiedOn = DateTime.Now;
                     entity.LinkCount = model.LinkCount;
                     entity.UpdateTime = DateTime.Now;
+                    entity.IsDelete = false;
                     await _GroupProductDAL.UpdateAsync(entity);
 
                     // Update children status
@@ -93,6 +94,7 @@ namespace Repositories.Repositories
                 {
                     model.CreatedOn = DateTime.Now;
                     model.UpdateTime = DateTime.Now;
+                    model.IsDelete = false;
                     model.IsAutoCrawler = 0;
 
                     var id = (int)await _GroupProductDAL.CreateAsync(model);
@@ -573,7 +575,7 @@ namespace Repositories.Repositories
         public async Task<int> DeleteById(int id)
         {
             var entity = await _GroupProductDAL.FindAsync(id);
-            //entity.
+            entity.IsDelete = true;
             await _GroupProductDAL.UpdateAsync(entity);
             return id;
         }

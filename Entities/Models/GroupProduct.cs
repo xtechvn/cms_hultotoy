@@ -41,5 +41,7 @@ public partial class GroupProduct
 
     public DateTime? UpdateTime { get; set; }
 
+    public bool? IsDelete { get; set; }
+
     public virtual ICollection<ProductClassification> ProductClassifications { get; set; } = new List<ProductClassification>();
 }
