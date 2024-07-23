@@ -562,6 +562,7 @@ var _ordersCMS = {
                 console.log("Status: " + textStatus);
             }
         });
+        $('.fillter-search').hide();
     },
     OnPaging: function (value) {
         pageSize = 1;

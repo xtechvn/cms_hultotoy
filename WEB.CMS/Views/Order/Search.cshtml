@@ -21,12 +21,12 @@
     <div class="row" style=" width: 100%; ">
         <input id="countOrder" value="@TotalRecord" style="display:none" />
         <div class="tab-default col-md-9 mb0 mt10">
-            <a href="javascript:;" onclick="_ordersCMS.OnSearchStatus(99)" id="countSttAll" class="active">Tất cả đơn hàng (@TotalRecord)</a>
-            <a href="javascript:;" onclick="_ordersCMS.OnSearchStatus(1)" id="countSttCheck">Đang tư vấn (@TotalRecord1)</a>
-            <a href="javascript:;" onclick="_ordersCMS.OnSearchStatus(2)" id="countSttNotDone">Chưa khởi hành (@TotalRecord2)</a>
-            <a href="javascript:;" onclick="_ordersCMS.OnSearchStatus(3)" id="countSttDone">Đã khởi hành (@TotalRecord3)</a>
-            <a href="javascript:;" onclick="_ordersCMS.OnSearchStatus(4)" id="countSttErr">Đơn hàng lỗi (@TotalRecordErr)</a>
-            <a href="javascript:;" onclick="_ordersCMS.OnSearchStatus(0)" id="countSttNews">Đơn chờ nhận triển khai (@TotalRecord4)</a>
+            <a href="javascript:;" onclick="_ordersCMS.OnSearchStatus(99)" id="countSttAll" class="active">Tất cả đơn hàng (@TotalRecord.ToString("N0"))</a>
+            <a href="javascript:;" onclick="_ordersCMS.OnSearchStatus(1)" id="countSttCheck">Đang tư vấn (@TotalRecord1.ToString("N0"))</a>
+            <a href="javascript:;" onclick="_ordersCMS.OnSearchStatus(2)" id="countSttNotDone">Chưa khởi hành (@TotalRecord2.ToString("N0"))</a>
+            <a href="javascript:;" onclick="_ordersCMS.OnSearchStatus(3)" id="countSttDone">Đã khởi hành (@TotalRecord3.ToString("N0"))</a>
+            <a href="javascript:;" onclick="_ordersCMS.OnSearchStatus(4)" id="countSttErr">Đơn hàng lỗi (@TotalRecordErr.ToString("N0"))</a>
+            <a href="javascript:;" onclick="_ordersCMS.OnSearchStatus(0)" id="countSttNews">Đơn chờ nhận triển khai (@TotalRecord4.ToString("N0"))</a>
         </div>
         <div class="col-md-3 text-right mt10">
             <button type="submit" class="btn btn-default" style="" onclick="_order_manual.CreateOrderManual()">Tạo đơn hàng</button>
