@@ -32,6 +32,14 @@
     <Content Update="QueryEs\searchClient.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Update="Views\AccountAccessApi\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\AccountAccessApi\Search.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Update="wwwroot\Template\Export\Danh-sách-khách-sạn.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -44,5 +52,28 @@
     <Content Update="wwwroot\Template\import\template-danh-sach-doan-vmb.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Watch Remove="Views\AccountAccessApi\AddNew.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\AccountAccessApi\AddNew.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Views\AccountAccessApi\AddNew.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\AccountAccessApi\Detail.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\AccountAccessApi\Edit.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Watch Remove="Views\AccountAccessApi\Detail.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\AccountAccessApi\Detail.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Watch Remove="Views\AccountAccessApi\Edit.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\AccountAccessApi\Edit.cshtml" />
   </ItemGroup>
 </Project>
