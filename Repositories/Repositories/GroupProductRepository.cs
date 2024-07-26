@@ -285,13 +285,21 @@ namespace Repositories.Repositories
                     _strHtml.Append(@"<label class=""check-list mb10 mr25"">");
                     var strChecked = string.Empty;
                     if (CheckedList != null && CheckedList.Count > 0 && CheckedList.Contains(parentId)) strChecked = "checked";
-                    _strHtml.Append(@"<input type=""checkbox"" class=""ckb-news-cate"" value='" + _parentModel.Id + "' " + strChecked + "/>");
-                    _strHtml.Append(@"<span class=""checkmark""></span>" + _parentModel.Name);
+                    if (_parentModel != null)
+                    {
+                        _strHtml.Append(@"<input type=""checkbox"" class=""ckb-news-cate"" value='" + _parentModel.Id + "' " + strChecked + "/>");
+                        _strHtml.Append(@"<span class=""checkmark""></span>" + _parentModel.Name);
+                    }
+                   
                     _strHtml.Append(@"</label>");
                 }
                 else
                 {
-                    _strHtml.Append(@"<label class=""mb10 mr25 ml10"">" + _parentModel.Name + "</label>");
+                    if (_parentModel != null)
+                    {
+                        _strHtml.Append(@"<label class=""mb10 mr25 ml10"">" + _parentModel.Name + "</label>");
+
+                    }
                 }
 
                 if (IsHasIconEdit && CheckedList != null && CheckedList.Count > 0 && CheckedList.Contains(parentId))

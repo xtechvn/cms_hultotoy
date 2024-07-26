@@ -1,7 +1,4 @@
-﻿using Entities.ViewModels.Contract;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Entities.ViewModels
 {
@@ -18,10 +15,6 @@ namespace Entities.ViewModels
         public long TotalRecord4 { get; set; }
         public long TotalrecordErr { get; set; }
 
-        public GenericViewModel<ContractViewModel> where()
-        {
-            throw new NotImplementedException();
-        }
     }
 
     public class Paging

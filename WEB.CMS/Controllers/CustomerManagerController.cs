@@ -1,9 +1,6 @@
 ﻿using Entities.Models;
 using Entities.ViewModels;
-using Entities.ViewModels.Contract;
 using Entities.ViewModels.CustomerManager;
-using Entities.ViewModels.Funding;
-using Entities.ViewModels.SupplierConfig;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -28,34 +25,25 @@ namespace WEB.Adavigo.CMS.Controllers
     public class CustomerManagerController : Controller
     {
         private readonly ICustomerManagerRepository _customerManagerRepositories;
-        private readonly IDepositHistoryRepository _depositHistoryRepository;
-        private readonly IOrderRepositor _orderRepositor;
-        private readonly IContractPayRepository _contractPayRepository;
+
         private readonly IConfiguration _configuration;
         private readonly IAllCodeRepository _allCodeRepository;
-        private readonly IPaymentAccountRepository _paymentAccountRepository;
         private readonly IClientRepository _clientRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IContractRepository _contractRepository;
         private readonly IWebHostEnvironment _WebHostEnvironment;
+        private readonly IBankingAccountRepository _bankingAccountRepository;
         private ManagementUser _ManagementUser;
-        private IBankingAccountRepository _bankingAccountRepository;
         private IAccountClientRepository _accountClientRepository;
 
 
-        public CustomerManagerController(IConfiguration configuration, ICustomerManagerRepository customerManagerRepositories, IDepositHistoryRepository depositHistoryRepository, ManagementUser ManagementUser, IWebHostEnvironment WebHostEnvironment, IAccountClientRepository accountClientRepository,
-        IOrderRepositor orderRepositor, IContractPayRepository contractPayRepository, IAllCodeRepository allCodeRepository, IPaymentAccountRepository paymentAccountRepository, IClientRepository clientRepository, IUserRepository userRepository, IContractRepository contractRepository, IBankingAccountRepository bankingAccountRepository)
+        public CustomerManagerController(IConfiguration configuration, ICustomerManagerRepository customerManagerRepositories,  ManagementUser ManagementUser, IWebHostEnvironment WebHostEnvironment, IAccountClientRepository accountClientRepository,
+         IAllCodeRepository allCodeRepository,  IClientRepository clientRepository, IUserRepository userRepository, IBankingAccountRepository bankingAccountRepository)
         {
             _customerManagerRepositories = customerManagerRepositories;
-            _depositHistoryRepository = depositHistoryRepository;
-            _orderRepositor = orderRepositor;
-            _contractPayRepository = contractPayRepository;
             _configuration = configuration;
             _allCodeRepository = allCodeRepository;
-            _paymentAccountRepository = paymentAccountRepository;
             _clientRepository = clientRepository;
             _userRepository = userRepository;
-            _contractRepository = contractRepository;
             _ManagementUser = ManagementUser;
             _WebHostEnvironment = WebHostEnvironment;
             _bankingAccountRepository = bankingAccountRepository;
@@ -196,9 +184,8 @@ namespace WEB.Adavigo.CMS.Controllers
             try
             {
                 var model = await _clientRepository.GetClientDetailByClientId(id);
-                var listcontract = await _contractRepository.CheckContractbyStatus(model.Id, ContractStatus.DA_DUYET);
 
-                if (model != null && model.ClientType != ClientType.kl && listcontract == 0)
+                if (model != null && model.ClientType != ClientType.kl)
                 {
                     ViewBag.btnStatus = 1;
                 }
@@ -210,51 +197,7 @@ namespace WEB.Adavigo.CMS.Controllers
             }
             return View();
         }
-        [HttpPost]
-        public IActionResult ListDepositHistory(long id, int currentPage = 1, int pageSize = 10)
-        {
-            var data = new GenericViewModel<DepositHistoryViewMdel>();
-            try
-            {
-                data = _depositHistoryRepository.getDepositHistoryByUserId(id, currentPage, pageSize);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("ListDepositHistory - CustomerManagerController: " + ex);
-            }
-
-            return PartialView(data);
-        }
-        [HttpPost]
-        public async Task<IActionResult> ListOrder(long id, int currentPage = 1, int pageSize = 10)
-        {
-            var data = new GenericViewModel<OrderViewModel>();
-            try
-            {
-                data = await _orderRepositor.GetByClientId(id, currentPage, pageSize);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("ListOrder - CustomerManagerController: " + ex);
-            }
-
-            return PartialView(data);
-        }
-        [HttpPost]
-        public async Task<IActionResult> ListContractPay(long id, int currentPage = 1, int pageSize = 10)
-        {
-            var data = new GenericViewModel<ContractViewModel>();
-            try
-            {
-                data = await _contractRepository.GetListByType(id, currentPage, pageSize);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("ListContractPay - CustomerManagerController: " + ex);
-            }
-
-            return PartialView(data);
-        }
+       
         [HttpPost]
         public async Task<IActionResult> Setup(string data)
         {

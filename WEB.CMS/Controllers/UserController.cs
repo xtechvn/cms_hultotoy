@@ -26,7 +26,6 @@ namespace WEB.CMS.Controllers
         private readonly IDepartmentRepository _DepartmentRepository;
         private readonly IRoleRepository _RoleRepository;
         private readonly IMFARepository _mFARepository;
-        private readonly IOrderRepository _orderRepository;
         private readonly ManagementUser _ManagementUser;
         private readonly APIService _aPIService;
         private readonly IConfiguration _configuration;
@@ -34,7 +33,7 @@ namespace WEB.CMS.Controllers
 
         public UserController(IUserRepository userRepository, IRoleRepository roleRepository,
             IWebHostEnvironment hostEnvironment, IMFARepository mFARepository,
-            IDepartmentRepository departmentRepository, ManagementUser managementUser, IOrderRepository orderRepository, IConfiguration configuration)
+            IDepartmentRepository departmentRepository, ManagementUser managementUser, IConfiguration configuration)
         {
             _UserRepository = userRepository;
             _RoleRepository = roleRepository;
@@ -42,7 +41,6 @@ namespace WEB.CMS.Controllers
             _mFARepository = mFARepository;
             _DepartmentRepository = departmentRepository;
             _ManagementUser = managementUser;
-            _orderRepository = orderRepository;
             _configuration = configuration;
             _aPIService = new APIService(configuration, userRepository);
         }
@@ -504,42 +502,7 @@ namespace WEB.CMS.Controllers
             }
 
         }
-        [HttpPost]
-        public async Task<IActionResult> UpdateAllOrderDetail()
-        {
-            try
-            {
-                var order = _orderRepository.GetAllOrderIDs();
-                if(order!=null && order.Count > 0)
-                {
-                    var _UserLogin = 0;
-                    if (HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
-                    {
-                        _UserLogin = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-                    }
-
-                    foreach (var id in order)
-                    {
-                        await _orderRepository.UpdateOrderDetail(id, _UserLogin);
-                    }
-                }
-                return Ok(new
-                {
-                    status = (int)ResponseType.SUCCESS,
-                    message = "Update Order Success",
-                });
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("UpdateAllOrderDetail - UserController: " + ex);
-                return Ok(new
-                {
-                    status = (int)ResponseType.ERROR,
-                    message = ex.Message.ToString(),
-                });
-            }
-
-        }
+       
         public async Task<IActionResult> ViewConfirm(long id)
         {
             try

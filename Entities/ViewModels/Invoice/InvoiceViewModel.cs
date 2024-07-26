@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Entities.Models;
-using Entities.ViewModels.Funding;
 
 namespace Entities.ViewModels.Invoice
 {
@@ -29,7 +27,6 @@ namespace Entities.ViewModels.Invoice
         public int InvoiceRequestId { get; set; }
         public string InvoiceRequestStatus { get; set; }
         public List<InvoiceRequest> RelateRequest { get; set; }
-        public List<CountStatus> RelateOrder { get; set; }
         public string ExportDateStr { get; set; }
         public string TaxNo { get; set; }
         public DateTime? PlanDate { get; set; }

@@ -1,13 +1,7 @@
-﻿using Entities.ViewModels.BankingAccount;
-using Entities.ViewModels.Mongo;
-using Microsoft.Extensions.Configuration;
+﻿using Entities.ViewModels.Mongo;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Utilities;
 
 namespace WEB.Adavigo.CMS.Service

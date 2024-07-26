@@ -1,7 +1,6 @@
 ﻿using Entities.ViewModels;
 using Entities.ViewModels.API;
 using Entities.ViewModels.ApiSever;
-using Entities.ViewModels.Hotel;
 using ENTITIES.ViewModels.Notify;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -26,47 +25,6 @@ namespace WEB.Adavigo.CMS.Service
         {
             _configuration = configuration;
             _userRepository = userRepository;
-
-        }
-        public async Task<BaseObjectResponse<OrderViewdetail>> GetOrderDetail(string order_id)
-        {
-            try
-            {
-                HttpClient httpClient = new HttpClient();
-                BaseObjectResponse<OrderViewdetail> result = null;
-                var j_param = new Dictionary<string, string>()
-                {
-                {"order_id",order_id },
-                };
-                var data = JsonConvert.SerializeObject(j_param);
-                var a = _configuration["DataBaseConfig:key_api:api_manual"];
-                var token = EncodeHelpers.Encode(data, _configuration["DataBaseConfig:key_api:api_manual"]);
-                var request = new FormUrlEncodedContent(new[]
-                    {
-                    new KeyValuePair<string, string>("token",token)
-                });
-                var url = ReadFile.LoadConfig().API_ADAVIGO_URL + ReadFile.LoadConfig().API_GET_ORDER_BY_ORDERID;
-                var response = await httpClient.PostAsync(url, request);
-                var stringResult = "";
-
-                if (response.IsSuccessStatusCode)
-                {
-                    stringResult = response.Content.ReadAsStringAsync().Result;
-
-                    result = JsonConvert.DeserializeObject<BaseObjectResponse<OrderViewdetail>>(stringResult);
-                    return result;
-                }
-                else
-                {
-                    return null;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("apisever:" + ex.ToString());
-                return null;
-            }
 
         }
         public async Task<int> SendMailResetPassword(string email)
@@ -568,28 +526,6 @@ namespace WEB.Adavigo.CMS.Service
             catch
             {
 
-            }
-            return null;
-        }
-        public async Task<List<VietQRBankDetail>> GetVietQRBankList()
-        {
-            try
-            {
-                var client = new HttpClient();
-                var request = new HttpRequestMessage(HttpMethod.Get, "https://api.vietqr.io/v2/banks");
-                var response = await client.SendAsync(request);
-
-                var jsonData = JObject.Parse( await response.Content.ReadAsStringAsync());
-                var status = int.Parse(jsonData["code"].ToString());
-                if (status == (int)ResponseType.SUCCESS)
-                {
-                    return JsonConvert.DeserializeObject<List<VietQRBankDetail>>(jsonData["data"].ToString());
-                }
-
-            }
-            catch
-            {
-                throw;
             }
             return null;
         }

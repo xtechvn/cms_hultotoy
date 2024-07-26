@@ -1,6 +1,4 @@
 ﻿using Aspose.Cells;
-using Entities.Models;
-using Entities.ViewModels.BankingAccount;
 using Entities.ViewModels.TransferSms;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -146,31 +144,7 @@ namespace WEB.Adavigo.CMS.Service
             }
             return totalAmount;
         }
-        public double SumAmountBankingAccountTransactionSMs(TransferSmsSearchModel searchModel)
-        {
-            var listTransaction = new List<BankingAccountViewModel>();
-
-            double sumAmount = 0;
-            try
-            {
-                var db = MongodbService.GetDatabase();
-
-                var collection = db.GetCollection<BankingAccountViewModel>("BankingAccount");
-                var filter = Builders<BankingAccountViewModel>.Filter.Empty;
-
-                var S = Builders<BankingAccountViewModel>.Sort.Descending("_id");
-
-
-                listTransaction = collection.Find(filter).Sort(S).ToList();
-                sumAmount = listTransaction.Sum(s => s.Amount);
-            }
-            catch (Exception ex)
-            {
-
-                LogHelper.InsertLogTelegram("SearchTransactionSMs - TransferSmsService. " + JsonConvert.SerializeObject(ex));
-            }
-            return sumAmount;
-        }
+       
         public List<TransactionSMSViewModel> ListTransactionSMs(TransferSmsSearchModel searchModel)
         {
             var listTransaction = new List<TransactionSMSViewModel>();
@@ -216,31 +190,7 @@ namespace WEB.Adavigo.CMS.Service
             }
             return listTransaction;
         }
-        public List<BankingAccountViewModel> GetLisstBankingAccountTransactionSMs()
-        {
-            var listTransactionAC = new List<BankingAccountViewModel>();
-
-            double sumAmount = 0;
-            try
-            {
-                var db = MongodbService.GetDatabase();
-
-                var collection = db.GetCollection<BankingAccountViewModel>("BankingAccount");
-                var filter = Builders<BankingAccountViewModel>.Filter.Empty;
-
-                var S = Builders<BankingAccountViewModel>.Sort.Descending("_id");
-
-
-                listTransactionAC = collection.Find(filter).Sort(S).ToList();
-
-            }
-            catch (Exception ex)
-            {
-
-                LogHelper.InsertLogTelegram("SearchTransactionSMs - TransferSmsService. " + JsonConvert.SerializeObject(ex));
-            }
-            return listTransactionAC;
-        }
+        
         public double SumTotalAmountTransactionSMs(string AccountNumber, string BankName, DateTime? ToDate)
         {
             var listTransaction = new List<TransactionSMSViewModel>();

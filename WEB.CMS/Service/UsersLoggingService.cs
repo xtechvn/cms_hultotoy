@@ -1,15 +1,10 @@
 ﻿using Entities.ViewModels.Log;
-using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Utilities;
 using Utilities.Contants;
 
 namespace WEB.CMS.Service.Log
-{ 
+{
     public static class UsersLoggingService
     {
         public static async Task<string> InsertLog(IConfiguration configuration, LogUsersActivityModel log, string document_name)

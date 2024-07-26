@@ -6,8 +6,6 @@ using Entities.ConfigModels;
 using Entities.Models;
 using Entities.ViewModels;
 using Entities.ViewModels.CustomerManager;
-using Entities.ViewModels.ElasticSearch;
-using Entities.ViewModels.Funding;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Repositories.IRepositories;
@@ -16,7 +14,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Utilities;
 using Utilities.Contants;
@@ -26,7 +23,6 @@ namespace Repositories.Repositories
     public class CustomerManagerRepository : ICustomerManagerRepository
     {
         private readonly ClientDAL _ClientDAL;
-        private readonly PaymentDAL _PaymentDAL;
         private readonly PaymentAccountDAL _PaymentAccountDAL;
         private readonly IAllCodeRepository _allCodeRepository;
         private readonly UserAgentDAL _UserAgentDAL;
@@ -34,19 +30,16 @@ namespace Repositories.Repositories
         private readonly UserDAL _UserDAL;
         private ClientESRepository _clientESRepository;
         private readonly IConfiguration _configuration;
-        private readonly IContractPayRepository _contractPayRepository;
-        public CustomerManagerRepository(IConfiguration configuration, IOptions<DataBaseConfig> dataBaseConfig, IAllCodeRepository allCodeRepository, IContractPayRepository contractPayRepository)
+        public CustomerManagerRepository(IConfiguration configuration, IOptions<DataBaseConfig> dataBaseConfig, IAllCodeRepository allCodeRepository)
         {
             _configuration = configuration;
             _ClientDAL = new ClientDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
             _allCodeRepository = allCodeRepository;
-            _PaymentDAL = new PaymentDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
             _PaymentAccountDAL = new PaymentAccountDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
             _UserAgentDAL = new UserAgentDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
             _AccountClientDAL = new AccountClientDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
             _UserDAL = new UserDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
             _clientESRepository = new ClientESRepository(_configuration["DataBaseConfig:Elastic:Host"]);
-            _contractPayRepository = contractPayRepository;
         }
 
         public int SetUpClient(CustomerManagerView model)
@@ -204,16 +197,6 @@ namespace Repositories.Repositories
                 {
                     var data = dt.ToList<CustomerManagerViewModel>();
                     model = data[0];
-                }
-                var searchModel = new ContractPaySearchModel();
-                searchModel.ClientId = Convert.ToInt32(ClientId);
-                searchModel.DebtStatus = -1;
-                var listPayment = _contractPayRepository.GetListContractPayDebt(searchModel, out long total, -1, -1);
-
-                if (listPayment != null && listPayment.Count > 0)
-                {
-                    model.sum_payment = listPayment.Sum(s => s.AmountPay);
-
                 }
 
                 return model;

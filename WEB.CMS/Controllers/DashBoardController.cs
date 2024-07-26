@@ -21,19 +21,13 @@ namespace WEB.CMS.Controllers
     public class DashBoardController : Controller
     {
         private readonly IDashboardRepository _DashboardRepository;
-        private readonly IOrderRepository _OrderRepository;
-        private readonly IPaymentVoucherRepository _PaymentVoucherRepository;
         private ManagementUser _ManagementUser;
         private IAllCodeRepository _allCodeRepository;
 
-        public DashBoardController(ManagementUser managementUser,
-            IDashboardRepository dashboardRepository,
-            IOrderRepository orderRepository, IPaymentVoucherRepository PaymentVoucherRepository, IAllCodeRepository allCodeRepository)
+        public DashBoardController(ManagementUser managementUser,IDashboardRepository dashboardRepository, IAllCodeRepository allCodeRepository)
         {
             _DashboardRepository = dashboardRepository;
             _ManagementUser = managementUser;
-            _OrderRepository = orderRepository;
-            _PaymentVoucherRepository = PaymentVoucherRepository;
             _allCodeRepository = allCodeRepository;
         }
 
@@ -150,65 +144,10 @@ namespace WEB.CMS.Controllers
             {
                 var current_user = _ManagementUser.GetCurrentUser();
 
-                var searchModel = new OrderViewSearchModel();
-                if (current_user != null && !string.IsNullOrEmpty(current_user.Role))
+                return new JsonResult(new
                 {
-                    var list = current_user.Role.Split(',');
-
-                    foreach (var item in list)
-                    {
-                        switch (Convert.ToInt32(item))
-                        {
-                            case (int)RoleType.SaleOnl:
-                            case (int)RoleType.SaleTour:
-                            case (int)RoleType.SaleKd:
-                            case (int)RoleType.TPDHKS:
-                            case (int)RoleType.TPDHVe:
-                            case (int)RoleType.TPDHTour:
-                            case (int)RoleType.TPKS:
-                            case (int)RoleType.TPTour:
-                            case (int)RoleType.TPVe:
-                            case (int)RoleType.DHPQ:
-                            case (int)RoleType.DHTour:
-                            case (int)RoleType.DHVe:
-                            case (int)RoleType.DHKS:
-                            case (int)RoleType.GDHN:
-                            case (int)RoleType.GDHPQ:
-                                {
-                                    if (searchModel.SalerPermission == null || searchModel.SalerPermission.Trim() == "")
-                                    {
-                                        searchModel.SalerPermission = current_user.UserUnderList;
-                                    }
-                                    else
-                                    {
-                                        searchModel.SalerPermission += "," + current_user.UserUnderList;
-
-                                    }
-                                }
-                                break;
-                            case (int)RoleType.Admin:
-                            case (int)RoleType.KT:
-                            case (int)RoleType.GD:
-                                {
-                                    searchModel.Sale = null;
-                                }
-                                break;
-                        }
-                    }
-                    searchModel.PermisionType = null;
-                    searchModel.PaymentStatus = null;
-                    searchModel.BoongKingCode = null;
-
-                    var dataOrder = await _OrderRepository.GetTotalCountOrder(searchModel, 1, 10);
-                    return new JsonResult(dataOrder);
-                }
-                else
-                {
-                    return new JsonResult(new
-                    {
-                        totalrecordErr = 0
-                    });
-                }
+                    totalrecordErr = 0
+                });
             }
             catch (Exception ex)
             {
@@ -328,44 +267,6 @@ namespace WEB.CMS.Controllers
                 return Content("");
             }
         }
-        [HttpPost]
-        public IActionResult GettotalAmountBankingAccountTransferSmsGroupByDate(TransferSmsSearchModel searchModel)
-        {
-            try
-            {
-                TransferSmsService transferSmsService = new TransferSmsService();
-                long total = 0;
-                var totalAmount = transferSmsService.SumAmountBankingAccountTransactionSMs(searchModel);
-                var newDate = DateTime.Now;
-                var SumTotalAmountTransactionSMs = transferSmsService.SumTotalAmountTransactionSMs(searchModel.AccountNumber, searchModel.BankName, newDate);
-                totalAmount = totalAmount + SumTotalAmountTransactionSMs;
-                return new JsonResult(totalAmount);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GettotalAmountBankingAccountTransferSmsGroupByDate - DashBoardController: " + ex.ToString());
-                return Content("");
-            }
-        }
-        [HttpPost]
-        public IActionResult ListBankingAccountTransactionSMs(TransferSmsSearchModel searchModel)
-        {
-            try
-            {
-                TransferSmsService transferSmsService = new TransferSmsService();
-                long total = 0;
-                var ListAC = transferSmsService.GetLisstBankingAccountTransactionSMs();
-
-
-
-                return new JsonResult(ListAC);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("ListBankingAccountTransactionSMs - DashBoardController: " + ex.ToString());
-                return Content("");
-            }
-        }
-
+       
     }
 }

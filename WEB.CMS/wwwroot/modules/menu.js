@@ -70,24 +70,41 @@ var _menu = {
     },
 
     ShowAddOrUpdate: function (id, parent_id = 0) {
+        _global_function.AddLoading()
+
         let title = `${id > 0 ? "Cập nhật" : "Thêm mới"} menu`;
         let url = '/menu/AddOrUpdate';
-        _menu.modal_element.find('.modal-title').html(title);
-        _menu.modal_element.find('.modal-dialog').css('max-width', '680px');
+        //_menu.modal_element.find('.modal-title').html(title);
+        //_menu.modal_element.find('.modal-dialog').css('max-width', '680px');
+        //let param = { id: id, parent_id: parent_id }
+        //_magnific.OpenSmallPopup(title, url, param);
+        //_ajax_caller.get(url, { id: id, parent_id: parent_id }, function (result) {
+
+        //    _menu.modal_element.find('.modal-body').html(result);
+        //    _menu.modal_element.show();
+        //});
         _ajax_caller.get(url, { id: id, parent_id: parent_id }, function (result) {
-            _menu.modal_element.find('.modal-body').html(result);
-            _menu.modal_element.modal('show');
+            $('body').append(result);
+            _global_function.RemoveLoading()
+            $('#menu-add-or-update').addClass('show')
+
         });
     },
 
     ShowPermision: function (id) {
         let title = `Cập nhật các quyền thuộc menu`;
         let url = '/menu/Permission';
-        _menu.modal_element.find('.modal-title').html(title);
-        _menu.modal_element.find('.modal-dialog').css('max-width', '680px');
+        _global_function.AddLoading()
+
+        //let param = { id: id }
+        //_magnific.OpenSmallPopup(title, url, param);
+        $('#flybooking-service').addClass('show')
+
+        //_menu.modal_element.find('.modal-title').html(title);
+        //_menu.modal_element.find('.modal-dialog').css('max-width', '680px');
         _ajax_caller.get(url, { id: id }, function (result) {
             _menu.modal_element.find('.modal-body').html(result);
-            _menu.modal_element.modal('show');
+            _menu.modal_element.show();
         });
     },
 
@@ -167,7 +184,16 @@ var _menu = {
             });
         });
     },
+    Close: function () {
+        _global_function.AddLoading()
 
+        $('#menu-add-or-update').removeClass('show')
+        setTimeout(function () {
+            $('#menu-add-or-update').remove();
+            _global_function.RemoveLoading()
+
+        }, 300);
+    }
 }
 
 var _changeInterval = null;

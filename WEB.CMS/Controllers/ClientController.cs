@@ -16,27 +16,21 @@ namespace WEB.Adavigo.CMS.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly IAllCodeRepository _allCodeRepository;
-        private readonly IContractRepository _contractRepository;
         private ClientESRepository clientESRepository;
 
         private IClientRepository _clientRepository;
         private IUserAgentRepository _userAgentRepository;
-        private IPolicyRepository _policyRepository;
-        private IIdentifierServiceRepository _identifierServiceRepository;
         private IUserRepository _userRepository;
 
-        public ClientController(IConfiguration configuration, IAllCodeRepository allCodeRepository, IContractRepository contractRepository,  IUserRepository userRepository,
-            IClientRepository clientRepository, IUserAgentRepository userAgentRepository, IIdentifierServiceRepository identifierServiceRepository, IPolicyRepository policyRepository)
+        public ClientController(IConfiguration configuration, IAllCodeRepository allCodeRepository,  IUserRepository userRepository,
+            IClientRepository clientRepository, IUserAgentRepository userAgentRepository)
         {
 
             _configuration = configuration;
             _allCodeRepository = allCodeRepository;
-            _contractRepository = contractRepository;
             clientESRepository = new ClientESRepository(_configuration["DataBaseConfig:Elastic:Host"]);
             _clientRepository = clientRepository;
             _userAgentRepository = userAgentRepository;
-            _identifierServiceRepository = identifierServiceRepository;
-            _policyRepository = policyRepository;
             _userRepository = userRepository;
 
         }

@@ -16,7 +16,7 @@
 
                 <li>
                     <a class="@(subMenu.Id == ActivedMenuId ? "active" : string.Empty)" href="@subMenu.Link">
-                        <img src="@subMenu.Icon">
+                        <img src="@subMenu.Icon" style="width:40px;">
                         @subMenu.Name
                     </a>
                 </li>
@@ -60,7 +60,7 @@
                 }
             <li class="accordion-item ">
                 <a class="@(parent.Id == ActivedParentId ? "active" : string.Empty)" href="@parent_link">
-                    <img src="@parent.Icon"> <span>@parent.Name</span>
+                    <img src="@parent.Icon" style="width:40px;"> <span>@parent.Name</span>
                 </a>
                 @if (childDatas!=null && childDatas.Any())
                     {
@@ -75,7 +75,7 @@
 
                         <li>
                             <a class="@(subMenu.Id == ActivedMenuId ? "active" : string.Empty)" href="@subMenu.Link">
-                                <img src="@subMenu.Icon">
+                                <img src="@subMenu.Icon" style="width:40px;">
                                 <span> @subMenu.Name</span>
                             </a>
                         </li>

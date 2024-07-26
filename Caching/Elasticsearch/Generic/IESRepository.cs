@@ -21,12 +21,5 @@ namespace Caching.Elasticsearch
 
         int UpSert(TEntity entity, string indexName, string Type);
         Task<int> UpSertAsync(TEntity entity, string indexName, string Type);
-        Task<List<HotelESViewModel>> GetListProduct(string index_name, string txtsearch, string Type);
-        
-        bool DeleteHotelByID(string hotel_id, string index_name, string Type);
-        bool DeleteOrderID(string hotel_id, string index_name, string Type);
-        bool DeleteDepositHistoryID(string hotel_id, string index_name, string Type);
-        Task<List<HotelESViewModel>> GetListHotelByCity(string index_name, string city, string Type);
-        Task<List<HotelESViewModel>> GetListHotelByGroupName(string index_name, string group_name, string Type);
     }
 }

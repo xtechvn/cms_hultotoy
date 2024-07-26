@@ -47,7 +47,8 @@ namespace WEB.Adavigo.CMS.Controllers.Configs
             var menus = await _MenuRepository.GetAll(name, link);
             return View(menus);
         }
-
+        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> AddOrUpdate(int id, int parent_id)
         {
             var model = new MenuUpsertViewModel

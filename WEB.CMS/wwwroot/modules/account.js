@@ -1,4 +1,7 @@
-﻿var _login = {
+﻿$(document).ready(function () {
+    _login.Initialization()
+})
+var _login = {
     Token: '',
     DotText:'',
     OnLoggingText: '<i class="fa fa-sign-in"></i>Đang đăng nhập',

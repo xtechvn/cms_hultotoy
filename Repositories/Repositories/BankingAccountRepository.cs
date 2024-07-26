@@ -1,14 +1,11 @@
 ﻿using DAL;
-using DAL.StoreProcedure;
 using Entities.ConfigModels;
 using Entities.Models;
-using Entities.ViewModels.Funding;
 using Microsoft.Extensions.Options;
 using Repositories.IRepositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Utilities;
 
 namespace Repositories.Repositories

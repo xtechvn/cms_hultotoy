@@ -9,7 +9,6 @@ namespace Entities.ViewModels
     {
         public int status { get; set; }
         public string msg { get; set; }
-        public OrderViewdetail data { get; set; }
     }
     public class ObjectResponse<T>
     {

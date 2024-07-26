@@ -69,7 +69,7 @@
                     {
                         foreach (var item in ClientType)
                         {
-                             <option value="@item.CodeValue">@item.Description</option>
+                            <option value="@item.CodeValue">@item.Description</option>
 
                         }
                     }
@@ -144,10 +144,7 @@
                     Tìm kiếm
                 </button>
             </div>
-        </div>
-        <div class="line-bottom mb20">
-            <div class="flex row-main-head">
-
+            <div class="form-group mb10 mr-2">
                 <div class="btn-right text-right ">
                     @if (ViewBag.buttomThem == 1)
                     {
@@ -252,25 +249,6 @@
 
     <script type="text/javascript" src="/modules/customer_manager.js"></script>
     <script type="text/javascript" src="~/js/zebra_datepicker.min.js"></script>
-    @*<link href="/lib/tagify/tagify.css" rel="stylesheet" type="text/css" />*@
-    <script>
-        //var txt_search = client_suggst.val();
-        //$('#client').select2({
-        //    ajax: {
-        //        url: '/Contract/ClientSuggestion"',
-        //        data: function (params) {
-        //            var query = {
-        //                search: params.term,
-        //                type: "post",
-        //                data: { txt_search},
-        //            }
-
-        //            // Query parameters will be ?search=[term]&type=public
-        //            return query;
-        //        }
-        //    }
-        //});
-        //});
         $('input[name="datetimeApprove"]').daterangepicker({
             autoUpdateInput: false,
             locale: {

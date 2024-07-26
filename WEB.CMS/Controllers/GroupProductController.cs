@@ -23,7 +23,6 @@ namespace WEB.CMS.Controllers
     public class GroupProductController : Controller
     {
         private readonly IGroupProductRepository _GroupProductRepository;
-        private readonly ILabelRepository _LabelRepository;
         private readonly IPositionRepository _PositionRepository;
         private readonly IAllCodeRepository _AllCodeRepository;
         private readonly IWebHostEnvironment _WebHostEnvironment;
@@ -33,12 +32,10 @@ namespace WEB.CMS.Controllers
 
         public GroupProductController(IGroupProductRepository groupProductRepository,
                IWebHostEnvironment hostEnvironment, IPositionRepository positionRepository,
-               ILabelRepository labelRepository,
                RedisConn redisService, IAllCodeRepository allCodeRepository, IOptions<DomainConfig> domainConfig, IConfiguration configuration)
         {
             _GroupProductRepository = groupProductRepository;
             _WebHostEnvironment = hostEnvironment;
-            _LabelRepository = labelRepository;
             _PositionRepository = positionRepository;
 
             _AllCodeRepository = allCodeRepository;
@@ -272,7 +269,6 @@ namespace WEB.CMS.Controllers
                 var listLinkWrong = new List<string>();//list link khong hop le
                 if (worksheet.Cells.Count > 0)
                 {
-                    var listLable = _LabelRepository.GetListAll();
                     //truong hop link trong file khong dung dinh dang
                     var list = worksheet.Cells;
                     for (int i = 1; i < list.Count; i++)
@@ -281,16 +277,8 @@ namespace WEB.CMS.Controllers
                         {
                             continue;
                         }
-                        //kiem tra link co nam trong cac nhan hang US ho tro khong?
-                        var checkLink = listLable.FirstOrDefault(n => list[i].Value.ToString().ToLower().Contains(n.Domain.ToLower()));
-                        if (checkLink != null)
-                        {
-                            listLink.Add(list[i].Value.ToString());
-                        }
-                        else
-                        {
-                            listLinkWrong.Add(list[i].Value.ToString());
-                        }
+                        listLinkWrong.Add(list[i].Value.ToString());
+
                     }
                 }
                 else
@@ -336,11 +324,9 @@ namespace WEB.CMS.Controllers
             try
             {
                 var listGroup = await _GroupProductRepository.GetAll();
-                var listLabel = _LabelRepository.GetListAll();
                 return new JsonResult(new
                 {
-                    Data = listGroup,
-                    DataLabel = listLabel
+                    Data = listGroup
                 });
             }
             catch (Exception ex)
