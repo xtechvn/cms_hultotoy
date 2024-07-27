@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-<!-- Thêm thuộc tính này để bỏ qua ResolveComReference -->
     <ResolveComReference>false</ResolveComReference>
   </PropertyGroup>
 
