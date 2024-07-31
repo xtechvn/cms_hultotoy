@@ -42,7 +42,7 @@ namespace WEB.CMS.Controllers
             _UrlStaticImage = domainConfig.Value.ImageStatic;
             _configuration = configuration;
             _redisService = redisService;
-
+            _redisService.Connect();
         }
 
         public IActionResult Index()
@@ -98,7 +98,7 @@ namespace WEB.CMS.Controllers
                         Code=entity.Code
                     };
                 }
-                _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU, 0);
+                _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU,Convert.ToInt32( _configuration["Redis:Database:db_common"]));
             }
             catch
             {
@@ -139,7 +139,7 @@ namespace WEB.CMS.Controllers
                 var rs = await _GroupProductRepository.UpSert(upsertModel);
                 if (rs > 0)
                 {
-                    _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU, 0);
+                    _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
 
                     return new JsonResult(new
                     {
@@ -186,7 +186,7 @@ namespace WEB.CMS.Controllers
 
                 if (rs > 0)
                 {
-                    _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU, 0);
+                    _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
 
 
                     return new JsonResult(new
