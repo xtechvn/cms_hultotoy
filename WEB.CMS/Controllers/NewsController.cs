@@ -14,6 +14,7 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Utilities;
+using Utilities.Common;
 using Utilities.Contants;
 using WEB.CMS.Customize;
 using WEB.CMS.Models;
@@ -299,6 +300,7 @@ namespace WEB.CMS.Controllers
             string token = string.Empty;
             try
             {
+                var api = new APIService2(_configuration);
                 var apiPrefix = ReadFile.LoadConfig().API_ADAVIGO_URL + ReadFile.LoadConfig().API_SYNC_ARTICLE;
                 var key_token_api = ReadFile.LoadConfig().KEY_TOKEN_API;
                 HttpClient httpClient = new HttpClient();
@@ -306,10 +308,8 @@ namespace WEB.CMS.Controllers
                     { "article_id", articleId.ToString() },
                     { "category_id",ArrCategoryId }
                 };
-                token = CommonHelper.Encode(JsonConvert.SerializeObject(j_param), _configuration["DataBaseConfig:key_api:api_manual"]);
-                var content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("token", token) });
-                var result_post=await httpClient.PostAsync(apiPrefix, content);
-                var post_content =JObject.Parse(result_post.Content.ReadAsStringAsync().Result);
+                api.POST(ReadFile.LoadConfig().API_SYNC_ARTICLE, j_param);
+               
             }
             catch (Exception ex)
             {
