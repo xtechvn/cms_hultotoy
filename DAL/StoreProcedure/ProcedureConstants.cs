@@ -61,6 +61,7 @@ namespace DAL.StoreProcedure
         public const string SP_GetListInvoiceRequest = "SP_GetListInvoiceRequest";
         public const string SP_GetListInvoice = "SP_GetListInvoice";
         public const string SP_GetListUserByUserId = "SP_GetListUserByUserId";
+        public const string PRODUCT_GetBoughtQuantity = "Product_GetBoughtQuantity";
     }
     
 }

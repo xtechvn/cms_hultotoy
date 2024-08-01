@@ -45,6 +45,9 @@ namespace Utilities.Contants
         public static string WEEKDAY_TYPE = "WEEKDAY_TYPE";
 
 
+        public static string INDUSTRY_SPECIAL_TYPE = "INDUSTRY_SPECIAL_TYPE";
+        public static string WEIGHT_UNIT = "WEIGHT_UNIT";
+        public static string PRODUCT_SPECIFICATION = "PRODUCT_SPECIFICATION";
     }
     public class AllCodeDescription
     {

@@ -330,5 +330,124 @@ namespace Utilities
             string pattern = "/[^a-zA-Z0-9.-_+/= ]/g";
             return Regex.Replace(text, pattern, "");
         }
+        public static string genLinkDetailProduct(string label_name, string product_code, string product_name)
+        {
+            product_name = CommonHelper.RemoveSpecialCharacters(product_name);
+            product_name = RemoveUnicode(CheckMaxLength(product_name.Trim(), 50));
+            product_name = product_name.Replace(" ", "-").Replace("/", "");
+            return ("/product/" + label_name + "/" + product_name + "-").ToLower() + product_code + ".html";
+        }
+        public static string genLinkDetailProductOtherLabel(string label_name, string path, bool is_extension = false)
+        {
+            path = path.Replace(".html?", "-variant-");
+            path = path.Replace(".html", "");
+            path = path.Replace("=", "__");
+            string url = ("/product/" + label_name + "/" + path).ToLower() + ".html";
+            if (is_extension)
+            {
+                url += "?product_source=3";
+            }
+            return url;
+        }
+        public static double convertToPound(double value, string unit)
+        {
+            try
+            {
+                double rs = 0;
+                switch (unit)
+                {
+                    case "ounces":
+                    case "oz":
+                        rs = value * 0.0625;
+                        break;
+                    case "grams":
+                    case "g":
+                        rs = value * 0.0022046;
+                        break;
+                    case "kilograms":
+                        rs = value * 2.2046;
+                        break;
+                    case "tonne":
+                        rs = value * 2204.62262;
+                        break;
+                    case "kiloton":
+                        rs = value * 2204622.6218;
+                        break;
+                    case "pounds":
+                        rs = value;
+                        break;
+                    default:
+                        rs = value;
+                        break;
+                }
+                return rs;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("convertToPound: value = " + value + " error:" + ex.ToString());
+                return 1; // Nếu k có đơn vị nào thỏa mãn sẽ coi như là k có cân nặng và báo mail về cho cskh
+            }
+
+        }
+        public static string GetCachePartFromURL(string url, int label_id = (int)LabelType.jomashop)
+        {
+            var cachepart = "";
+            if (url == null || url.Trim() == "")
+            {
+                return cachepart;
+            }
+            else if (url.Contains("amazon.com"))
+            {
+                var asin = "";
+                CommonHelper.CheckAsinByLink(url, out asin);
+                return asin;
+            }
+            try
+            {   // https://www.jomashop.com/golden-goose-stardan-low-top-sneakers-in-leather-gwf00128-f000567.html?product_id=774221
+                var product_path = url.Split("/");
+                var plant_text = product_path[product_path.Length - 1];
+                cachepart = CommonHelper.Encode(plant_text, label_id.ToString());
+            }
+            catch { }
+            return cachepart;
+        }
+        public static bool CheckAsinByLink(string Link, out string ASIN)
+        {
+            ASIN = Link;
+            try
+            {
+                // regex lấy ra domain theo link
+                Link = Link.Replace("http://", "https://").Replace("%", "");
+                var uri = new Uri(Link);
+                string sDomainLite = uri.Host;
+
+                // regex lay ra link ID sản phẩm
+                //M1: "https://www.amazon.com/gp/aw/d/B07GB4X6T7/ref=ox_sc_act_image_1?smid=AY8DYQ3EFA9NJ&psc=1"
+                //M2: https://www.amazon.com/d/Eye-Creams/Hada-Labo-Tokyo-Correcting-Cream/B00OFTIP86/ref=sr_1_2_a_it?ie=UTF8&qid=1542617568&sr=8-2-spons&keywords=Hada+Labo+Tokyo&psc=1#customerReviews
+
+
+                var match = Regex.Match(Link, "https://" + sDomainLite + "/([\\w-]+/)?(dp|gp/product|gp/aw/d)/(\\w+/)?(\\w{10})", RegexOptions.Singleline); //spelling error
+                var url = match.Groups[0].Value;
+
+                //Detect Truong hop 2
+                if (url == string.Empty)
+                {
+                    match = Regex.Match(Link, "(?:[/dp/]|$)([A-Z0-9]{10})", RegexOptions.Singleline); //spelling error
+                    url = match.Groups[0].Value;
+                }
+
+                // Lấy ra ASIN trên link
+                ASIN = url == "" ? "" : url.Split('/').Last();
+
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("CheckAsinAmz - CommonHelper: Link = " + Link + " error:" + ex.ToString());
+                return false;
+            }
+        }
+
     }
 }

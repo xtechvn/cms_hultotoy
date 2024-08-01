@@ -147,6 +147,10 @@ namespace Entities.Models
         public virtual DbSet<Ward> Ward { get; set; }
         public virtual DbSet<InvoiceSign> InvoiceSign { get; set; }
         public virtual DbSet<InvoiceFormNo> InvoiceFormNo { get; set; }
+        public virtual DbSet<Product> Product { get; set; }
+        public virtual DbSet<LocationProduct> LocationProduct { get; set; }
+         public virtual DbSet<IndustrySpecialLuxury> IndustrySpecialLuxury { get; set; }
+        public virtual DbSet<PriceProductLevel> PriceProductLevel { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -1505,6 +1509,22 @@ namespace Entities.Models
                 entity.Property(e => e.StoreName).HasMaxLength(50);
 
                 entity.Property(e => e.UpdateTime).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<LocationProduct>(entity =>
+            {
+                entity.HasKey(e => e.LocationProductId);
+
+                entity.Property(e => e.CreateOn).HasColumnType("datetime");
+
+                entity.Property(e => e.LocationProductId).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.ProductCode)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.UpdateLast).HasColumnType("datetime");
             });
 
             modelBuilder.Entity<Menu>(entity =>
@@ -2952,6 +2972,37 @@ namespace Entities.Models
                 entity.Property(e => e.WardId)
                     .IsRequired()
                     .HasMaxLength(5);
+            });
+
+            modelBuilder.Entity<IndustrySpecialLuxury>(entity =>
+            {
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ExpireDate).HasColumnType("datetime");
+
+                entity.Property(e => e.GroupLabelId)
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasComment("Nhóm sản phẩm áp dụng so sánh với nhóm sản phẩm nổi trội");
+
+                entity.Property(e => e.UpdateLast).HasColumnType("datetime");
+            });
+            modelBuilder.Entity<PriceProductLevel>(entity =>
+            {
+                entity.HasKey(e => e.PriceId);
+
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.FromDate).HasColumnType("datetime");
+
+                entity.Property(e => e.LabelId)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Note).HasMaxLength(2000);
+
+                entity.Property(e => e.ToDate).HasColumnType("datetime");
             });
 
             OnModelCreatingPartial(modelBuilder);

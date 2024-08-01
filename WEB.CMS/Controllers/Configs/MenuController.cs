@@ -130,21 +130,21 @@ namespace WEB.Adavigo.CMS.Controllers.Configs
 
 
         [HttpPost]
-        public async Task<IActionResult> AddOrUpdate(MenuUpsertViewModel model)
+        public async Task<IActionResult> Summit(MenuUpsertViewModel request)
         {
             try
             {
                 long result = 0;
                 string ActionName = string.Empty;
-                if (model.Id > 0)
+                if (request.Id > 0)
                 {
                     ActionName = "Cập nhật";
-                    result = await _MenuRepository.Update(model);
+                    result = await _MenuRepository.Update(request);
                 }
                 else
                 {
                     ActionName = "Thêm mới";
-                    result = await _MenuRepository.Create(model);
+                    result = await _MenuRepository.Create(request);
                 }
 
                 if (result > 0)

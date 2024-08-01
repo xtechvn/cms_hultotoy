@@ -126,8 +126,8 @@ var _menu = {
 
         let formData = this.GetFormData(Form);
 
-        let url = "/menu/AddOrUpdate";
-        _ajax_caller.post(url, { model: formData }, function (result) {
+        let url = "/menu/Summit";
+        _ajax_caller.post(url, { request: formData }, function (result) {
             if (result.isSuccess) {
                 _msgalert.success(result.message);
                 _menu.modal_element.modal('hide');
