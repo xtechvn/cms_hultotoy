@@ -102,9 +102,15 @@ var _menu = {
 
         //_menu.modal_element.find('.modal-title').html(title);
         //_menu.modal_element.find('.modal-dialog').css('max-width', '680px');
+        //_ajax_caller.get(url, { id: id }, function (result) {
+        //    _menu.modal_element.find('.modal-body').html(result);
+        //    _menu.modal_element.show();
+        //});
         _ajax_caller.get(url, { id: id }, function (result) {
-            _menu.modal_element.find('.modal-body').html(result);
-            _menu.modal_element.show();
+            $('body').append(result);
+            _global_function.RemoveLoading()
+            $('#menu-add-or-update').addClass('show')
+
         });
     },
 
