@@ -107,7 +107,7 @@ namespace WEB.CMS.Controllers
 
         public async Task<IActionResult> RelationArticle(long Id)
         {
-            //ViewBag.StringTreeViewCate = await _GroupProductRepository.GetListTreeViewCheckBox(NEWS_CATEGORY_ID, -1);
+            ViewBag.StringTreeViewCate = await _GroupProductRepository.GetListTreeViewCheckBox(NEWS_CATEGORY_ID, -1);
             ViewBag.ListAuthor = await _UserRepository.GetUserSuggestionList(string.Empty);
             return PartialView();
         }
