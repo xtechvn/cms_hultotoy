@@ -331,7 +331,7 @@ namespace Repositories.Repositories
                     });
                 }
 
-                var _SearchRequest = new SearchRequest<ProductViewModel>("product_hulotoys")
+                var _SearchRequest = new SearchRequest<ProductViewModel>("product_hulotoys_store")
                 {
                     Query = new BoolQuery { Must = Clauses },
                     From = (filter.PageIndex - 1) * filter.PageSize,
@@ -339,7 +339,7 @@ namespace Repositories.Repositories
                     Sort = sort_clauses
                 };
 
-                Func<CountDescriptor<ProductViewModel>, CountRequest> _CountRequest = q => new CountRequest<ProductViewModel>("product_hulotoys")
+                Func<CountDescriptor<ProductViewModel>, CountRequest> _CountRequest = q => new CountRequest<ProductViewModel>("product_hulotoys_store")
                 {
                     Query = new BoolQuery { Must = Clauses },
                 };

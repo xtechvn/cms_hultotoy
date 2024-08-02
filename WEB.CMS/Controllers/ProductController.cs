@@ -23,7 +23,9 @@ namespace WEB.CMS.Controllers
     [CustomAuthorize]
     public class ProductController : Controller
     {
-        private const int USEXPRESS_CATEGORY_ID = -1;
+        private const int US_CATEGORY_ID = 1;
+
+        private const int USEXPRESS_CATEGORY_ID = 1;
         private readonly ILabelRepository _LabelRepository;
         private readonly ICommonRepository _CommonRepository;
         private readonly IProductRepository _ProductRepository;
@@ -32,7 +34,6 @@ namespace WEB.CMS.Controllers
         private readonly IConfiguration _Configuration;
         private readonly IAllCodeRepository _allCodeRepository;
         private readonly ILocationProductRepository _locationProductRepository;
-        private const int US_CATEGORY_ID = 90;
         private readonly string _UrlStaticImage;
         private readonly ProductMongoAccess _productMongoAccess;
         private readonly ProductDetailMongoAccess _productDetailMongoAccess;
@@ -122,7 +123,7 @@ namespace WEB.CMS.Controllers
                     {
 
                         IProductESRepository<object> _ProductESRepository = new ProductESRepository<object>(_Configuration["DataBaseConfig:Elastic:Host"]);
-                        model = _ProductESRepository.getProductDetailByCode("product_hulotoys", ASIN, label_id);
+                        model = _ProductESRepository.getProductDetailByCode("product_hulotoys_store", ASIN, label_id);
                         if (model != null && model.product_code != null && model.product_code.Trim() != "")
                         {
                             try
@@ -556,14 +557,77 @@ namespace WEB.CMS.Controllers
                                 //-- Push ES
                                 IProductESRepository<ProductViewModel> _ProductESRepository = new ProductESRepository<ProductViewModel>(_Configuration["DataBaseConfig:Elastic:Host"]);
                                 var productObj = JsonConvert.DeserializeObject<ProductViewModel>(json_obj_edit);
-                                var product_response = _ProductESRepository.DeleteProductByCode("product_hulotoys", productObj.product_code);
+                                var product_response = _ProductESRepository.DeleteProductByCode("product_hulotoys_store", productObj.product_code);
                                 if (product_response)
                                 {
                                     productObj.id = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
-                                    var id=  _ProductESRepository.UpSert(productObj, "product_hulotoys");
+                                    var id=  _ProductESRepository.UpSert(productObj, "product_hulotoys_store");
 
                                 }
+                                //-- Product Location: 
+                                if (location_list != null && location_list.Count > 0)
+                                {
+                                    //Delete Non Select Location:
+                                    var exists_list = await _locationProductRepository.GetByProductCode(location_list[0].ProductCode);
+                                    bool existence = false;
+                                    foreach (var exists in exists_list)
+                                    {
+                                        existence = false;
+                                        foreach (var location in location_list)
+                                        {
+                                            if (location.ProductCode == exists.ProductCode && location.GroupProductId == exists.GroupProductId)
+                                            {
+                                                existence = true;
+                                                break;
+                                            }
+                                        }
+                                        if (existence == false) await _locationProductRepository.DeleteAsync(exists);
+                                    }
+                                    string group_id = "";
+                                    var is_first = true;
+                                    //Add or Update
+                                    foreach (var location in location_list)
+                                    {
+                                        //--Update Product Location:
+                                        existence = false;
+                                        foreach (var exists in exists_list)
+                                        {
+                                            if (location.ProductCode == exists.ProductCode && location.GroupProductId == exists.GroupProductId)
+                                            {
+                                                exists.UpdateLast = DateTime.Now;
+                                                if (HttpContext.User.FindFirst(ClaimTypes.Name) != null)
+                                                {
+                                                    exists.UserId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                                                }
+                                                exists.OrderNo = location.OrderNo;
+                                                await _locationProductRepository.Update(exists);
+                                                existence = true;
+                                                break;
+                                            }
+                                        }
+                                        if (existence == false)
+                                        {
+                                            if (HttpContext.User.FindFirst(ClaimTypes.Name) != null)
+                                            {
+                                                location.UserId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                                            }
+                                            location.CreateOn = DateTime.Now;
+                                            location.UpdateLast = DateTime.Now;
+                                            var location_id = await _locationProductRepository.Addnew(location);
+                                        }
+                                        //--Add To Queue field:
+                                        if (is_first)
+                                        {
+                                            is_first = false;
+                                        }
+                                        else
+                                        {
+                                            group_id += ",";
+                                        }
+                                        group_id += location.GroupProductId;
+                                    }
 
+                                }
                                 // -- Push Redis:
                                 string cache_name = CacheHelper.cacheKeyProductDetail(model.product_code, model.label_id);
                                 int db_index = Convert.ToInt32(_Configuration["Redis:Database:db_product_amazon"]);
@@ -665,7 +729,7 @@ namespace WEB.CMS.Controllers
                             str = _RedisService.Get(cache_name, Convert.ToInt32(_Configuration["Redis:Database:db_product_amazon"]));
                             if (str == null || str.Trim() == "")
                             {
-                                model = _ProductESRepository.getProductDetailByCode("product_hulotoys", product_code, label_id);
+                                model = _ProductESRepository.getProductDetailByCode("product_hulotoys_store", product_code, label_id);
                             }
                             else
                             {
@@ -694,11 +758,11 @@ namespace WEB.CMS.Controllers
                                 _RedisService.Set(cache_name, json_obj_edit, db_index);
                                 _ProductESRepository = new ProductESRepository<object>(_Configuration["DataBaseConfig:Elastic:Host"]);
                                 var productObj = JsonConvert.DeserializeObject<ProductViewModel>(json_obj_edit);
-                                var product_response = _ProductESRepository.DeleteProductByCode("product_hulotoys", productObj.product_code);
+                                var product_response = _ProductESRepository.DeleteProductByCode("product_hulotoys_store", productObj.product_code);
                                 if (product_response)
                                 {
                                     productObj.id = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
-                                    _ProductESRepository.UpSert(productObj, "product_hulotoys");
+                                    _ProductESRepository.UpSert(productObj, "product_hulotoys_store");
                                 }
                                 status = (int)ResponseType.SUCCESS;
                                 msg += model.product_code + " success. ";
@@ -786,7 +850,7 @@ namespace WEB.CMS.Controllers
                             str = _RedisService.Get(cache_name, Convert.ToInt32(_Configuration["Redis:Database:db_product_amazon"]));
                             if (str == null || str.Trim() == "")
                             {
-                                model = _ProductESRepository.getProductDetailByCode("product_hulotoys", product_code, label_id);
+                                model = _ProductESRepository.getProductDetailByCode("product_hulotoys_store", product_code, label_id);
                             }
                             else
                             {
@@ -814,11 +878,11 @@ namespace WEB.CMS.Controllers
                                 _RedisService.Set(cache_name, json_obj_edit, db_index);
                                 _ProductESRepository = new ProductESRepository<object>(_Configuration["DataBaseConfig:Elastic:Host"]);
                                 var productObj = JsonConvert.DeserializeObject<ProductViewModel>(json_obj_edit);
-                                var product_response = _ProductESRepository.DeleteProductByCode("product_hulotoys", productObj.product_code);
+                                var product_response = _ProductESRepository.DeleteProductByCode("product_hulotoys_store", productObj.product_code);
                                 if (product_response)
                                 {
                                     productObj.id = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
-                                    _ProductESRepository.UpSert(productObj, "product_hulotoys");
+                                    _ProductESRepository.UpSert(productObj, "product_hulotoys_store");
                                 }
                                 status = (int)ResponseType.SUCCESS;
                                 msg += model.product_code + " success. ";
@@ -869,7 +933,7 @@ namespace WEB.CMS.Controllers
                     IProductESRepository<object> _ProductESRepository = new ProductESRepository<object>(_Configuration["DataBaseConfig:Elastic:Host"]);
                     // Build id identity:
                     // Delete in ES:
-                    var product_response = _ProductESRepository.DeleteProductByCode("product_hulotoys", ASIN);
+                    var product_response = _ProductESRepository.DeleteProductByCode("product_hulotoys_store", ASIN);
                     if (product_response)
                     {
                         status = (int)ResponseType.SUCCESS;
@@ -1135,11 +1199,11 @@ namespace WEB.CMS.Controllers
 
                     var productObj = JsonConvert.DeserializeObject<ProductViewModel>(json_obj_edit);
                     IProductESRepository<object> _ProductESRepository = new ProductESRepository<object>(_Configuration["DataBaseConfig:Elastic:Host"]);
-                    var product_response = _ProductESRepository.DeleteProductByCode("product_hulotoys", productObj.product_code);
+                    var product_response = _ProductESRepository.DeleteProductByCode("product_hulotoys_store", productObj.product_code);
                     if (product_response)
                     {
                         productObj.id = ((DateTimeOffset)DateTime.Now).ToUnixTimeSeconds();
-                        _ProductESRepository.UpSert(productObj, "product_hulotoys");
+                        _ProductESRepository.UpSert(productObj, "product_hulotoys_store");
                     }
                   
 
@@ -1853,10 +1917,10 @@ namespace WEB.CMS.Controllers
                 foreach (var detail in list_id)
                 {
                     detail.link_product = CommonHelper.genLinkDetailProduct(detail.label_name, detail.product_code, CommonHelper.RemoveUnicode(detail.product_name).Trim());
-                    var delete_complete = _ProductESRepository.DeleteProductByCode("product_hulotoys", detail.product_code);
+                    var delete_complete = _ProductESRepository.DeleteProductByCode("product_hulotoys_store", detail.product_code);
                     if (delete_complete)
                     {
-                        _ProductESRepository.UpSert(detail, "product_hulotoys");
+                        _ProductESRepository.UpSert(detail, "product_hulotoys_store");
                     }
                     var detail_json = JsonConvert.SerializeObject(detail);
                     // -- Push Redis:
@@ -1978,10 +2042,10 @@ namespace WEB.CMS.Controllers
                         model.item_weight = "1 pounds";
 
                         //-- Push ES:
-                        var delete_complete = _ProductESRepository.DeleteProductByCode("product_hulotoys", model.product_code);
+                        var delete_complete = _ProductESRepository.DeleteProductByCode("product_hulotoys_store", model.product_code);
                         if (delete_complete)
                         {
-                            _ProductESRepository.UpSert(model, "product_hulotoys");
+                            _ProductESRepository.UpSert(model, "product_hulotoys_store");
                         }
                         // -- Push Redis:
                         string cache_name = CacheHelper.cacheKeyProductDetail(model.product_code, model.label_id);
