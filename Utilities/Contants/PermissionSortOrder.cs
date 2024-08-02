@@ -21,7 +21,7 @@ namespace Utilities.Contants
         PHIEU_YEU_CAU_CHI = 64,//yêu cầu chi
         PHIEU_CHI = 62,//phiếu chi
         NAP_QUY = 46,//NẠP QUỸ
-        QL_KHACH_HANG = 50,//Quản lý khách hàng
+        QL_KHACH_HANG = 2,//Quản lý khách hàng
         PHIEU_THU = 57,//quản lý phiếu thu
         YEU_CAU_XUAT_HOA_DON = 77,//quản lý phiếu thu
         CHUONG_TRINH = 90,//quản chương trình qc

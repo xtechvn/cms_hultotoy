@@ -59,7 +59,7 @@
                 </a>
             }
         </div>
-     
+
     </div>
     <div class="wrap_bg mb20">
 
@@ -213,15 +213,15 @@
                                 }
                             </div>
                             <div class="btn-right">
-                                <button type="button" class="btn btn-default gray open-popup" onclick="_newsDetail.OnOpenRelationForm('@Model.Id')">
+                                <button type="button" class="btn btn-default gray" onsubmit="return false" onclick="_newsDetail.OnOpenRelationForm('@Model.Id')">
                                     Thêm tin liên quan
                                 </button>
                                 @if (Model.Status == ArticleStatus.PUBLISH)
-                                    {
-                                        <button type="button"id="ha_bai_viet" class="btn btn-default red open-popup" onclick="_newsDetail.OnChangeArticleStatus('@Model.Id','@ArticleStatus.REMOVE')">
-                                            Hạ bài viết
-                                        </button>
-                                    }
+                                {
+                                    <button type="button" id="ha_bai_viet" class="btn btn-default red open-popup" onclick="_newsDetail.OnChangeArticleStatus('@Model.Id','@ArticleStatus.REMOVE')">
+                                        Hạ bài viết
+                                    </button>
+                                }
 
                                 @if (Model.Status == ArticleStatus.REMOVE)
                                 {
