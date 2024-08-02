@@ -30,7 +30,7 @@ namespace Utilities.Contants
     {
         public const int PUBLISH = 0; // BÀI XUẤT BẢN
         public const int SAVE = 1; // BÀI LƯU TẠM
-        public const int REMOVE = 2; // BÀI BỊ HẠ
+        public const int REMOVE = 2; // BÀI LƯU TẠM
     }
 
     public enum PAYMENT_REQUEST_STATUS

@@ -33,7 +33,10 @@ $(document).ready(function () {
     };
 
     _wrapperImage.lightGallery();
-
+    var News_Status = $('#News_Status').val();
+    if (News_Status == 0) {
+        _newsDetail.disabledView();
+    }
 });
 
 _common.tinyMce('#text-editor');
@@ -514,6 +517,34 @@ var _newsDetail = {
             error: function (jqXHR) {
 
             }
+        });
+    },
+    disabledView: function () {
+        $('input[type="text"], input[type="checkbox"], input[type="radio"], select, button, textarea').prop('disabled', true);
+        $('#ha_bai_viet').prop('disabled', false);
+    },
+    EditNewDetail: function (id, status) {
+        let title = 'Xác nhận hạ bài viết';
+        let description = 'Bài viết đang hiển thị ngoài mặt trang sẽ bị hạ.Bạn có đồng ý không?';
+        _msgconfirm.openDialog(title, description, function () {
+            $.ajax({
+                url: '/news/ChangeArticleStatus',
+                type: 'POST',
+                data: { Id: id, articleStatus: status },
+                success: function (result) {
+                    if (result.isSuccess) {
+                        _msgalert.success(result.message);
+                        setTimeout(function () {
+                            window.location.href = "/news/detail/" + result.dataId;
+
+                        }, 200);
+                    } else {
+                        _msgalert.error(result.message);
+                    }
+                },
+                error: function (jqXHR) {
+                }
+            });
         });
     },
 }

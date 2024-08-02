@@ -31,6 +31,7 @@
     .user-hierarchy-tag ul .lever2 {
         padding-left: 15px;
     }
+
     .loading {
         position: absolute;
         z-index: 1;
@@ -42,13 +43,26 @@
         background: rgba(0, 0, 0, 0.479);
     }
 
-   .loading img {
-        width: 2rem;
-   }
+        .loading img {
+            width: 2rem;
+        }
 </style>
 <div class="row-main container" style="max-width: 1180px;">
-    <h2 class="title_page">ĐĂNG BÀI VIẾT</h2>
+    <input value="@Model.Status" id="News_Status" style="display:none;" />
+    <div class="flex row-main-head">
+        <h2 class="title_page">ĐĂNG BÀI VIẾT</h2>
+        <div class="btn-right text-right">
+            @if (Model.Status == ArticleStatus.PUBLISH)
+            {
+                <a href="javascripts:;" class="btn" onclick="_newsDetail.EditNewDetail('@Model.Id','@ArticleStatus.REMOVE')">
+                    Sửa bài viết
+                </a>
+            }
+        </div>
+     
+    </div>
     <div class="wrap_bg mb20">
+
         <form id="form-news">
             <div class="form-default2">
                 <div class="form-group none-flex">
@@ -71,7 +85,7 @@
                         <label><strong>Nội dung</strong> <sup class="red">*</sup></label>
                         <div class="list-radio flex mb10" style="margin-left: 20px">
                             <label class="radio-inline">
-                                <input  onclick="_newsDetail.Onchen('0')" type="radio" asp-for="@Model.ArticleType" value="0">
+                                <input onclick="_newsDetail.Onchen('0')" type="radio" asp-for="@Model.ArticleType" value="0">
                                 Bài thường
                             </label>
                             <label class="radio-inline">
@@ -95,8 +109,8 @@
                     <!-- Dạng bài video -->
                     <div id="video_post" class="mb20" style="display:none">
                         <div class="border pd10">
-                            
-                            
+
+
                             <div style="max-width: 100%;margin: 0 auto;">
                                 <div>
                                     <div class="col-md">
@@ -123,10 +137,10 @@
                                         <div>
                                             @if (Model.Body != null)
                                             {
-                                            <video class="col-md" id="iframe-video" src="@Model.Body" controls></video>
-                                            <div class="choose-btn" onclick="_newsDetail.DeleteVideo()">
-                                                <div class="btn-default">Chọn video khác</div>
-                                            </div>
+                                                <video class="col-md" id="iframe-video" src="@Model.Body" controls></video>
+                                                <div class="choose-btn" onclick="_newsDetail.DeleteVideo()">
+                                                    <div class="btn-default">Chọn video khác</div>
+                                                </div>
                                             }
                                         </div>
                                         <div class="lightgallery" id="lightgallery">
@@ -203,11 +217,11 @@
                                     Thêm tin liên quan
                                 </button>
                                 @if (Model.Status == ArticleStatus.PUBLISH)
-                                {
-                                    <button type="button" class="btn btn-default red open-popup" onclick="_newsDetail.OnChangeArticleStatus('@Model.Id','@ArticleStatus.REMOVE')">
-                                        Hạ bài viết
-                                    </button>
-                                }
+                                    {
+                                        <button type="button"id="ha_bai_viet" class="btn btn-default red open-popup" onclick="_newsDetail.OnChangeArticleStatus('@Model.Id','@ArticleStatus.REMOVE')">
+                                            Hạ bài viết
+                                        </button>
+                                    }
 
                                 @if (Model.Status == ArticleStatus.REMOVE)
                                 {
@@ -327,4 +341,5 @@
     <script src="~/lib/tags-input/bootstrap-tagsinput.js"></script>
     <script src="~/lib/tags-input/typeahead.js"></script>
     <script src="~/modules/news_detail.js?v=8"></script>
+
 }
