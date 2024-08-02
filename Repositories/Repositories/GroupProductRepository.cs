@@ -17,7 +17,7 @@ namespace Repositories.Repositories
 {
     public class GroupProductRepository : IGroupProductRepository
     {
-        private const int NEWS_CATEGORY_ID = 1;
+        private const int NEWS_CATEGORY_ID = 10;
         private readonly GroupProductDAL _GroupProductDAL;
         private readonly AllCodeDAL _AllCodeDAL;
 
