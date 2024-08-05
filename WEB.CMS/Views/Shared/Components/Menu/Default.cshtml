@@ -60,7 +60,7 @@
                 }
             <li class="accordion-item ">
                 <a class="@(parent.Id == ActivedParentId ? "active" : string.Empty)" href="@parent_link">
-                    <img src="@parent.Icon" style="width:40px;"> <span>@parent.Name</span>
+                    <img src="@parent.Icon" style="width:24px;"> <span>@parent.Name</span>
                 </a>
                 @if (childDatas!=null && childDatas.Any())
                     {
@@ -96,7 +96,7 @@
             @*<svg class="icon-svg">
             <use xlink:href="/images/icons/icon.svg#Out"></use>
         </svg>*@
-            <img src="/images/menu/Đăng xuất.svg" style="width:40px;">
+            <img src="/images/menu/Đăng xuất.svg" style="width:24px;">
             Đăng xuất
         </a>
     </form>
