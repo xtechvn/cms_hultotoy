@@ -30,10 +30,10 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var list_role_id = await _DbContext.UserRole.Where(s => s.UserId == user_id).ToListAsync();
+                    var list_role_id = await _DbContext.UserRoles.Where(s => s.UserId == user_id).ToListAsync();
                     if (list_role_id != null && list_role_id.Count > 0)
                     {
-                        return await _DbContext.Role.Where(s => list_role_id.Select(x => x.RoleId).Contains(s.Id)).ToListAsync();
+                        return await _DbContext.Roles.Where(s => list_role_id.Select(x => x.RoleId).Contains(s.Id)).ToListAsync();
                     }
                     return null;
                 }

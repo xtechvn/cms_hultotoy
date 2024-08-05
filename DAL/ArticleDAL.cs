@@ -144,7 +144,7 @@ namespace DAL
                     {
                         try
                         {
-                            var article = await _DbContext.Article.FindAsync(Id);
+                            var article = await _DbContext.Articles.FindAsync(Id);
                             model = new ArticleModel
                             {
                                 Id = article.Id,
@@ -161,15 +161,15 @@ namespace DAL
                                 Position = article.Position ?? 0
                             };
 
-                            var TagIds = await _DbContext.ArticleTag.Where(s => s.ArticleId == article.Id).Select(s => s.TagId).ToListAsync();
-                            model.Tags = await _DbContext.Tag.Where(s => TagIds.Contains(s.Id)).Select(s => s.TagName).ToListAsync();
-                            model.Categories = await _DbContext.ArticleCategory.Where(s => s.ArticleId == article.Id).Select(s => (int)s.CategoryId).ToListAsync();
-                            model.RelatedArticleIds = await _DbContext.ArticleRelated.Where(s => s.ArticleId == article.Id).Select(s => (long)s.ArticleRelatedId).ToListAsync();
+                            var TagIds = await _DbContext.ArticleTags.Where(s => s.ArticleId == article.Id).Select(s => s.TagId).ToListAsync();
+                            model.Tags = await _DbContext.Tags.Where(s => TagIds.Contains(s.Id)).Select(s => s.TagName).ToListAsync();
+                            model.Categories = await _DbContext.ArticleCategories.Where(s => s.ArticleId == article.Id).Select(s => (int)s.CategoryId).ToListAsync();
+                            model.RelatedArticleIds = await _DbContext.ArticleRelateds.Where(s => s.ArticleId == article.Id).Select(s => (long)s.ArticleRelatedId).ToListAsync();
 
                             if (model.RelatedArticleIds != null && model.RelatedArticleIds.Count > 0)
                             {
-                                model.RelatedArticleList = await (from _article in _DbContext.Article.AsNoTracking()
-                                                                  join a in _DbContext.User.AsNoTracking() on _article.AuthorId equals a.Id into af
+                                model.RelatedArticleList = await (from _article in _DbContext.Articles.AsNoTracking()
+                                                                  join a in _DbContext.Users.AsNoTracking() on _article.AuthorId equals a.Id into af
                                                                   from _user in af.DefaultIfEmpty()
                                                                   where model.RelatedArticleIds.Contains(_article.Id)
                                                                   select new ArticleRelationModel
@@ -210,13 +210,13 @@ namespace DAL
                     {
                         try
                         {
-                            var ExistList = await _DbContext.ArticleTag.Where(s => s.ArticleId == ArticleId).ToListAsync();
+                            var ExistList = await _DbContext.ArticleTags.Where(s => s.ArticleId == ArticleId).ToListAsync();
                             if (ExistList != null && ExistList.Count > 0)
                             {
                                 foreach (var item in ExistList)
                                 {
-                                    var deleteModel = await _DbContext.ArticleTag.FindAsync(item.Id);
-                                    _DbContext.ArticleTag.Remove(deleteModel);
+                                    var deleteModel = await _DbContext.ArticleTags.FindAsync(item.Id);
+                                    _DbContext.ArticleTags.Remove(deleteModel);
                                     await _DbContext.SaveChangesAsync();
                                 }
                             }
@@ -230,7 +230,7 @@ namespace DAL
                                         TagId = item,
                                         ArticleId = ArticleId
                                     };
-                                    await _DbContext.ArticleTag.AddAsync(model);
+                                    await _DbContext.ArticleTags.AddAsync(model);
                                     await _DbContext.SaveChangesAsync();
                                 }
                             }
@@ -264,13 +264,13 @@ namespace DAL
                     {
                         try
                         {
-                            var ExistList = await _DbContext.ArticleCategory.Where(s => s.ArticleId == ArticleId).ToListAsync();
+                            var ExistList = await _DbContext.ArticleCategories.Where(s => s.ArticleId == ArticleId).ToListAsync();
                             if (ExistList != null && ExistList.Count > 0)
                             {
                                 foreach (var item in ExistList)
                                 {
-                                    var deleteModel = await _DbContext.ArticleCategory.FindAsync(item.Id);
-                                    _DbContext.ArticleCategory.Remove(deleteModel);
+                                    var deleteModel = await _DbContext.ArticleCategories.FindAsync(item.Id);
+                                    _DbContext.ArticleCategories.Remove(deleteModel);
                                     await _DbContext.SaveChangesAsync();
                                 }
                             }
@@ -284,7 +284,7 @@ namespace DAL
                                         CategoryId = item,
                                         ArticleId = ArticleId
                                     };
-                                    await _DbContext.ArticleCategory.AddAsync(model);
+                                    await _DbContext.ArticleCategories.AddAsync(model);
                                     await _DbContext.SaveChangesAsync();
                                 }
                             }
@@ -318,13 +318,13 @@ namespace DAL
                     {
                         try
                         {
-                            var ExistList = await _DbContext.ArticleRelated.Where(s => s.ArticleId == ArticleId).ToListAsync();
+                            var ExistList = await _DbContext.ArticleRelateds.Where(s => s.ArticleId == ArticleId).ToListAsync();
                             if (ExistList != null && ExistList.Count > 0)
                             {
                                 foreach (var item in ExistList)
                                 {
-                                    var deleteModel = await _DbContext.ArticleRelated.FindAsync(item.Id);
-                                    _DbContext.ArticleRelated.Remove(deleteModel);
+                                    var deleteModel = await _DbContext.ArticleRelateds.FindAsync(item.Id);
+                                    _DbContext.ArticleRelateds.Remove(deleteModel);
                                     await _DbContext.SaveChangesAsync();
                                 }
                             }
@@ -338,7 +338,7 @@ namespace DAL
                                         ArticleRelatedId = item,
                                         ArticleId = ArticleId
                                     };
-                                    await _DbContext.ArticleRelated.AddAsync(model);
+                                    await _DbContext.ArticleRelateds.AddAsync(model);
                                     await _DbContext.SaveChangesAsync();
                                 }
                             }
@@ -372,41 +372,41 @@ namespace DAL
                     {
                         try
                         {
-                            var ExistCategory = await _DbContext.ArticleCategory.Where(s => s.ArticleId == Id).ToListAsync();
+                            var ExistCategory = await _DbContext.ArticleCategories.Where(s => s.ArticleId == Id).ToListAsync();
                             if (ExistCategory != null && ExistCategory.Count > 0)
                             {
                                 foreach (var item in ExistCategory)
                                 {
-                                    var deleteModel = await _DbContext.ArticleCategory.FindAsync(item.Id);
-                                    _DbContext.ArticleCategory.Remove(deleteModel);
+                                    var deleteModel = await _DbContext.ArticleCategories.FindAsync(item.Id);
+                                    _DbContext.ArticleCategories.Remove(deleteModel);
                                     await _DbContext.SaveChangesAsync();
                                 }
                             }
 
-                            var ExistRelated = await _DbContext.ArticleRelated.Where(s => s.ArticleId == Id).ToListAsync();
+                            var ExistRelated = await _DbContext.ArticleRelateds.Where(s => s.ArticleId == Id).ToListAsync();
                             if (ExistRelated != null && ExistRelated.Count > 0)
                             {
                                 foreach (var item in ExistRelated)
                                 {
-                                    var deleteModel = await _DbContext.ArticleRelated.FindAsync(item.Id);
-                                    _DbContext.ArticleRelated.Remove(deleteModel);
+                                    var deleteModel = await _DbContext.ArticleRelateds.FindAsync(item.Id);
+                                    _DbContext.ArticleRelateds.Remove(deleteModel);
                                     await _DbContext.SaveChangesAsync();
                                 }
                             }
 
-                            var ExistTag = await _DbContext.ArticleTag.Where(s => s.ArticleId == Id).ToListAsync();
+                            var ExistTag = await _DbContext.ArticleTags.Where(s => s.ArticleId == Id).ToListAsync();
                             if (ExistTag != null && ExistTag.Count > 0)
                             {
                                 foreach (var item in ExistTag)
                                 {
-                                    var deleteModel = await _DbContext.ArticleTag.FindAsync(item.Id);
-                                    _DbContext.ArticleTag.Remove(deleteModel);
+                                    var deleteModel = await _DbContext.ArticleTags.FindAsync(item.Id);
+                                    _DbContext.ArticleTags.Remove(deleteModel);
                                     await _DbContext.SaveChangesAsync();
                                 }
                             }
 
-                            var article = await _DbContext.Article.FindAsync(Id);
-                            _DbContext.Article.Remove(article);
+                            var article = await _DbContext.Articles.FindAsync(Id);
+                            _DbContext.Articles.Remove(article);
                             await _DbContext.SaveChangesAsync();
 
                             transaction.Commit();
@@ -447,8 +447,8 @@ namespace DAL
                         {
 
 
-                            var list_article = await (from _article in _DbContext.Article.AsNoTracking()
-                                                      join a in _DbContext.ArticleCategory.AsNoTracking() on _article.Id equals a.ArticleId into af
+                            var list_article = await (from _article in _DbContext.Articles.AsNoTracking()
+                                                      join a in _DbContext.ArticleCategories.AsNoTracking() on _article.Id equals a.ArticleId into af
                                                       from detail in af.DefaultIfEmpty()
                                                       where detail.CategoryId == cate_id && _article.Status == ArticleStatus.PUBLISH
                                                       select new ArticleViewModel
@@ -498,7 +498,7 @@ namespace DAL
                     {
                         try
                         {
-                            var article = await _DbContext.Article.FirstOrDefaultAsync(x => x.Status == ArticleStatus.PUBLISH && x.Id == article_id);
+                            var article = await _DbContext.Articles.FirstOrDefaultAsync(x => x.Status == ArticleStatus.PUBLISH && x.Id == article_id);
                             model = new ArticleModel
                             {
                                 Id = article.Id,
@@ -548,8 +548,8 @@ namespace DAL
                 {
                     using (var transaction = _DbContext.Database.BeginTransaction())
                     {
-                        list_article = await (from article in _DbContext.Article.AsNoTracking()
-                                              join a in _DbContext.ArticleCategory on article.Id equals a.ArticleId into af
+                        list_article = await (from article in _DbContext.Articles.AsNoTracking()
+                                              join a in _DbContext.ArticleCategories on article.Id equals a.ArticleId into af
                                               from detail in af.DefaultIfEmpty()
                                               where article.Status == ArticleStatus.PUBLISH && article.Title.ToUpper().Contains(title.ToUpper())
                                               select new ArticleViewModel
@@ -578,7 +578,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    ListRs = await _DbContext.ArticleCategory.Where(s => s.ArticleId == ArticleId).Select(s => (int)s.CategoryId).ToListAsync();
+                    ListRs = await _DbContext.ArticleCategories.Where(s => s.ArticleId == ArticleId).Select(s => (int)s.CategoryId).ToListAsync();
                 }
             }
             catch
@@ -606,8 +606,8 @@ namespace DAL
                         try
                         {
 
-                            var list_article = await (from _article in _DbContext.Article.AsNoTracking()
-                                                      join a in _DbContext.ArticleCategory.AsNoTracking() on _article.Id equals a.ArticleId into af
+                            var list_article = await (from _article in _DbContext.Articles.AsNoTracking()
+                                                      join a in _DbContext.ArticleCategories.AsNoTracking() on _article.Id equals a.ArticleId into af
                                                       from detail in af.DefaultIfEmpty()
                                                       where detail.CategoryId == cate_id && _article.Status == ArticleStatus.PUBLISH
                                                       orderby _article.PublishDate descending
@@ -623,8 +623,8 @@ namespace DAL
                                                           link = CommonHelper.genLinkNews(_article.Title, _article.Id.ToString())
                                                       }
                                                      ).ToListAsync();
-                            var list_pinned = await (from _article in _DbContext.Article.AsNoTracking()
-                                                     join a in _DbContext.ArticleCategory.AsNoTracking() on _article.Id equals a.ArticleId into af
+                            var list_pinned = await (from _article in _DbContext.Articles.AsNoTracking()
+                                                     join a in _DbContext.ArticleCategories.AsNoTracking() on _article.Id equals a.ArticleId into af
                                                      from detail in af.DefaultIfEmpty()
                                                      where detail.CategoryId == cate_id && _article.Status == ArticleStatus.PUBLISH && _article.PublishDate <= DateTime.Now && _article.DownTime > DateTime.Now && list_postion_pinned.Contains(_article.Position)
                                                      orderby _article.Position ascending
@@ -693,8 +693,8 @@ namespace DAL
                         try
                         {
 
-                            var article = await (from _article in _DbContext.Article.AsNoTracking()
-                                                 join a in _DbContext.ArticleCategory.AsNoTracking() on _article.Id equals a.ArticleId into af
+                            var article = await (from _article in _DbContext.Articles.AsNoTracking()
+                                                 join a in _DbContext.ArticleCategories.AsNoTracking() on _article.Id equals a.ArticleId into af
                                                  from detail in af.DefaultIfEmpty()
                                                  where detail.CategoryId == cate_id && _article.Status == ArticleStatus.PUBLISH && _article.UpTime <= DateTime.Now && DateTime.Now < _article.DownTime && _article.Position == position
                                                  select new ArticleFeModel

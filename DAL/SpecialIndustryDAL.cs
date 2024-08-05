@@ -33,7 +33,7 @@ namespace DAL
 
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var result = await (from n in _DbContext.IndustrySpecialLuxury.AsNoTracking()
+                    var result = await (from n in _DbContext.IndustrySpecialLuxuries.AsNoTracking()
                                         where n.SpecialType == SpecialType
                                         select new IndustrySpecialViewModel
                                         {

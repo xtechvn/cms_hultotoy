@@ -11,7 +11,7 @@ namespace Repositories.IRepositories
     {
         Task<List<MenuViewModel>> GetMenuParentAndChildAll();
         Task<List<Permission>> GetPermissionList();
-        Task<IEnumerable<MenuPermissions>> GetAllMenuHasPermission();
+        Task<IEnumerable<MenuPermission>> GetAllMenuHasPermission();
         Task<List<Menu>> GetMenuPermissionOfUser(IEnumerable<int> menu_ids);
 
         Task<long> Create(Menu model);

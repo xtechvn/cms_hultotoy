@@ -19,7 +19,7 @@ namespace DAL
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
 
-                    var deta = _DbContext.AccountClient.Add(model);
+                    var deta = _DbContext.AccountClients.Add(model);
                     _DbContext.SaveChanges();
 
 
@@ -39,7 +39,7 @@ namespace DAL
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
 
-                    var main_account =  _DbContext.AccountClient.FirstOrDefault(x => x.ClientId == client_id);
+                    var main_account =  _DbContext.AccountClients.FirstOrDefault(x => x.ClientId == client_id);
                     if (main_account != null)
                     {
                         return main_account.Id;
@@ -63,7 +63,7 @@ namespace DAL
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
 
-                    var main_account = _DbContext.AccountClient.FirstOrDefault(x => x.ClientId == client_id);
+                    var main_account = _DbContext.AccountClients.FirstOrDefault(x => x.ClientId == client_id);
                     if (main_account != null)
                     {
                         return main_account;
@@ -88,7 +88,7 @@ namespace DAL
                 {
 
                  
-                    _DbContext.AccountClient.Update(model);
+                    _DbContext.AccountClients.Update(model);
                      await _DbContext.SaveChangesAsync();
 
                     return 1;

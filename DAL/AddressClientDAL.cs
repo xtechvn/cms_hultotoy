@@ -17,26 +17,7 @@ namespace DAL
             _connection = connection;
         }
 
-        public async Task<AddressClient> GetByClientId(int clientId)
-        {
-            try
-            {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
-                    var detail = _DbContext.AddressClient.AsNoTracking().FirstOrDefaultAsync(x => x.ClientId == clientId);
-                    if (detail != null)
-                    {
-                        return await detail;
-                    }
-                }
-                return null;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("GetByClientId - AddressClientDAL: " + ex);
-                return null;
-            }
-        }
+       
 
     }
 }

@@ -30,7 +30,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = _DbContext.Product.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+                    var detail = _DbContext.Products.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
                     if (detail != null)
                     {
                         return await detail;
@@ -50,7 +50,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = _DbContext.Product.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+                    var detail = _DbContext.Products.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
                     if (detail != null)
                     {
                         return await detail;
@@ -70,7 +70,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = _DbContext.Product.AsNoTracking().FirstOrDefaultAsync(x => x.ProductMapId == id);
+                    var detail = _DbContext.Products.AsNoTracking().FirstOrDefaultAsync(x => x.ProductMapId == id);
                     if (detail != null)
                     {
                         return await detail;
@@ -90,7 +90,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = _DbContext.Product.AsNoTracking().FirstOrDefaultAsync(x => x.ProductCode
+                    var detail = _DbContext.Products.AsNoTracking().FirstOrDefaultAsync(x => x.ProductCode
                     == productCode && x.LabelId == storeId);
                     if (detail != null)
                     {
@@ -111,7 +111,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = _DbContext.Product.AsNoTracking().FirstOrDefaultAsync(x => x.ProductCode
+                    var detail = _DbContext.Products.AsNoTracking().FirstOrDefaultAsync(x => x.ProductCode
                     == productCode);
                     if (detail != null)
                     {
@@ -132,7 +132,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    _DbContext.Product.Add(model);
+                    _DbContext.Products.Add(model);
                     await _DbContext.SaveChangesAsync();
                     return model.Id;
                 }
@@ -149,7 +149,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    _DbContext.Product.Update(model);
+                    _DbContext.Products.Update(model);
                     await _DbContext.SaveChangesAsync();
                 }
                 return model.Id;
@@ -184,7 +184,7 @@ namespace DAL
 
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var result = await (from n in _DbContext.PriceProductLevel.AsNoTracking()
+                    var result = await (from n in _DbContext.PriceProductLevels.AsNoTracking()
                                         where (("," + n.LabelId.Trim() + ",").IndexOf("," + LabelId.ToString().Trim() + ",") >= 0) && (current_date >= n.FromDate && current_date <= n.ToDate)
                                         select new PriceLevelViewModel
                                         {

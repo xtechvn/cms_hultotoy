@@ -261,7 +261,7 @@ namespace Repositories.Repositories
             return await _MenuDAL.GetSelectedPermissionList(id);
         }
 
-        public async Task<IEnumerable<MenuPermissions>> GetAllMenuHasPermission()
+        public async Task<IEnumerable<MenuPermission>> GetAllMenuHasPermission()
         {
             return await _MenuDAL.GetAllMenuHasPermission();
         }

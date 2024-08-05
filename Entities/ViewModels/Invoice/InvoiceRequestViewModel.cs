@@ -61,28 +61,7 @@ namespace Entities.ViewModels.Invoice
                 return string.Empty;
             }
         }
-        public string PaymentDateRemind
-        {
-            get
-            {
-                if (PlanDate == null || Status == (int)INVOICE_REQUEST_STATUS.DA_DUYET || Status == (int)INVOICE_REQUEST_STATUS.HOAN_THANH) return string.Empty;
-                if (PlanDate < DateTime.Today)
-                {
-                    var time = DateTime.Today.Subtract(PlanDate.Value);
-                    return "[Quá " + time.Days + " ngày]";
-                }
-                if (PlanDate == DateTime.Today)
-                {
-                    return "[Xuất trong hôm nay]";
-                }
-                if (PlanDate > DateTime.Today)
-                {
-                    var time = PlanDate.Value.Subtract(DateTime.Today);
-                    return "[Còn " + time.Days + " ngày]";
-                }
-                return string.Empty;
-            }
-        }
+       
         public int isSend { get; set; }
         public long InvoiceRequestDetailId { get; set; }
         public List<AttachFile> AttachFiles { get; set; }

@@ -22,7 +22,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = _DbContext.LocationProduct.AsNoTracking().FirstOrDefaultAsync(x => x.LocationProductId == id);
+                    var detail = _DbContext.LocationProducts.AsNoTracking().FirstOrDefaultAsync(x => x.LocationProductId == id);
                     if (detail != null)
                     {
                         return await detail;
@@ -42,7 +42,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = _DbContext.LocationProduct.AsNoTracking().Where(x => x.ProductCode == product_code).ToListAsync();
+                    var detail = _DbContext.LocationProducts.AsNoTracking().Where(x => x.ProductCode == product_code).ToListAsync();
                     if (detail != null)
                     {
                         return await detail;
@@ -62,7 +62,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = _DbContext.LocationProduct.AsNoTracking().Where(x => x.ProductCode == product_code && x.GroupProductId==group_id).FirstOrDefaultAsync();
+                    var detail = _DbContext.LocationProducts.AsNoTracking().Where(x => x.ProductCode == product_code && x.GroupProductId==group_id).FirstOrDefaultAsync();
                     if (detail != null)
                     {
                         return await detail;

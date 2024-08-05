@@ -43,7 +43,7 @@ namespace DAL
 
                     if (model.permission_ids != null && model.permission_ids.Any())
                     {
-                        var datas = model.permission_ids.Select(x => new MenuPermissions
+                        var datas = model.permission_ids.Select(x => new MenuPermission
                         {
                             Id = 0,
                             MenuId = model.menu_id,
@@ -63,7 +63,7 @@ namespace DAL
             }
         }
 
-        public async Task<IEnumerable<MenuPermissions>> GetAllMenuHasPermission()
+        public async Task<IEnumerable<MenuPermission>> GetAllMenuHasPermission()
         {
             try
             {
@@ -98,7 +98,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    return await _DbContext.Menu.AsNoTracking().Where(x=>x.Status==0).ToListAsync();
+                    return await _DbContext.Menus.AsNoTracking().Where(x=>x.Status==0).ToListAsync();
                 }
             }
             catch

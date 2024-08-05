@@ -62,7 +62,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = _DbContext.AllCode.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+                    var detail = _DbContext.AllCodes.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
                     if (detail != null)
                     {
                         return await detail;
@@ -82,7 +82,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = await _DbContext.AllCode.AsNoTracking().Where(x => x.Type == type).OrderByDescending(x => x.CodeValue).FirstOrDefaultAsync();
+                    var detail = await _DbContext.AllCodes.AsNoTracking().Where(x => x.Type == type).OrderByDescending(x => x.CodeValue).FirstOrDefaultAsync();
                     if (detail != null)
                     {
                         return  detail.CodeValue;
@@ -101,7 +101,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = await _DbContext.AllCode.AsNoTracking().Where(x => x.Type == type).OrderByDescending(x => x.OrderNo).FirstOrDefaultAsync();
+                    var detail = await _DbContext.AllCodes.AsNoTracking().Where(x => x.Type == type).OrderByDescending(x => x.OrderNo).FirstOrDefaultAsync();
                     if (detail != null)
                     {
                         return detail.OrderNo!=null?(short)detail.OrderNo: (short)-1;
@@ -120,7 +120,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = await _DbContext.AllCode.AsNoTracking().Where(x => x.Type == type && x.Description==description).FirstOrDefaultAsync();
+                    var detail = await _DbContext.AllCodes.AsNoTracking().Where(x => x.Type == type && x.Description==description).FirstOrDefaultAsync();
                     if (detail != null)
                     {
                         return detail;
@@ -139,7 +139,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = await _DbContext.AllCode.AsNoTracking().Where(n => n.Type == type_name).OrderBy(x=>x.Description).ToListAsync();
+                    var detail = await _DbContext.AllCodes.AsNoTracking().Where(n => n.Type == type_name).OrderBy(x=>x.Description).ToListAsync();
                     if (detail != null)
                     {
                         return detail;
@@ -159,7 +159,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var detail = await _DbContext.AllCode.AsNoTracking().Where(x => x.Type == type && x.Description.ToLower().Contains(description.Trim().ToLower())).FirstOrDefaultAsync();
+                    var detail = await _DbContext.AllCodes.AsNoTracking().Where(x => x.Type == type && x.Description.ToLower().Contains(description.Trim().ToLower())).FirstOrDefaultAsync();
                     if (detail != null)
                     {
                         return detail;

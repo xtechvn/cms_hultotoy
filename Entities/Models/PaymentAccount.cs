@@ -1,19 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 
-// Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
-// If you have enabled NRTs for your project, then un-comment the following line:
-// #nullable disable
+namespace Entities.Models;
 
-namespace Entities.Models
+public partial class PaymentAccount
 {
-    public partial class PaymentAccount
-    {
-        public int Id { get; set; }
-        public string AccountNumb { get; set; }
-        public string AccountName { get; set; }
-        public string BankName { get; set; }
-        public string Branch { get; set; }
-        public long ClientId { get; set; }
-    }
+    public int Id { get; set; }
+
+    /// <summary>
+    /// Số tài khoản
+    /// </summary>
+    public string AccountNumb { get; set; }
+
+    /// <summary>
+    /// Tên chủ tài khoản
+    /// </summary>
+    public string AccountName { get; set; }
+
+    /// <summary>
+    /// Tên ngân hàng
+    /// </summary>
+    public string BankName { get; set; }
+
+    /// <summary>
+    /// Chi nhánh
+    /// </summary>
+    public string Branch { get; set; }
+
+    public long ClientId { get; set; }
 }

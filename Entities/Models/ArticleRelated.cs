@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-// Code scaffolded by EF Core assumes nullable reference types (NRTs) are not used or disabled.
-// If you have enabled NRTs for your project, then un-comment the following line:
-// #nullable disable
+namespace Entities.Models;
 
-namespace Entities.Models
+public partial class ArticleRelated
 {
-    public partial class ArticleRelated
-    {
-        public long Id { get; set; }
-        public long? ArticleId { get; set; }
-        public long? ArticleRelatedId { get; set; }
+    public long Id { get; set; }
 
-        public virtual Article Article { get; set; }
-    }
+    public long? ArticleId { get; set; }
+
+    public long? ArticleRelatedId { get; set; }
+
+    public virtual Article Article { get; set; }
 }

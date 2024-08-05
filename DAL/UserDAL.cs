@@ -29,7 +29,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var ListUser = _DbContext.User.AsQueryable();
+                    var ListUser = _DbContext.Users.AsQueryable();
 
                     if (!string.IsNullOrEmpty(userName))
                     {
@@ -64,8 +64,8 @@ namespace DAL
                         Address = s.Address,
                         Status = s.Status,
                         CreatedOn = s.CreatedOn,
-                        RoleList = (from a in _DbContext.UserRole.Where(a => a.UserId == s.Id)
-                                    join b in _DbContext.Role on a.RoleId equals b.Id into bs
+                        RoleList = (from a in _DbContext.UserRoles.Where(a => a.UserId == s.Id)
+                                    join b in _DbContext.Roles on a.RoleId equals b.Id into bs
                                     from b in bs.DefaultIfEmpty()
                                     select new Role
                                     {
@@ -73,13 +73,13 @@ namespace DAL
                                         Name = b.Name,
                                         Status = b.Status
                                     }).ToList(),
-                        UserDepartment = (from a in _DbContext.Department.Where(a => a.Id == s.DepartmentId)
+                        UserDepartment = (from a in _DbContext.Departments.Where(a => a.Id == s.DepartmentId)
                                           select new Department
                                           {
                                               Id = a.Id,
                                               DepartmentName = a.DepartmentName,
                                           }).FirstOrDefault(),
-                        UserPosition = (from a in _DbContext.UserPosition.Where(a => a.Id == s.UserPositionId)
+                        UserPosition = (from a in _DbContext.UserPositions.Where(a => a.Id == s.UserPositionId)
                                         select new UserPosition
                                         {
                                             Id = a.Id,
@@ -116,7 +116,7 @@ namespace DAL
                     {
                         foreach (var roleId in arrayRole)
                         {
-                            var model = await _DbContext.UserRole.Where(s => s.UserId == userId && s.RoleId == roleId).FirstOrDefaultAsync();
+                            var model = await _DbContext.UserRoles.Where(s => s.UserId == userId && s.RoleId == roleId).FirstOrDefaultAsync();
                             if (model == null || model.Id <= 0)
                             {
                                 model = new UserRole
@@ -125,15 +125,15 @@ namespace DAL
                                     RoleId = roleId
                                 };
 
-                                await _DbContext.UserRole.AddAsync(model);
+                                await _DbContext.UserRoles.AddAsync(model);
                                 await _DbContext.SaveChangesAsync();
                             }
 
                         }
-                        var list = await _DbContext.UserRole.Where(s => s.UserId == userId && !arrayRole.Contains(s.RoleId)).ToListAsync();
+                        var list = await _DbContext.UserRoles.Where(s => s.UserId == userId && !arrayRole.Contains(s.RoleId)).ToListAsync();
                         if (list != null && list.Count > 0)
                         {
-                            _DbContext.UserRole.RemoveRange(list);
+                            _DbContext.UserRoles.RemoveRange(list);
                             await _DbContext.SaveChangesAsync();
                         }
                     }
@@ -141,10 +141,10 @@ namespace DAL
                     {
                         foreach (var roleId in arrayRole)
                         {
-                            var model = await _DbContext.UserRole.Where(s => s.UserId == userId && s.RoleId == roleId).FirstOrDefaultAsync();
+                            var model = await _DbContext.UserRoles.Where(s => s.UserId == userId && s.RoleId == roleId).FirstOrDefaultAsync();
                             if (model != null)
                             {
-                                _DbContext.UserRole.Remove(model);
+                                _DbContext.UserRoles.Remove(model);
                                 await _DbContext.SaveChangesAsync();
                             }
                         }
@@ -165,7 +165,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    return await _DbContext.UserRole.Where(x => x.UserId == userId).Select(s => s.RoleId).ToListAsync();
+                    return await _DbContext.UserRoles.Where(x => x.UserId == userId).Select(s => s.RoleId).ToListAsync();
                 }
             }
             catch (Exception ex)
@@ -181,7 +181,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    return await _DbContext.User.FirstOrDefaultAsync(s => s.UserName.Equals(input));
+                    return await _DbContext.Users.FirstOrDefaultAsync(s => s.UserName.Equals(input));
                 }
             }
             catch (Exception ex)
@@ -197,7 +197,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    return await _DbContext.User.Where(s => userIds.Contains(s.Id)).ToListAsync();
+                    return await _DbContext.Users.Where(s => userIds.Contains(s.Id)).ToListAsync();
                 }
             }
             catch (Exception ex)
@@ -213,7 +213,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    return await _DbContext.User.FirstOrDefaultAsync(s => userIds == s.Id);
+                    return await _DbContext.Users.FirstOrDefaultAsync(s => userIds == s.Id);
                 }
             }
             catch (Exception ex)
@@ -229,8 +229,8 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    return await (from u in _DbContext.User
-                                  join department in _DbContext.Department on u.DepartmentId equals department.Id into dep
+                    return await (from u in _DbContext.Users
+                                  join department in _DbContext.Departments on u.DepartmentId equals department.Id into dep
                                   from subdep in dep.DefaultIfEmpty()
                                   where u.Id == user
                                   select new UserDataViewModel
@@ -265,7 +265,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    return await _DbContext.User.FirstOrDefaultAsync(s => s.Email.Equals(input));
+                    return await _DbContext.Users.FirstOrDefaultAsync(s => s.Email.Equals(input));
                 }
             }
             catch (Exception ex)
@@ -282,7 +282,7 @@ namespace DAL
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
                     var arrRoleId = strRoleId.Split(',').Select(s => int.Parse(s)).ToArray();
-                    return _DbContext.UserRole.Where(s => arrRoleId.Contains(s.RoleId)).Select(s => s.UserId).ToList();
+                    return _DbContext.UserRoles.Where(s => arrRoleId.Contains(s.RoleId)).Select(s => s.UserId).ToList();
                 }
             }
             catch (Exception ex)
@@ -299,7 +299,7 @@ namespace DAL
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
 
-                    return _DbContext.User.FirstOrDefault(s => s.Id == Id);
+                    return _DbContext.Users.FirstOrDefault(s => s.Id == Id);
                 }
             }
             catch (Exception ex)
@@ -316,7 +316,7 @@ namespace DAL
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
 
-                    return _DbContext.User.AsNoTracking().ToList();
+                    return _DbContext.Users.AsNoTracking().ToList();
                 }
             }
             catch (Exception ex)
@@ -331,7 +331,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    return await _DbContext.User.AsNoTracking().Where(s => s.UserName.ToLower().Contains(txt_search.ToLower())).ToListAsync();
+                    return await _DbContext.Users.AsNoTracking().Where(s => s.UserName.ToLower().Contains(txt_search.ToLower())).ToListAsync();
                 }
             }
             catch (Exception ex)
@@ -347,8 +347,8 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    return await (from a in _DbContext.RolePermission
-                                  join b in _DbContext.UserRole on a.RoleId equals b.RoleId
+                    return await (from a in _DbContext.RolePermissions
+                                  join b in _DbContext.UserRoles on a.RoleId equals b.RoleId
                                   where b.UserId == user_id
                                   select new RolePermission
                                   {
@@ -371,7 +371,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var user_department_model = await _DbContext.UserDepart.Where(s => s.UserId == model.Id)
+                    var user_department_model = await _DbContext.UserDeparts.Where(s => s.UserId == model.Id)
                         .OrderByDescending(s => s.Id)
                         .FirstOrDefaultAsync();
 
@@ -382,7 +382,7 @@ namespace DAL
                         dataJoinTime = user_department_model.LeaveDate;
                     }
 
-                    _DbContext.UserDepart.Add(new UserDepart
+                    _DbContext.UserDeparts.Add(new UserDepart
                     {
                         UserId = model.Id,
                         DepartmentId = model.DepartmentId,
@@ -431,10 +431,10 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var user_role = await _DbContext.UserRole.Where(s => s.RoleId == role_id).FirstOrDefaultAsync();
+                    var user_role = await _DbContext.UserRoles.Where(s => s.RoleId == role_id).FirstOrDefaultAsync();
                     if (user_role != null && user_role.Id > 0)
                     {
-                        return await _DbContext.User.Where(s => s.Id == user_role.UserId && s.Status == 0).FirstOrDefaultAsync();
+                        return await _DbContext.Users.Where(s => s.Id == user_role.UserId && s.Status == 0).FirstOrDefaultAsync();
                     }
                 }
             }
@@ -451,11 +451,11 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var user_role = _DbContext.UserRole.Where(s => s.RoleId == role_id).ToList();
+                    var user_role = _DbContext.UserRoles.Where(s => s.RoleId == role_id).ToList();
                     var listUserId = user_role.Select(n => n.UserId).ToList();
                     if (listUserId.Count > 0)
                     {
-                        return await _DbContext.User.Where(s => listUserId.Contains(s.Id) && s.Status == 0).ToListAsync();
+                        return await _DbContext.Users.Where(s => listUserId.Contains(s.Id) && s.Status == 0).ToListAsync();
                     }
                 }
             }
@@ -472,11 +472,11 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var user_role = _DbContext.UserRole.Where(s => role_ids.Contains(s.RoleId)).ToList();
+                    var user_role = _DbContext.UserRoles.Where(s => role_ids.Contains(s.RoleId)).ToList();
                     var listUserId = user_role.Select(n => n.UserId).ToList();
                     if (listUserId.Count > 0)
                     {
-                        return await _DbContext.User.Where(s => listUserId.Contains(s.Id) && s.Status == 0).ToListAsync();
+                        return await _DbContext.Users.Where(s => listUserId.Contains(s.Id) && s.Status == 0).ToListAsync();
                     }
                 }
             }
@@ -493,11 +493,11 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var user_role = _DbContext.UserRole.Where(s => s.RoleId == role_id).ToList();
+                    var user_role = _DbContext.UserRoles.Where(s => s.RoleId == role_id).ToList();
                     var userRoleIds = user_role.Select(n => n.UserId).ToList();
                     if (userRoleIds.Count > 0)
                     {
-                        return _DbContext.User.Where(s => userRoleIds.Contains(s.Id) && s.Status == 0).ToList();
+                        return _DbContext.Users.Where(s => userRoleIds.Contains(s.Id) && s.Status == 0).ToList();
                     }
                 }
             }
@@ -513,7 +513,7 @@ namespace DAL
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    return await _DbContext.User.AsNoTracking().Where(s => s.UserName.ToLower().Contains(txt_search.ToLower()) && ids.Contains(s.Id)).ToListAsync();
+                    return await _DbContext.Users.AsNoTracking().Where(s => s.UserName.ToLower().Contains(txt_search.ToLower()) && ids.Contains(s.Id)).ToListAsync();
                 }
             }
             catch (Exception ex)
