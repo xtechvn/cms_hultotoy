@@ -58,7 +58,7 @@
                     var first_child = _ListMenu.FirstOrDefault(s => s.ParentId == parent.Id && !string.IsNullOrEmpty(s.Link));
                     parent_link = first_child.Link;
                 }
-            <li class="accordion-item ">
+            <li class="accordion-item " style="margin-bottom: 6px 0px 6px 0px !important ">
                 <a class="@(parent.Id == ActivedParentId ? "active" : string.Empty)" href="@parent_link">
                     <img src="@parent.Icon" style="width:24px;"> <span>@parent.Name</span>
                 </a>
