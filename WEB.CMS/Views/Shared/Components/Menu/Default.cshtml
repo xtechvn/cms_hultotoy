@@ -27,13 +27,13 @@
     }
 }
 
-<section class="menu-left">
+<section class="menu-left"style="width:77px !important">
 
-    <a class="btn_control_menu" href="javascripts:;">
+    @*<a class="btn_control_menu" href="javascripts:;">
         <svg class="icon-svg">
             <use xlink:href="/images/icons/icon.svg#menu"></use>
         </svg>
-    </a>
+    </a>*@
     <h1 class="logo" title="new-ca" href="/">
         <a href="/" class="before"><img src="/images/menu/Logo_gọn.svg" alt=""></a>
         <a href="/" class="after"><img src="/images/graphics/logo-a.svg" alt=""></a>
@@ -58,8 +58,8 @@
                     var first_child = _ListMenu.FirstOrDefault(s => s.ParentId == parent.Id && !string.IsNullOrEmpty(s.Link));
                     parent_link = first_child.Link;
                 }
-            <li class="accordion-item " style="margin-bottom: 6px 0px 6px 0px !important ">
-                <a class="@(parent.Id == ActivedParentId ? "active" : string.Empty)" href="@parent_link">
+            <li class="accordion-item " style="margin-bottom: 0 !important">
+                <a class="@(parent.Id == ActivedParentId ? "active" : string.Empty)" href="@parent_link"style="padding:0 !important">
                     <img src="@parent.Icon" style="width:24px;"> <span>@parent.Name</span>
                 </a>
                 @if (childDatas!=null && childDatas.Any())
