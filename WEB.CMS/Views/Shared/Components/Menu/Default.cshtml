@@ -93,9 +93,11 @@
     </div>
     <form method="post" asp-controller="account" asp-action="logout" style="color:white;">
         <a class="out" onclick="$(this).closest('form').submit(); _account.logOut()" style="cursor:pointer">
-            <svg class="icon-svg">
-                <use xlink:href="/images/menu/Đăng xuất.svg"></use>
-            </svg> Đăng xuất
+            @*<svg class="icon-svg">
+            <use xlink:href="/images/icons/icon.svg#Out"></use>
+        </svg>*@
+            <img src="/images/menu/Đăng xuất.svg" style="width:40px;">
+            Đăng xuất
         </a>
     </form>
 </section>
