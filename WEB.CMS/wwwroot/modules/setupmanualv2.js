@@ -146,7 +146,8 @@ var _setupmanualv2 = {
                 $('#form_label').val(label_id);
                 redirect_from_cms = 1;
                 _setupmanualv2.GetDetailByASIN();
-                _common.tinyMce('form_productinfomationHTML');
+                debugger
+                _common.tinyMce('#form_productinfomationHTML');
             }
             else {
 
@@ -154,7 +155,8 @@ var _setupmanualv2 = {
                 $('#form_label').removeAttr('disabled');
                 $('#form_product_code').css('background-color', '');
                 $('#form_label').css('background-color', '');
-                _common.tinyMce('form_productinfomationHTML');
+                debugger
+                _common.tinyMce('#form_productinfomationHTML');
             }
         });
     },
@@ -594,7 +596,7 @@ var _setupmanualv2 = {
             $('#form_amountvnd').html('<u>' + _setupmanualv2.formatMoney(Math.round(product_model.amount_vnd), 'VND') + ' đ</u>');
             _setupmanualv2.ParseFeeDetail(product_model.list_product_fee, product_model.rate, product_model.product_save_price);
             _setupmanualv2.DisplayProductSpecification(product_model.product_specification);
-            //_setupmanualv2.DisplayProductInfomationHTML(product_model.product_infomation_HTML);
+            _setupmanualv2.DisplayProductInfomationHTML(product_model.product_infomation_HTML);
             _setupmanualv2.DisplayProductLocation(product_model.product_code, product_model.group_product_id);
             if (product_model.product_type == '4') {
                 _setupmanualv2.OnFixedAmountVNDProduct('1', product_model.amount_vnd);
