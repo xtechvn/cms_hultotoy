@@ -56,7 +56,7 @@ namespace Repositories.Repositories
                     entity.OrderNo = model.OrderNo;
                     entity.ImagePath = model.ImagePath;
                     entity.Status = model.Status;
-                    entity.Path = model.Path + "-" + model.Id;
+                    entity.Path = model.Path ;
                     entity.Description = model.Description;
                     entity.PositionId = model.PositionId;
                     entity.ModifiedOn = DateTime.Now;
