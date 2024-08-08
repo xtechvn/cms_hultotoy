@@ -285,6 +285,12 @@ namespace Utilities.Contants
         public static string InsertTourProgramPackages = "sp_InsertTourProgramPackages";
         public static string UpdateTourProgramPackages = "[sp_UpdateTourProgramPackages]";
 
+        public static string sp_InsertAccountAccessAPI = "sp_InsertAccountAccessAPI";
+        public static string sp_UpdateAccountAccessAPI = "sp_UpdateAccountAccessAPI";
+
+        public static string sp_InsertAccountAccessAPIPermission = "sp_InsertAccountAccessAPIPermission";
+        public static string sp_UpdateAccountAccessAPIPermission = "sp_UpdateAccountAccessAPIPermission";
+
 
         #region vin wonder
         public static string sp_InsertCampaign = "sp_InsertCampaign";

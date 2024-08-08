@@ -165,5 +165,20 @@ namespace Repositories.Repositories
         {
             return bankingAccountDAL.GetBankAccountDataTableBySupplierId(supplierId).ToList<BankingAccount>();
         }
+
+        public async Task<List<AllCode>> GetListByCodeValueAsync(int codevalue)
+        {
+            return await _AllCodeDAL.GetListByCodeValueAsync(codevalue);
+        }
+
+        public async Task<List<AllCode>> GetAllCodeAsync() 
+        {
+            return await _AllCodeDAL.GetAllAsync();
+        }
+
+        public async Task<List<AllCode>> GetAllSortByID(int id)
+        {
+            return await _AllCodeDAL.GetAllSortByID(id);
+        }
     }
 }

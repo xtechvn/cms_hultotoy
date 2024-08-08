@@ -15,6 +15,61 @@ namespace DAL
     {
         public AllCodeDAL(string connection) : base(connection) { }
 
+        public async Task<List<AllCode>> GetListByCodeValueAsync(int codevalue)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    var detail = await _DbContext.Set<AllCode>().Where(n => n.CodeValue == codevalue).ToListAsync();
+                    if (detail != null)
+                    {
+                        return detail;
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetListByCodeValue - AllCodeDAL. " + ex);
+                return null;
+            }
+        }
+
+        public async Task<List<AllCode>> GetAllSortByID(int id)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+                    var query = _DbContext.Set<AllCode>().AsQueryable();
+
+                    var matchingItem = query.FirstOrDefault(x => x.Id == id);
+
+                    if (matchingItem != null)
+                    {
+                        // Tạo một danh sách mới, thêm bản ghi tìm thấy vào đầu danh sách
+                        var result = new List<AllCode> { matchingItem };
+                        // Thêm các bản ghi còn lại vào danh sách
+                        result.AddRange(query.Where(x => x.Id != id));
+                        return result;
+                    }
+                    else
+                    {
+                        // Không tìm thấy bản ghi nào trùng khớp
+                        return query.ToList();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetListByName - AllCodeDAL. " + ex);
+                return null;
+            }
+        }
+
+
+
         public List<AllCode> GetListByType(string type)
         {
             try

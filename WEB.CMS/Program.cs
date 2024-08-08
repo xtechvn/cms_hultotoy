@@ -65,6 +65,8 @@ builder.Services.AddTransient<IDashboardRepository, DashboardRepository>();
 builder.Services.AddTransient<ILabelRepository, LabelRepository>();
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
 builder.Services.AddTransient<ILocationProductRepository, LocationProductRepository>();
+builder.Services.AddTransient<IAccountAccessApiRepository, AccountAccessApiRepository>();
+builder.Services.AddTransient<IAccountAccessApiPermissionRepository, AccountAccessApiPermissionRepository>();
 // Setting Redis                     
 builder.Services.AddSingleton<RedisConn>();
 builder.Services.AddSingleton<ManagementUser>();
