@@ -27,7 +27,7 @@ namespace WEB.CMS.Controllers
 
         public async Task<IActionResult> Index()
         {
-            List<AllCode> lstAllCode = _allCodeRepository.GetAll();
+            List<AllCode> lstAllCode = await _allCodeRepository.GetAllSortByIDAndTypeEqualsPROJECT_TYPE(0);
             List<AccountAccessApi> lstAAA = await _accountAccessApiRepository.GetAccountAccessApis();
             List<AccountAccessApiPermission> lstAAAP = await _accountAccessApiPermissionRepository.GetAllAccountAccessAPIPermissionAsync();
             List<AccountAccessApiViewModel> LstAAAViewModel = new();
@@ -63,7 +63,7 @@ namespace WEB.CMS.Controllers
         {
             AccountAccessApiViewModel AAAViewModel = new();
             AccountAccessApi AAA = await _accountAccessApiRepository.GetAccountAccessApiByID(id);
-            List<AllCode> Code = await _allCodeRepository.GetAllSortByID(id_AllCode);
+            List<AllCode> Code = await _allCodeRepository.GetAllSortByIDAndTypeEqualsPROJECT_TYPE(id_AllCode);
             AccountAccessApiPermission AAAP = await _accountAccessApiPermissionRepository.GetAccountAccessApiPermissionByID(id_AccountAccessAPIPermission);
             if (AAA != null && AAAP != null && Code != null)
             {
@@ -86,9 +86,9 @@ namespace WEB.CMS.Controllers
         }
 
         [HttpGet]
-        public IActionResult Add()
+        public async Task<IActionResult> Add()
         {
-            List<AllCode> lstAllCode = _allCodeRepository.GetAll();
+            List<AllCode> lstAllCode = await _allCodeRepository.GetAllSortByIDAndTypeEqualsPROJECT_TYPE(0);
             return View(lstAllCode);
         }
 

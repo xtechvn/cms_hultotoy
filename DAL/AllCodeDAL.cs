@@ -36,13 +36,13 @@ namespace DAL
             }
         }
 
-        public async Task<List<AllCode>> GetAllSortByID(int id)
+        public async Task<List<AllCode>> GetAllSortByIDAndTypeEqualsPROJECT_TYPE(int id)
         {
             try
             {
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
-                    var query = _DbContext.Set<AllCode>().AsQueryable();
+                    var query = _DbContext.Set<AllCode>().Where(x => x.Type == "PROJECT_TYPE");
 
                     var matchingItem = query.FirstOrDefault(x => x.Id == id);
 
