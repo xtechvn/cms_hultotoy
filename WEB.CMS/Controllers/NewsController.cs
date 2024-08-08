@@ -80,6 +80,8 @@ namespace WEB.CMS.Controllers
         public async Task<IActionResult> Detail(long Id)
         {
             var model = new ArticleModel();
+           var size_img = ReadFile.LoadConfig().SIZE_IMG;
+            ViewBag.size_img = size_img;
             if (Id > 0)
             {
                 model = await _ArticleRepository.GetArticleDetail(Id);

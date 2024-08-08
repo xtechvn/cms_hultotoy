@@ -268,6 +268,8 @@ var _newsDetail = {
     },
 
     OnSave: function (articleStatus) {
+        let sizeImg = $('#size_img').val();
+        var img = $('#img_' + sizeImg).attr('src') == undefined ? "" : $('#img_'+sizeImg).attr('src')
         let formvalid = $('#form-news');
         var max_pos = $('#ArticleType:checked').val() == "0" ? 7 : 8;
         formvalid.validate({
@@ -353,7 +355,10 @@ var _newsDetail = {
                 _msgalert.error('Bạn phải upload ít nhất một ảnh đại diện cho tin bài');
                 return false;
             }
-
+            if (img == "" ) {
+                _msgalert.error('Bạn phải upload ảnh đại diện cho tin bài ' + sizeImg);
+                return false;
+            }
             $.ajax({
                 url: '/news/upsert',
                 type: 'POST',

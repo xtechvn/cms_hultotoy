@@ -49,6 +49,7 @@
 </style>
 <div class="row-main container" style="max-width: 1180px;">
     <input value="@Model.Status" id="News_Status" style="display:none;" />
+    <input value="@ViewBag.size_img " id="size_img" style="display:none;" />
     <div class="flex row-main-head">
         <h2 class="title_page">ĐĂNG BÀI VIẾT</h2>
         <div class="btn-right text-right">
@@ -223,7 +224,7 @@
                                     </button>
                                 }
 
-                                @if (Model.Status == ArticleStatus.REMOVE)
+                                @if (Model.Status == ArticleStatus.REMOVE || Model.Status == ArticleStatus.SAVE)
                                 {
                                     <button type="button" class="btn btn-default red open-popup" onclick="_newsDetail.OnDelete('@Model.Id')">
                                         Xóa bài viết

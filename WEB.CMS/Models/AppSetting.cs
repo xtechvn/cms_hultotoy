@@ -72,5 +72,6 @@ namespace WEB.CMS.Models
         public int Department_Operator_Fly { get; set; }
         public int Department_Operator_Tour { get; set; }
         public int Department_Operator_WaterSport { get; set; }
+        public string SIZE_IMG { get; set; }
     }
 }
