@@ -40,5 +40,10 @@ namespace Utilities.Contants
         {
             Monday = DayOfWeek.Monday,
         }
+
+        public enum AllCodeTypeEqualsPROJECT_TYPESortById 
+        {
+            Default = 0,
+        }
     }
 }

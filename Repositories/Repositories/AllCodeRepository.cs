@@ -176,9 +176,9 @@ namespace Repositories.Repositories
             return await _AllCodeDAL.GetAllAsync();
         }
 
-        public async Task<List<AllCode>> GetAllSortByIDAndTypeEqualsPROJECT_TYPE(int id)
+        public async Task<List<AllCode>> GetAllSortByIDAndType(int id,string type)
         {
-            return await _AllCodeDAL.GetAllSortByIDAndTypeEqualsPROJECT_TYPE(id);
+            return await _AllCodeDAL.GetAllSortByIDAndType(id,type);
         }
     }
 }
