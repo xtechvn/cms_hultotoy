@@ -1,8 +1,11 @@
 ﻿using DAL.Generic;
+using DAL.StoreProcedure;
 using Entities.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +16,11 @@ namespace DAL
 {
     public class AllCodeDAL : GenericService<AllCode>
     {
-        public AllCodeDAL(string connection) : base(connection) { }
+        private static DbWorker _DbWorker;
+        public AllCodeDAL(string connection) : base(connection) 
+        {
+            _DbWorker = new DbWorker(connection);
+        }
 
         public async Task<List<AllCode>> GetListByCodeValueAsync(int codevalue)
         {
@@ -36,30 +43,36 @@ namespace DAL
             }
         }
 
-        public async Task<List<AllCode>> GetAllSortByIDAndTypeEqualsPROJECT_TYPE(int id)
+        public async Task<List<AllCode>> GetAllSortByIDAndType(int id ,string type)
         {
             try
             {
-                using (var _DbContext = new EntityDataContext(_connection))
+                SqlParameter[] sqlParameters = new SqlParameter[]
                 {
-                    var query = _DbContext.Set<AllCode>().Where(x => x.Type == "PROJECT_TYPE");
+                    new SqlParameter("@Ids", DBNull.Value),
+                    new SqlParameter("@Type", type != null ? type : DBNull.Value)
+                };
 
-                    var matchingItem = query.FirstOrDefault(x => x.Id == id);
+                var lstObj = _DbWorker.GetDataTable(StoreProcedureConstant.Sp_GetListAllCodeByTypeAndIds, sqlParameters);
+                List<AllCode> allCodes = lstObj.AsEnumerable().Select(row => new AllCode
+                {
+                    Id = row.Field<int>("Id"),
+                    CodeValue = row.Field<short>("CodeValue"),
+                    Description = row.Field<string>("Description"),
+                    OrderNo = row.Field<short>("OrderNo")
+                }).ToList();
 
-                    if (matchingItem != null)
-                    {
-                        // Tạo một danh sách mới, thêm bản ghi tìm thấy vào đầu danh sách
-                        var result = new List<AllCode> { matchingItem };
-                        // Thêm các bản ghi còn lại vào danh sách
-                        result.AddRange(query.Where(x => x.Id != id));
-                        return result;
-                    }
-                    else
-                    {
-                        // Không tìm thấy bản ghi nào trùng khớp
-                        return query.ToList();
-                    }
+                // Tìm đối tượng có Id trùng với id
+                var itemToMoveToTop = allCodes.FirstOrDefault(x => x.Id == id);
+
+                // Nếu tìm thấy đối tượng, xóa khỏi danh sách và thêm vào đầu
+                if (itemToMoveToTop != null)
+                {
+                    allCodes.Remove(itemToMoveToTop);
+                    allCodes.Insert(0, itemToMoveToTop);
                 }
+
+                return allCodes;
             }
             catch (Exception ex)
             {

@@ -290,6 +290,7 @@ namespace Utilities.Contants
 
         public static string sp_InsertAccountAccessAPIPermission = "sp_InsertAccountAccessAPIPermission";
         public static string sp_UpdateAccountAccessAPIPermission = "sp_UpdateAccountAccessAPIPermission";
+        public static string Sp_GetListAllCodeByTypeAndIds = "Sp_GetListAllCodeByTypeAndIds";
 
 
         #region vin wonder
