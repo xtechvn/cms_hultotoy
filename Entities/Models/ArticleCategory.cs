@@ -10,4 +10,6 @@ public partial class ArticleCategory
     public int? CategoryId { get; set; }
 
     public long? ArticleId { get; set; }
+
+    public DateTime? UpdateLast { get; set; }
 }

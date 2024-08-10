@@ -117,6 +117,8 @@ public partial class DataMSContext : DbContext
 
     public virtual DbSet<OrderBak> OrderBaks { get; set; }
 
+    public virtual DbSet<OrderDetail> OrderDetails { get; set; }
+
     public virtual DbSet<Payment> Payments { get; set; }
 
     public virtual DbSet<PaymentAccount> PaymentAccounts { get; set; }
@@ -364,11 +366,15 @@ public partial class DataMSContext : DbContext
         modelBuilder.Entity<ArticleCategory>(entity =>
         {
             entity.ToTable("ArticleCategory");
+
+            entity.Property(e => e.UpdateLast).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<ArticleRelated>(entity =>
         {
             entity.ToTable("ArticleRelated");
+
+            entity.Property(e => e.UpdateLast).HasColumnType("datetime");
 
             entity.HasOne(d => d.Article).WithMany(p => p.ArticleRelateds)
                 .HasForeignKey(d => d.ArticleId)
@@ -380,6 +386,8 @@ public partial class DataMSContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK_ArticleTags");
 
             entity.ToTable("ArticleTag");
+
+            entity.Property(e => e.UpdateLast).HasColumnType("datetime");
 
             entity.HasOne(d => d.Article).WithMany(p => p.ArticleTags)
                 .HasForeignKey(d => d.ArticleId)
@@ -1055,6 +1063,18 @@ public partial class DataMSContext : DbContext
             entity.Property(e => e.SmsContent).HasMaxLength(400);
             entity.Property(e => e.StartDate).HasColumnType("datetime");
             entity.Property(e => e.UpdateLast).HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<OrderDetail>(entity =>
+        {
+            entity.ToTable("OrderDetail");
+
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.ProductCode)
+                .IsRequired()
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Payment>(entity =>

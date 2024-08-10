@@ -11,5 +11,7 @@ public partial class ArticleRelated
 
     public long? ArticleRelatedId { get; set; }
 
+    public DateTime? UpdateLast { get; set; }
+
     public virtual Article Article { get; set; }
 }

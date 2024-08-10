@@ -228,7 +228,8 @@ namespace DAL
                                     var model = new ArticleTag
                                     {
                                         TagId = item,
-                                        ArticleId = ArticleId
+                                        ArticleId = ArticleId,
+                                        UpdateLast=DateTime.Now
                                     };
                                     await _DbContext.ArticleTags.AddAsync(model);
                                     await _DbContext.SaveChangesAsync();
@@ -282,7 +283,8 @@ namespace DAL
                                     var model = new ArticleCategory
                                     {
                                         CategoryId = item,
-                                        ArticleId = ArticleId
+                                        ArticleId = ArticleId,
+                                        UpdateLast = DateTime.Now
                                     };
                                     await _DbContext.ArticleCategories.AddAsync(model);
                                     await _DbContext.SaveChangesAsync();
@@ -336,7 +338,8 @@ namespace DAL
                                     var model = new ArticleRelated
                                     {
                                         ArticleRelatedId = item,
-                                        ArticleId = ArticleId
+                                        ArticleId = ArticleId,
+                                        UpdateLast = DateTime.Now
                                     };
                                     await _DbContext.ArticleRelateds.AddAsync(model);
                                     await _DbContext.SaveChangesAsync();

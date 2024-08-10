@@ -11,6 +11,8 @@ public partial class ArticleTag
 
     public long? ArticleId { get; set; }
 
+    public DateTime? UpdateLast { get; set; }
+
     public virtual Article Article { get; set; }
 
     public virtual Tag Tag { get; set; }
