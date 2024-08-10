@@ -40,6 +40,7 @@ namespace Repositories.Repositories
                 if (Status == ArticleStatus.PUBLISH)
                 {
                     model.PublishDate = DateTime.Now;
+                    model.ModifiedOn = DateTime.Now;
                 }
 
                 await _ArticleDAL.UpdateAsync(model);
