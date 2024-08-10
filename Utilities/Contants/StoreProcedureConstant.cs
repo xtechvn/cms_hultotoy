@@ -292,6 +292,12 @@ namespace Utilities.Contants
         public static string sp_UpdateAccountAccessAPIPermission = "sp_UpdateAccountAccessAPIPermission";
         public static string Sp_GetListAllCodeByTypeAndIds = "Sp_GetListAllCodeByTypeAndIds";
 
+        public static string SP_GetListTag = "SP_GetListTag";
+        public static string SP_GetListClient = "SP_GetListClient";
+        public static string SP_InsertClient = "SP_InsertClient";
+        public static string sp_UpdateClient = "sp_UpdateClient";
+        public static string SP_GetDetailClientByClientId = "SP_GetDetailClientByClientId";
+
 
         #region vin wonder
         public static string sp_InsertCampaign = "sp_InsertCampaign";

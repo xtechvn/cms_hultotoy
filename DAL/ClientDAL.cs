@@ -11,8 +11,10 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Helpers;
 using Utilities;
 using Utilities.Contants;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DAL
 {
@@ -28,6 +30,7 @@ namespace DAL
         {
             try
             {
+
                 using (var _DbContext = new EntityDataContext(_connection))
                 {
                     var detail = await _DbContext.AccountClients.AsNoTracking().FirstOrDefaultAsync(x => x.Id == clientId);
@@ -266,6 +269,35 @@ namespace DAL
                         }
                         else
                         {
+
+                            SqlParameter[] objParam = new SqlParameter[23];
+                            objParam[0] = new SqlParameter("@ClientMapId", model.ClientMapId);
+                            objParam[1] = new SqlParameter("@SaleMapId", model.SaleMapId);
+                            objParam[2] = new SqlParameter("@ClientType", model.ClientType);
+                            objParam[3] = new SqlParameter("@ClientName", model.ClientName);
+                            objParam[4] = new SqlParameter("@Email", model.Email);
+                            objParam[5] = new SqlParameter("@Gender", model.Gender);
+                            objParam[6] = new SqlParameter("@Status", model.Status);
+                            objParam[7] = new SqlParameter("@Note", model.Note);
+                            objParam[8] = new SqlParameter("@Avartar", model.Avartar);
+                            objParam[9] = new SqlParameter("@JoinDate", model.JoinDate);
+                            objParam[10] = new SqlParameter("@isReceiverInfoEmail  ", model.IsReceiverInfoEmail);
+                            objParam[11] = new SqlParameter("@Phone", model.Phone);
+                            objParam[12] = new SqlParameter("@Birthday", model.Birthday);
+                            objParam[13] = new SqlParameter("@UpdateTime", model.UpdateTime);
+                            objParam[14] = new SqlParameter("@TaxNo", model.TaxNo);
+                            objParam[15] = new SqlParameter("@AgencyType", model.AgencyType);
+                            objParam[16] = new SqlParameter("@PermisionType", model.PermisionType);
+                            objParam[17] = new SqlParameter("@BusinessAddress", model.BusinessAddress);
+                            objParam[18] = new SqlParameter("@ExportBillAddress", model.ExportBillAddress);
+                            objParam[19] = new SqlParameter("@ClientCode", model.ClientCode);
+                            objParam[20] = new SqlParameter("@IsRegisterAffiliate", model.IsRegisterAffiliate);
+                            objParam[21] = new SqlParameter("@ReferralId", model.ReferralId);
+                            objParam[22] = new SqlParameter("@ParentId",    model.ParentId);
+
+
+                            DataTable dt = _DbWorker.GetDataTable(StoreProcedureConstant.SP_InsertClient, objParam);
+
                             var deta = _DbContext.Clients.Add(model);
                             _DbContext.SaveChanges();
                         }
@@ -278,9 +310,36 @@ namespace DAL
 
                         if (data2.Count == 0 && data2 != null  )
                         {
-                           
-                           
-                                var deta = _DbContext.Clients.Update(model);
+
+                            SqlParameter[] objParam = new SqlParameter[24];
+                            objParam[0] = new SqlParameter("@Id ", model.Id);
+                            objParam[1] = new SqlParameter("@ClientMapId", model.ClientMapId);
+                            objParam[2] = new SqlParameter("@SaleMapId", model.SaleMapId);
+                            objParam[3] = new SqlParameter("@ClientType", model.ClientType);
+                            objParam[4] = new SqlParameter("@ClientName", model.ClientName);
+                            objParam[5] = new SqlParameter("@Email", model.Email);
+                            objParam[6] = new SqlParameter("@Gender", model.Gender);
+                            objParam[7] = new SqlParameter("@Status", model.Status);
+                            objParam[8] = new SqlParameter("@Note", model.Note);
+                            objParam[9] = new SqlParameter("@Avartar", model.Avartar);
+                            objParam[10] = new SqlParameter("@JoinDate", model.JoinDate);
+                            objParam[11] = new SqlParameter("@isReceiverInfoEmail  ", model.IsReceiverInfoEmail);
+                            objParam[12] = new SqlParameter("@Phone", model.Phone);
+                            objParam[13] = new SqlParameter("@Birthday", model.Birthday);
+                            objParam[14] = new SqlParameter("@UpdateTime", model.UpdateTime);
+                            objParam[15] = new SqlParameter("@TaxNo", model.TaxNo);
+                            objParam[16] = new SqlParameter("@AgencyType", model.AgencyType);
+                            objParam[17] = new SqlParameter("@PermisionType", model.PermisionType);
+                            objParam[18] = new SqlParameter("@BusinessAddress", model.BusinessAddress);
+                            objParam[19] = new SqlParameter("@ExportBillAddress", model.ExportBillAddress);
+                            objParam[20] = new SqlParameter("@ClientCode", model.ClientCode);
+                            objParam[21] = new SqlParameter("@IsRegisterAffiliate", model.IsRegisterAffiliate);
+                            objParam[22] = new SqlParameter("@ReferralId", model.ReferralId);
+                            objParam[23] = new SqlParameter("@ParentId", model.ParentId);
+
+
+                            DataTable dt = _DbWorker.GetDataTable(StoreProcedureConstant.sp_UpdateClient, objParam);
+                            var deta = _DbContext.Clients.Update(model);
                                 _DbContext.SaveChanges();
                                 return 1;
                             
@@ -306,12 +365,19 @@ namespace DAL
         {
             try
             {
-                using (var _DbContext = new EntityDataContext(_connection))
+
+                SqlParameter[] objParam = new SqlParameter[4];
+                objParam[0] = new SqlParameter("@Email", email);
+                objParam[1] = new SqlParameter("@TaxNo", DBNull.Value);
+        
+
+                DataTable dt = _DbWorker.GetDataTable(StoreProcedureConstant.SP_GetListClient, objParam);
+                if (dt != null && dt.Rows.Count > 0)
                 {
-                    var data2 = _DbContext.Clients.AsQueryable();
-                    var a = data2.FirstOrDefault(s => s.Email.Equals(email));
-                    return a;
+                    var data = dt.ToList<Client>();
+                    return data[0];
                 }
+                return null;
             }
             catch (Exception ex)
             {
@@ -323,12 +389,17 @@ namespace DAL
         {
             try
             {
-                using (var _DbContext = new EntityDataContext(_connection))
+                SqlParameter[] objParam = new SqlParameter[4];
+                objParam[0] = new SqlParameter("@Email", DBNull.Value);
+                objParam[1] = new SqlParameter("@TaxNo", TaxNo);
+
+                DataTable dt = _DbWorker.GetDataTable(StoreProcedureConstant.SP_GetListClient, objParam);
+                if (dt != null && dt.Rows.Count > 0)
                 {
-                    var data2 = _DbContext.Clients.AsQueryable();
-                    var a = data2.FirstOrDefault(s => s.TaxNo.Equals(TaxNo));
-                    return a;
+                    var data = dt.ToList<Client>();
+                    return data[0];
                 }
+                return null;
             }
             catch (Exception ex)
             {
