@@ -271,7 +271,7 @@ var _newsDetail = {
         let sizeImg = $('#size_img').val();
         var img = $('#img_' + sizeImg).attr('src') == undefined ? "" : $('#img_'+sizeImg).attr('src')
         let formvalid = $('#form-news');
-        var max_pos = $('#ArticleType:checked').val() == "0" ? 7 : 8;
+        var max_pos = $('#ArticleType:checked').val() == "0" ? 3 : 4;
         formvalid.validate({
             rules: {
                 Title: {
