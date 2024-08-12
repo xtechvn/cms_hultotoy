@@ -96,37 +96,22 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-app.MapControllerRoute(name: "setupManual",
-                 pattern: "/product/setup-manual",
-                 defaults: new { controller = "product", action = "SetupManual" });
+
 app.MapControllerRoute(name: "transactionsms",
   pattern: "/transactionsms",
   defaults: new { controller = "TransactionSms", action = "Index" });
+
 app.MapControllerRoute(name: "Order",
  pattern: "/Order/{id?}",
  defaults: new { controller = "Order", action = "Orderdetails" });
-app.MapControllerRoute(name: "SetService",
- pattern: "SetService/fly/detail/{group_booking_id}",
- defaults: new { controller = "SetService", action = "FlyDetail" });
-app.MapControllerRoute(name: "SetService",
- pattern: "SetService/Tour/Detail/{id}",
- defaults: new { controller = "SetService", action = "TourDetail" });
-app.MapControllerRoute(name: "SetService",
-pattern: "SetService/Others/Detail/{id}",
-defaults: new { controller = "SetService", action = "OtherDetail" });
-app.MapControllerRoute(name: "SetService",
-pattern: "SetService/VinWonder/Detail/{id}",
-defaults: new { controller = "SetService", action = "VinWonderDetail" });
 
 
 app.MapControllerRoute(name: "AccountSetup",
 pattern: "/Account/2FA",
-defaults: new { controller = "Account", action = "Setup2FA" });
-app.MapControllerRoute(name: "ProgramsPackage",
-pattern: "/ProgramsPackage/DetailListProgramsPackage/{id}/{Packageid}/{ProgramName}",
-defaults: new { controller = "ProgramsPackage", action = "DetailListProgramsPackage" });
+defaults: new { controller = "Account", action = "Setup2FA" }); 
 
-app.MapControllerRoute(name: "ProgramsPackage",
-pattern: "/ProgramsPackage/ProgramsPriceHotelIndex",
-defaults: new { controller = "ProgramsPackage", action = "ProgramsPriceHotelIndex" });
+app.MapControllerRoute(name: "ProductDetail",
+ pattern: "/productv2/detail/{product_id?}",
+ defaults: new { controller = "ProductV2", action = "ProductDetail" });
+
 app.Run();

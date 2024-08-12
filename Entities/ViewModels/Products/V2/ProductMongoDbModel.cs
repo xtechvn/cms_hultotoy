@@ -30,9 +30,12 @@ namespace Entities.ViewModels.Products.V2
         public List<ProductAttributeMongoDbModel> attributes { get; set; }
         public List<ProductDiscountOnGroupsBuyModel> discount_group_buy { get; set; }
         public int preorder_status { get; set; }
+        public float star { get; set; }
         public int condition_of_product { get; set; }
         public string sku { get; set; }
         public string parent_product_id { get; set; }
+        public DateTime created_date { get; set; }
+        public DateTime updated_last { get; set; }
 
 
     }

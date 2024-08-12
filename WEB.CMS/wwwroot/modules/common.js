@@ -27,7 +27,7 @@
 
         }
     });
-
+ 
 });
 var _global_function = {
     AddLoading: function () {
@@ -238,5 +238,23 @@ var _global_function = {
     },
     DateDotNETToDatePicker: function (date) {
         return ("0" + date.getDate()).slice(-2) + '/' + ("0" + (date.getMonth() + 1)).slice(-2) + '/' + date.getFullYear() ;
+    },
+    RenderBreadcumb: function (breadcumb_list) {
+        var html = `<div class="header-right">
+             <div class="container">
+                <ol class="breadcrumb">
+                  {breadcrumb}
+                </ol>
+            </div>
+            </div>`
+        var html_breadcumb = '<li class="breadcrumb-item {active}" {aria} ><a href="{url}">{name}</a></li>'
+        var html_sub = ''
+        $(breadcumb_list).each(function (index, item) {
+            html_sub += html_breadcumb.replaceAll('{url}', item.url).replaceAll('{name}', item.name)
+                .replaceAll('{active}', item.activated ? 'active' : '')
+                .replaceAll('{aria}', item.activated ? `aria-current="page"` : '')
+        });
+
+        $('#topbar .flex').prepend(html.replace('{breadcrumb}', html_sub))
     }
 }

@@ -86,7 +86,7 @@
         </div>
     </div>
 </section>
-<script type="text/javascript" src="~/modules/notify.js" defer></script>
+@* <script type="text/javascript" src="~/modules/notify.js" defer></script>
 <script>
     var _menu_html = {
         html_menu_notify: '<li class= "active"  onclick="_noti.UpdateNotify($(this))" data="{id}"> <a href="{link}" > <span class="ava"><img src="/images/icons/user.png"></span> {note}  <div class="time">{date}</div></a></li> ',
@@ -109,7 +109,7 @@
         var data = JSON.parse(event.data);
       @*  console.log("total_not_seen: " + data.total_not_seen)
         console.log("total_not: " + total_not)*@
-        $('#note-tt').html(_menu_html.html_menu_notify_thongbao.replace('{note}', "Thông báo từ hệ thống"))
+       @* $('#note-tt').html(_menu_html.html_menu_notify_thongbao.replace('{note}', "Thông báo từ hệ thống"))
         if (data.total_not_seen > total_not) {
 
             document.getElementById('myAudio').play();
@@ -139,3 +139,4 @@
         console.log("closed"); // vì cho chạy liên tục nên không cần đóng
     }
 </script>
+ *@

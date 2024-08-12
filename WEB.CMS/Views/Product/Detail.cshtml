@@ -1,0 +1,793 @@
+﻿@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string product_id = (string)ViewBag.ProductId;
+}
+<section class="add-product">
+    <input id="product_detail" style="display:none;" value="@product_id" />
+   
+    <div class="row-main container">
+        <div class="line-bottom bg-white px-3 mb-3" style="padding-bottom: 0;">
+            <div class="tab-default mb0">
+                <a href="javascript:;" class="change-tab active" data-id="1">Thông tin cơ bản</a>
+                <a href="javascript:;" class="change-tab" data-id="2">Thông tin bán hàng</a>
+                <a href="javascript:;" class="change-tab" data-id="3">Vận chuyển</a>
+                <a href="javascript:;" class="change-tab" data-id="4">Thông tin khác</a>
+            </div>
+        </div>
+    </div>
+    <div class="row-main container">
+        <div class="box-info bg-white p-3 mb-3">
+            <h5 class="title-box mb-2 text-uppercase">Thông tin cơ bản</h5>
+            <div id="images" class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                <label class="label">Hình ảnh sản phẩm</label>
+                <div class="wrap_input">
+                    <div class="manage-color w-100">
+                        <div class="flex list w-100">
+                            <div class="items magnific_popup">
+                                <button type="button" class="delete"><i class="icofont-close-line"></i></button>
+                                <a class="thumb_img thumb_1x1 magnific_thumb">
+                                    <img src="/images/graphics/product.jpg">
+                                </a>
+                            </div>
+                            <div class="items magnific_popup">
+                                <a class="thumb_img thumb_1x1 magnific_thumb">
+                                    <img src="/images/graphics/product.jpg">
+                                </a>
+                            </div>
+                            <div class="items magnific_popup">
+                                <a class="thumb_img thumb_1x1 magnific_thumb">
+                                    <img src="/images/graphics/product.jpg">
+                                </a>
+                            </div>
+                            <div class="items magnific_popup">
+                                <a class="thumb_img thumb_1x1 magnific_thumb">
+                                    <img src="/images/graphics/product.jpg">
+                                </a>
+                            </div>
+                            <div class="items import">
+                                <label class="choose choose-wrap">
+                                    <input type="file" name="myFile">
+                                    <div class="choose-content">
+                                        <i class="icofont-image"></i>
+                                        <span>Thêm hình ảnh (0/9)</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <p>
+                            Tải lên hình ảnh với tỷ lệ 1:1. Việc sử dụng hình ảnh đẹp sẽ thu hút thêm lượt truy
+                            cập vào sản phẩm của bạn
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div id="avatar" class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                <label class="label">Ảnh bìa</label>
+                <div class="wrap_input">
+                    <div class="manage-color  w-100">
+                        <div class="flex list align-items-center w-100">
+                            <div class="items magnific_popup">
+                                <button type="button" class="delete"><i class="icofont-close-line"></i></button>
+                                <a class="thumb_img thumb_1x1 magnific_thumb">
+                                    <img src="/images/graphics/product.jpg">
+                                </a>
+                            </div>
+                            <div class="items import">
+                                <label class="choose choose-wrap">
+                                    <input type="file" name="myFile">
+                                    <div class="choose-content">
+                                        <i class="icofont-image"></i>
+                                        <span>Thêm hình ảnh (0/1)</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <ul>
+                                <li>Tải lên hình ảnh 1:1</li>
+                                <li>
+                                    Ảnh bìa sẽ được hiện thị tại các trang Kết qả tìm kiếm, gợi ý hôm nay...
+                                    Việc sử dụng ảnh bìa đẹp sẽ thu hút thêm lượt truy cập vào sản phẩm của bạn
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div id="videos" class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                <label class="label">Video sản phẩm</label>
+                <div class="wrap_input">
+                    <div class="manage-color  w-100">
+                        <div class="flex list align-items-center w-100">
+                            <div class="items magnific_popup">
+                                <button type="button" class="delete"><i class="icofont-close-line"></i></button>
+                                <a class="thumb_img thumb_1x1 magnific_thumb">
+                                    <img src="/images/graphics/product.jpg">
+                                </a>
+                            </div>
+                            <div class="items import">
+                                <label class="choose choose-wrap">
+                                    <input type="file" name="myFile">
+                                    <div class="choose-content">
+                                        <i class="icofont-video-alt"></i>
+                                        <span>Thêm hình ảnh (0/1)</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <ul>
+                                <li>Kích thước tối đa 30Mb, độ phân giải không vượt quá 1280x1280px</li>
+                                <li>Độ dài: 10s-60s</li>
+                                <li>Định dạng: MP4</li>
+                                <li>
+                                    Lưu ý: sản phẩm có thể hiển thị trong khi video dang được xử lý. Video sẽ tự
+                                    động hiển thị sau khi xử lý thành công
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div id="product-name" class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                <label class="label">Tên sản phẩm</label>
+                <div class="wrap_input">
+                    <div class="form-group namesp">
+                        <input type="text" class="form-control"
+                               placeholder="Tên sản phẩm + Thương hiệu + Model + Thông số kỹ thuật">
+                        <span class="note"><nw class="count">0</nw>/120</span>
+                    </div>
+                </div>
+            </div>
+            <div id="group-id" class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                <label class="label">Chọn ngành hàng</label>
+                <div class="wrap_input">
+                    <div class="form-group namesp">
+                        <input type="text" class="form-control"
+                               placeholder="Tên sản phẩm + Thương hiệu + Model + Thông số kỹ thuật">
+                        <a href="javascript:;" class="edit select-group-product"><i class="icofont-ui-edit"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div id="description" class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                <label class="label">Mô tả sản phẩm</label>
+                <div class="wrap_input">
+                    <div class="form-group">
+                        <textarea rows="5" class="form-control" maxlength="3000"></textarea>
+                        <p class="text-right mt-1"><nw class="count">0</nw>/3000</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="specification-disabled" class="box-info bg-white p-3 mb-3  disabled">
+            <h5 class="title-box mb-2 text-uppercase">Thông tin chi tiết</h5>
+            <p class="mb-0">Có thể điều chỉnh sau khi chọn ngành hàng</p>
+        </div>
+        <div id="selling-information-disabled" class="box-info bg-white p-3 mb-3   disabled">
+            <h5 class="title-box mb-2 text-uppercase">Thông tin bán hàng</h5>
+            <p class="mb-0">Có thể điều chỉnh sau khi chọn ngành hàng</p>
+        </div>
+        <div id="other-information-disabled" class="box-info bg-white p-3 mb-3 disabled">
+            <h5 class="title-box mb-2 text-uppercase">Thông tin khác</h5>
+            <p class="mb-0">Có thể điều chỉnh sau khi chọn ngành hàng</p>
+        </div>
+
+        <div id="specifications" class="box-info bg-white p-3 mb-3">
+            <h5 class="title-box mb-2 text-uppercase">Thông tin chi tiết</h5>
+            <p>
+                Hoàn thành: 6/19
+                <span style="color: #919191" class="mx-2">
+                    Điền thông tin thuộc tính để tăng mức độ hiển thị cho
+                    sản
+                    phẩm
+                </span>
+                <a href="" class="text-primary">Xem hướng dẫn bổ sung thuộc tính</a>
+            </p>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">Thương hiệu</label>
+                        <div class="wrap_input">
+                            <div class="form-group">
+                                <select class="select2 w-100">
+                                    <option>Vui lòng chọn</option>
+                                    <option value="">Thương hiệu</option>
+                                    <option value="">Thương hiệu</option>
+                                    <option value="">Thương hiệu </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">Chất liệu<span>0/5</span></label>
+                        <div class="wrap_input">
+                            <div class="form-group">
+                                <select class="select2 w-100">
+                                    <option>Vui lòng chọn</option>
+                                    <option value="">Chất liệu</option>
+                                    <option value="">Chất liệu</option>
+                                    <option value="">Chất liệu </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">Độ tuổi khuyến nghị</label>
+                        <div class="wrap_input">
+                            <div class="form-group">
+                                <select class="select2 w-100">
+                                    <option>Vui lòng chọn</option>
+                                    <option value="">18</option>
+                                    <option value="">18</option>
+                                    <option value="">18 </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">Ngày sản xuất</label>
+                        <div class="wrap_input">
+                            <div class="datepicker-wrap">
+                                <input id="datepicker" placeholder="Vui lòng chọn"
+                                       class="datepicker-input form-control" type="text" value="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">Tên tổ chức chịu trách nghiệm sản xuất</label>
+                        <div class="wrap_input">
+                            <div class="form-group">
+                                <select class="select2 w-100">
+                                    <option>Vui lòng chọn</option>
+                                    <option value="">Tên abc</option>
+                                    <option value="">Tên abc</option>
+                                    <option value="">Tên abc </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">Địa chỉ tổ chức chịu trách nghiệm sản xuất</label>
+                        <div class="wrap_input">
+                            <div class="form-group">
+                                <select class="select2 w-100">
+                                    <option>Vui lòng chọn</option>
+                                    <option value="">Abc</option>
+                                    <option value="">Abc</option>
+                                    <option value="">Abc </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">
+                            Sản phẩm
+                            đặt theo yêu cầu
+                        </label>
+                        <div class="wrap_input">
+                            <div class="form-group">
+                                <select class="select2 w-100">
+                                    <option>Vui lòng chọn</option>
+                                    <option value="">Abc</option>
+                                    <option value="">Abc</option>
+                                    <option value="">Abc </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <a href="" class="block text-center">
+                        <span>
+                            Hiển thị đầy đủ danh sách
+                            <i class="icofont-simple-down"></i>
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div id="selling-information" class="box-info bg-white p-3 mb-3">
+            <h5 class="title-box mb-2 text-uppercase">Thông tin bán hàng</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">Phân loại</label>
+                        <div class="wrap_input">
+                            <button class="btn btn-add"><i class="icofont-plus"></i>Thêm nhóm phân loại</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">Giá</label>
+                        <div class="wrap_input">
+                            <div class="form-group price">
+                                <input type="text" class="form-control" placeholder="Nhập giá">
+                                <span class="note">đ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">Kho</label>
+                        <div class="wrap_input">
+                            <div class="form-group price">
+                                <input type="text" class="form-control" placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">Mua nhiều giảm giá</label>
+                        <div class="wrap_input">
+                            <button class="btn btn-add"><i class="icofont-plus"></i>Thêm khoảng giá</button>
+                            <p class="mt-1">
+                                Mua nhiều giảm giá sẽ bị ẩn khi sản phẩm đang tham gia Mua Kèm Deal
+                                Sốc hay Combo
+                                Khuyễn Mãi
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="item-edit item flex flex-lg-nowrap gap10 mb-2 w-100">
+                <label class="label">Phân loại hàng</label>
+                <div class="wrap_input pb-4">
+                    <span class="delete">
+                        <i class="icofont-close"></i>
+                    </span>
+                    <div class="row ">
+                        <div class="col-md-6">
+                            <div class="box-list">
+                                <h6>
+                                    <b>Màu sắc</b><span class="mx-2"
+                                                        style="color: #919191; font-weight: normal;">
+                                        (Tùy
+                                        chỉnh)
+                                    </span> <a href=""><i class="icofont-ui-edit"></i></a>
+                                </h6>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="line-bottom"></div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="box-list">
+                                <div class="form-group namesp flex-input-choose">
+                                    <label class="choose choose-wrap">
+                                        <input type="file" name="myFile">
+                                        <div class="choose-content">
+                                            <i class="icofont-image"></i>
+                                        </div>
+                                    </label>
+                                    <div class="relative w-100">
+                                        <input type="text" class="form-control" placeholder="" value="Màu sắc">
+                                        <span class="note">12/14</span>
+                                    </div>
+                                    <div class="right-action">
+                                        <a class="icon-action" href=""><i class="icofont-trash"></i></a>
+                                        <a class="icon-action" href=""><i class="icofont-drag"></i></a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="box-list">
+                                <div class="form-group namesp flex-input-choose">
+                                    <label class="choose choose-wrap">
+                                        <input type="file" name="myFile">
+                                        <div class="choose-content">
+                                            <i class="icofont-image"></i>
+                                        </div>
+                                    </label>
+                                    <div class="relative w-100">
+                                        <input type="text" class="form-control" placeholder="" value="Màu sắc">
+                                        <span class="note">12/14</span>
+                                    </div>
+                                    <div class="right-action">
+                                        <a class="icon-action" href=""><i class="icofont-trash"></i></a>
+                                        <a class="icon-action" href=""><i class="icofont-drag"></i></a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="box-list">
+                                <div class="form-group namesp flex-input-choose">
+                                    <label class="choose choose-wrap">
+                                        <input type="file" name="myFile">
+                                        <div class="choose-content">
+                                            <i class="icofont-image"></i>
+                                        </div>
+                                    </label>
+                                    <div class="relative w-100">
+                                        <input type="text" class="form-control" placeholder="" value="Màu sắc">
+                                        <span class="note">12/14</span>
+                                    </div>
+                                    <div class="right-action">
+                                        <a class="icon-action" href=""><i class="icofont-trash"></i></a>
+                                        <a class="icon-action" href=""><i class="icofont-drag"></i></a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="box-list">
+                                <div class="form-group namesp flex-input-choose">
+                                    <label class="choose choose-wrap">
+                                        <input type="file" name="myFile">
+                                        <div class="choose-content">
+                                            <i class="icofont-image"></i>
+                                        </div>
+                                    </label>
+                                    <div class="relative w-100">
+                                        <input type="text" class="form-control" placeholder="" value="Màu sắc">
+                                        <span class="note">12/14</span>
+                                    </div>
+                                    <div class="right-action">
+                                        <a class="icon-action" href=""><i class="icofont-trash"></i></a>
+                                        <a class="icon-action" href=""><i class="icofont-drag"></i></a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="item-edit item flex flex-lg-nowrap gap10 mb-2 w-100">
+                <label class="label">Phân loại hàng</label>
+                <div class="wrap_input pb-4">
+                    <button class="btn btn-add"><i class="icofont-plus"></i>Thêm phân loại 2</button>
+                    <span class="delete">
+                        <i class="icofont-close"></i>
+                    </span>
+                    <div class="row ">
+                        <div class="col-md-6">
+                            <div class="box-list">
+
+                                <div class="form-group namesp mb-0">
+                                    <input type="text" class="form-control" placeholder="" value="Màu sắc">
+                                    <span class="note">12/14</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="line-bottom"></div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="box-list">
+                                <div class="form-group namesp flex-input-choose">
+                                    <label class="choose choose-wrap">
+                                        <input type="file" name="myFile">
+                                        <div class="choose-content">
+                                            <i class="icofont-image"></i>
+                                        </div>
+                                    </label>
+                                    <div class="relative w-100">
+                                        <input type="text" class="form-control" placeholder="" value="Màu sắc">
+                                        <span class="note">12/14</span>
+                                    </div>
+                                    <div class="right-action">
+                                        <a class="icon-action" href=""><i class="icofont-trash"></i></a>
+                                        <a class="icon-action" href=""><i class="icofont-drag"></i></a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="box-list">
+                                <div class="form-group namesp flex-input-choose">
+                                    <label class="choose choose-wrap">
+                                        <input type="file" name="myFile">
+                                        <div class="choose-content">
+                                            <i class="icofont-image"></i>
+                                        </div>
+                                    </label>
+                                    <div class="relative w-100">
+                                        <input type="text" class="form-control" placeholder="" value="Màu sắc">
+                                        <span class="note">12/14</span>
+                                    </div>
+                                    <div class="right-action">
+                                        <a class="icon-action" href=""><i class="icofont-trash"></i></a>
+                                        <a class="icon-action" href=""><i class="icofont-drag"></i></a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="box-list">
+                                <div class="form-group namesp flex-input-choose">
+                                    <label class="choose choose-wrap">
+                                        <input type="file" name="myFile">
+                                        <div class="choose-content">
+                                            <i class="icofont-image"></i>
+                                        </div>
+                                    </label>
+                                    <div class="relative w-100">
+                                        <input type="text" class="form-control" placeholder="" value="Màu sắc">
+                                        <span class="note">12/14</span>
+                                    </div>
+                                    <div class="right-action">
+                                        <a class="icon-action" href=""><i class="icofont-trash"></i></a>
+                                        <a class="icon-action" href=""><i class="icofont-drag"></i></a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="box-list">
+                                <div class="form-group namesp flex-input-choose">
+                                    <label class="choose choose-wrap">
+                                        <input type="file" name="myFile">
+                                        <div class="choose-content">
+                                            <i class="icofont-image"></i>
+                                        </div>
+                                    </label>
+                                    <div class="relative w-100">
+                                        <input type="text" class="form-control" placeholder="" value="Màu sắc">
+                                        <span class="note">12/14</span>
+                                    </div>
+                                    <div class="right-action">
+                                        <a class="icon-action" href=""><i class="icofont-trash"></i></a>
+                                        <a class="icon-action" href=""><i class="icofont-drag"></i></a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="item-edit item flex flex-lg-nowrap gap10 mb-2 w-100">
+                <label class="label">
+                    Danh sách
+                    phân loại hàng
+                </label>
+                <div class="wrap_input pb-4">
+                    <div class="flex flex-lg-nowrap gap10 mb-2">
+                        <div class="w-100">
+                            <table class="w-100">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="form-group mb-0 price">
+                                                <input type="text" class="form-control" placeholder="Giá nhập">
+                                                <span class="note">đ</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group mb-0 price">
+                                                <input type="text" class="form-control" placeholder="Lợi nhuận">
+                                                <span class="note">đ</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group mb-0">
+                                                <input type="text" class="form-control" placeholder="Kho hàng">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group mb-0">
+                                                <input type="text" class="form-control"
+                                                       placeholder="SKU phân loại">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-base btn-all">Áp dụng cho tất cả phân loại</button>
+                    </div>
+                    <div class="table-responsive table-scroll">
+                        <table class="table w-100">
+                            <tbody>
+                                <tr class="text-uppercase">
+                                    <th>Màu sắc</th>
+                                    <th>Giá</th>
+                                    <th>Lợi nhuận</th>
+                                    <th>Giá bán</th>
+                                    <th>Kho hàng</th>
+                                    <th>SKU phân loại</th>
+                                </tr>
+                                <tr>
+                                    <td>Hồng</td>
+                                    <td>
+                                        <div class="form-group mb-0 price">
+                                            <input type="text" class="form-control" placeholder="Giá nhập">
+                                            <span class="note">đ</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group mb-0 price">
+                                            <input type="text" class="form-control" placeholder="Lợi nhuận">
+                                            <span class="note">đ</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group mb-0 price">
+                                            <input type="text" class="form-control" placeholder="Giá bán">
+                                            <span class="note">đ</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group mb-0">
+                                            <input type="text" class="form-control" placeholder="Kho hàng">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group mb-0">
+                                            <input type="text" class="form-control" placeholder="SKU phân loại">
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="item-edit item flex flex-lg-nowrap gap10 mb-2 w-100">
+                <label class="label">Mua nhiều giảm giá</label>
+                <div class="wrap_input pb-4">
+                    <div class="table-responsive  table-scroll">
+                        <table class="table w-100 text-center">
+                            <tbody>
+                                <tr class="text-uppercase">
+                                    <th>Khoảng giá</th>
+                                    <th>Số lượng sản phẩm</th>
+                                    <th>Chiết khấu</th>
+                                    <th class="">Thao tác</th>
+                                </tr>
+                                <tr>
+                                    <td>Khoảng gái 1</td>
+                                    <td>
+                                        <div class="flex gap10 flex-nowrap align-items-center justify-content-center">
+                                            <div class="form-group mb-0">
+                                                <input type="text" class="form-control"
+                                                       placeholder="Từ sản phẩm">
+                                            </div>
+                                            <i class="icofont-arrow-right"></i>
+                                            <div class="form-group mb-0">
+                                                <input type="text" class="form-control"
+                                                       placeholder="Đến sản phẩm">
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                    <td>
+                                        <div class="flex gap10 flex-nowrap align-items-center justify-content-center">
+                                            <label class="radio mb-3">
+                                                <input type="radio" name="optradio">
+                                                <span class="checkmark"></span>
+                                            </label>
+                                            <div class="form-group mb-0 price mr-3">
+                                                <input type="text" class="form-control" placeholder="Nhập số">
+                                                <span class="note">đ</span>
+                                            </div>
+                                            <label class="radio mb-3">
+                                                <input type="radio" name="optradio">
+                                                <span class="checkmark"></span>
+
+                                            </label>
+                                            <div class="form-group mb-0 price">
+                                                <input type="text" class="form-control" placeholder="Nhập số">
+                                                <span class="note">%</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <i class="icofont-trash"></i>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td>Khoảng gái 1</td>
+                                    <td class="text-left">
+                                        <button class="btn btn-add">
+                                            <i class="icofont-plus"></i>Thêm khoảng
+                                            giá
+                                        </button>
+                                    </td>
+                                    <td>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="other-information" class="box-info bg-white p-3 mb-3">
+            <h5 class="title-box mb-2 text-uppercase">Thông tin khác</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">Đặt hàng trước</label>
+                        <div class="wrap_input">
+                            <div class="flex gap10 mb-1">
+                                <label class="radio mb0 ml5">
+                                    <input type="radio" name="optradio">
+                                    <span class="checkmark"></span>
+                                    Không
+                                </label>
+                                <label class="radio mb0 ml5">
+                                    <input type="radio" name="optradio">
+                                    <span class="checkmark"></span>
+                                    Đồng ý
+                                </label>
+                            </div>
+                            <p>
+                                Tôi sẽ gửi hàng trong vòng 2 ngày (không bao gồm các ngày nghỉ lễ, Tết và những
+                                ngày đơn vị vận chuyển không làm việc)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">Tình trạng</label>
+                        <div class="wrap_input">
+                            <div class="form-group">
+                                <select class="select2 w-100">
+                                    <option>Mới</option>
+                                    <option value="">Cũ</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                        <label class="label">SKU sản phẩm</label>
+                        <div class="wrap_input">
+                            <div class="form-group price">
+                                <input type="text" class="form-control" placeholder="Vui lòng nhập">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="action-form">
+            <a href="" class="btn btn-round btn-outline-base">Hủy</a>
+            <a href="" class="btn btn-round btn-outline-base">Ẩn</a>
+            <a href="" class="btn btn-round btn-base">Cập nhật</a>
+        </div>
+    </div>
+</section>
+@section Scripts {
+    <script src="/modules/product/common.js"></script>
+    <script src="/modules/product/detail.js"></script>
+}
