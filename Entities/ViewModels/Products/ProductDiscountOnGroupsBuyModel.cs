@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entities.ViewModels.Products.V2
+namespace Entities.ViewModels.Products
 {
     public class ProductDiscountOnGroupsBuyModel
     {

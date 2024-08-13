@@ -1,12 +1,6 @@
-﻿using Elasticsearch.Net;
-using Entities.ViewModels;
-using Entities.ViewModels.Product;
-using Entities.ViewModels.Products;
-using Entities.ViewModels.Products.V2;
-using MongoDB.Bson;
+﻿using Entities.ViewModels.Products;
 using MongoDB.Driver;
 using Newtonsoft.Json;
-using PdfSharp;
 
 namespace WEB.CMS.Models.Product
 {
@@ -52,23 +46,7 @@ namespace WEB.CMS.Models.Product
                 return null;
             }
         }
-        public async Task<string> DeleteAsync(ProductBlackList model)
-        {
-            try
-            {
-                var filter = Builders<ProductMongoDbModel>.Filter;
-                var filterDefinition = filter.And(
-                    filter.Eq("_id", model._id)
-                    );
-                await _productDetailCollection.FindOneAndDeleteAsync(filterDefinition);
-                return model._id;
-            }
-            catch (Exception ex)
-            {
-                Utilities.LogHelper.InsertLogTelegram("ProductDetailMongoAccess - DeleteAsync: \nData: aff_model: " + JsonConvert.SerializeObject(model) + ".\n Error: " + ex);
-                return null;
-            }
-        }
+       
       
         public async Task<ProductMongoDbModel> GetByID(string id)
         {

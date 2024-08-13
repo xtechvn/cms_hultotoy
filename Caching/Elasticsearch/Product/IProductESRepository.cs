@@ -20,16 +20,6 @@ namespace Caching.Elasticsearch
 
         int UpSert(TEntity entity, string indexName);
         Task<int> UpSertAsync(TEntity entity, string indexName);
-
-        int UpSertMultiple(IEnumerable<TEntity> entity, string indexName);
-        Task<int> UpSertMultipleAsync(IEnumerable<TEntity> entity, string indexName);
-        ProductViewModel getProductDetailByCode(string index_name, string product_code, int label_id);
         bool DeleteProductByCode(string indexName, string document_id);
-        List<ProductViewModel> searchProduct(string input_search, string index_name, int top);
-        long GetIdentityProductEs(string index_name);
-        Task<SearchEsEntitiesViewModel> getProductListByGroupProductId(string index_name, List<int> grp_id, int from, int size,string filter);
-        Task<string> getListProductCodeNotExits(string index_name, List<string> lst_product_code_target,int group_id);
-        int getTotalProductCrawlToday(string index_name,int label_type);
-        Task<bool> DeleteProductByKey(string index_name, string product_code, int label_id);
     }
 }

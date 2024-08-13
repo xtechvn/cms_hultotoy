@@ -1,4 +1,4 @@
-﻿using Entities.ViewModels.Products.V2;
+﻿using Entities.ViewModels.Products;
 using Microsoft.AspNetCore.Mvc;
 using WEB.CMS.Customize;
 using WEB.CMS.Models.Product;
