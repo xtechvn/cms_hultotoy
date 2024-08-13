@@ -8,7 +8,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using PdfSharp;
 
-namespace WEB.CMS.Models.Product.V2
+namespace WEB.CMS.Models.Product
 {
     public class ProductDetailMongoAccess
     {

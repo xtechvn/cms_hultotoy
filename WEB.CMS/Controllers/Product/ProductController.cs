@@ -1,26 +1,7 @@
-﻿using Caching.Elasticsearch;
-using Caching.RedisWorker;
-using Entities.ConfigModels;
-using Entities.Models;
-using Entities.ViewModels;
-using Entities.ViewModels.Product;
-using Entities.ViewModels.Products;
-using Entities.ViewModels.Products.V2;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Entities.ViewModels.Products.V2;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using Repositories.IRepositories;
-using System.Configuration;
-using System.Globalization;
-using System.Security.Claims;
-using System.Text.RegularExpressions;
-using Utilities;
-using Utilities.Contants;
 using WEB.CMS.Customize;
 using WEB.CMS.Models.Product;
-using WEB.CMS.Models.Product.V2;
-using LogHelper = Utilities.LogHelper;
 
 namespace WEB.CMS.Controllers
 {
