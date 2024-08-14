@@ -19,7 +19,8 @@ namespace WEB.CMS.Controllers
         {
            
             return View();
-        }
+        } 
+        
         public IActionResult Detail(string product_id="")
         {
             ViewBag.ProductId = product_id;
@@ -89,6 +90,63 @@ namespace WEB.CMS.Controllers
             return Ok(new
             {
                 is_success = false
+            });
+        }
+        public async Task<IActionResult> Summit(ProductMongoDbModel request)
+        {
+            try
+            {
+                if(
+                    request.name==null || request.name.Trim()==""
+                    || request.images == null || request.images.Count<=0
+                    || request.avatar == null || request.avatar.Trim() == ""
+                    ||  request.group_product_id<=0
+                    || request.amount <=0
+                    )
+                {
+                    return Ok(new
+                    {
+                        is_success = false,
+                        msg = "Dữ liệu sản phẩm không chính xác, vui lòng chỉnh sửa và thử lại",
+                    });
+                }
+                if(request._id==null || request._id.Trim() == "")
+                {
+                    var rs=await _productV2DetailMongoAccess.AddNewAsync(request);
+                    if (rs != null)
+                    {
+                        return Ok(new
+                        {
+                            is_success = true,
+                            msg="Thêm mới sản phẩm thành công",
+                            data=rs
+                        });
+                    }
+                }
+                else
+                {
+                    var rs = await _productV2DetailMongoAccess.UpdateAsync(request);
+                    if (rs != null)
+                    {
+                        return Ok(new
+                        {
+                            is_success = true,
+                            msg = "Cập nhật sản phẩm thành công",
+                            data = rs
+                        });
+                    }
+                }
+               
+
+            }
+            catch
+            {
+
+            }
+            return Ok(new
+            {
+                is_success = false,
+                msg = "Thêm mới / Cập nhật sản phẩm thất bại, vui lòng liên hệ bộ phận IT",
             });
         }
     }
