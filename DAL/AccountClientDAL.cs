@@ -1,30 +1,40 @@
 ﻿using DAL.Generic;
+using DAL.StoreProcedure;
 using Entities.Models;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Utilities;
+using Utilities.Contants;
 
 namespace DAL
 {
    public class AccountClientDAL : GenericService<AccountClient>
     {
-        public AccountClientDAL(string connection) : base(connection) { }
+        private static DbWorker _DbWorker;
+        public AccountClientDAL(string connection) : base(connection) {
+            _DbWorker = new DbWorker(connection);
+        }
         public int CreateAccountClient(AccountClient model)
         {
             try
             {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
+                    SqlParameter[] objParam = new SqlParameter[9];
+                    objParam[0] = new SqlParameter("@ClientId ", model.ClientId);
+                    objParam[1] = new SqlParameter("@ClientType", model.ClientType);
+                    objParam[2] = new SqlParameter("@UserName", model.UserName);
+                    objParam[3] = new SqlParameter("@Password", model.Password);
+                    objParam[4] = new SqlParameter("@PasswordBackup", model.PasswordBackup);
+                    objParam[5] = new SqlParameter("@ForgotPasswordToken", model.ForgotPasswordToken);
+                    objParam[6] = new SqlParameter("@Status", model.Status);
+                    objParam[7] = new SqlParameter("@GroupPermission", model.GroupPermission);
+                    objParam[8] = new SqlParameter("@GoogleToken", model.GoogleToken);
 
-                    var deta = _DbContext.AccountClients.Add(model);
-                    _DbContext.SaveChanges();
-
-
-                }
-                return 1;
+                return _DbWorker.ExecuteNonQuery(StoreProcedureConstant.sp_InsertAccountClient, objParam);
             }
             catch (Exception ex)
             {
@@ -84,15 +94,19 @@ namespace DAL
         {
             try
             {
-                using (var _DbContext = new EntityDataContext(_connection))
-                {
+                SqlParameter[] objParam = new SqlParameter[10];
+                objParam[0] = new SqlParameter("@Id ", model.Id);
+                objParam[1] = new SqlParameter("@ClientId ", model.ClientId);
+                objParam[2] = new SqlParameter("@ClientType", model.ClientType);
+                objParam[3] = new SqlParameter("@UserName", model.UserName);
+                objParam[4] = new SqlParameter("@Password", model.Password);
+                objParam[5] = new SqlParameter("@PasswordBackup", model.PasswordBackup);
+                objParam[6] = new SqlParameter("@ForgotPasswordToken", model.ForgotPasswordToken);
+                objParam[7] = new SqlParameter("@Status", model.Status);
+                objParam[8] = new SqlParameter("@GroupPermission", model.GroupPermission);
+                objParam[9] = new SqlParameter("@GoogleToken", model.GoogleToken);
 
-                 
-                    _DbContext.AccountClients.Update(model);
-                     await _DbContext.SaveChangesAsync();
-
-                    return 1;
-                }
+                return _DbWorker.ExecuteNonQuery(StoreProcedureConstant.sp_UpdateAccountClient, objParam);    
             }
             catch (Exception ex)
             {

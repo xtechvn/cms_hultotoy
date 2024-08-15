@@ -18,6 +18,7 @@ using Utilities.Contants;
 using WEB.Adavigo.CMS.Service;
 using WEB.CMS.Customize;
 using WEB.CMS.Models;
+using WEB.CMS.Service;
 
 namespace WEB.Adavigo.CMS.Controllers
 {
@@ -34,6 +35,7 @@ namespace WEB.Adavigo.CMS.Controllers
         private readonly IBankingAccountRepository _bankingAccountRepository;
         private ManagementUser _ManagementUser;
         private IAccountClientRepository _accountClientRepository;
+        private LogCacheFilterMongoService _logCacheFilterMongoService;
 
 
         public CustomerManagerController(IConfiguration configuration, ICustomerManagerRepository customerManagerRepositories,  ManagementUser ManagementUser, IWebHostEnvironment WebHostEnvironment, IAccountClientRepository accountClientRepository,
@@ -48,6 +50,7 @@ namespace WEB.Adavigo.CMS.Controllers
             _WebHostEnvironment = WebHostEnvironment;
             _bankingAccountRepository = bankingAccountRepository;
             _accountClientRepository = accountClientRepository;
+            _logCacheFilterMongoService = new LogCacheFilterMongoService(configuration);
         }
         public async Task<IActionResult> Index()
         {
@@ -140,6 +143,28 @@ namespace WEB.Adavigo.CMS.Controllers
                 if (current_user != null)
                 {
                     var i = 0;
+                    if(searchModel.CacheName != null)
+                    {
+                        var data = _logCacheFilterMongoService.GetListLogCache(null, searchModel.CacheName);
+                        if (data != null)
+                        {
+                            searchModel.MaKH = data[0].MaKH;
+                            searchModel.CreatedBy = data[0].CreatedBy;
+                            searchModel.UserId = data[0].UserId;
+                            searchModel.TenKH = data[0].TenKH;
+                            searchModel.Email = data[0].Email;
+                            searchModel.Phone = data[0].Phone;
+                            searchModel.AgencyType = data[0].AgencyType;
+                            searchModel.ClientType = data[0].ClientType;
+                            searchModel.PermissionType = data[0].PermissionType;
+                            searchModel.CreateDate = data[0].CreateDate;
+                            searchModel.EndDate = data[0].EndDate;
+                            searchModel.MinAmount = data[0].MinAmount;
+                            searchModel.MaxAmount = data[0].MaxAmount;
+                            searchModel.SalerPermission = data[0].SalerPermission;
+                        }
+                       
+                    }
                     if (current_user != null && !string.IsNullOrEmpty(current_user.Role))
                     {
                         var list = Array.ConvertAll(current_user.Role.Split(','), int.Parse);
@@ -568,6 +593,56 @@ namespace WEB.Adavigo.CMS.Controllers
                 status = status,
                 msg = msg
             });
+        }
+
+        public async Task<IActionResult> InsertLogCache(CustomerManagerViewSearchModel searchModel)
+        {
+
+            int status = (int)ResponseType.FAILED;
+            string msg = "Error On Excution";
+            try
+            {
+                searchModel.CacheName = "TEST";
+              var Insert =await  _logCacheFilterMongoService.InsertLogCache(searchModel);
+                if(Insert > 0)
+                {
+                    status = (int)ResponseType.SUCCESS;
+                    msg = "Lưu thành công thành công";
+                }
+                else
+                {
+                    status = (int)ResponseType.SUCCESS;
+                    msg = "Lưu thành không công thành công";
+                }
+            
+
+            }
+            catch(Exception ex)
+            {
+                LogHelper.InsertLogTelegram("InsertLogCache - CustomerManagerController: " + ex);
+                status = (int)ResponseType.ERROR;
+                msg = "Lỗi kỹ thuật vui lòng liên hệ bộ phận IT";
+            }
+            return Ok(new
+            {
+                status = status,
+                msg = msg,
+
+            });
+        }
+        public async Task<string> GetSuggestionUserCache(string txt_search)
+        {
+            try
+            {
+                
+                var data =  _logCacheFilterMongoService.GetListLogCache(txt_search,null);
+                return JsonConvert.SerializeObject(data);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetSuggestionUserCache - CustomerManagerController: " + ex);
+                return null;
+            }
         }
     }
 }

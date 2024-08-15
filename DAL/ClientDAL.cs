@@ -296,10 +296,10 @@ namespace DAL
                             objParam[22] = new SqlParameter("@ParentId",    model.ParentId);
 
 
-                            DataTable dt = _DbWorker.GetDataTable(StoreProcedureConstant.SP_InsertClient, objParam);
+                            var dt = _DbWorker.ExecuteNonQuery(StoreProcedureConstant.SP_InsertClient, objParam);
 
-                            var deta = _DbContext.Clients.Add(model);
-                            _DbContext.SaveChanges();
+
+                            return 1;
                         }
                        
                     }
@@ -338,12 +338,8 @@ namespace DAL
                             objParam[23] = new SqlParameter("@ParentId", model.ParentId);
 
 
-                            DataTable dt = _DbWorker.GetDataTable(StoreProcedureConstant.sp_UpdateClient, objParam);
-                            var deta = _DbContext.Clients.Update(model);
-                                _DbContext.SaveChanges();
-                                return 1;
-                            
-                            
+                            var dt = _DbWorker.ExecuteNonQuery(StoreProcedureConstant.sp_UpdateClient, objParam);
+
                         }
                         else
                         {
