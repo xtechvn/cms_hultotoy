@@ -275,14 +275,14 @@ namespace Repositories.Repositories
                 if (_childList != null && _childList.Count() > 0)
                 {
                     if (ParentCheckedList != null && ParentCheckedList.Count > 0 && ParentCheckedList.Contains(parentId))
-                        _strHtml.Append(@"<a class=""cur-pointer btn-toggle-cate minus"">-</a>");
+                        _strHtml.Append(@"<a class=""cur-pointer btn-toggle-cate minus icofont-minus ""></a>");
                     else
-                        _strHtml.Append(@"<a class=""cur-pointer btn-toggle-cate plus"">+</a>");
+                        _strHtml.Append(@"<a class=""cur-pointer btn-toggle-cate plus icofont-plus""></a>");
                 }
 
                 if (parentId != NEWS_CATEGORY_ID /*true*/)
                 {
-                    _strHtml.Append(@"<label class=""check-list mb10 mr25"">");
+                    _strHtml.Append(@"<label class=""check-list mb10 mr25 ml10"">");
                     var strChecked = string.Empty;
                     if (CheckedList != null && CheckedList.Count > 0 && CheckedList.Contains(parentId)) strChecked = "checked";
                     if (_parentModel != null)

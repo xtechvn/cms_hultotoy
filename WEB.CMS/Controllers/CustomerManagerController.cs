@@ -569,5 +569,30 @@ namespace WEB.Adavigo.CMS.Controllers
                 msg = msg
             });
         }
+
+        public async Task<IActionResult> ListClient(CustomerManagerViewSearchModel searchModel, int currentPage = 1, int pageSize = 20)
+        {
+
+            int stt_code = (int)ResponseType.FAILED;
+            string msg = "Error On Excution";
+            try
+            {
+                stt_code = (int)ResponseType.SUCCESS;
+                msg = "Lưu thành công thành công";
+
+            }
+            catch(Exception ex)
+            {
+                LogHelper.InsertLogTelegram("CustomerManagerDetail - CustomerManagerController: " + ex);
+                stt_code = (int)ResponseType.ERROR;
+                msg = "Lỗi kỹ thuật vui lòng liên hệ bộ phận IT";
+            }
+            return Ok(new
+            {
+                stt_code = stt_code,
+                msg = msg,
+
+            });
+        }
     }
 }

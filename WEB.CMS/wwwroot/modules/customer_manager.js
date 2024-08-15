@@ -102,7 +102,37 @@ $(document).ready(function () {
             },
             cache: true
         }
-   });
+    });
+    $("#filter-client").select2({
+        theme: 'bootstrap4',
+        placeholder: "Bộ lọc đã lưu",
+        maximumSelectionLength: 1,
+        ajax: {
+            url: "/Order/UserSuggestion",
+            type: "post",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                var query = {
+                    txt_search: params.term,
+                }
+
+                // Query parameters will be ?search=[term]&type=public
+                return query;
+            },
+            processResults: function (response) {
+                return {
+                    results: $.map(response.data, function (item) {
+                        return {
+                            text: item.fullname + ' - ' + item.email,
+                            id: item.id,
+                        }
+                    })
+                };
+            },
+            cache: true
+        }
+    });
     $("#txtNguoiTao").select2({
         theme: 'bootstrap4',
         placeholder: "Tên nhân viên, Email",
@@ -210,6 +240,7 @@ var _customer_manager = {
       
         this.SearchClient(objSearch);
         this.setValueFilter(objSearch);
+        $('#imgLoading_order').hide();
 
     },
     Loaddata: function () {
@@ -310,6 +341,7 @@ var _customer_manager = {
         });
     },
     SearchOrder: function (input) {
+        $('#imgLoading_order').hide();
         $.ajax({
             url: "/CustomerManager/ListOrder",
             type: "Post",

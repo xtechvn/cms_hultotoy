@@ -44,10 +44,12 @@ namespace WEB.CMS.Controllers
             _configuration = configuration;
             _GroupProductRepository = groupProductRepository;
 
+
         }
 
         public async Task<IActionResult> Index()
         {
+           var NEWS_CATEGORY_ID = Convert.ToInt32(_configuration["Config:default_news_root_group"]);
             ViewBag.ListArticleStatus = await _CommonRepository.GetAllCodeByType(AllCodeType.ARTICLE_STATUS);
             ViewBag.StringTreeViewCate = await _GroupProductRepository.GetListTreeViewCheckBox(NEWS_CATEGORY_ID, -1);
             ViewBag.ListAuthor = await _UserRepository.GetUserSuggestionList(string.Empty);
@@ -90,6 +92,7 @@ namespace WEB.CMS.Controllers
             {
                 model.Status = ArticleStatus.SAVE;
             }
+            var NEWS_CATEGORY_ID = Convert.ToInt32(_configuration["Config:default_news_root_group"]);
             ViewBag.StringTreeViewCate = await _GroupProductRepository.GetListTreeViewCheckBox(NEWS_CATEGORY_ID, -1, model.Categories);
             return View(model);
         }
@@ -109,6 +112,7 @@ namespace WEB.CMS.Controllers
 
         public async Task<IActionResult> RelationArticle(long Id)
         {
+            var NEWS_CATEGORY_ID = Convert.ToInt32(_configuration["Config:default_news_root_group"]);
             ViewBag.StringTreeViewCate = await _GroupProductRepository.GetListTreeViewCheckBox(NEWS_CATEGORY_ID, -1);
             ViewBag.ListAuthor = await _UserRepository.GetUserSuggestionList(string.Empty);
             return PartialView();
@@ -142,8 +146,8 @@ namespace WEB.CMS.Controllers
                 };
 
                 var model = JsonConvert.DeserializeObject<ArticleModel>(data.ToString(), settings);
-               
-              
+
+                var NEWS_CATEGORY_ID = Convert.ToInt32(_configuration["Config:default_news_root_group"]);
                 if (await _GroupProductRepository.IsGroupHeader(model.Categories)) model.Categories.Add(NEWS_CATEGORY_ID);
 
                 if (model != null && HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
