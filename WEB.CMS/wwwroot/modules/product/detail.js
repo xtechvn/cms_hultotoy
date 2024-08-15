@@ -70,16 +70,26 @@ var product_detail = {
             var element = $(this)
             element.closest('.product-attributes').next().remove()
             element.closest('.product-attributes').remove()
+            if ($('.product-attributes').length <= 0) {
+                $('#single-product-amount').show()
+                $('#product-attributes-price').hide()
+                $('#product-attributes-all-price').closest('.item-edit').hide()
 
+            }
         });
         $('body').on('click', '.btn-add-attributes', function () {
             var element = $(this)
             product_detail.AddProductAttributes()
+            product_detail.RenderRowAttributeTablePrice()
+            $('#single-product-amount').hide()
+            $('#product-attributes-price').show()
+            $('#product-attributes-all-price').closest('.item-edit').show()
 
         });
+        
         $('body').on('keyup', '.lastest-attribute-value .attributes-name', function () {
             var element = $(this)
-            input_element.closest('.relative').find('.error').hide()
+            element.closest('.relative').find('.error').hide()
             product_detail.ValidateAttributesInput(element)
             element.closest('.lastest-attribute-value').removeClass('lastest-attribute-value')
             if (element.val() != undefined && element.val().trim() != '') {
@@ -108,10 +118,10 @@ var product_detail = {
         $('body').on('click', '.attribute-name-edit', function () {
             var element = $(this)
             element.hide()
-            $('#edit-attributes-name-nw').show()
             element.closest('h6').find('b').attr('data-value', element.closest('h6').find('b').html())
             element.closest('h6').find('b').html('Nhập tên thuộc tính mới')
             element.closest('h6').find('span').hide()
+            element.closest('h6').find('.edit-attributes-name-nw').show()
             element.hide()
 
         });
@@ -119,15 +129,14 @@ var product_detail = {
             var element = $(this)
             var value = element.closest('h6').find('.attribute-name').val()
             element.closest('h6').find('b').html(value)
-            $('#edit-attributes-name-nw').hide()
+            element.closest('h6').find('.edit-attributes-name-nw').hide()
             element.closest('h6').find('.attribute-name-edit').show()
             element.closest('h6').find('span').show()
         });
         $('body').on('click', '.edit-attributes-name-cancel', function () {
             var element = $(this)
-            $('#edit-attributes-name-nw').hide()
             element.closest('h6').find('b').html(element.closest('h6').find('b').attr('data-value'))
-            element.closest('h6').find('.attribute-name-edit').show()
+            element.closest('h6').find('.edit-attributes-name-nw').hide()
             element.closest('h6').find('span').show()
 
         });
@@ -158,35 +167,70 @@ var product_detail = {
             element.hide()
          
         });
-        $('body').on('click', '.specifications-box .col-md-6 .add-specificaion-value-add ,.specifications-box .col-md-6 .add-specificaion-value-cancel ', function (e) {
+        $('body').on('click', '.specifications-box .col-md-6 .add-specificaion-value-add , .specifications-box .col-md-6 .add-specificaion-value-cancel ', function (e) {
             var element = $(this)
             element.closest('.border-top').find('.add-specificaion-value-box').hide()
             element.closest('.border-top').find('.add-specificaion-value').show()
 
         });
-        //$('body').on('click', '.select-group-product', function (e) {
-        //    var element = $(this)
-        //    $.magnificPopup.open({
-        //        items: {
-        //            src: '#them-nganhhang'
-        //        },
-        //        type: 'inline',
-        //        midClick: true,
-        //        callbacks: {
-        //            beforeOpen: function () {
-        //                this.st.mainClass = currentPopup.st.mainClass;
-        //            }
-        //        }
-        //    });
-        //});
+     
+        $('body').on('click', '.btn-add-attributes, .edit-attributes-name-confirm, .attribute-item-add, .attribute-item-delete, #product-attributes-box .delete', function () {
+            product_detail.RenderRowAttributeTablePrice()
+
+        });
+        $('body').on('focusout', '.attributes-name', function () {
+            product_detail.RenderRowAttributeTablePrice()
+
+        });
+        $('body').on('click', '.btn-all', function () {
+            product_detail.ApplyAllPriceToTable()
+
+
+        });
+        $('body').on('click', '.btn-add-discount-groupbuy', function () {
+            $('#discount-groupbuy').show()
+            $('.btn-add-discount-groupbuy').closest('.row').hide()
+            var id = $('.discount-groupbuy-row').length + 1
+            var html = _product_constants.HTML.ProductDetail_DiscountGroupBuy_Row
+                .replaceAll('Khoảng giá 1', 'Khoảng giá ' + id)
+                .replaceAll('{discount-type}', 'discount-type-' + id)
+                
+            $(html).insertBefore('#discount-groupbuy .summary')
+        });
+        $('body').on('click', '#discount-groupbuy .delete-row', function () {
+            var element = $(this)
+            element.closest('.discount-groupbuy-row').remove()
+            if ($('.discount-groupbuy-row').length <=0) {
+                $('#discount-groupbuy').hide()
+                $('.btn-add-discount-groupbuy').closest('.row').show()
+            }
+                     
+        });
+        $('body').on('keyup', '.input-price', function () {
+            var element = $(this)
+            var value = element.val()
+            element.val(Comma(value))
+            product_detail.UpdateRowData(element.closest('tr'))
+        });
+        $('body').on('click', '#discount-groupbuy .summary .btn-add', function () {
+
+            var id = $('.discount-groupbuy-row').length + 1
+            var html = _product_constants.HTML.ProductDetail_DiscountGroupBuy_Row
+                .replaceAll('Khoảng giá 1', 'Khoảng giá ' + id)
+                .replaceAll('{discount-type}', 'discount-type-' + id)
+
+            $(html).insertBefore('#discount-groupbuy .summary')
+
+        });
     },
     Detail: function () {
         var product_id = $('#product_detail').val()
         if (product_id != null && product_id != undefined && product_id.trim() != '') {
             _product_function.POST('/Product/ProductDetail', { product_id: $('#product_detail').val() }, function (result) {
                 if (result.is_success && result.data) {
-                    product_detail.RenderGeneralFunction()
                     product_detail.RenderExistsProduct(result.data)
+                    product_detail.RenderGeneralFunction()
+
                 }
                 else {
                     window.location.href = '/error'
@@ -194,15 +238,17 @@ var product_detail = {
             });
         }
         else {
-            product_detail.RenderGeneralFunction()
-            product_detail.RenderAddNewProduct()
             $('.btn-update').html('Thêm mới')
+            product_detail.RenderAddNewProduct()
+            product_detail.RenderGeneralFunction()
+
         }
 
 
     },
 
     RenderGeneralFunction: function () {
+        product_detail.RenderRowAttributeTablePrice()
         $('#images .list').html(_product_constants.HTML.ProductDetail_Images_AddImagesButton.replace('{0}', '0').replace('{max}', _product_constants.VALUES.ProductDetail_Max_Image))
         $('#avatar .list').html(_product_constants.HTML.ProductDetail_Images_AddImagesButton.replace('{0}', '0').replace('{max}', '1'))
         $('#videos .list').html(_product_constants.HTML.ProductDetail_Images_AddImagesButton.replace('{0}', '0').replace('{max}', '1'))
@@ -210,9 +256,22 @@ var product_detail = {
         product_detail.ShowProductTab()
         $('.add-product').removeClass('placeholder')
         $('.add-product').removeClass('box-placeholder')
+        $('#single-product-amount').show()
+        $('#product-attributes-price').hide()
+        $('#product-attributes-all-price').closest('.item-edit').hide()
+        $('.select2').each(function (index, item) {
+            var element=$(this)
+            element.select2({
+                minimumResultsForSearch: Infinity
+            });
+        })
+       
     },
     RenderAddNewProduct: function () {
         $('#product-attributes-box').html('')
+        $('#discount-groupbuy').hide()
+        $('.btn-add-discount-groupbuy').closest('.row').show()
+
         var html = ''
         $(_product_constants.VALUES.DefaultSpecificationValue).each(function (index, item) {
             switch (item.type) {
@@ -325,9 +384,9 @@ var product_detail = {
         var attribute_max_count = 2
         if ($('.product-attributes').length < attribute_max_count) {
             $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row.replaceAll('{html}', _product_constants.HTML.ProductDetail_Attribute_Row_Item))
-            if ($('.product-attributes').length < attribute_max_count) {
-                $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row_Add_Attributes)
-            }
+            //if ($('.product-attributes').length < attribute_max_count) {
+            //    $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row_Add_Attributes)
+            //}
         }
       
     },
@@ -348,5 +407,141 @@ var product_detail = {
             }
         })
         return success
+    },
+    RenderRowAttributeTablePrice: function () {
+        var html=''
+        var product_attributes = []
+        $('.product-attributes').each(function (index, item) {
+            var element = $(this)
+            var product_attribute_by_id = {
+                id: index,
+                data_values:[]
+            }
+            element.find('.attributes-name').each(function (index, item) {
+                var element_input = $(this)
+                if (element_input != undefined && element_input.val() != undefined && element_input.val().trim() != '')
+                product_attribute_by_id.data_values.push(element_input.val())
+            })
+            product_attributes.push(product_attribute_by_id)
+        })
+        var combination_array = []
+        if (product_attributes.length > 0) {
+            combination_array = product_attributes[0].data_values.map(v => [].concat(v))
+            if (product_attributes.length > 1) {
+                for (var i = 1; i < product_attributes.length; i++) {
+                    var array2 = product_attributes[i].data_values;
+                    combination_array = combination_array.flatMap(d => array2.map(v => [].concat(d, v)))
+
+                }
+            }
+        }
+       
+        if (combination_array.length > 0) {
+            var name = combination_array[0][0]
+            $(combination_array).each(function (index, item) {
+                var html_attribute_attr=''
+                var html_td_attribute = ''
+
+                $(item).each(function (index_attribute, attribute_name) {
+                    var filter_value = item.join('').substring(0, (index_attribute + 1))
+                    var row_span = combination_array.filter(val => val.join('').startsWith(filter_value)).length
+                    
+                    var html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
+                        .replaceAll('{i}', index_attribute)
+                        .replaceAll('{name}', attribute_name.trim())
+                        .replaceAll('{row_span}', 'rowspan="' + row_span + '"')
+                    html_attribute_attr += 'data-attribute-' + (index_attribute + 1) + '="' + attribute_name.trim() + '" '
+                    html_td_attribute += html_item;
+                    
+                })
+
+                if (item[0].toLowerCase().trim() == name) {
+                    html += _product_constants.HTML.ProductDetail_Attribute_Price_TrSub
+                        .replaceAll('data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-2"', html_attribute_attr)
+                        .replaceAll('{td_arrtibute}', html_td_attribute)
+                }
+                else {
+                    name = item[0].toLowerCase().trim()
+                    html += _product_constants.HTML.ProductDetail_Attribute_Price_TrMain
+                        .replaceAll('data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-1"', html_attribute_attr)
+                        .replaceAll('{td_arrtibute}', html_td_attribute)
+                }
+
+            })
+
+        }
+        $('#product-attributes-price tbody').html(html)
+        $('#product-attributes-price .th-attributes').hide()
+        for (var i = 1; i <= $('.product-attributes').length; i++) {
+            $('#product-attributes-price .th-attribute-' + i).show()
+            $('#product-attributes-price .th-attribute-' + i).html($($('.product-attributes')[(i-1)]).find('h6').find('b').text())
+
+        }
+        $(GetAttributeList(1)).each(function (index, item) {
+            HideAttributes(item,1)
+        })
+    },
+
+    ApplyAllPriceToTable: function () {
+        $('#product-attributes-price .td-price input').val(Comma($('#product-attributes-all-price .td-price input').val()))
+        $('#product-attributes-price .td-profit input').val(Comma($('#product-attributes-all-price .td-profit input').val()))
+        $('#product-attributes-price .td-stock input').val(Comma($('#product-attributes-all-price .td-stock input').val()))
+        $('#product-attributes-price .td-sku input').val(Comma($('#product-attributes-all-price .td-sku input').val()))
+        var price = isNaN(parseFloat($('#product-attributes-all-price .td-price input').val().replaceAll(',', ''))) ? 0 : parseFloat($('#product-attributes-all-price .td-price input').val().replaceAll(',', ''))
+        var profit = isNaN(parseFloat($('#product-attributes-all-price .td-profit input').val().replaceAll(',', ''))) ? 0 : parseFloat($('#product-attributes-all-price .td-profit input').val().replaceAll(',', ''))
+        $('#product-attributes-price .td-amount input').val(Comma(price + profit))
+        //$('#product-attributes-all-price .td-price input').val('')
+        //$('#product-attributes-all-price .td-profit input').val('')
+        //$('#product-attributes-all-price .td-stock input').val('')
+        //$('#product-attributes-all-price .td-sku input').val('')
+    },
+    UpdateRowData: function (tr) {
+        var price = isNaN(parseFloat(tr.find('.td-price').find('input').val().replaceAll(',', ''))) ? 0 : parseFloat(tr.find('.td-price').find('input').val().replaceAll(',', ''))
+        var profit = isNaN(parseFloat(tr.find('.td-profit').find('input').val().replaceAll(',', ''))) ? 0 : parseFloat(tr.find('.td-profit').find('input').val().replaceAll(',', ''))
+
+        tr.find('.td-amount').find('input').val(Comma(price + profit))
     }
+    
+}
+function HideAttributes(name, i) {
+    var find = $('#product-attributes-price tbody tr[data-attribute-' + i + '="' + name + '"]')
+    if (find.length <= 0) return;
+    var first = true;
+    
+    find.each(function (index, item) {
+        var element=$(this)
+        if (first) {
+            first = false
+        } else {
+            for (var field_index = 0; field_index < i; field_index++) {
+                $(element.find('.td-attribute-' + field_index)).hide()
+            }
+        }
+
+    })
+    //var list = GetAttributeList(++i)
+    //$(list).each(function (index, item) {
+    //    HideAttributes(item,i)
+    //})
+}
+function GetAttributeList(index) {
+    var list = []
+    $($('#product-attributes-box .row-attributes-value')[index - 1]).find('input[type="text"]').each(function (index_item, item) {
+        var element = $(this)
+        list.push(element.val())
+
+    })
+    return list
+}
+function Comma(number) { //function to add commas to textboxes
+    number = ('' + number).replace(/[^0-9.,]+/g, '');
+    number += '';
+    number = number.replaceAll(',', '');
+    x = number.split('.');
+    x1 = x[0];
+    x2 = x.length > 1 ? '.' + x[1] : '';
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(x1))
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+    return x1 + x2;
 }
