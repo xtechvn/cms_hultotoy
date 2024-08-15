@@ -60,7 +60,7 @@ namespace WEB.CMS.Service
             }
             return 0;
         }
-        public List<CustomerManagerViewSearchModel> GetListLogCache(CustomerManagerViewSearchModel searchModel)
+        public List<CustomerManagerViewSearchModel> GetListLogCache(string name,string _id)
         {
             var listLog = new List<CustomerManagerViewSearchModel>();
             try
@@ -68,11 +68,17 @@ namespace WEB.CMS.Service
                 var db = MongodbService.GetDatabase();
 
 
-                var collection = db.GetCollection<CustomerManagerViewSearchModel>(configuration["DataBaseConfig:MongoServer:LogAction_collection"]);
+                var collection = db.GetCollection<CustomerManagerViewSearchModel>(configuration["DataBaseConfig:MongoServer:Cache_Filter_KH"]);
                 var filter = Builders<CustomerManagerViewSearchModel>.Filter.Empty;
 
-
-                filter &= Builders<CustomerManagerViewSearchModel>.Filter.Eq(n => n.CacheName, searchModel.CacheName);
+                if (name != null)
+                {
+                    filter &= Builders<CustomerManagerViewSearchModel>.Filter.Where(s => s.CacheName.ToUpper().Contains(name.Trim().ToUpper()));
+                }
+                if (name != null)
+                {
+                    filter &= Builders<CustomerManagerViewSearchModel>.Filter.Where(s => s._id.ToUpper().Contains(_id.Trim().ToUpper()));
+                }
 
                 var S = Builders<CustomerManagerViewSearchModel>.Sort.Descending("_id");
 

@@ -193,7 +193,37 @@ $(document).ready(function () {
             cache: true
         }
     });
+    $("#filter-client").select2({
+        theme: 'bootstrap4',
+        placeholder: "Bộ lọc đã lưu",
+        maximumSelectionLength: 1,
+        ajax: {
+            url: "/CustomerManager/GetSuggestionUserCache",
+            type: "post",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                var query = {
+                    txt_search: params.term,
+                }
+                // Query parameters will be ?search=[term]&type=public
+                return query;
+            },
+            processResults: function (response) {
+                return {
+                    results: $.map(response, function (item) {
+                        return {
+                            text: item.CacheName,
+                            id: item._id,
+                        }
+                    })
+                };
+            },
+        },
+
+    });
     _customer_manager.ClearlocalStorage();
+ 
 });
 
 var _customer_manager = {
@@ -294,6 +324,11 @@ var _customer_manager = {
                 var SaleName = JSON.parse(cookie1)
                 $('#txtNguoiTao').html('<option selected value = ' + input.UserId + '> ' + SaleName + '</option>')
             }
+        }
+
+        var AgencyType = $("#filter-client").select2().find(":selected").attr('data-agencytype');
+        if (AgencyType > 0) {
+            var AgencyType2 = $("#filter-client").select2("val");
         }
         $.ajax({
             url: "/CustomerManager/ListClient",
@@ -709,6 +744,7 @@ var _customer_manager = {
     SearchData: function () {
         var CreateDate;
         var EndDate;
+        var CacheName_data = $('#filter-client').select2("val");
         var MaKH_data = $('#client').select2("val");
         textClient = $('#client').find(':selected').text();
         var UserId_data = $('#txtNguoiTao').select2("val");
@@ -730,6 +766,7 @@ var _customer_manager = {
             TenKH: null,
             Email: null,
             Phone: null,
+            CacheName: null,
             AgencyType: $('#AgencyType').val(),
             ClientType: $('#ClientType').val(),
             PermissionType: $('#PermisionType').val(),
@@ -760,6 +797,10 @@ var _customer_manager = {
         }
         else {
             window.localStorage.removeItem("textNT")
+        }
+        if (CacheName_data != null && CacheName_data[0] != null) {
+            _searchModel.CacheName = CacheName_data[0]
+     
         }
         var objSearch = this.SearchParam;
         objSearch = _searchModel;
@@ -1125,7 +1166,270 @@ var _customer_manager = {
             }
         });
     },
-   
+
+    SeverFilter: function () {
+        var CreateDate;
+        var EndDate;
+        var MaKH_data = $('#client').select2("val");
+        textClient = $('#client').find(':selected').text();
+        var UserId_data = $('#txtNguoiTao').select2("val");
+        textNV = $('#txtNguoiTao').find(':selected').text();
+        var CreatedBy_data = $('#CreatedBy').select2("val");
+        textNT = $('#CreatedBy').find(':selected').text();
+        if ($('#createdate').data('daterangepicker') !== undefined &&
+            $('#createdate').data('daterangepicker') != null && isPickerApprove) {
+            CreateDate = $('#createdate').data('daterangepicker').startDate._d.toLocaleDateString("en-GB");
+            EndDate = $('#createdate').data('daterangepicker').endDate._d.toLocaleDateString("en-GB");
+        } else {
+            CreateDate = null
+            EndDate = null
+        }
+        let _searchModel = {
+            MaKH: MaKH_data,
+            UserId: UserId_data,
+            CreatedBy: CreatedBy_data,
+            TenKH: textClient,
+            Email: null,
+            Phone: null,
+            AgencyType: $('#AgencyType').val(),
+            ClientType: $('#ClientType').val(),
+            PermissionType: $('#PermisionType').val(),
+            CreateDate: CreateDate,
+            EndDate: EndDate,
+            MinAmount: $('#minamount').val().replaceAll(',', ''),
+            MaxAmount: $('#maxamount').val().replaceAll(',', ''),
+            PageIndex: 1,
+            PageSize: $("#selectPaggingOptions").find(':selected').val(),
+        };
+
+        var objSearch = this.SearchParam;
+        objSearch = _searchModel;
+
+        $.ajax({
+            url: "/CustomerManager/InsertLogCache",
+            type: "Post",
+            data: { searchModel: objSearch },
+            success: function (result) {
+                if (result.status == 0) {
+                    _msgalert.success(result.msg)
+                } else {
+                    _msgalert.error(result.msg)
+                }
+            }
+        });
+    },
+    getList: function () {
+        var type = $('input[name=optradio]:checked').val();
+        $('#form_down_check_radio').attr('style', 'display: none');
+        $('#btn_check_radio').removeClass('active');
+
+        var searchModel = {
+            FromDateStr: null,
+            ToDateStr: null,
+        };
+        switch (type) {
+            case "1": {
+                searchModel.FromDateStr = new Date().toLocaleDateString("en-GB");
+                searchModel.ToDateStr = new Date().toLocaleDateString("en-GB");
+                $('#check_radio_name').text("Hôm nay")
+            }
+                break;
+            case "2": {
+                var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+
+                newDate.setDate(newDate.getDate() - 1);
+                searchModel.FromDateStr = newDate.toLocaleDateString("en-GB");
+                searchModel.ToDateStr = newDate.toLocaleDateString("en-GB");
+                $('#check_radio_name').text("Hôm qua")
+            }
+                break;
+            case "3": {
+                var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+
+                newDate.setDate(newDate.getDate() - 7);
+                searchModel.FromDateStr = newDate.toLocaleDateString("en-GB");
+                searchModel.ToDateStr = new Date().toLocaleDateString("en-GB");
+                $('#check_radio_name').text("Tuần trước")
+            }
+                break;
+            case "4": {
+                var newdate = new Date();
+                newdate.setDate(01);
+                searchModel.FromDateStr = newdate.toLocaleDateString("en-GB");
+                searchModel.ToDateStr = new Date().toLocaleDateString("en-GB");
+                $('#check_radio_name').text("Tháng này")
+            }
+                break;
+            case "5": {
+                var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                newDate.setDate(01);
+                newDate.setMonth(newDate.getMonth() - 1);
+                var newDate2 = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                newDate2.setDate(30);
+                newDate2.setMonth(newDate2.getMonth() - 1);
+
+                searchModel.FromDateStr = newDate.toLocaleDateString("en-GB");
+                searchModel.ToDateStr = newDate2.toLocaleDateString("en-GB");
+                $('#check_radio_name').text("Tháng trước")
+            }
+                break;
+            case "6": {
+                $('#check_radio_name').text("Quý này")
+                var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                var month = newDate.getMonth() + 1;
+                var quarter = Math.ceil(month / 3);
+                switch (quarter) {
+                    case 1: {
+                        var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate.setDate(01);
+                        newDate.setMonth(00);
+                        var newDate2 = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate2.setDate(31);
+                        newDate2.setMonth(02);
+
+                        searchModel.FromDateStr = newDate.toLocaleDateString("en-GB");
+                        searchModel.ToDateStr = newDate2.toLocaleDateString("en-GB");
+                    } break;
+                    case 2: {
+                        var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate.setDate(01);
+                        newDate.setMonth(03);
+                        var newDate2 = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate2.setDate(30);
+                        newDate2.setMonth(05);
+
+                        searchModel.FromDateStr = newDate.toLocaleDateString("en-GB");
+                        searchModel.ToDateStr = newDate2.toLocaleDateString("en-GB");
+                    } break;
+                    case 3: {
+                        var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate.setDate(01);
+                        newDate.setMonth(06);
+                        var newDate2 = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate2.setDate(30);
+                        newDate2.setMonth(08);
+
+                        searchModel.FromDateStr = newDate.toLocaleDateString("en-GB");
+                        searchModel.ToDateStr = newDate2.toLocaleDateString("en-GB");
+                    } break;
+                    case 4: {
+                        var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate.setDate(01);
+                        newDate.setMonth(09);
+                        var newDate2 = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate2.setDate(31);
+                        newDate2.setMonth(11);
+
+                        searchModel.FromDateStr = newDate.toLocaleDateString("en-GB");
+                        searchModel.ToDateStr = newDate2.toLocaleDateString("en-GB");
+                    } break;
+                }
+            }
+                break;
+            case "7": {
+                $('#check_radio_name').text("Quý trước")
+                var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                var month = newDate.getMonth() + 1;
+                var quarter = Math.ceil(month / 3) - 1;
+                switch (quarter) {
+                    case 1: {
+                        var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate.setDate(01);
+                        newDate.setMonth(00);
+                        var newDate2 = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate2.setDate(31);
+                        newDate2.setMonth(02);
+
+                        searchModel.FromDateStr = newDate.toLocaleDateString("en-GB");
+                        searchModel.ToDateStr = newDate2.toLocaleDateString("en-GB");
+                    } break;
+                    case 2: {
+                        var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate.setDate(01);
+                        newDate.setMonth(03);
+                        var newDate2 = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate2.setDate(30);
+                        newDate2.setMonth(05);
+
+                        searchModel.FromDateStr = newDate.toLocaleDateString("en-GB");
+                        searchModel.ToDateStr = newDate2.toLocaleDateString("en-GB");
+                    } break;
+                    case 3: {
+                        var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate.setDate(01);
+                        newDate.setMonth(06);
+                        var newDate2 = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate2.setDate(30);
+                        newDate2.setMonth(08);
+
+                        searchModel.FromDateStr = newDate.toLocaleDateString("en-GB");
+                        searchModel.ToDateStr = newDate2.toLocaleDateString("en-GB");
+                    } break;
+                    case 4: {
+                        var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate.setDate(01);
+                        newDate.setMonth(09);
+                        var newDate2 = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                        newDate2.setDate(31);
+                        newDate2.setMonth(11);
+
+                        searchModel.FromDateStr = newDate.toLocaleDateString("en-GB");
+                        searchModel.ToDateStr = newDate2.toLocaleDateString("en-GB");
+                    } break;
+                }
+            }
+                break;
+        }
+
+        var CreateDate;
+        var EndDate;
+        var MaKH_data = $('#client').select2("val");
+        textClient = $('#client').find(':selected').text();
+        var UserId_data = $('#txtNguoiTao').select2("val");
+        textNV = $('#txtNguoiTao').find(':selected').text();
+        var CreatedBy_data = $('#CreatedBy').select2("val");
+        textNT = $('#CreatedBy').find(':selected').text();
+        if ($('#createdate').data('daterangepicker') !== undefined &&
+            $('#createdate').data('daterangepicker') != null && isPickerApprove) {
+            CreateDate = $('#createdate').data('daterangepicker').startDate._d.toLocaleDateString("en-GB");
+            EndDate = $('#createdate').data('daterangepicker').endDate._d.toLocaleDateString("en-GB");
+        } else {
+            CreateDate = null
+            EndDate = null
+        }
+        let _searchModel = {
+            MaKH: null,
+            UserId: null,
+            CreatedBy: null,
+            TenKH: null,
+            Email: null,
+            Phone: null,
+            AgencyType: $('#AgencyType').val(),
+            ClientType: $('#ClientType').val(),
+            PermissionType: $('#PermisionType').val(),
+            CreateDate: searchModel.FromDateStr,
+            EndDate: searchModel.ToDateStr,
+            MinAmount: $('#minamount').val().replaceAll(',', ''),
+            MaxAmount: $('#maxamount').val().replaceAll(',', ''),
+            PageIndex: 1,
+            PageSize: $("#selectPaggingOptions").find(':selected').val(),
+        };
+        if (MaKH_data != null && MaKH_data[0] != null) {
+            _searchModel.MaKH = MaKH_data[0]       
+        }
+
+        if (UserId_data != null && UserId_data[0] != null) {
+            _searchModel.UserId = UserId_data[0] 
+        }
+        if (CreatedBy_data != null && CreatedBy_data[0] != null) {
+            _searchModel.CreatedBy = CreatedBy_data[0]
+        }
+       
+        var objSearch = this.SearchParam;
+        objSearch = _searchModel;
+
+        this.SearchClient(objSearch);
+    }
 }
 
 //// validate

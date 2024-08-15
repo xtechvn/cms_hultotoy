@@ -243,7 +243,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group flex justify-content-between mt-3 pt-3 border-top">
-                                        <a href="" class="text-primary">
+                                        <a href="javascript:;" onclick="_customer_manager.SeverFilter()"  class="text-primary">
                                             <b>
                                                 <i class="icofont-plus-circle"></i>Tạo bộ
                                                 lọc
@@ -325,7 +325,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group flex justify-content-between mt-3 pt-3 border-top">
-                                        <a href="" class="text-primary">
+                                        <a href="javascript:;" onclick="_customer_manager.SeverFilter()"  class="text-primary">
                                             <b>
                                                 <i class="icofont-plus-circle"></i>Tạo bộ
                                                 lọc
@@ -411,7 +411,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group flex justify-content-between mt-3 pt-3 border-top">
-                                        <a href="" class="text-primary">
+                                        <a href="javascript:;" onclick="_customer_manager.SeverFilter()"  class="text-primary">
                                             <b>
                                                 <i class="icofont-plus-circle"></i>Tạo bộ
                                                 lọc
@@ -529,7 +529,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group flex justify-content-between mt-3 pt-3 border-top">
-                                        <a href="" class="text-primary flex gap10">
+                                        <a href="javascript:;" onclick="_customer_manager.SeverFilter()" class="text-primary flex gap10">
                                             <i class="icofont-plus-circle"></i>Tạo bộ
                                             lọc
                                         </a>
@@ -581,56 +581,57 @@
                     <ul class="scroll-inner">
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio" checked="">
+                                <input type="radio" name="optradio" value="0" checked="">
                                 <span class="checkmark"></span>
                                 Tất cả
                             </label>
                         </li>
+
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio">
-                                <span class="checkmark"></span>
-                                Hôm qua
-                            </label>
-                        </li>
-                        <li>
-                            <label class="radio">
-                                <input type="radio" name="optradio">
+                                <input type="radio" name="optradio" value="1">
                                 <span class="checkmark"></span>
                                 Hôm nay
                             </label>
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio">
+                                <input type="radio" name="optradio"value="2">
+                                <span class="checkmark"></span>
+                                Hôm qua
+                            </label>
+                        </li>
+                        <li>
+                            <label class="radio">
+                                <input type="radio" name="optradio"value="3">
                                 <span class="checkmark"></span>
                                 Tuần trước
                             </label>
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio">
+                                <input type="radio" name="optradio"value="4">
                                 <span class="checkmark"></span>
                                 Tháng này
                             </label>
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio">
+                                <input type="radio" name="optradio"value="5">
                                 <span class="checkmark"></span>
                                 Tháng trước
                             </label>
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio">
+                                <input type="radio" name="optradio"value="6">
                                 <span class="checkmark"></span>
                                 Quý này
                             </label>
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio">
+                                <input type="radio" name="optradio"value="7">
                                 <span class="checkmark"></span>
                                 Quý trước
                             </label>
@@ -654,7 +655,7 @@
                     </ul>
                     <div class="text-right">
                         <a href="javascript:;" class="onclick-active">Hủy bỏ</a>
-                        <a href="javascript:;" class="ml-3 btn btn-primary">Áp dụng</a>
+                        <a href="javascript:;" onclick="_customer_manager.getList()" class="ml-3 btn btn-primary">Áp dụng</a>
                     </div>
                 </div>
             </div>
