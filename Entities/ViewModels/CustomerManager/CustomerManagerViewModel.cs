@@ -22,21 +22,8 @@ namespace Entities.ViewModels.CustomerManager
         public long UserId { get; set; }
         public long ACStatus { get; set; }
      
-        public long TotalDebtAmount { get; set; }
-        public long HotelDebtAmout { get; set; }
-        public long ProductFlyTicketDebtAmount { get; set; }
-        public long VinWonderDebtAmount { get; set; }
-        public long TouringCarDebtAmount { get; set; }
-        public long TourDebtAmount { get; set; }
-        public string ServiceType { get; set; }
-        public string ClientCode { get; set; }
-
-        public long TotalAmountUse { get; set; }
-        public long TotalAmountFlyUse { get; set; }
-        public long TotalAmountHotelUse { get; set; }
-        public long TotalAmountTourUse { get; set; }
-        public long TotalAmountOtherUse { get; set; }
-        public long TotalAmountVinWonderUse { get; set; }
+        public long TotalAmount { get; set; }
+       
     }
     public class CustomerManagerViewSearchModel
     {

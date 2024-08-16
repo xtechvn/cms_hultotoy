@@ -1,143 +1,11 @@
 ﻿@using Entities.Models
 @using Utilities.Contants
 @using Entities.ViewModels.CustomerManager
+@using Entities.ViewModels.UserAgent
 @model CustomerManagerViewModel
-@* <div class="table-responsive table-white">
-    <table class="table table-nowrap">
-        <tbody>
-            <tr>
-                <td colspan="3">
-                    <strong>Khách hàng: @Model.ClientName</strong>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2"><strong>Thông tin cơ bản</strong></td>
-                <td style="width: 440px;"><strong>Thông tin tài chính</strong></td>
-            </tr>
-            <tr>
-                <td style="min-width: 400px;">
-                    <div class="row">
-                        <div class="col-4 mb10 gray">Mã</div>
-                        <div class="col-8 mb10">: @Model.ClientCode</div>
-                        <div class="col-4 mb10 gray">Mã số thuế/Chứng minh nhân dân</div>
-                        <div class="col-8 mb10">: @Model.TaxNo</div>
-                        <div class="col-4 mb10 gray">Điện thoại</div>
-                        <div class="col-8 mb10">: @Model.Phone</div>
-                        <div class="col-4 mb10 gray">Email</div>
-                        <div class="col-8 mb10">: @Model.Email</div>
-                        <div class="col-4 mb10 gray">Địa chỉ giao dịch</div>
-                        <div class="col-8 mb10">: @Model.BusinessAddress</div>
-                        <div class="col-4 mb10 gray">Địa chỉ xuất hóa đơn</div>
-                        <div class="col-8 mb10">: @Model.ExportBillAddress</div>
-                    </div>
-                </td>
-                <td style="min-width: 400px;">
-                    <div class="row">
-                        <div class="col-4 mb10 gray">Đối tượng</div>
-                        <div class="col-8 mb10">: @Model.AgencyType_name</div>
-                        <div class="col-4 mb10 gray">Loại</div>
-                        <div class="col-8 mb10">: @Model.client_type_name</div>
-                        <div class="col-4 mb10 gray">Nhóm</div>
-                        <div class="col-8 mb10">: @Model.PermisionType_name</div>
-
-                        <div class="col-4 mb10 gray">Người phụ trách:</div>
-                        <div class="col-8 mb10">: @Model.UserId_name</div>
-                        <div class="col-4 mb10 gray">Người Tạo:</div>
-                        <div class="col-8 mb10">: @Model.Create_name</div>
-                        <div class="col-4 mb10 gray">Ngày tạo:</div>
-                        <div class="col-8 mb10">: @Model.JoinDate.ToString("dd/MM/yyyy HH:MM:ss")</div>
-                    </div>
-                </td>
-                <td style="min-width: 400px;">
-                    <div class="row">
-                        <div class="col-5 mb10 gray">Tổng thanh toán:</div>
-                        <div class="col-7 mb10">: @Model.sum_payment.ToString("N0")</div>
-                        @if (Model.PermisionType == Utilities.Contants.PermisionType.DUOC_CN)
-                        {
-            <div class="col-5 mb10 gray">Công nợ</div>
-                            <div class="col-7 mb10 blue" data-toggle="modal" data-target="#myModal7">: @Model.TotalAmountUse.ToString("N0")/@Model.TotalDebtAmount.ToString("N0") </div>}
-
-                        <div class="col-5 mb10 gray">Số dư chưa gạch nợ </div>
-                        <div class="col-7 mb10">: @ViewBag.Amount.ToString("N0")</div>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="3">
-                    <div class="flex">
-                        <div class="red mr-4 underline">Ghi chú</div>
-                        <span>: @Model.Note</span>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-
-                <td colspan="3">
-
-                    <div><strong>Thông tin hệ thống</strong> </div>
-                    <div class="row">
-                        <div class="col-4 mb10 gray">Ngày cập nhật :</div>
-                        <div class="col-8 mb10">@Model.UpdateLast</div>
-                        <div class="col-4 mb10 gray">Người cập nhật :</div>
-                        <div class="col-8 mb10">@Model.Update_Name</div>
-
-                    </div>
-                </td>
-
-            </tr>
-
-        </tbody>
-    </table>
-</div>
-<div class="modal fade" id="myModal7" style="display: none;" aria-hidden="true">
-    <div class="modal-dialog" style="max-width: 600px">
-        <div class="modal-content">
-            <!-- Modal Header -->
-            <div class="modal-header">
-                <h4 class="modal-title">Chi tiết công nợ khách hàng</h4>
-                <button type="button" class="close" data-dismiss="modal">×</button>
-            </div>
-            <!-- Modal body -->
-            <div class="modal-body">
-                <div class="row">
-                    @if (Model.ServiceType != null) 
-                    { 
-                        @if (Model.ServiceType.Contains(((int)ServicesType.FlyingTicket).ToString()))
-                        {
-                            <div class="col-6 mb10">Hạn mức công nợ VMB</div>
-                            <div class="col-6 mb10">: @Model.TotalAmountFlyUse.ToString("N0")/@Model.ProductFlyTicketDebtAmount.ToString("N0") </div>
-                        }
-                        @if (Model.ServiceType.Contains(((int)ServicesType.VINHotelRent).ToString())) 
-                        {
-                            <div class="col-6 mb10">Hạn mức công nợ KS</div>
-                            <div class="col-6 mb10">: @Model.TotalAmountHotelUse.ToString("N0")/@Model.HotelDebtAmout.ToString("N0") </div>
-                        }
-                        @if (Model.ServiceType.Contains(((int)ServicesType.Tourist).ToString())) 
-                        {
-                            <div class="col-6 mb10">Hạn mức công nợ Tour</div>
-                            <div class="col-6 mb10">: @Model.TotalAmountTourUse.ToString("N0")/@Model.TourDebtAmount.ToString("N0") </div>
-                        }
-                        @if (Model.ServiceType.Contains(((int)ServicesType.VinWonder).ToString())) 
-                        {
-                            <div class="col-6 mb10">Hạn mức công nợ VinWonder</div>
-                            <div class="col-6 mb10">: @Model.TotalAmountVinWonderUse.ToString("N0")/@Model.VinWonderDebtAmount.ToString("N0") </div>
-                        }
-                        @if (Model.ServiceType.Contains(((int)ServicesType.Other).ToString())|| Model.ServiceType.Contains(((int)ServicesType.VehicleRent).ToString())) 
-                        { 
-                            <div class="col-6 mb10">Hạn mức công nợ dịch vụ khác</div>
-                            <div class="col-6 mb10">: @Model.TotalAmountOtherUse.ToString("N0")/@Model.TouringCarDebtAmount.ToString("N0") </div>
-                        }
-                    }
-                    
-
-                  
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
- *@
+@{
+    var data_UserAgent = (List<UserAgentViewModel>)ViewBag.userAgent;
+}
 <div class="bg-white rounded p-3 side-left">
     <div class="flex flex-nowrap gap10 align-items-center mb-3">
         <div class="img-avatar ">
@@ -145,17 +13,17 @@
         </div>
         <h6 class="text-uppercase">@Model.ClientName</h6>
     </div>
-    <div class="flex gap10 flex-nowrap align-items-center">
+  @*   <div class="flex gap10 flex-nowrap align-items-center">
         <span class="text-nowrap">Hoàn thiện hồ sơ</span>
         <div class="bar">
             <div class="percent" style="width: 30%;">30%</div>
         </div>
-    </div>
+    </div> *@
     <div class="flex gap10 flex-nowrap align-items-center my-3">
-        <a href="" class="btn border"><i class="icofont-ui-edit"></i></a>
-        <a href="" class="btn border"><i class="icofont-book-alt"></i></a>
+        <a href="javascripts:;" onclick="_customer_manager.OpenPopup('@Model.Id')" class="btn border"><i class="icofont-ui-edit"></i></a>
+        @*<a href="" class="btn border"><i class="icofont-book-alt"></i></a>
         <a href="" class="btn border"><i class="icofont-share"></i></a>
-        <a href="" class="btn border text-danger"><i class="icofont-trash"></i></a>
+        <a href="" class="btn border text-danger"><i class="icofont-trash"></i></a>*@
     </div>
     <div class="box-info-user p-3 mb-3">
         <h6 class="text-uppercase mb-3">
@@ -196,9 +64,9 @@
                     }
                
             </div>
-            <div class="col-6">
+            @* <div class="col-6">
                 <p class="m-0"><i class="icofont-book-alt mr-2"></i>Chưa có dữ liệu</p>
-            </div>
+            </div> *@
         </div>
     </div>
     <div class="row align-items-center mb-3">
@@ -210,7 +78,7 @@
                 <div class="relative select-user">
                     <a href="#" class="btn btn-default white">
                         <i class="icofont-user"></i>
-                        <span>@Model.AgencyType_name</span>
+                        <span>@Model.client_type_name</span>
                         <svg class="icon-svg ml-1">
                             <use xlink:href="#CaretDown"></use>
                         </svg>
@@ -228,7 +96,12 @@
                 <div class="relative select-user">
                     <a href="#" class="btn btn-default white">
                         <i class="icofont-user"></i>
-                        <span>@Model.UserId_name</span>
+                       @if (data_UserAgent != null && data_UserAgent.Count > 0)
+                            {
+                            <span>@data_UserAgent[0].UserId_Name </span>
+                                data_UserAgent.Remove(data_UserAgent[0]);
+                            }
+                       
                         <svg class="icon-svg ml-1">
                             <use xlink:href="#CaretDown"></use>
                         </svg>
@@ -269,16 +142,22 @@
         <div class="col-6">
             <div class="flex align-items-center justify-content-end gap10">
                 <div class="list-avt pl-4">
-                    <img class="rounded-circle" width="30" height="30" src="/images/graphics/no-avt.png">
-                    <img class="rounded-circle" width="30" height="30" src="/images/graphics/no-avt.png">
-                    <img class="rounded-circle" width="30" height="30" src="/images/graphics/no-avt.png">
+                    @if (data_UserAgent != null && data_UserAgent.Count > 0)
+                    {
+                        foreach(var item in data_UserAgent)
+                        {
+                            <img onclick="_customer_manager_Detail.OpenPopupUserAgent('@item.Id',@Model.Id)" class="rounded-circle" width="30" title="@item.UserId_Name" height="30" src="@(item.Avata != "" ? item.Avata:"/images/graphics/no-avt.png")">
+                        }
+                    }
+                   
+                   
                 </div>
-                <a href="" class="btn-add-user"><i class="icofont-ui-add"></i></a>
+                <a href="javascripts:;" onclick="_customer_manager_Detail.OpenPopupUserAgent('0',@Model.Id)" class="btn-add-user"><i class="icofont-ui-add"></i></a>
             </div>
         </div>
     </div>
     <div class="row mb-3 mx-0">
-        <div class="col-4 px-1">
+        @*<div class="col-4 px-1">
             <div class="item-thongke text-center p-2">
                 <div class="icon rounded-circle text-white" style="background: #4A80B8">
                     <i class="icofont-book-alt"></i>
@@ -295,12 +174,12 @@
                 <p class="mb-0">Liên hệ lần cuối</p>
                 <b style="font-size: 24px;">10</b>
             </div>
-        </div>
+        </div>*@
         <div class="col-4  px-1">
             <div class="item-thongke text-center p-2">
                 <div class="icon rounded-circle  text-white" style="background: #4AB88A"><i class="icofont-money"></i></div>
                 <p class="mb-0">Giá trị đơn hàng</p>
-                <b style="font-size: 24px;">10</b>
+                <b style="font-size: 24px;">@Model.TotalAmount.ToString("N0")</b>
             </div>
         </div>
     </div>

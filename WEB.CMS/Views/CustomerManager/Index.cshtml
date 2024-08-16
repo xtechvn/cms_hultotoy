@@ -38,8 +38,9 @@
         cursor: pointer;
         z-index: 2;
     }
-    .select2-search__field{
-        margin-left:0px !important;
+
+    .select2-search__field {
+        margin-left: 0px !important;
     }
 </style>
 
@@ -66,8 +67,8 @@
                             <div class="tab-default" style="border-bottom: 1px solid #CCCCCC;" id="myTab" role="tablist">
                                 <a href="#setting-tab1" class="active" data-toggle="tab" data-target="#setting-tab1" type="button" role="tab" aria-controls="setting-tab1" aria-selected="true">Khách hàng</a>
                                 @*<a href="#setting-tab2" data-toggle="tab" data-target="#setting-tab2" type="button" role="tab" aria-controls="setting-tab2" aria-selected="true">Người liên hệ</a>
-                            <a href="#setting-tab3" data-toggle="tab" data-target="#setting-tab3" type="button" role="tab" aria-controls="setting-tab3" aria-selected="true">Thông tin mua hàng</a>
-                            <a href="#setting-tab4" data-toggle="tab" data-target="#setting-tab4" type="button" role="tab" aria-controls="setting-tab4" aria-selected="true">Tìm kiếm nâng cao</a>*@
+                                    <a href="#setting-tab3" data-toggle="tab" data-target="#setting-tab3" type="button" role="tab" aria-controls="setting-tab3" aria-selected="true">Thông tin mua hàng</a>
+                                    <a href="#setting-tab4" data-toggle="tab" data-target="#setting-tab4" type="button" role="tab" aria-controls="setting-tab4" aria-selected="true">Tìm kiếm nâng cao</a>*@
                             </div>
                             <div class="tab-content" id="myTabContent">
                                 <div id="setting-tab1" class="tab-pane fade " aria-labelledby="setting-tab1" role="tabpanel">
@@ -243,7 +244,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group flex justify-content-between mt-3 pt-3 border-top">
-                                        <a href="javascript:;" onclick="_customer_manager.SeverFilter()"  class="text-primary">
+                                        <a href="javascript:;" onclick="_customer_manager.SeverFilter()" class="text-primary">
                                             <b>
                                                 <i class="icofont-plus-circle"></i>Tạo bộ
                                                 lọc
@@ -325,7 +326,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group flex justify-content-between mt-3 pt-3 border-top">
-                                        <a href="javascript:;" onclick="_customer_manager.SeverFilter()"  class="text-primary">
+                                        <a href="javascript:;" onclick="_customer_manager.SeverFilter()" class="text-primary">
                                             <b>
                                                 <i class="icofont-plus-circle"></i>Tạo bộ
                                                 lọc
@@ -375,17 +376,17 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="lbl">Thời gian tạo</label>
-                                                <div class="wrap_input">
-                                                    <div class="datepicker-wrap" style="width:100%">
-                                                        <input class="form-control date text-left filter_date_daterangepicker" id="createdate" type="text"
-                                                               name="datetimeApprove" style="min-width: 180px !important" placeholder="Thời gian tạo" />
+                                        @*<div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="lbl">Thời gian tạo</label>
+                                                    <div class="wrap_input">
+                                                        <div class="datepicker-wrap" style="width:100%">
+                                                            <input class="form-control date text-left filter_date_daterangepicker" id="createdate" type="text"
+                                                                   name="datetimeApprove" style="min-width: 180px !important" placeholder="Thời gian tạo" />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </div>
+                                            </div>*@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
@@ -411,7 +412,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group flex justify-content-between mt-3 pt-3 border-top">
-                                        <a href="javascript:;" onclick="_customer_manager.SeverFilter()"  class="text-primary">
+                                        <a href="javascript:;" onclick="_customer_manager.SeverFilter()" class="text-primary">
                                             <b>
                                                 <i class="icofont-plus-circle"></i>Tạo bộ
                                                 lọc
@@ -546,7 +547,7 @@
             </div>
             <div class="form-group mb10 mr-2" style="min-width: 250px;">
 
-                <select class="select2 client-select main-staff-select" id="filter-client"  multiple="multiple" style="width:100% !important" placeholder="Bộ lọc đã lưu">
+                <select class="select2 client-select main-staff-select" id="filter-client" multiple="multiple" style="width:100% !important" placeholder="Bộ lọc đã lưu">
                 </select>
             </div>
             <div class="form-group mb10 mr-2">
@@ -568,16 +569,16 @@
             </div>
 
             <div class="relative">
-                <a href="javascript:;" class="btn btn-default white onclick">
+                <a href="javascript:;" class="btn btn-default white onclick-filter">
                     <svg class="icon-svg mr-1">
                         <use xlink:href="#Calendar"></use>
                     </svg>
-                    <span>Hôm nay</span>
+                    <span id="check_radio_name">Hôm nay</span>
                     <svg class="icon-svg ml-1">
                         <use xlink:href="#CaretDown"></use>
                     </svg>
                 </a>
-                <div class="select-option form-down" style="display:none">
+                <div class="select-option form-down-filter" style="display:none">
                     <ul class="scroll-inner">
                         <li>
                             <label class="radio">
@@ -596,59 +597,63 @@
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio"value="2">
+                                <input type="radio" name="optradio" value="2">
                                 <span class="checkmark"></span>
                                 Hôm qua
                             </label>
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio"value="3">
+                                <input type="radio" name="optradio" value="3">
                                 <span class="checkmark"></span>
                                 Tuần trước
                             </label>
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio"value="4">
+                                <input type="radio" name="optradio" value="4">
                                 <span class="checkmark"></span>
                                 Tháng này
                             </label>
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio"value="5">
+                                <input type="radio" name="optradio" value="5">
                                 <span class="checkmark"></span>
                                 Tháng trước
                             </label>
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio"value="6">
+                                <input type="radio" name="optradio" value="6">
                                 <span class="checkmark"></span>
                                 Quý này
                             </label>
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio"value="7">
+                                <input type="radio" name="optradio" value="7">
                                 <span class="checkmark"></span>
                                 Quý trước
                             </label>
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio">
+                                <input type="radio" name="optradio"value="8">
                                 <span class="checkmark"></span>
                                 Khác
                             </label>
                             <div class="flex mb-3 gap10 flex-nowrap align-items-center justify-content-between">
-                                <div class="wrap_input">
-                                    <input type="text" class="form-control" placeholder="Ngày bắt đầu">
-                                </div>
-                                <i class="icofont-arrow-right"></i>
-                                <div class="wrap_input">
-                                    <input type="text" class="form-control" placeholder="Ngày kết thúc">
+                                @*<div class="wrap_input">
+                                        <input type="text" class="form-control" placeholder="Ngày bắt đầu">
+                                    </div>
+                                    <i class="icofont-arrow-right"></i>
+                                    <div class="wrap_input">
+                                        <input type="text" class="form-control" placeholder="Ngày kết thúc">
+                                    </div>*@
+                                <div class="datepicker-wrap" style="width:100%">
+                                    <input class="form-control date text-left filter_date_daterangepicker" id="createdate" type="text"
+                                           name="datetimeApprove" style="min-width: 180px !important" placeholder="Thời gian tạo" />
                                 </div>
                             </div>
                         </li>
@@ -789,17 +794,17 @@
         $('#createdate').daterangepicker({
             autoUpdateInput: false,
             locale: {
-            cancelLabel: 'Clear'
+                cancelLabel: 'Clear'
             }
-            });
+        });
         $('#createdate').on('cancel.daterangepicker', function (ev, picker) {
             $(this).val('');
-            isPickerApprove=false;
-            });
+            isPickerApprove = false;
+        });
         $('#createdate').on('apply.daterangepicker', function (ev, picker) {
             $(this).val(picker.startDate.format('DD /MM/YYYY') + ' - ' + picker.endDate.format('DD /MM/YYYY'));
-            isPickerApprove=true;
-            });
+            isPickerApprove = true;
+        });
     </script>
 
 }
