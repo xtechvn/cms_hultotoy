@@ -1,6 +1,8 @@
-﻿using Entities.Models;
+﻿using Caching.Elasticsearch;
+using Entities.Models;
 using Entities.ViewModels;
 using Entities.ViewModels.CustomerManager;
+using Entities.ViewModels.ElasticSearch;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -36,10 +38,11 @@ namespace WEB.Adavigo.CMS.Controllers
         private ManagementUser _ManagementUser;
         private IAccountClientRepository _accountClientRepository;
         private LogCacheFilterMongoService _logCacheFilterMongoService;
-
+        private IUserAgentRepository _userAgentRepository;
+        private UserESRepository _userESRepository;
 
         public CustomerManagerController(IConfiguration configuration, ICustomerManagerRepository customerManagerRepositories,  ManagementUser ManagementUser, IWebHostEnvironment WebHostEnvironment, IAccountClientRepository accountClientRepository,
-         IAllCodeRepository allCodeRepository,  IClientRepository clientRepository, IUserRepository userRepository, IBankingAccountRepository bankingAccountRepository)
+         IAllCodeRepository allCodeRepository,  IClientRepository clientRepository, IUserRepository userRepository, IBankingAccountRepository bankingAccountRepository, IUserAgentRepository userAgentRepository)
         {
             _customerManagerRepositories = customerManagerRepositories;
             _configuration = configuration;
@@ -51,6 +54,8 @@ namespace WEB.Adavigo.CMS.Controllers
             _bankingAccountRepository = bankingAccountRepository;
             _accountClientRepository = accountClientRepository;
             _logCacheFilterMongoService = new LogCacheFilterMongoService(configuration);
+            _userAgentRepository = userAgentRepository;
+            _userESRepository = new UserESRepository(configuration["DataBaseConfig:Elastic:Host"]);
         }
         public async Task<IActionResult> Index()
         {
@@ -109,7 +114,7 @@ namespace WEB.Adavigo.CMS.Controllers
         {
             try
             {
-                var key_token_api = _configuration["DataBaseConfig:key_api:api_manual"];
+               
                 var AgencyType = _allCodeRepository.GetListByType("AGENCY_TYPE");
                 var PermisionType = _allCodeRepository.GetListByType("PERMISION_TYPE");
                 var ClientType = _allCodeRepository.GetListByType("CLIENT_TYPE");
@@ -342,7 +347,8 @@ namespace WEB.Adavigo.CMS.Controllers
             {
                 var Amount = await _customerManagerRepositories.GetAmountRemainOfContractByClientId(id);
                 var data = await _customerManagerRepositories.GetDetailClient(id);
-
+                var model = _userAgentRepository.UserAgentByClient((int)id, 0);
+                ViewBag.userAgent = model;
                 if (Amount != null) { ViewBag.Amount = Amount.AmountRemain; }
                 else
                 {
@@ -643,6 +649,97 @@ namespace WEB.Adavigo.CMS.Controllers
                 LogHelper.InsertLogTelegram("GetSuggestionUserCache - CustomerManagerController: " + ex);
                 return null;
             }
+        }
+        public async Task<IActionResult> DetailUserAgent(int user_Id,long client)
+        {
+
+            try
+            {
+                ViewBag.client = client;
+                if (user_Id != 0)
+                {
+                    var model = _userAgentRepository.UserAgentByClient(0,user_Id);
+                    if(model != null && model.Count > 0)
+                    return PartialView(model[0]);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("DetailUserAgent - PaymentAccountController: " + ex);
+            }
+            return PartialView();
+        }
+        [HttpPost]
+        public IActionResult UpdatalUserAgent(int id, int userId,long clientId)
+        {
+
+            try
+            {
+                if (id != 0)
+                {
+                    var create_id = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                    var model = _userAgentRepository.UpdataUserAgent(id, userId, create_id, clientId);
+                    if (model > 0)
+                    {
+                        return Ok(new
+                        {
+                            stt_code = (int)ResponseType.SUCCESS,
+                            msg = "Đổi nhân viên thành công",
+
+                        });
+                    }
+                    else
+                    {
+
+                        return Ok(new
+                        {
+                            stt_code = (int)ResponseType.FAILED,
+                            msg = "Đổi nhân viên không thành công",
+
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UpdatalUserAgent - PaymentAccountController: " + ex);
+            }
+            return Ok(new
+            {
+                stt_code = (int)ResponseType.FAILED,
+                msg = "Đổi nhân viên không thành công",
+
+            });
+        }
+        public async Task<IActionResult> UserSuggestion(string txt_search, int service_type = 0)
+        {
+
+            try
+            {
+                long _UserId = 0;
+                if (HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
+                {
+                    _UserId = Convert.ToInt64(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                }
+                if (txt_search == null) txt_search = "";
+                var data = await _userESRepository.GetUserSuggesstion(txt_search);
+                return Ok(new
+                {
+                    status = (int)ResponseType.SUCCESS,
+                    data = data,
+                });
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("UserSuggestion - OrderManualController: " + ex.ToString());
+                return Ok(new
+                {
+                    status = (int)ResponseType.SUCCESS,
+                    data = new List<CustomerESViewModel>()
+                });
+            }
+
         }
     }
 }

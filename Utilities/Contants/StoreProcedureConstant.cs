@@ -299,6 +299,9 @@ namespace Utilities.Contants
         public static string SP_GetDetailClientByClientId = "SP_GetDetailClientByClientId";
         public static string sp_InsertAccountClient = "sp_InsertAccountClient";
         public static string sp_UpdateAccountClient = "sp_UpdateAccountClient";
+        public static string sp_UpdateUserAgent = "sp_UpdateUserAgent";
+        public static string SP_InsertUserAgent = "SP_InsertUserAgent";
+        public static string SP_GetUserAgentByClientId = "SP_GetUserAgentByClientId";
 
 
         #region vin wonder

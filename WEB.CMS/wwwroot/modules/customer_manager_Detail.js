@@ -382,6 +382,7 @@ var _customer_manager_Detail = {
             var UserId_new = $('#UserId_new').select2("val");
             var UserId = UserId_new[0];
             var user_Id = $('#id_userid').val();
+            var Client_Id = $('#UserAgent_Client').val();
             let _searchModel = {
                 id: user_Id
             };
@@ -389,11 +390,12 @@ var _customer_manager_Detail = {
 
             objSearch = _searchModel;
             $.ajax({
-                url: "/PaymentAccount/UpdatalUserAgent",
+                url: "/CustomerManager/UpdatalUserAgent",
                 type: "POST",
                 data: {
                     id: user_Id,
-                    userId: UserId
+                    userId: UserId,
+                    clientId: Client_Id
                 },
                 success: function (result) {
 
@@ -411,13 +413,15 @@ var _customer_manager_Detail = {
             });
         }
     },
-    OpenPopupUserAgent: function (id) {
-        var user_Id = $('#id_userid').val();
-
+    OpenPopupUserAgent: function (id,clientid) {
         let title = 'Đổi nhân viên phụ trách';
-        let url = '/PaymentAccount/DetailUserAgent';
+        if (id == 0) {
+            title = 'Thêm mới nhân viên phụ trách';
+        } 
+        let url = '/CustomerManager/DetailUserAgent';
         let param = {
-            user_Id: user_Id
+            user_Id: id,
+            client: clientid
         };
         _magnific.OpenSmallPopup(title, url, param);
     },
