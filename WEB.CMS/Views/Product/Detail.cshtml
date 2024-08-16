@@ -457,7 +457,7 @@
            </nw>
 
 
-            <div id ="product-attributes-price-table" class="item-edit item flex flex-lg-nowrap gap10 mb-2 w-100">
+            <div class="item-edit item flex flex-lg-nowrap gap10 mb-2 w-100">
                 <label class="label">
                     Danh sách
                     phân loại hàng
@@ -465,27 +465,27 @@
                 <div class="wrap_input pb-4">
                     <div class="flex flex-lg-nowrap gap10 mb-2">
                         <div class="w-100">
-                            <table class="w-100">
+                            <table id="product-attributes-all-price" class="w-100">
                                 <tbody>
                                     <tr>
-                                        <td>
+                                        <td class="td-price">
                                             <div class="form-group mb-0 price">
-                                                <input type="text" class="form-control" placeholder="Giá nhập">
+                                                <input type="text" class="form-control input-price" placeholder="Giá nhập">
                                                 <span class="note">đ</span>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td class="td-profit">
                                             <div class="form-group mb-0 price">
-                                                <input type="text" class="form-control" placeholder="Lợi nhuận">
+                                                <input type="text" class="form-control input-price" placeholder="Lợi nhuận">
                                                 <span class="note">đ</span>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td class="td-stock">
                                             <div class="form-group mb-0">
-                                                <input type="text" class="form-control" placeholder="Kho hàng">
+                                                <input type="text" class="form-control input-price" placeholder="Kho hàng">
                                             </div>
                                         </td>
-                                        <td>
+                                        <td class="td-sku">
                                             <div class="form-group mb-0">
                                                 <input type="text" class="form-control"
                                                        placeholder="SKU phân loại">
@@ -497,43 +497,79 @@
                         </div>
                         <button class="btn btn-base btn-all">Áp dụng cho tất cả phân loại</button>
                     </div>
-                    <div class="table-responsive table-scroll">
+                    <div id="product-attributes-price" class="table-responsive table-scroll">
                         <table class="table w-100">
-                            <tbody>
-                                <tr class="text-uppercase">
-                                    <th>Màu sắc</th>
-                                    <th>Giá</th>
-                                    <th>Lợi nhuận</th>
-                                    <th>Giá bán</th>
-                                    <th>Kho hàng</th>
-                                    <th>SKU phân loại</th>
+                            <thead>
+                                <tr class="text-uppercase tr-head">
+                                    <th class="th-attributes th-attribute-1" style="min-width: 150px;">Phân loại 1</th>
+                                    <th class="th-attributes th-attribute-2" style="min-width: 150px;">Phân loại 2</th>
+                                    <th class="th-price">Giá</th>
+                                    <th class="th-profit">Lợi nhuận</th>
+                                    <th class="th-amount">Giá bán</th>
+                                    <th class="th-stock">Kho hàng</th>
+                                    <th class="th-sku">SKU phân loại</th>
                                 </tr>
-                                <tr>
-                                    <td>Hồng</td>
-                                    <td>
+                            </thead>
+                            <tbody>
+                               
+                                <tr class="tr-main" data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-1">
+                                    <td class="td-attributes td-attribute-1" rowspan="2"> Phân loại 1</td>
+                                    <td class="td-attributes td-attribute-2">Phân loại 2-1</td>
+                                    <td class="td-price">
                                         <div class="form-group mb-0 price">
                                             <input type="text" class="form-control" placeholder="Giá nhập">
                                             <span class="note">đ</span>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td class="td-profit">
                                         <div class="form-group mb-0 price">
                                             <input type="text" class="form-control" placeholder="Lợi nhuận">
                                             <span class="note">đ</span>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td class="td-amount">
                                         <div class="form-group mb-0 price">
                                             <input type="text" class="form-control" placeholder="Giá bán">
                                             <span class="note">đ</span>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td class="td-stock">
                                         <div class="form-group mb-0">
                                             <input type="text" class="form-control" placeholder="Kho hàng">
                                         </div>
                                     </td>
-                                    <td>
+                                    <td class="td-sku">
+                                        <div class="form-group mb-0">
+                                            <input type="text" class="form-control" placeholder="SKU phân loại">
+                                        </div>
+                                    </td>
+                                </tr>  
+                                <tr class="tr-sub" data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-2">
+                                    <td class="td-attribute-2">Phân loại 2-2</td>
+                                    <td class="td-price">
+                                        <div class="form-group mb-0 price">
+                                            <input type="text" class="form-control" placeholder="Giá nhập">
+                                            <span class="note">đ</span>
+                                        </div>
+                                    </td>
+                                    <td class="td-profit">
+                                        <div class="form-group mb-0 price">
+                                            <input type="text" class="form-control" placeholder="Lợi nhuận">
+                                            <span class="note">đ</span>
+                                        </div>
+                                    </td>
+                                    <td class="td-amount">
+                                        <div class="form-group mb-0 price">
+                                            <input type="text" class="form-control" placeholder="Giá bán">
+                                            <span class="note">đ</span>
+                                        </div>
+                                    </td>
+                                    <td class="td-stock">
+                                        <div class="form-group mb-0">
+                                            <input type="text" class="form-control" placeholder="Kho hàng">
+                                        </div>
+                                    </td>
+                                    <td class="td-sku">
                                         <div class="form-group mb-0">
                                             <input type="text" class="form-control" placeholder="SKU phân loại">
                                         </div>
@@ -544,37 +580,65 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
-                        <label class="label">Giá</label>
-                        <div class="wrap_input">
-                            <div id="main-amount" class="form-group price">
-                                <input type="text" class="form-control" placeholder="Nhập giá">
-                                <span class="note">đ</span>
+            <nw id="single-product-amount" style="" class="box-info bg-white p-3 mb-3 col-12">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="item flex flex-lg-nowrap gap10 mb-2 w-100 ">
+                            <label class="label">Giá nhập</label>
+                            <div class="wrap_input">
+                                <div id="main-price" class="form-group price">
+                                    <input type="text" class="form-control" placeholder="Nhập giá">
+                                    <span class="note">đ</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
-                        <label class="label">Kho</label>
-                        <div id="stock" class="wrap_input">
-                            <div class="form-group price">
-                                <input type="text" class="form-control" placeholder="0">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="item flex flex-lg-nowrap gap10 mb-2 w-100 product-single-profit">
+                            <label class="label">Lợi nhuận</label>
+                            <div class="wrap_input">
+                                <div id="main-profit" class="form-group price">
+                                    <input type="text" class="form-control" placeholder="Nhập giá">
+                                    <span class="note">đ</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                            <label class="label">Giá bán</label>
+                            <div class="wrap_input">
+                                <div id="main-amount" class="form-group price product-single-amount">
+                                    <input type="text" class="form-control" placeholder="Giá bán" disabled="">
+                                    <span class="note">đ</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                            <label class="label">Kho</label>
+                            <div id="main-stock" class="wrap_input">
+                                <div class="form-group price">
+                                    <input type="text" class="form-control" placeholder="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nw>
             <div class="row">
                 <div class="col-md-6">
                     <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
                         <label class="label">Mua nhiều giảm giá</label>
                         <div class="wrap_input">
-                            <button class="btn btn-add"><i class="icofont-plus"></i>Thêm khoảng giá</button>
+                            <button class="btn btn-add btn-add-discount-groupbuy"><i class="icofont-plus"></i>Thêm khoảng giá</button>
                             <p class="mt-1">
                                 Mua nhiều giảm giá sẽ bị ẩn khi sản phẩm đang tham gia Mua Kèm Deal
                                 Sốc hay Combo
@@ -585,65 +649,26 @@
                 </div>
             </div>
           
-            <div class="item-edit item flex flex-lg-nowrap gap10 mb-2 w-100">
+            <div id="discount-groupbuy" class="item-edit item flex flex-lg-nowrap gap10 mb-2 w-100">
                 <label class="label">Mua nhiều giảm giá</label>
                 <div class="wrap_input pb-4">
                     <div class="table-responsive  table-scroll">
                         <table class="table w-100 text-center">
-                            <tbody>
+                            <thead>
                                 <tr class="text-uppercase">
                                     <th>Khoảng giá</th>
                                     <th>Số lượng sản phẩm</th>
                                     <th>Chiết khấu</th>
                                     <th class="">Thao tác</th>
                                 </tr>
-                                <tr>
-                                    <td>Khoảng gái 1</td>
-                                    <td>
-                                        <div class="flex gap10 flex-nowrap align-items-center justify-content-center">
-                                            <div class="form-group mb-0">
-                                                <input type="text" class="form-control"
-                                                       placeholder="Từ sản phẩm">
-                                            </div>
-                                            <i class="icofont-arrow-right"></i>
-                                            <div class="form-group mb-0">
-                                                <input type="text" class="form-control"
-                                                       placeholder="Đến sản phẩm">
-                                            </div>
-                                        </div>
-
-                                    </td>
-                                    <td>
-                                        <div class="flex gap10 flex-nowrap align-items-center justify-content-center">
-                                            <label class="radio mb-3">
-                                                <input type="radio" name="optradio">
-                                                <span class="checkmark"></span>
-                                            </label>
-                                            <div class="form-group mb-0 price mr-3">
-                                                <input type="text" class="form-control" placeholder="Nhập số">
-                                                <span class="note">đ</span>
-                                            </div>
-                                            <label class="radio mb-3">
-                                                <input type="radio" name="optradio">
-                                                <span class="checkmark"></span>
-
-                                            </label>
-                                            <div class="form-group mb-0 price">
-                                                <input type="text" class="form-control" placeholder="Nhập số">
-                                                <span class="note">%</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <i class="icofont-trash"></i>
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td>Khoảng gái 1</td>
+                            </thead>
+                            <tbody>
+                               
+                                <tr class="summary">
+                                    <td></td>
                                     <td class="text-left">
                                         <button class="btn btn-add">
-                                            <i class="icofont-plus"></i>Thêm khoảng
+                                           <i class="icofont-plus"></i>Thêm khoảng
                                             giá
                                         </button>
                                     </td>

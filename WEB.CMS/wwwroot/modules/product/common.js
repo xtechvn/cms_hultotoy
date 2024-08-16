@@ -143,18 +143,18 @@ var _product_constants = {
                         <div class="col-md-6">
                             <div class="box-list">
                                 <h6>
-                                    <b> Tên thuộc tính</b>
-                                    <span class="mx-2" style="color: #919191; font-weight: normal;">
+                                    <b > Tên thuộc tính</b>
+                                    <span class="mx-2" style="color: #919191; font-weight: normal;display:none; ">
                                         (Tùy
                                         chỉnh)
                                     </span>
-                                    <nw id="edit-attributes-name-nw item" style="display:none;">
+                                    <nw class="edit-attributes-name-nw item" >
                                          <input type="text" class="attribute-name">
                                          <p type="error" style="display:none;"> </p>
                                         <a href="javascript:;" class="text-base edit-attributes-name-confirm"><i class="icofont-checked"></i></a>
                                         <a href="javascript:;" class="text-base edit-attributes-name-cancel" ><i class="icofont-close-squared-alt"></i></a>
                                     </nw>
-                                    <a class="attribute-name-edit" href="javascript:;"><i class="icofont-ui-edit"></i></a>
+                                    <a class="attribute-name-edit" style="display:none;" href="javascript:;"><i class="icofont-ui-edit"></i></a>
                                 </h6>
 
                             </div>
@@ -223,5 +223,112 @@ var _product_constants = {
                     </div>
                 </div>
             </div>`,
+        ProductDetail_Attribute_Price_Tr_Td:`<td class="td-attributes td-attribute-{i}" {row_span}>{name}</td>`,
+        ProductDetail_Attribute_Price_TrMain:` <tr class="tr-main" data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-1">
+                                   {td_arrtibute}
+                                    <td class="td-price">
+                                        <div class="form-group mb-0 price">
+                                            <input type="text" class="form-control" placeholder="Giá nhập">
+                                            <span class="note">đ</span>
+                                        </div>
+                                    </td>
+                                    <td class="td-profit">
+                                        <div class="form-group mb-0 price">
+                                            <input type="text" class="form-control" placeholder="Lợi nhuận">
+                                            <span class="note">đ</span>
+                                        </div>
+                                    </td>
+                                    <td class="td-amount">
+                                        <div class="form-group mb-0 price">
+                                            <input type="text" class="form-control" placeholder="Giá bán">
+                                            <span class="note">đ</span>
+                                        </div>
+                                    </td>
+                                    <td class="td-stock">
+                                        <div class="form-group mb-0">
+                                            <input type="text" class="form-control" placeholder="Kho hàng">
+                                        </div>
+                                    </td>
+                                    <td class="td-sku">
+                                        <div class="form-group mb-0">
+                                            <input type="text" class="form-control" placeholder="SKU phân loại">
+                                        </div>
+                                    </td>
+                                </tr>  `,
+        ProductDetail_Attribute_Price_TrSub:`<tr class="tr-sub" data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-2">
+                                   {td_arrtibute}
+                                    <td class="td-price">
+                                        <div class="form-group mb-0 price">
+                                            <input type="text" class="form-control input-price" placeholder="Giá nhập">
+                                            <span class="note">đ</span>
+                                        </div>
+                                    </td>
+                                    <td class="td-profit">
+                                        <div class="form-group mb-0 price">
+                                            <input type="text" class="form-control input-price" placeholder="Lợi nhuận">
+                                            <span class="note">đ</span>
+                                        </div>
+                                    </td>
+                                    <td class="td-amount">
+                                        <div class="form-group mb-0 price">
+                                            <input type="text" class="form-control input-price" placeholder="Giá bán">
+                                            <span class="note">đ</span>
+                                        </div>
+                                    </td>
+                                    <td class="td-stock">
+                                        <div class="form-group mb-0">
+                                            <input type="text" class="form-control input-price" placeholder="Kho hàng">
+                                        </div>
+                                    </td>
+                                    <td class="td-sku">
+                                        <div class="form-group mb-0">
+                                            <input type="text" class="form-control" placeholder="SKU phân loại">
+                                        </div>
+                                    </td>
+                                </tr>`,
+        ProductDetail_DiscountGroupBuy_Row:` <tr class="discount-groupbuy-row">
+                                    <td class="name">Khoảng giá 1</td>
+                                    <td>
+                                        <div class="flex gap10 flex-nowrap align-items-center justify-content-center">
+                                            <div class="form-group mb-0 quanity-from">
+                                                <input type="text" class="form-control input-price"
+                                                       placeholder="Từ số lượng">
+                                            </div>
+                                            <i class="icofont-arrow-right"></i>
+                                            <div class="form-group mb-0 quanity-to">
+                                                <input type="text" class="form-control input-price"
+                                                       placeholder="Đến số lượng">
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                    <td>
+                                        <div class="flex gap10 flex-nowrap align-items-center justify-content-center discount-value">
+                                            <label class="radio mb-3">
+                                                <input type="radio" name="{discount-type}" value="0">
+                                                <span class="checkmark"></span>
+                                            </label>
+                                            <div class="form-group mb-0 price mr-3 discount-number">
+                                                <input type="text" class="form-control input-price" placeholder="Nhập số">
+                                                <span class="note">đ</span>
+                                            </div>
+                                            <label class="radio mb-3">
+                                                <input type="radio" name="{discount-type}" value="1">
+                                                <span class="checkmark"></span>
+
+                                            </label>
+                                            <div class="form-group mb-0 price discount-percent">
+                                                <input type="text" class="form-control input-price" placeholder="Nhập số">
+                                                <span class="note">%</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                       <a href="javascript:;" class="delete-row">
+                                            <i class="icofont-trash"></i>
+                                       </a>
+                                    </td>
+
+                                </tr>`
     }
 }
