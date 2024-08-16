@@ -284,52 +284,7 @@ var _customer_manager = {
 
     },
     SearchClient: function (input) {
-        if(localStorage.getItem("cookiesearchModel") != null){
-            var cookieModel = localStorage.getItem("cookiesearchModel");
-            input = JSON.parse(cookieModel);
-
-            if (input.AgencyType != null) {
-                $('#AgencyType').val(input.AgencyType).attr("selected", "selected");
-                var text = $("#AgencyType").find(':selected').text();
-                console.log(text)
-                $('#select2-AgencyType-container').html($("#AgencyType").find(':selected').text());
-            }
-
-            if (input.ClientType != null) {
-                $('#ClientType').val(input.ClientType).attr("selected", "selected");
-                $('#select2-ClientType-container').html($("#ClientType").find(':selected').text());
-            }
-            if (input.CreateDate != null)
-                $('#createdate').html(input.CreateDate + " - " + input.EndDate);
-            if (input.MinAmount != null)
-                $('#minamount').html(input.MinAmount);
-            if (input.MaxAmount != null)
-                $('#maxamount').html(input.MaxAmount);
-            if (input.PermissionType != null) {
-                $('#PermisionType').val(input.PermissionType).attr("selected", "selected");
-                $('#select2-PermisionType-container').html($("#PermisionType").find(':selected').text());
-            }
-            if (window.localStorage.getItem("textClient") != null) {
-                var cookie1 = window.localStorage.getItem("textClient")
-                var SaleName = JSON.parse(cookie1)
-                $('#client').html('<option selected value = ' + input.MaKH + '> ' + SaleName + '</option>')
-            }
-            if (window.localStorage.getItem("textNT") != null) {
-                var cookie1 = window.localStorage.getItem("textNT")
-                var SaleName = JSON.parse(cookie1)
-                $('#CreatedBy').html('<option selected value = ' + input.CreatedBy + '> ' + SaleName + '</option>')
-            }
-            if (window.localStorage.getItem("textNV") != null) {
-                var cookie1 = window.localStorage.getItem("textNV")
-                var SaleName = JSON.parse(cookie1)
-                $('#txtNguoiTao').html('<option selected value = ' + input.UserId + '> ' + SaleName + '</option>')
-            }
-        }
-
-        var AgencyType = $("#filter-client").select2().find(":selected").attr('data-agencytype');
-        if (AgencyType > 0) {
-            var AgencyType2 = $("#filter-client").select2("val");
-        }
+       
         $.ajax({
             url: "/CustomerManager/ListClient",
             type: "Post",
@@ -1379,24 +1334,27 @@ var _customer_manager = {
                 }
             }
                 break;
+            case "8": {
+                if ($('#createdate').data('daterangepicker') !== undefined &&
+                    $('#createdate').data('daterangepicker') != null && isPickerApprove) {
+                    searchModel.FromDateStr = $('#createdate').data('daterangepicker').startDate._d.toLocaleDateString("en-GB");
+                    searchModel.ToDateStr = $('#createdate').data('daterangepicker').endDate._d.toLocaleDateString("en-GB");
+                } else {
+                    searchModel.FromDateStr  = null
+                    searchModel.ToDateStr = null
+                }
+            }
+                break;
         }
 
-        var CreateDate;
-        var EndDate;
+
         var MaKH_data = $('#client').select2("val");
         textClient = $('#client').find(':selected').text();
         var UserId_data = $('#txtNguoiTao').select2("val");
         textNV = $('#txtNguoiTao').find(':selected').text();
         var CreatedBy_data = $('#CreatedBy').select2("val");
         textNT = $('#CreatedBy').find(':selected').text();
-        if ($('#createdate').data('daterangepicker') !== undefined &&
-            $('#createdate').data('daterangepicker') != null && isPickerApprove) {
-            CreateDate = $('#createdate').data('daterangepicker').startDate._d.toLocaleDateString("en-GB");
-            EndDate = $('#createdate').data('daterangepicker').endDate._d.toLocaleDateString("en-GB");
-        } else {
-            CreateDate = null
-            EndDate = null
-        }
+       
         let _searchModel = {
             MaKH: null,
             UserId: null,

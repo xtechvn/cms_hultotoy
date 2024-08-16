@@ -5,6 +5,7 @@
             $(this).addClass("onclick-active");
             $(this).removeClass("onclick");
             $(this).next('.form-down').slideDown();
+            $(this).next('.form-down-filter').slideDown();
             $(this).next('.list-noti').slideDown();
             $('.form-down input').focus();
 
@@ -17,6 +18,7 @@
             $(this).addClass("onclick");
             $(this).next('.form-down').slideUp();
             $(this).next('.list-noti').slideUp();
+            $(this).next('.form-down-filter').slideUp();
         }
 
     });
@@ -24,10 +26,23 @@
         if ($(event.target).closest('.wrap-notifi').length == 0) {
             $(".list-noti").slideUp();
             $(".wrap-notifi .notifi").removeClass('active');
-
         }
     });
- 
+    $('body').on('click', '.onclick-filter', function () {
+        if (!$(this).hasClass("onclick-active-filter")) {
+            $(this).addClass("onclick-active-filter");
+            $(this).removeClass("onclick-filter");
+            $(this).next('.form-down-filter').slideDown();
+        }
+    });
+    $('body').on('click', '.onclick-active-filter', function () {
+        if (!$(this).hasClass("onclick-filter")) {
+            $(this).removeClass("onclick-active-filter");
+            $(this).addClass("onclick-filter");
+            $(this).next('.form-down-filter').slideUp();
+        }
+
+    });
 });
 var _global_function = {
     AddLoading: function () {
