@@ -1343,6 +1343,7 @@ var _customer_manager = {
                     searchModel.FromDateStr  = null
                     searchModel.ToDateStr = null
                 }
+                $('#check_radio_name').text("Khác")
             }
                 break;
         }
