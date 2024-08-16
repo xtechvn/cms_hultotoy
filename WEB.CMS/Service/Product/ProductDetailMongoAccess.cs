@@ -21,6 +21,7 @@ namespace WEB.CMS.Models.Product
         {
             try
             {
+                model.GenID();
                 await _productDetailCollection.InsertOneAsync(model);
                 return model._id;
             }
@@ -71,11 +72,10 @@ namespace WEB.CMS.Models.Product
             {
                 var filter = Builders<ProductMongoDbModel>.Filter;
                 var filterDefinition = filter.Empty;
-                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.parent_product_id, "-1"); 
                 filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.name, keyword);
                 if (group_id > 0)
                 {
-                    filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.group_product_id, group_id);
+                    filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.group_product_id, group_id.ToString());
                 }
                 var sort_filter = Builders<ProductMongoDbModel>.Sort;
                 var sort_filter_definition = sort_filter.Descending(x=>x.updated_last);
@@ -91,23 +91,7 @@ namespace WEB.CMS.Models.Product
                 return null;
             }
         }
-        public async Task<List<ProductMongoDbModel>> SubListing(List<string> ids)
-        {
-            try
-            {
-                var filter = Builders<ProductMongoDbModel>.Filter;
-                var filterDefinition = filter.Empty;
-                filterDefinition &= Builders<ProductMongoDbModel>.Filter.In(x => x.parent_product_id, ids);
-                var model = _productDetailCollection.Find(filterDefinition);
-                var result = await model.ToListAsync();
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Utilities.LogHelper.InsertLogTelegram("ProductDetailMongoAccess - SubListing Error: " + ex);
-                return null;
-            }
-        }
+        
 
 
     }

@@ -18,7 +18,8 @@ var product_index = {
         $('body').on('click', '.btn-add-product', function () {
             window.location.href='/product/detail'
         });
-        $('body').on('click', '.product-edit', function () {
+       
+        $('body').on('click', '.product-edit, .name-product', function () {
             var element = $(this)
             var product_id = element.closest('tr').attr('data-id')
             if (product_id != null && product_id != undefined && product_id.trim() != '') {
@@ -27,7 +28,12 @@ var product_index = {
             }
         });
         $('body').on('click', '.product-viewmore', function () {
+            var element = $(this)
+            var product_id = element.closest('tr').attr('data-id')
+            if (product_id != null && product_id != undefined && product_id.trim() != '') {
+                window.location.href = '/product/detail/' + product_id
 
+            }
         });
         $('body').on('click', '.btn-export-excel', function () {
 
@@ -36,13 +42,7 @@ var product_index = {
     Listing: function () {
         _product_function.POST('/Product/ProductListing', product_index.Model, function (result) {
             if (result.is_success && result.data && result.data.length > 0) {
-                var model_sub = {
-                    main_products: result.data.map(a => a._id)
-                }
-                _product_function.POST('/Product/ProductSubListing', model_sub, function (result_sublisting) {
-                    product_index.RenderSearch(result.data, result_sublisting.data)
-
-                })
+                product_index.RenderSearch(result.data)
             }
             else {
                 $('#product_list').html('')
@@ -51,45 +51,80 @@ var product_index = {
         });
 
     },
-    RenderSearch: function (main_products, sub_products) {
+    RenderSearch: function (main_products) {
         var html = ''
         $(main_products).each(function (index, item) {
+            
             var html_item = _product_constants.HTML.Product
-                .replaceAll('{id}', item._id)
-                .replaceAll('{avatar}', item.avatar)
-                .replaceAll('{name}', item.name)
-            var html_attr = ''
-            $(item.attributes).each(function (index_attr, attr) {
-                html_attr += attr.value + ', '
-            });
-            html_item.replaceAll('{attribute}', html_attr)
-            html_item.replaceAll('{amount}', _product_function.Comma(item.amount))
-            html_item.replaceAll('{stock}', _product_function.Comma(item.quanity_of_stock))
-            var sub_by_id = sub_products.filter(obj => {
-                return obj.parent_product_id == item._id
-            })
-            html += html_item
-            if (sub_by_id && sub_by_id.length > 0) {
-                $(main_products).each(function (index, sub_item) {
+            html_item = html_item.replaceAll('{id}', item._id)
+            html_item = html_item.replaceAll('{avatar}', item.avatar)
+            html_item = html_item.replaceAll('{name}', item.name)           
+            html_item = html_item.replaceAll('{attribute}', '')
+            if (item.amount > 0) {
+                html_item = html_item.replaceAll('{amount}', _product_function.Comma(item.amount) +' đ')
+            } 
+            if (item.quanity_of_stock > 0) {
+                html_item = html_item.replaceAll('{stock}', _product_function.Comma(item.quanity_of_stock))
+            } 
+            html_item = html_item.replaceAll('{order_count}', '')
+            var html_variations=''
+            if (item.variations && item.variations.length > 0) {
+                var amount=[]
+                var quanity_stock=[]
+                $(item.variations).each(function (index, sub_item) {
                     var html_sub_item = _product_constants.HTML.SubProduct
                         .replaceAll('{id}', sub_item._id)
-                        .replaceAll('{main_id}', sub_item.parent_product_id)
-                        .replaceAll('{avatar}', sub_item.avatar)
+                        .replaceAll('{main_id}', item._id)
                         .replaceAll('{name}', sub_item.name)
                         .replaceAll('{sku}', sub_item.sku)
-                        .replaceAll('{amount}', _product_function.Comma(sub_item.amount))
+                        .replaceAll('{amount}', _product_function.Comma(sub_item.amount) + ' đ')
                         .replaceAll('{stock}', _product_function.Comma(sub_item.quanity_of_stock))
+                        .replaceAll('{order_count}', '')
                     var html_sub_attr = ''
-                    $(item.attributes).each(function (index_attr, sub_attr) {
-                        html_sub_attr += sub_attr.value + ', '
-                    });
-                    html_sub_item.replaceAll('{attribute}', html_sub_attr)
-                    html += html_sub_item
 
+                    //var result = jsObjects.filter(obj => {
+                    //    return obj.b === 6
+                    //})
+                    var sub_attr_img=[]
+                    $(sub_item.variation_attributes).each(function (index_variation_attributes, variation_attributes_item) {
+                        var attribute = item.attributes.filter(obj => {
+                            return obj._id == variation_attributes_item.level
+                        })
+                        var attribute_detail = item.attributes_detail.filter(obj => {
+                            return (obj.attribute_id == variation_attributes_item.level && obj.name == variation_attributes_item.name)
+                        })
+                        if (attribute[0].img != null && attribute[0].img != undefined && attribute[0].img.trim() != '') {
+                            sub_attr_img.push(attribute[0].img)
+                        }
+                        if (attribute_detail[0].img != null && attribute_detail[0].img != undefined && attribute_detail[0].img.trim() != '') {
+                            sub_attr_img.push(attribute_detail[0].img)
+                        }
+                        html_sub_attr += '' + attribute[0].name + ': ' + attribute_detail[0].name
+                        if (index_variation_attributes < ($(sub_item.variation_attributes).length - 1)) {
+                            html_sub_attr += ', '
+                        }
+                        
+                    })
+                    html_sub_item = html_sub_item.replaceAll('{attribute}','Phân loại hàng: '+ html_sub_attr)
+                    html_sub_item = html_sub_item.replaceAll('{avatar}', sub_attr_img.length > 0 ? sub_attr_img[0] : item.avatar)
+                    html_variations += html_sub_item
+                    amount.push(sub_item.amount)
+                    quanity_stock.push(sub_item.quanity_of_stock)
                 });
+                const sum_stock = quanity_stock.reduce((partialSum, a) => partialSum + a, 0);
+                var max = Math.max(...amount);
+                var min = Math.min(...amount);
+                html_item = html_item.replaceAll('{amount}', _product_function.Comma(min) + ' đ - ' + _product_function.Comma(max) + ' đ')
+                html_item = html_item.replaceAll('{stock}', _product_function.Comma(sum_stock))
+
+                
             }
+            html += html_item
+            html += html_variations
+
         });
         $('#product_list').html(html)
+        
     }
    
 }

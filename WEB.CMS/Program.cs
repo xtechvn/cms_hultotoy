@@ -111,7 +111,7 @@ pattern: "/Account/2FA",
 defaults: new { controller = "Account", action = "Setup2FA" }); 
 
 app.MapControllerRoute(name: "ProductDetail",
- pattern: "/productv2/detail/{product_id?}",
- defaults: new { controller = "ProductV2", action = "ProductDetail" });
+ pattern: "/product/detail/{id?}",
+ defaults: new { controller = "Product", action = "Detail" });
 
 app.Run();

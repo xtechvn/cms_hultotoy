@@ -1,4 +1,6 @@
-﻿using Entities.ViewModels.Products;
+﻿using Entities.Models;
+using Entities.ViewModels.Products;
+using HuloToys_Service.ElasticSearch.NewEs;
 using Microsoft.AspNetCore.Mvc;
 using WEB.CMS.Customize;
 using WEB.CMS.Models.Product;
@@ -9,11 +11,12 @@ namespace WEB.CMS.Controllers
     public class ProductController : Controller
     {
         private readonly ProductDetailMongoAccess _productV2DetailMongoAccess;
-
+        private readonly GroupProductESService _groupProductESService;
+        private readonly int group_product_root = 1;
         public ProductController(IConfiguration configuration)
         {
             _productV2DetailMongoAccess = new ProductDetailMongoAccess(configuration);
-
+            _groupProductESService = new GroupProductESService(configuration["DataBaseConfig:Elastic:Host"], configuration);
         }
         public IActionResult Index()
         {
@@ -21,10 +24,30 @@ namespace WEB.CMS.Controllers
             return View();
         } 
         
-        public IActionResult Detail(string product_id="")
+        public IActionResult Detail(string id = "")
         {
-            ViewBag.ProductId = product_id;
+            ViewBag.ProductId = id;
             return View();
+        }
+        public async Task<IActionResult> GroupProduct(int group_id = 1)
+        {
+            try
+            {
+                if(group_id>0)
+                return Ok(new
+                {
+                    is_success = true,
+                    data =  _groupProductESService.GetListGroupProductByParentId(group_id)
+                });
+            }
+            catch
+            {
+
+            }
+            return Ok(new
+            {
+                is_success = false
+            });
         }
         public async Task<IActionResult> ProductListing(string keyword = "", int group_id = -1, int page_index = 1, int page_size = 10)
         {
@@ -48,31 +71,6 @@ namespace WEB.CMS.Controllers
                 is_success = false
             });
         }
-        public async Task<IActionResult> ProductSubListing(List<string> main_products)
-        {
-            try
-            {
-                List<ProductMongoDbModel> sub_product = new List<ProductMongoDbModel>();
-                if (main_products != null && main_products.Count > 0)
-                {
-                    sub_product = await _productV2DetailMongoAccess.SubListing(main_products);
-                }
-                return Ok(new
-                {
-                    is_success = true,
-                    data = sub_product
-                });
-
-            }
-            catch
-            {
-
-            }
-            return Ok(new
-            {
-                is_success = false
-            });
-        } 
         public async Task<IActionResult> ProductDetail(string product_id)
         {
             try
@@ -100,8 +98,7 @@ namespace WEB.CMS.Controllers
                     request.name==null || request.name.Trim()==""
                     || request.images == null || request.images.Count<=0
                     || request.avatar == null || request.avatar.Trim() == ""
-                    ||  request.group_product_id<=0
-                    || request.amount <=0
+                    || request.group_product_id == null || request.group_product_id.Trim() == ""
                     )
                 {
                     return Ok(new
@@ -110,6 +107,7 @@ namespace WEB.CMS.Controllers
                         msg = "Dữ liệu sản phẩm không chính xác, vui lòng chỉnh sửa và thử lại",
                     });
                 }
+                request.status=0;
                 if(request._id==null || request._id.Trim() == "")
                 {
                     var rs=await _productV2DetailMongoAccess.AddNewAsync(request);
@@ -147,6 +145,60 @@ namespace WEB.CMS.Controllers
             {
                 is_success = false,
                 msg = "Thêm mới / Cập nhật sản phẩm thất bại, vui lòng liên hệ bộ phận IT",
+            });
+        }
+        public async Task<IActionResult> ProductDetailGroupProducts(string ids)
+        {
+            try
+            {
+                List<GroupProduct> groups = new List<GroupProduct>();
+                foreach(var id in ids.Split(","))
+                {
+                    if (id != null && id.Trim() != "")
+                    {
+                        try
+                        {
+                            groups.Add(_groupProductESService.GetDetailGroupProductById(Convert.ToInt32(id)));
+                        }
+                        catch { }
+                    }
+                }
+                return Ok(new
+                {
+                    is_success = true,
+                    data= groups
+                });
+            }
+            catch
+            {
+
+            }
+            return Ok(new
+            {
+                is_success = false
+            });
+        }
+        public async Task<IActionResult> CancelProduct(string id)
+        {
+            try
+            {
+                if (id==null || id.Trim() == "")
+                {
+
+                }
+                return Ok(new
+                {
+                    is_success = true,
+                    
+                });
+            }
+            catch
+            {
+
+            }
+            return Ok(new
+            {
+                is_success = false
             });
         }
     }

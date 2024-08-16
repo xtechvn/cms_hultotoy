@@ -29,13 +29,13 @@ var _product_constants = {
     VALUES: {
         ProductDetail_Max_Image: 9,
         DefaultSpecificationValue: [
-            { id:'1',name:'Thương hiệu',type:1},
-            { id: '2', name: 'Chất liệu', type: 1 },
-            { id: '3', name: 'Độ tuổi khuyến nghị', type: 1 },
-            { id: '4', name: 'Ngày sản xuất', type: 2 },
-            { id: '5', name: 'Tên tổ chức chịu trách nhiệm sản xuất', type: 1 },
-            { id: '6', name: 'Địa chỉ tổ chức chịu trách nghiệm sản xuất', type: 1 },
-            { id: '7', name: 'Sản phẩm đặt theo yêu cầu', type: 1 },
+            { id:'1',name:'Thương hiệu',type:1, attribute_id:1},
+            { id: '2', name: 'Chất liệu', type: 3, attribute_id: 2 },
+            { id: '3', name: 'Độ tuổi khuyến nghị', type: 1, attribute_id: 3 },
+            { id: '4', name: 'Ngày sản xuất', type: 2, attribute_id: 4 },
+            { id: '5', name: 'Tên tổ chức chịu trách nhiệm sản xuất', type: 1, attribute_id: 5 },
+            { id: '6', name: 'Địa chỉ tổ chức chịu trách nghiệm sản xuất', type: 1, attribute_id: 6 },
+            { id: '7', name: 'Sản phẩm đặt theo yêu cầu', type: 1, attribute_id: 7 },
         ]
     },
     HTML: {
@@ -56,12 +56,12 @@ var _product_constants = {
                                         <h3 class="name-product">
                                            {name}
                                         </h3>
-                                        <div class="cat">Phân loại hàng: {attribute}</div>
+                                        <div class="cat" style="display:none;">Phân loại hàng: {attribute}</div>
 
                                     </div>
                                 </div>
                             </td>
-                            <td class="text-center">{amount}</td>
+                            <td class="text-center">{order_count}</td>
                             <td class="text-center">{amount}</td>
                             <td class="text-center">{stock}</td>
                             <td class="text-center">
@@ -84,7 +84,7 @@ var _product_constants = {
                                     </div>
                                 </div>
                             </td>
-                           <td class="text-center">{amount}</td>
+                           <td class="text-center">{order_count}</td>
                             <td class="text-center">{amount}</td>
                             <td class="text-center">{stock}</td>
                             <td class="text-center"></td>
@@ -167,7 +167,7 @@ var _product_constants = {
                 </div>
             </div>`,
        
-        ProductDetail_Specification_Row_Item: ` <div class="col-md-6 " data-type="{type}">
+        ProductDetail_Specification_Row_Item: ` <div class="col-md-6 " >
                         <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
                             <label class="label">{name}<span style="display:none;">0/10</span></label>
                             <div class="wrap_input">
@@ -176,12 +176,17 @@ var _product_constants = {
                             </div>
                         </div>
                     </div>`,
-        ProductDetail_Specification_Row_Item_DateTime:`<div class="datepicker-wrap">
-                                <input id="datepicker" placeholder="Vui lòng chọn"
-                                       class="datepicker-input form-control" type="text" value="">
+        ProductDetail_Specification_Row_Item_DateTime:`<div class="datepicker-wrap namesp" data-type="2" data-attr-id="{attribute_id}">
+                                <input  placeholder="Vui lòng chọn"
+                                       class="datepicker-input form-control" type="text" value="{value}">
                             </div>`,
-        ProductDetail_Specification_Row_Item_SelectOptions: ` <div class="form-group namesp">
-                <input type="text" class="form-control" placeholder="{placeholder}" >
+        ProductDetail_Specification_Row_Item_Input: ` <div class="form-group namesp"data-type="3" data-attr-id="{attribute_id}">
+                <input type="text" class="form-control" placeholder="{placeholder}" value="{value}">
+                <a href="" class="edit"><i class="icofont-thin-down"></i></a>
+           
+            </div>`,
+        ProductDetail_Specification_Row_Item_SelectOptions: ` <div class="form-group namesp"data-type="1" data-attr-id="{attribute_id}">
+                <input type="text" class="form-control input-select-option" placeholder="{placeholder}" readonly value="{value}">
                 <a href="" class="edit"><i class="icofont-thin-down"></i></a>
             </div>
             <div class="select-option p-2" style="width: 70%;display:none;">
@@ -201,9 +206,9 @@ var _product_constants = {
                             </div>
                         </div>
                         <ul>
-                            <li style=" list-style: none; "><input type="checkbox" name="option1" value="1"> <span>Option 1</span></li>
-                            <li style=" list-style: none; "><input type="checkbox" name="option2" value="1"> <span>Option 2</span></li>
-                            <li style=" list-style: none; "><input type="checkbox" name="option3" value="1"> <span>Option 3</span></li>
+                            <li style=" list-style: none; "><input class="checkbox-option" type="checkbox" name="option1" value="option-1"> <span>Option 1</span></li>
+                            <li style=" list-style: none; "><input class="checkbox-option" type="checkbox" name="option2" value="option-2"> <span>Option 2</span></li>
+                            <li style=" list-style: none; "><input class="checkbox-option" type="checkbox" name="option3" value="option-3"> <span>Option 3</span></li>
                         </ul>
                         <div class="border-top text-center pt-2">
                             <a href="javascript:;" class="text-primary add-specificaion-value">
@@ -329,6 +334,18 @@ var _product_constants = {
                                        </a>
                                     </td>
 
-                                </tr>`
+                                </tr>`,
+        ProductDetail_GroupProduct_ResultDirection:`<b>{name}<i class="icofont-thin-right"></i></b>`,
+        ProductDetail_GroupProduct_ResultSelected:`<b>{name}</b>`,
+        ProductDetail_GroupProduct_colmd4_Li:` <li data-id="{id}" data-name="{name}"><a href="javascript:;">{name}<i class="{icofont-thin-right}"></i></a></li>`,
+        ProductDetail_GroupProduct_colmd4:`<div class="col-md-4" data-level="{level}">
+                        <div class="list-toys">
+                            <h6><a href="">{name}<i class="icofont-thin-right"></i></a></h6>
+                            <ul>
+                               {li}
+                                
+                            </ul>
+                        </div>
+                    </div>`
     }
 }
