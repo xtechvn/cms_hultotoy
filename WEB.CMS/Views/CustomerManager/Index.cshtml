@@ -339,90 +339,91 @@
                                     </div>
                                 </div>
                                 <div id="setting-tab3" class="tab-pane fade show active" aria-labelledby="setting-tab3" role="tabpanel">
-                                    <div class="row">
+                                    <form id="bo-loc-tab3" onsubmit="return false">
+                                        <div class="row">
 
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="lbl">Đối tượng</label>
-                                                <div class="wrap_input">
-                                                    <select class="select2" name="" id="AgencyType" style="width: 150px; height: 30px;">
-                                                        <option value="-1">Tất cả đối tượng</option>
-                                                        @if (AgencyType != null)
-                                                        {
-                                                            foreach (var item in AgencyType)
-                                                            {
-                                                                <option value="@item.CodeValue">@item.Description</option>
-                                                            }
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="lbl">loại khách hàng</label>
-                                                <div class="wrap_input">
-                                                    <select class="select2" id="ClientType" name="" style="width: 220px; height: 30px;">
-                                                        <option value="-1">Tất cả loại khách hàng</option>
-                                                        @if (ClientType != null)
-                                                        {
-                                                            foreach (var item in ClientType)
-                                                            {
-                                                                <option value="@item.CodeValue">@item.Description</option>
-
-                                                            }
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        @*<div class="col-md-6">
+                                            <div class="col-md-6">
                                                 <div class="form-group">
-                                                    <label class="lbl">Thời gian tạo</label>
+                                                    <label class="lbl">Đối tượng</label>
                                                     <div class="wrap_input">
-                                                        <div class="datepicker-wrap" style="width:100%">
-                                                            <input class="form-control date text-left filter_date_daterangepicker" id="createdate" type="text"
-                                                                   name="datetimeApprove" style="min-width: 180px !important" placeholder="Thời gian tạo" />
+                                                        <select class="select2" name="" id="AgencyType" style="width: 150px; height: 30px;">
+                                                            <option value="-1">Tất cả đối tượng</option>
+                                                            @if (AgencyType != null)
+                                                            {
+                                                                foreach (var item in AgencyType)
+                                                                {
+                                                                    <option value="@item.CodeValue">@item.Description</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="lbl">loại khách hàng</label>
+                                                    <div class="wrap_input">
+                                                        <select class="select2" id="ClientType" name="" style="width: 220px; height: 30px;">
+                                                            <option value="-1">Tất cả loại khách hàng</option>
+                                                            @if (ClientType != null)
+                                                            {
+                                                                foreach (var item in ClientType)
+                                                                {
+                                                                    <option value="@item.CodeValue">@item.Description</option>
+
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @*<div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label class="lbl">Thời gian tạo</label>
+                                                        <div class="wrap_input">
+                                                            <div class="datepicker-wrap" style="width:100%">
+                                                                <input class="form-control date text-left filter_date_daterangepicker" id="createdate" type="text"
+                                                                       name="datetimeApprove" style="min-width: 180px !important" placeholder="Thời gian tạo" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>*@
+
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="lbl">Người tạo</label>
+                                                    <div class="wrap_input">
+
+                                                        <select class="select2 client-select main-staff-select" id="CreatedBy" multiple="multiple" style="width:100% !important">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="lbl">Tổng thanh toán</label>
+                                                    <div class="wrap_input ">
+                                                        <div id="minamount_form" style="display: flex;">
+                                                            <div><input type="text" class="form-control mb10 mr-2 currency" id="minamount" placeholder="Từ" style="width:120px"></div>
+                                                            <div> <input type="text" class="form-control mb10 mr-2 currency" id="maxamount" placeholder="Đến" style="width:120px"></div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>*@
-
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="lbl">Người tạo</label>
-                                                <div class="wrap_input">
-
-                                                    <select class="select2 client-select main-staff-select" id="CreatedBy" multiple="multiple" style="width:100% !important">
-                                                    </select>
-                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="lbl">Tổng thanh toán</label>
-                                                <div class="wrap_input ">
-                                                    <div id="minamount_form" class="form-group mb10 mr-2 row">
-                                                        <input type="text" class="form-control mb10 mr-2 currency" id="minamount" placeholder="Từ" style="width:120px">
-                                                        <input type="text" class="form-control mb10 mr-2 currency" id="maxamount" placeholder="Đến" style="width:120px">
-
-                                                    </div>
-                                                </div>
+                                        <div class="form-group flex justify-content-between mt-3 pt-3 border-top">
+                                            <a href="#add-bo-loc" class="text-primary open-popup">
+                                                <b>
+                                                    <i class="icofont-plus-circle"></i>Tạo bộ lọc
+                                                </b>
+                                            </a>
+                                            <div class="flex align-items-center">
+                                                <a href="javascripts:;" onclick="_customer_manager.Clearboloc('bo-loc-tab3')" class="text-primary">Khôi phục mặc định</a>
+                                                <button type="button" onclick="_customer_manager.SearchData()" class="btn btn-primary">Áp dụng</button>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="form-group flex justify-content-between mt-3 pt-3 border-top">
-                                        <a href="javascript:;" onclick="_customer_manager.SeverFilter()" class="text-primary">
-                                            <b>
-                                                <i class="icofont-plus-circle"></i>Tạo bộ
-                                                lọc
-                                            </b>
-                                        </a>
-                                        <div class="flex align-items-center">
-                                            <a href="" class="text-primary">Khôi phục mặc định</a>
-                                            <button type="button" onclick="_customer_manager.SearchData()" class="btn btn-primary">Áp dụng</button>
-                                        </div>
-                                    </div>
+                                    </form>
+
                                 </div>
                                 <div id="setting-tab4" class="tab-pane fade" aria-labelledby="setting-tab4" role="tabpanel">
                                     <div class="row">
@@ -573,12 +574,12 @@
                     <svg class="icon-svg mr-1">
                         <use xlink:href="#Calendar"></use>
                     </svg>
-                    <span id="check_radio_name">Hôm nay</span>
+                    <span id="check_radio_name">Tất cả</span>
                     <svg class="icon-svg ml-1">
                         <use xlink:href="#CaretDown"></use>
                     </svg>
                 </a>
-                <div class="select-option form-down-filter" style="display:none">
+                <div class="select-option form-down-filter" id="bo-loc-date" style="display:none">
                     <ul class="scroll-inner">
                         <li>
                             <label class="radio">
@@ -639,7 +640,7 @@
                         </li>
                         <li>
                             <label class="radio">
-                                <input type="radio" name="optradio"value="8">
+                                <input type="radio" name="optradio" value="8">
                                 <span class="checkmark"></span>
                                 Khác
                             </label>
@@ -659,7 +660,7 @@
                         </li>
                     </ul>
                     <div class="text-right">
-                        <a href="javascript:;" class="onclick-active">Hủy bỏ</a>
+                        <a href="javascript:;" onclick="_customer_manager.Closeboloc()">Hủy bỏ</a>
                         <a href="javascript:;" onclick="_customer_manager.getList()" class="ml-3 btn btn-primary">Áp dụng</a>
                     </div>
                 </div>
@@ -693,7 +694,7 @@
                     }
 
                     <div class="row-main-head mb10 mr-2">
-                        <div class="down-up right">
+                        <div class="down-up ">
                             <a class="btn btn-default onclick" href="javascript:;">
                                 <i class="fa fa-bars"></i>
                                 <i class="fa fa-caret-down"></i>
@@ -782,6 +783,29 @@
             <img src="/images/icons/loading.gif" style=" width: 100px; height: 100px; margin-left:46%;" id="imgLoading_client" />
         </div>
     </div>
+    <div id="add-bo-loc" class="white-popup mfp-hide">
+        <div class="content_lightbox">
+            <div class="head">
+                Lưu bộ lọc
+            </div>
+            <div class="form-default">
+
+                <div class="form-group">
+                    <label class="lbl">Tên bộ lọc</label>
+                    <div class="wrap_input">
+                        <input type="text" class="form-control" id="Cache_name">
+                        <label id="Cache_name-error" class="error" for="Cache_name" style="display:none;">Tên bộ lọc không thể bỏ trống</label>
+                    </div>
+                </div>
+                <div class="form-group align-right mt20 block">
+                    <button type="button" class="btn btn-default bg-main" onclick="_customer_manager.SeverFilter()"><i class="fa fa-floppy-o"></i>Lưu</button>
+                    <button type="button" class="btn btn-default cancel" onclick="$.magnificPopup.close();"><i class="fa fa-minus-circle"></i>Bỏ qua</button>
+                </div>
+            </div>
+        </div>
+        <button title="Close (Esc)" type="button" class="mfp-close">×</button>
+    </div>
+
 </section>
 
 

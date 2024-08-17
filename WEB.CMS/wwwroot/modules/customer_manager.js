@@ -1125,6 +1125,13 @@ var _customer_manager = {
     SeverFilter: function () {
         var CreateDate;
         var EndDate;
+        var Cache_Name = $('#Cache_name').val();
+        if (Cache_Name == null || Cache_Name == "") {
+            $('#Cache_name-error').show();
+            return false;
+        } else {
+            $('#Cache_name-error').hide();
+        }
         var MaKH_data = $('#client').select2("val");
         textClient = $('#client').find(':selected').text();
         var UserId_data = $('#txtNguoiTao').select2("val");
@@ -1146,6 +1153,7 @@ var _customer_manager = {
             TenKH: textClient,
             Email: null,
             Phone: null,
+            CacheName: Cache_Name,
             AgencyType: $('#AgencyType').val(),
             ClientType: $('#ClientType').val(),
             PermissionType: $('#PermisionType').val(),
@@ -1167,6 +1175,7 @@ var _customer_manager = {
             success: function (result) {
                 if (result.status == 0) {
                     _msgalert.success(result.msg)
+                    $.magnificPopup.close();
                 } else {
                     _msgalert.error(result.msg)
                 }
@@ -1174,6 +1183,9 @@ var _customer_manager = {
         });
     },
     getList: function () {
+        $('#bo-loc-date').hide();
+        $('.onclick-active-filter').addClass('onclick-filter');
+        $('.onclick-filter').removeClass('onclick-active-filter');
         var type = $('input[name=optradio]:checked').val();
         $('#form_down_check_radio').attr('style', 'display: none');
         $('#btn_check_radio').removeClass('active');
@@ -1388,7 +1400,15 @@ var _customer_manager = {
         objSearch = _searchModel;
 
         this.SearchClient(objSearch);
-    }
+    },
+    Clearboloc: function (id) {
+        document.getElementById(id).reset()
+    },
+    Closeboloc: function () {
+        $('#bo-loc-date').hide();
+        $('.onclick-active-filter').addClass('onclick-filter');
+        $('.onclick-filter').removeClass('onclick-active-filter');
+    },
 }
 
 //// validate
