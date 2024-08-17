@@ -73,7 +73,7 @@ var product_index = {
                 var quanity_stock=[]
                 $(item.variations).each(function (index, sub_item) {
                     var html_sub_item = _product_constants.HTML.SubProduct
-                        .replaceAll('{id}', sub_item._id)
+                        .replaceAll('{id}', item._id)
                         .replaceAll('{main_id}', item._id)
                         .replaceAll('{name}', sub_item.name)
                         .replaceAll('{sku}', sub_item.sku)
