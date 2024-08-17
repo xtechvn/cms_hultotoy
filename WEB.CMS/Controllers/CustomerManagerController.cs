@@ -608,7 +608,7 @@ namespace WEB.Adavigo.CMS.Controllers
             string msg = "Error On Excution";
             try
             {
-                searchModel.CacheName = "TEST";
+              
               var Insert =await  _logCacheFilterMongoService.InsertLogCache(searchModel);
                 if(Insert > 0)
                 {
