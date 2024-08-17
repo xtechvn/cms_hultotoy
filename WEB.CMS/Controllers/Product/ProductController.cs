@@ -29,7 +29,7 @@ namespace WEB.CMS.Controllers
             ViewBag.ProductId = id;
             return View();
         }
-        public async Task<IActionResult> GroupProduct(int group_id = 1)
+        public async Task<IActionResult> GroupProduct(int group_id = 1, int position = 0)
         {
             try
             {
@@ -37,7 +37,9 @@ namespace WEB.CMS.Controllers
                 return Ok(new
                 {
                     is_success = true,
-                    data =  _groupProductESService.GetListGroupProductByParentId(group_id)
+                    data =  _groupProductESService.GetListGroupProductByParentId(group_id),
+                    position = position
+
                 });
             }
             catch
@@ -166,7 +168,7 @@ namespace WEB.CMS.Controllers
                 return Ok(new
                 {
                     is_success = true,
-                    data= groups
+                    data= groups,
                 });
             }
             catch

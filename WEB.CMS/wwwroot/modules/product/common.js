@@ -29,13 +29,13 @@ var _product_constants = {
     VALUES: {
         ProductDetail_Max_Image: 9,
         DefaultSpecificationValue: [
-            { id:'1',name:'Thương hiệu',type:1, attribute_id:1},
+            { id:'1',name:'Thương hiệu',type:3, attribute_id:1},
             { id: '2', name: 'Chất liệu', type: 3, attribute_id: 2 },
-            { id: '3', name: 'Độ tuổi khuyến nghị', type: 1, attribute_id: 3 },
+            { id: '3', name: 'Độ tuổi khuyến nghị', type: 3, attribute_id: 3 },
             { id: '4', name: 'Ngày sản xuất', type: 2, attribute_id: 4 },
-            { id: '5', name: 'Tên tổ chức chịu trách nhiệm sản xuất', type: 1, attribute_id: 5 },
-            { id: '6', name: 'Địa chỉ tổ chức chịu trách nghiệm sản xuất', type: 1, attribute_id: 6 },
-            { id: '7', name: 'Sản phẩm đặt theo yêu cầu', type: 1, attribute_id: 7 },
+            { id: '5', name: 'Tên tổ chức chịu trách nhiệm sản xuất', type: 3, attribute_id: 5 },
+            { id: '6', name: 'Địa chỉ tổ chức chịu trách nghiệm sản xuất', type: 3, attribute_id: 6 },
+            { id: '7', name: 'Sản phẩm đặt theo yêu cầu', type: 3, attribute_id: 7 },
         ]
     },
     HTML: {
@@ -148,8 +148,8 @@ var _product_constants = {
                                         (Tùy
                                         chỉnh)
                                     </span>
-                                    <nw class="edit-attributes-name-nw item" >
-                                         <input type="text" class="attribute-name">
+                                    <nw class="edit-attributes-name-nw item "style="display:flex;" >
+                                         <input type="text" class="form-control  attribute-name">
                                          <p type="error" style="display:none;"> </p>
                                         <a href="javascript:;" class="text-base edit-attributes-name-confirm"><i class="icofont-checked"></i></a>
                                         <a href="javascript:;" class="text-base edit-attributes-name-cancel" ><i class="icofont-close-squared-alt"></i></a>
@@ -336,7 +336,7 @@ var _product_constants = {
 
                                 </tr>`,
         ProductDetail_GroupProduct_ResultDirection:`<b>{name}<i class="icofont-thin-right"></i></b>`,
-        ProductDetail_GroupProduct_ResultSelected:`<b>{name}</b>`,
+        ProductDetail_GroupProduct_ResultSelected:`<b >{name}</b>`,
         ProductDetail_GroupProduct_colmd4_Li:` <li data-id="{id}" data-name="{name}"><a href="javascript:;">{name}<i class="{icofont-thin-right}"></i></a></li>`,
         ProductDetail_GroupProduct_colmd4:`<div class="col-md-4" data-level="{level}">
                         <div class="list-toys">

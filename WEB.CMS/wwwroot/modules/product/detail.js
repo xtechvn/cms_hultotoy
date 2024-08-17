@@ -1,4 +1,5 @@
-﻿$(document).ready(function () {
+﻿
+$(document).ready(function () {
     product_detail.Initialization()
 })
 var product_detail = {
@@ -38,7 +39,7 @@ var product_detail = {
         $('body').on('change', '.image_input', function () {
             var element = $(this)
             product_detail.AddProductImages(element)
-
+            
 
         });
         $('body').on('click', '.select-group-product', function () {
@@ -116,15 +117,24 @@ var product_detail = {
             element.hide()
             element.closest('h6').find('b').attr('data-value', element.closest('h6').find('b').html())
             element.closest('h6').find('b').html('Nhập tên thuộc tính mới')
+            element.closest('h6').find('b').hide()
             element.closest('h6').find('span').hide()
             element.closest('h6').find('.edit-attributes-name-nw').show()
             element.hide()
+
+        });
+        $('body').on('keyup', '.edit-attributes-name-nw input', function () {
+            var element = $(this)
+            var value = element.closest('h6').find('.attribute-name').val()
+            element.closest('h6').find('b').html(value)
 
         });
         $('body').on('click', '.edit-attributes-name-confirm', function () {
             var element = $(this)
             var value = element.closest('h6').find('.attribute-name').val()
             element.closest('h6').find('b').html(value)
+            element.closest('h6').find('b').show()
+
             element.closest('h6').find('.edit-attributes-name-nw').hide()
             element.closest('h6').find('.attribute-name-edit').show()
             element.closest('h6').find('span').show()
@@ -133,15 +143,32 @@ var product_detail = {
             var element = $(this)
             element.closest('h6').find('b').html(element.closest('h6').find('b').attr('data-value'))
             element.closest('h6').find('.edit-attributes-name-nw').hide()
+            element.closest('h6').find('b').show()
             element.closest('h6').find('span').show()
 
         });
         $('body').on('click', '.specifications-box .col-md-6 .namesp input', function () {
             var element = $(this)
-            $('.specifications-box .col-md-6 .select-option').fadeOut()
-            if (element.closest('.col-md-6').find('.select-option').length > 0) {
-                element.closest('.col-md-6').find('.select-option').fadeIn()
-            }
+            var parent = element.closest('.col-md-6').find('.select-option')
+            $('.specifications-box .col-md-6 .select-option').each(function (index, item) {
+                var compare = $(this)
+                if (compare.is(parent)) {
+                    if (parent.is(':hidden')) {
+                        parent.fadeIn()
+                    } else {
+                        parent.fadeOut()
+                    }
+                } else {
+                    compare.fadeOut()
+                }
+
+
+            })
+            //$('.specifications-box .col-md-6 .select-option').fadeOut()
+
+            //if (element.closest('.col-md-6').find('.select-option').length > 0 && element.closest('.col-md-6').find('.select-option').is('hidden')) {
+            //    element.closest('.col-md-6').find('.select-option').fadeIn()
+            //}
 
         });
         //-- Click outside div global function:
@@ -222,7 +249,7 @@ var product_detail = {
             var element = $(this)
             element.closest('.col-md-4').find('li').removeClass('active')
             element.addClass('active')
-            product_detail.RenderOnSelectGroupProduct()
+            product_detail.RenderOnSelectGroupProduct(element)
         });
         $('body').on('click', '.action .btn-outline-base', function () {
             $.magnificPopup.close()
@@ -390,13 +417,16 @@ var product_detail = {
         //-- Image
         $(product.images).each(function (index, item) {
             $('#images .list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', item).replaceAll('{id}', '-1'))
+            $('#images .items .count').html($('#images .items .count').closest('.list').find('.magnific_popup').length)
 
         })
         //-- Avatar
         $('#avatar .list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', product.avatar).replaceAll('{id}', '-1'))
+        $('#avatar .items .count').html($('#avatar .items .count').closest('.list').find('.magnific_popup').length)
 
         $(product.videos).each(function (index, item) {
             $('#videos .list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', item).replaceAll('{id}', '-1'))
+            $('#videos .items .count').html($('#videos .items .count').closest('.list').find('.magnific_popup').length)
 
         })
         
@@ -415,42 +445,19 @@ var product_detail = {
                 })
                 html = html.replace('{li}', html_item).replaceAll('{name}', 'HuloToy').replaceAll('{level}', '0')
                 $('#them-nganhhang .bg-box .row').html(html)
-                _product_function.POST('/Product/ProductDetailGroupProducts', { ids: product.group_product_id }, function (result_detail) {
-                    if (result_detail.is_success && result_detail.data) {
-                        var html_input=''
-                        $(result_detail.data).each(function (index_detail, item_detail) {
-                            if (index_detail >= ($(result_detail.data).length - 1)) {
-                                html_input += item_detail.name 
-                            } else {
-                                html_selected_input += item_detail.name + ' > '
-                            }
-                            $('#them-nganhhang .bg-box li').each(function (index_li, item_li) {
-                                var element = $(this)
-                                if (element.attr('data-id').trim() == item_detail.id) {
-                                    element.addClass('active')
-                                    return false
-                                }
-                            })
-                        })
-                        var html_selected_popup=''
-                        $('#them-nganhhang .col-md-4').each(function (index, item) {
-                            var element = $(this)
-                            var selected = element.find('ul').find('.active').attr('data-name')
-                            if (index >= ($('#them-nganhhang .col-md-4').length - 1)) {
-                                html_selected_popup += _product_constants.HTML.ProductDetail_GroupProduct_ResultSelected.replaceAll('{name}', element.find('ul').find('.active').attr('data-name'))
-                            } else {
+                //$('.select-group-product').trigger('click')
+                $('#them-nganhhang .col-md-4').first().find('li[data-id="' + product.group_product_id.split(',')[0] + '"]').trigger('click')
+                var group_split = product.group_product_id.split(',')
 
-                                html_selected_popup += _product_constants.HTML.ProductDetail_GroupProduct_ResultDirection.replaceAll('{name}', selected)
-                            }
-                        })
-                        $('#group-product-selection').html(html_selected_popup)
-
-                        $('#group-id input').val(html_input)
-                    }
-                });
-
+                for (var i = 1; i < group_split.length; i++) {
+                    setTimeout(function () {
+                        $('#them-nganhhang li[data-id="' + group_split[i] + '"]').trigger('click')
+                        product_detail.RenderSelectedGroupProduct()
+                    }, 100);
+                }
             }
         });
+        
         //-- Specification
         var html = ''
 
@@ -592,6 +599,7 @@ var product_detail = {
         $('#sku input').val(product.sku)
         
     },
+    
     RenderSpecificationSelectOption: function (element) {
         var value = ''
         var html=''
@@ -607,9 +615,18 @@ var product_detail = {
         element.closest('.col-md-6').find('.namesp').find('.input-select-option').attr('data-value', value)
         element.closest('.col-md-6').find('.namesp').find('.input-select-option').val(html)
     },
-    RenderOnSelectGroupProduct: function () {
+    RenderOnSelectGroupProduct: function (element_selected) {
         var html_selected_popup = ''
-
+        var lastest_group_id = 0
+        var level = 0
+        var lastest_group_name = ''
+        var selected_md4_level = parseInt(element_selected.closest('.col-md-4').attr('data-level'))
+        $('#them-nganhhang .col-md-4').each(function (index, item) {
+            var element = $(this)
+            if (index > parseInt(selected_md4_level)) {
+                element.remove()
+            }
+        })
         $('#them-nganhhang .col-md-4').each(function (index, item) {
             var element = $(this)
             var selected = element.find('ul').find('.active').attr('data-name')
@@ -619,8 +636,26 @@ var product_detail = {
                 
                 html_selected_popup += _product_constants.HTML.ProductDetail_GroupProduct_ResultDirection.replaceAll('{name}', selected)
             }
+           
+            lastest_group_id = element.find('.active').attr('data-id')
+            level = index
+            lastest_group_name = element.find('ul').find('.active').attr('data-name')
         })
         $('#group-product-selection').html(html_selected_popup)
+
+        _product_function.POST('/Product/GroupProduct', { group_id: parseInt(lastest_group_id) }, function (result) {
+            if (result.is_success && result.data && result.data.length>0) {
+                var html = _product_constants.HTML.ProductDetail_GroupProduct_colmd4
+                var html_item = ''
+                $(result.data).each(function (index, item) {
+                    html_item += _product_constants.HTML.ProductDetail_GroupProduct_colmd4_Li
+                        .replaceAll('{id}', item.id).replaceAll('{name}', item.name)
+                })
+                html = html.replace('{li}', html_item).replaceAll('{name}', lastest_group_name).replaceAll('{level}', (level+1))
+                $('#them-nganhhang .bg-box .row').append(html)
+
+            }
+        });
     },
     RenderSelectedGroupProduct: function () {
         var html_selected_input = ''
@@ -687,11 +722,15 @@ var product_detail = {
             var reader = new FileReader();
             reader.onload = function (e) {
                 element.closest('.list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
+                element.closest('.items').find('.count').html(element.closest('.list').find('.magnific_popup').length)
+
             }
             reader.readAsDataURL(item);
 
         });
+        
         element.val(null)
+
     },
     Summit: function () {
         var model = {
@@ -730,27 +769,10 @@ var product_detail = {
             })
 
         })
-        model.attributes = []
-        $('.product-attributes').each(function (index, item) {
-            var element = $(this)
-            model.attributes.push( {
-                _id: (index+1),
-                name: element.find('h6').find('b').html(),
-            })
-           
-        })
-        model.attributes_detail = []
-        $('#product-attributes-box .attributes-name').each(function (index_2, item_2) {
-            var element = $(this)
-            var value = element.val()
-            if (value != undefined && value.trim() != '') {
-                model.attributes_detail.push({
-                    attribute_id: product_detail.GetLevelOfAttributesBox(element.closest('.product-attributes')),
-                    img: '',
-                    name: element.val()
-                })
-            }
-        })
+        var attribute_model =  product_detail.GetAttributeItem()
+        model.attributes = attribute_model.attributes
+        model.attributes_detail = attribute_model.attributes_detail
+        
         
         model.discount_group_buy = []
         $('#discount-groupbuy tbody .discount-groupbuy-row').each(function (index, item) {
@@ -893,14 +915,17 @@ var product_detail = {
        
         if (combination_array.length > 0) {
             var name = combination_array[0][0]
+            var model = product_detail.GetAttributeItem()
             $(combination_array).each(function (index, item) {
                 var html_attribute_attr=''
                 var html_td_attribute = ''
 
-                $(item).each(function (index_attribute, attribute_name) {
-                    var filter_value = item.join('').substring(0, (index_attribute + 1))
-                    var row_span = combination_array.filter(val => val.join('').startsWith(filter_value)).length
-                    
+                $(item).each(function (index_attribute, attribute_name) {         
+                    var row_span = model.attributes_detail.filter(obj => {
+                        return obj.attribute_id == (index_attribute + 2)
+                    }).length
+                    if (row_span <= 0) row_span = 1
+
                     var html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                         .replaceAll('{i}', index_attribute)
                         .replaceAll('{name}', attribute_name.trim())
@@ -909,6 +934,9 @@ var product_detail = {
                     html_td_attribute += html_item;
                     
                 })
+
+                
+                
 
                 if (item[0].toLowerCase().trim() == name) {
                     html += _product_constants.HTML.ProductDetail_Attribute_Price_TrSub
@@ -932,7 +960,8 @@ var product_detail = {
             $('#product-attributes-price .th-attribute-' + i).html($($('.product-attributes')[(i-1)]).find('h6').find('b').text())
 
         }
-        $(GetAttributeList(1)).each(function (index, item) {
+        var list_filter = GetAttributeList(1)
+        $(list_filter).each(function (index, item) {
             HideAttributes(item,1)
         })
     },
@@ -958,6 +987,33 @@ var product_detail = {
             tr.find('.td-amount').find('input').val(Comma(price + profit))
         }
         
+    },
+    GetAttributeItem: function () {
+        var model = {
+
+        }
+        model.attributes = []
+        $('.product-attributes').each(function (index, item) {
+            var element = $(this)
+            model.attributes.push({
+                _id: (index + 1),
+                name: element.find('h6').find('b').html(),
+            })
+
+        })
+        model.attributes_detail = []
+        $('#product-attributes-box .attributes-name').each(function (index_2, item_2) {
+            var element = $(this)
+            var value = element.val()
+            if (value != undefined && value.trim() != '') {
+                model.attributes_detail.push({
+                    attribute_id: product_detail.GetLevelOfAttributesBox(element.closest('.product-attributes')),
+                    img: '',
+                    name: element.val()
+                })
+            }
+        })
+        return model
     }
     
 }
@@ -1014,7 +1070,7 @@ function HideAttributes(name, i) {
 }
 function GetAttributeList(index) {
     var list = []
-    $($('#product-attributes-box .row-attributes-value')[index - 1]).find('input[type="text"]').each(function (index_item, item) {
+    $($('#product-attributes-box .row-attributes-value')[index-1]).find('input[type="text"]').each(function (index_item, item) {
         var element = $(this)
         list.push(element.val())
 
