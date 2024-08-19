@@ -47,7 +47,7 @@
 <section style=" overflow-x: hidden;">
     <div class="row-main container">
         <h2 class="txt_18 bold mb20">Danh sách khách hàng</h2>
-        <div class="flex fillter-donhang mb10">
+        <div class="flex fillter-donhang">
             <div class="form-group mb10 mr-2" style="min-width: 500px;">
 
                 <select class="select2 client-select main-staff-select" id="client" multiple="multiple" style="width:100% !important">
@@ -55,7 +55,7 @@
             </div>
             <div class="form-group select-list filter-list mb10 mr-2">
                 <div class="relative select-user">
-                    <a href="javascript:;" class="btn btn-default white onclick">
+                    <a href="javascript:;" class="btn-default white onclick">
                         <i class="icofont-filter"></i>
                         <span>Bộ lọc</span>
                         <svg class="icon-svg ml-1">
@@ -67,8 +67,8 @@
                             <div class="tab-default" style="border-bottom: 1px solid #CCCCCC;" id="myTab" role="tablist">
                                 <a href="#setting-tab1" class="active" data-toggle="tab" data-target="#setting-tab1" type="button" role="tab" aria-controls="setting-tab1" aria-selected="true">Khách hàng</a>
                                 @*<a href="#setting-tab2" data-toggle="tab" data-target="#setting-tab2" type="button" role="tab" aria-controls="setting-tab2" aria-selected="true">Người liên hệ</a>
-                                    <a href="#setting-tab3" data-toggle="tab" data-target="#setting-tab3" type="button" role="tab" aria-controls="setting-tab3" aria-selected="true">Thông tin mua hàng</a>
-                                    <a href="#setting-tab4" data-toggle="tab" data-target="#setting-tab4" type="button" role="tab" aria-controls="setting-tab4" aria-selected="true">Tìm kiếm nâng cao</a>*@
+                                <a href="#setting-tab3" data-toggle="tab" data-target="#setting-tab3" type="button" role="tab" aria-controls="setting-tab3" aria-selected="true">Thông tin mua hàng</a>
+                                <a href="#setting-tab4" data-toggle="tab" data-target="#setting-tab4" type="button" role="tab" aria-controls="setting-tab4" aria-selected="true">Tìm kiếm nâng cao</a>*@
                             </div>
                             <div class="tab-content" id="myTabContent">
                                 <div id="setting-tab1" class="tab-pane fade " aria-labelledby="setting-tab1" role="tabpanel">
@@ -378,16 +378,16 @@
                                                 </div>
                                             </div>
                                             @*<div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label class="lbl">Thời gian tạo</label>
-                                                        <div class="wrap_input">
-                                                            <div class="datepicker-wrap" style="width:100%">
-                                                                <input class="form-control date text-left filter_date_daterangepicker" id="createdate" type="text"
-                                                                       name="datetimeApprove" style="min-width: 180px !important" placeholder="Thời gian tạo" />
-                                                            </div>
+                                                <div class="form-group">
+                                                    <label class="lbl">Thời gian tạo</label>
+                                                    <div class="wrap_input">
+                                                        <div class="datepicker-wrap" style="width:100%">
+                                                            <input class="form-control date text-left filter_date_daterangepicker" id="createdate" type="text"
+                                                                   name="datetimeApprove" style="min-width: 180px !important" placeholder="Thời gian tạo" />
                                                         </div>
                                                     </div>
-                                                </div>*@
+                                                </div>
+                                            </div>*@
 
                                             <div class="col-md-6">
                                                 <div class="form-group">
@@ -646,12 +646,12 @@
                             </label>
                             <div class="flex mb-3 gap10 flex-nowrap align-items-center justify-content-between">
                                 @*<div class="wrap_input">
-                                        <input type="text" class="form-control" placeholder="Ngày bắt đầu">
-                                    </div>
-                                    <i class="icofont-arrow-right"></i>
-                                    <div class="wrap_input">
-                                        <input type="text" class="form-control" placeholder="Ngày kết thúc">
-                                    </div>*@
+                                    <input type="text" class="form-control" placeholder="Ngày bắt đầu">
+                                </div>
+                                <i class="icofont-arrow-right"></i>
+                                <div class="wrap_input">
+                                    <input type="text" class="form-control" placeholder="Ngày kết thúc">
+                                </div>*@
                                 <div class="datepicker-wrap" style="width:100%">
                                     <input class="form-control date text-left filter_date_daterangepicker" id="createdate" type="text"
                                            name="datetimeApprove" style="min-width: 180px !important" placeholder="Thời gian tạo" />
@@ -674,11 +674,11 @@
                 </select>
             </div>
 
-            <div class="mb10 mr-2">
-                <button class="btn-search btn-default" type="button" onclick="_customer_manager.Export()" id="btnExport">
+            <div class="form-group mb10 mr-2">
+                @*<button class="btn-search btn-default" type="button" onclick="_customer_manager.Export()" id="btnExport">
                     <i class="fa fa-file-excel-o" id="icon-export" title="Xuất excel">
                     </i>
-                </button>
+                </button>*@
                 <button type="button" class="btn btn-default bg-main" onclick="_customer_manager.SearchData()">
                     <svg class="icon-svg" style="vertical-align: sub;">
                         <use xlink:href="/images/icons/icon.svg#search"></use>
@@ -686,12 +686,12 @@
                     Tìm kiếm
                 </button>
             </div>
-            <div class="form-group mb10 mr-2">
-                <div class="btn-right text-right flex ">
-                    @if (ViewBag.buttomThem == 1)
+            <div class="">
+                <div class="">
+                    @*@if (ViewBag.buttomThem == 1)
                     {
                         <button type="button" class="btn btn-default bg-main mb10 mr-2" onclick="_customer_manager.OpenPopup('')"><i class="fa fa-plus-circle"></i>Tạo mới khách hàng</button>
-                    }
+                    }*@
 
                     <div class="row-main-head mb10 mr-2">
                         <div class="down-up ">
@@ -776,6 +776,31 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="flex gap10 mb10 align-items-center justify-content-between">
+            <div class="flex gap10 left-button">
+
+                <div class="relative filter-nguonkh">
+
+                </div>
+
+            </div>
+            <div class="right-button flex gap10 ">
+
+                <button type="button" class="btn btn-outline-secondary" onclick="_customer_manager.Export()" id="btnExport">
+                    <i class="icofont-download" id="icon-export" title="Xuất excel"></i>
+                    Xuất Excel
+                </button>
+                @if (ViewBag.buttomThem == 1)
+                {
+                    <button type="button" class="btn btn-primary" onclick="_customer_manager.OpenPopup('')">
+                        <i class="icofont-plus-circle"></i>
+                        Tạo mới khách hàng
+                    </button>
+                }
+
             </div>
         </div>
         @*Danh sách khách hàng*@
