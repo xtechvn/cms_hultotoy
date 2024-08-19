@@ -27,6 +27,31 @@ var product_detail = {
         });
     },
     DynamicBind: function () {
+        $('body').on('click', '.change-tab', function () {
+            var element = $(this)
+            switch (element.attr('data-id')) {
+                case '1': {
+                    $("#images").get(0).scrollIntoView({ behavior: 'smooth' });
+
+                } break
+                case '2': {
+                    $("#selling-information").get(0).scrollIntoView({ behavior: 'smooth' });
+
+                } break
+                case '3': {
+                    $("#other-information").get(0).scrollIntoView({ behavior: 'smooth' });
+
+                } break
+                case '4': {
+                    $("#other-information").get(0).scrollIntoView({ behavior: 'smooth' });
+
+                } break
+            }
+        });
+        $('body').on('click', '.magnific_popup .delete', function () {
+            var element = $(this)
+            element.closest('.items').remove()
+        });
         $('body').on('click', '.choose-product-images', function () {
             var element = $(this)
             if (product_detail.GetImagesCount() >= _product_constants.VALUES.ProductDetail_Max_Image) {
@@ -147,6 +172,12 @@ var product_detail = {
             element.closest('h6').find('span').show()
 
         });
+        $('body').on('keyup', '#specifications .them-chatlieu .input_search', function () {
+            var element = $(this)
+            setTimeout(function () {
+                product_detail.RenderSpecificationLi(element)
+            }, 1000);
+        });
         $('body').on('click', '.specifications-box .col-md-6 .namesp input', function () {
             var element = $(this)
             var parent = element.closest('.col-md-6').find('.select-option')
@@ -155,6 +186,8 @@ var product_detail = {
                 if (compare.is(parent)) {
                     if (parent.is(':hidden')) {
                         parent.fadeIn()
+                        product_detail.RenderSpecificationLi(compare)
+                        
                     } else {
                         parent.fadeOut()
                     }
@@ -195,6 +228,23 @@ var product_detail = {
             element.closest('.border-top').find('.add-specificaion-value-box').hide()
             element.closest('.border-top').find('.add-specificaion-value').show()
 
+        });
+        $('body').on('click', '.specifications-box .col-md-6 .add-specificaion-value-add ', function (e) {
+            var element = $(this)
+            var parent = element.closest('.them-chatlieu').find('ul')
+            var name = element.closest('.add-specificaion-value-box').find('input').val()
+            parent.prepend(_product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions_NewOptions
+                .replaceAll('{checked}', 'checked')
+                .replaceAll('{value}', 'undefined') 
+                .replaceAll('{name}', name) 
+            )
+            element.closest('.add-specificaion-value-box').find('input').val('')
+            product_detail.RenderSpecificationSelectOption(element.closest('.them-chatlieu').find('ul').find('li'))
+            var type = element.closest('.col-md-6').find('.namesp').attr('data-attr-id')
+            
+            _product_function.POST('/Product/AddProductSpecification', { type: type, name: name }, function (result) {
+               
+            });
         });
      
         $('body').on('click', '.btn-add-attributes, .edit-attributes-name-confirm, .attribute-item-add, .attribute-item-delete, #product-attributes-box .delete', function () {
@@ -329,7 +379,8 @@ var product_detail = {
                 case 1: {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_Input
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
-                        .replaceAll('{attribute_id}', item.attribute_id)
+                        .replaceAll('{id}', item.id)
+
                         .replaceAll('{value}', '')
 
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item
@@ -342,7 +393,8 @@ var product_detail = {
                 case 2: {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_DateTime
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
-                        .replaceAll('{attribute_id}', item.attribute_id)
+                        .replaceAll('{id}', item.id)
+
                         .replaceAll('{value}', '')
 
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item
@@ -353,7 +405,8 @@ var product_detail = {
                 default: {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
-                        .replaceAll('{attribute_id}', item.attribute_id)
+                        .replaceAll('{id}', item.id)
+
                         .replaceAll('{value}', '')
 
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item
@@ -469,7 +522,7 @@ var product_detail = {
                 case 1: {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_Input
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
-                        .replaceAll('{attribute_id}', item.attribute_id)
+                        .replaceAll('{id}', item.id)
                         .replaceAll('{value}', specification[0].value)
 
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item
@@ -482,7 +535,7 @@ var product_detail = {
                 case 2: {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_DateTime
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
-                        .replaceAll('{attribute_id}', item.attribute_id)
+                        .replaceAll('{id}', item.id)
                         .replaceAll('{value}', specification[0].value)
 
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item
@@ -493,7 +546,7 @@ var product_detail = {
                 default: {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
-                        .replaceAll('{attribute_id}', item.attribute_id)
+                        .replaceAll('{id}', item.id)
                         .replaceAll('{value}', specification[0].value)
 
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item
@@ -599,7 +652,27 @@ var product_detail = {
         $('#sku input').val(product.sku)
         
     },
-    
+    RenderSpecificationLi: function (element) {
+        var html = ''
+        var type = element.closest('.col-md-6').find('.namesp').attr('data-attr-id')
+        var name = element.closest('.col-md-6').find('.input_search').val()
+        
+        _product_function.POST('/Product/GetSpecificationByName', { type: type, name: name }, function (result) {
+            if (result.is_success && result.data && result.data.length > 0) {
+                var current_value = element.closest('.namesp').find('.input-select-option').val()
+                if (current_value == undefined) current_value=''
+                $(result.data).each(function (index, item) {
+                    html += _product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions_NewOptions
+                        .replaceAll('{option-name}', 'specification-' + type)
+                        .replaceAll('{value}', item._id)
+                        .replaceAll('{checked}', current_value.includes(item.attribute_name)?'checked':'' )
+                        .replaceAll('{name}', item.attribute_name)
+                })
+            }
+            element.closest('.col-md-6').find('ul').html(html)
+            
+        });
+    },
     RenderSpecificationSelectOption: function (element) {
         var value = ''
         var html=''
@@ -663,6 +736,7 @@ var product_detail = {
         $('#them-nganhhang .col-md-4').each(function (index, item) {
             var element = $(this)
             var selected = element.find('ul').find('.active').attr('data-name')
+            if (element.find('ul').find('.active').attr('data-id') == undefined) return true
             if (index >= ($('#them-nganhhang .col-md-4').length - 1)) {
                 html_selected_input += selected
                 group_selected += element.find('ul').find('.active').attr('data-id')
@@ -717,19 +791,40 @@ var product_detail = {
         });
     },
     AddProductImages: function (element) {
-        $(element[0].files).each(function (index, item) {
+        var max_item = _product_constants.VALUES.ProductDetail_Max_Image
+        switch (element.closest('.flex-lg-nowrap').attr('id')) {
+            case 'images': {
 
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                element.closest('.list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
-                element.closest('.items').find('.count').html(element.closest('.list').find('.magnific_popup').length)
+            } break
+            case 'avatar': {
+                max_item = _product_constants.VALUES.ProductDetail_Max_Avt
+            } break
+            case 'videos': {
+                max_item = _product_constants.VALUES.ProductDetail_Max_Avt
 
-            }
-            reader.readAsDataURL(item);
+            } break
+        }
+        if (element.closest('.flex-lg-nowrap').find('.magnific_popup').length >= max_item) {
+            _msgalert.error('Số lượng ảnh/videos vượt quá giới hạn')
 
-        });
-        
-        element.val(null)
+
+            element.val(null)
+        }
+        else {
+            $(element[0].files).each(function (index, item) {
+
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    element.closest('.list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
+                    element.closest('.items').find('.count').html(element.closest('.list').find('.magnific_popup').length)
+
+                }
+                reader.readAsDataURL(item);
+
+            });
+            element.val(null)
+
+        }
 
     },
     Summit: function () {

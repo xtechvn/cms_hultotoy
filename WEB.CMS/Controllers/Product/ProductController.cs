@@ -2,6 +2,8 @@
 using Entities.ViewModels.Products;
 using HuloToys_Service.ElasticSearch.NewEs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Nest;
 using WEB.CMS.Customize;
 using WEB.CMS.Models.Product;
 
@@ -11,12 +13,14 @@ namespace WEB.CMS.Controllers
     public class ProductController : Controller
     {
         private readonly ProductDetailMongoAccess _productV2DetailMongoAccess;
+        private readonly ProductSpecificationMongoAccess _productSpecificationMongoAccess;
         private readonly GroupProductESService _groupProductESService;
         private readonly int group_product_root = 1;
         public ProductController(IConfiguration configuration)
         {
             _productV2DetailMongoAccess = new ProductDetailMongoAccess(configuration);
             _groupProductESService = new GroupProductESService(configuration["DataBaseConfig:Elastic:Host"], configuration);
+            _productSpecificationMongoAccess = new ProductSpecificationMongoAccess( configuration);
         }
         public IActionResult Index()
         {
@@ -80,7 +84,7 @@ namespace WEB.CMS.Controllers
                 return Ok(new
                 {
                     is_success = true,
-                    data = await _productV2DetailMongoAccess.GetByID(product_id)
+                    data = await _productV2DetailMongoAccess.GetByID(product_id),
                 });
             }
             catch
@@ -180,19 +184,61 @@ namespace WEB.CMS.Controllers
                 is_success = false
             });
         }
-        public async Task<IActionResult> CancelProduct(string id)
+        public async Task<IActionResult> AddProductSpecification(int type, string name)
         {
             try
             {
-                if (id==null || id.Trim() == "")
+                if (name == null || name.Trim() == "")
+                {
+                   
+                }
+                else
+                {
+                    var exists = await _productSpecificationMongoAccess.GetByNameAndType(type, name);
+                    if (exists == null || exists._id == null)
+                    {
+                        var id = await _productSpecificationMongoAccess.AddNewAsync(new ProductSpecificationMongoDbModel()
+                        {
+                            attribute_name = name,
+                            attribute_type = type,
+
+                        });
+                        return Ok(new
+                        {
+                            is_success = true,
+                            data = id
+                        });
+                    }
+                }
+               
+            }
+            catch
+            {
+
+            }
+            return Ok(new
+            {
+                is_success = false
+            });
+        }
+        public async Task<IActionResult> GetSpecificationByName(int type, string name)
+        {
+            try
+            {
+                if (type<=0)
                 {
 
                 }
-                return Ok(new
+                else
                 {
-                    is_success = true,
-                    
-                });
+                    var exists = await _productSpecificationMongoAccess.Listing(type, name);
+                    return Ok(new
+                    {
+                        is_success = true,
+                        data = exists
+                    });
+                }
+
             }
             catch
             {

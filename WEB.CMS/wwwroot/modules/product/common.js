@@ -28,14 +28,15 @@
 var _product_constants = {
     VALUES: {
         ProductDetail_Max_Image: 9,
+        ProductDetail_Max_Avt: 1,
         DefaultSpecificationValue: [
-            { id:'1',name:'Thương hiệu',type:3, attribute_id:1},
-            { id: '2', name: 'Chất liệu', type: 3, attribute_id: 2 },
-            { id: '3', name: 'Độ tuổi khuyến nghị', type: 3, attribute_id: 3 },
-            { id: '4', name: 'Ngày sản xuất', type: 2, attribute_id: 4 },
-            { id: '5', name: 'Tên tổ chức chịu trách nhiệm sản xuất', type: 3, attribute_id: 5 },
-            { id: '6', name: 'Địa chỉ tổ chức chịu trách nghiệm sản xuất', type: 3, attribute_id: 6 },
-            { id: '7', name: 'Sản phẩm đặt theo yêu cầu', type: 3, attribute_id: 7 },
+            { id: 1, name:'Thương hiệu',type:3},
+            { id: 5, name: 'Chất liệu', type: 3},
+            { id: 2, name: 'Độ tuổi khuyến nghị', type: 3 },
+            { id: 6, name: 'Ngày sản xuất', type: 2},
+            { id: 3, name: 'Tên tổ chức chịu trách nhiệm sản xuất', type: 3 },
+            { id: 7, name: 'Địa chỉ tổ chức chịu trách nghiệm sản xuất', type: 3 },
+            { id: 4, name: 'Sản phẩm đặt theo yêu cầu', type: 3 },
         ]
     },
     HTML: {
@@ -176,20 +177,21 @@ var _product_constants = {
                             </div>
                         </div>
                     </div>`,
-        ProductDetail_Specification_Row_Item_DateTime:`<div class="datepicker-wrap namesp" data-type="2" data-attr-id="{attribute_id}">
+        ProductDetail_Specification_Row_Item_DateTime:`<div class="datepicker-wrap namesp" data-type="2" data-attr-id="{id}">
                                 <input  placeholder="Vui lòng chọn"
                                        class="datepicker-input form-control" type="text" value="{value}">
                             </div>`,
-        ProductDetail_Specification_Row_Item_Input: ` <div class="form-group namesp"data-type="3" data-attr-id="{attribute_id}">
+        ProductDetail_Specification_Row_Item_Input: ` <div class="form-group namesp"data-type="3" data-attr-id="{id}">
                 <input type="text" class="form-control" placeholder="{placeholder}" value="{value}">
                 <a href="" class="edit"><i class="icofont-thin-down"></i></a>
            
             </div>`,
-        ProductDetail_Specification_Row_Item_SelectOptions: ` <div class="form-group namesp"data-type="1" data-attr-id="{attribute_id}">
+        ProductDetail_Specification_Row_Item_SelectOptions_NewOptions:`<li style=" list-style: none; "><input class="checkbox-option" type="checkbox" name="{option-name}" value="{value}" {checked}> <span>{name}</span></li>`,
+        ProductDetail_Specification_Row_Item_SelectOptions: ` <div class="form-group namesp"data-type="1" data-attr-id="{id}">
                 <input type="text" class="form-control input-select-option" placeholder="{placeholder}" readonly value="{value}">
                 <a href="" class="edit"><i class="icofont-thin-down"></i></a>
             </div>
-            <div class="select-option p-2" style="width: 70%;display:none;">
+            <div class="select-option p-2" style="width:90%;display:none;">
                 <div class="them-chatlieu">
                     <div class="content_lightbox">
                         <div class="form-group w-100 ">
@@ -205,11 +207,9 @@ var _product_constants = {
                                 </span>
                             </div>
                         </div>
-                        <ul>
-                            <li style=" list-style: none; "><input class="checkbox-option" type="checkbox" name="option1" value="option-1"> <span>Option 1</span></li>
-                            <li style=" list-style: none; "><input class="checkbox-option" type="checkbox" name="option2" value="option-2"> <span>Option 2</span></li>
-                            <li style=" list-style: none; "><input class="checkbox-option" type="checkbox" name="option3" value="option-3"> <span>Option 3</span></li>
-                        </ul>
+                        <ul style="min-height:200px;overflow:scroll;overflow-x: hidden;overflow-y: scroll;">
+                            <img src="/images/icons/loading.gif" style=" width: 20px; height: 20px; " />
+                         </ul>
                         <div class="border-top text-center pt-2">
                             <a href="javascript:;" class="text-primary add-specificaion-value">
                                 <i class="icofont-plus mr-2"></i>Thêm thuộc

@@ -31,7 +31,7 @@ namespace Entities.ViewModels.Products
         public string name { get; set; }
         public string group_product_id { get; set; }
         public string description { get; set; }
-        public List<ProductSpecificationMongoDbModel> specification { get; set; }
+        public List<ProductSpecificationDetailMongoDbModel> specification { get; set; }
         public List<ProductAttributeMongoDbModel> attributes { get; set; }
         public List<ProductAttributeMongoDbModelItem> attributes_detail { get; set; }
         public List<ProductDiscountOnGroupsBuyModel> discount_group_buy { get; set; }
