@@ -67,6 +67,10 @@ builder.Services.AddTransient<IProductRepository, ProductRepository>();
 builder.Services.AddTransient<ILocationProductRepository, LocationProductRepository>();
 builder.Services.AddTransient<IAccountAccessApiRepository, AccountAccessApiRepository>();
 builder.Services.AddTransient<IAccountAccessApiPermissionRepository, AccountAccessApiPermissionRepository>();
+builder.Services.AddTransient<IOrderRepository, OrderRepository>();
+builder.Services.AddTransient<IContractPayRepository, ContractPayRepository>();
+builder.Services.AddTransient<IPaymentRequestRepository, PaymentRequestRepository>();
+
 // Setting Redis                     
 builder.Services.AddSingleton<RedisConn>();
 builder.Services.AddSingleton<ManagementUser>();
@@ -102,8 +106,8 @@ app.MapControllerRoute(name: "transactionsms",
   defaults: new { controller = "TransactionSms", action = "Index" });
 
 app.MapControllerRoute(name: "Order",
- pattern: "/Order/{id?}",
- defaults: new { controller = "Order", action = "Orderdetails" });
+ pattern: "/Order/{orderId?}",
+ defaults: new { controller = "Order", action = "OrderDetail" });
 
 
 app.MapControllerRoute(name: "AccountSetup",
@@ -113,5 +117,6 @@ defaults: new { controller = "Account", action = "Setup2FA" });
 app.MapControllerRoute(name: "ProductDetail",
  pattern: "/product/detail/{id?}",
  defaults: new { controller = "Product", action = "Detail" });
+
 
 app.Run();

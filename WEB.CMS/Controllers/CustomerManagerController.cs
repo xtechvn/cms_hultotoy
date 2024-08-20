@@ -732,7 +732,7 @@ namespace WEB.Adavigo.CMS.Controllers
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("UserSuggestion - OrderManualController: " + ex.ToString());
+                LogHelper.InsertLogTelegram("UserSuggestion - CustomerManagerController: " + ex.ToString());
                 return Ok(new
                 {
                     status = (int)ResponseType.SUCCESS,
