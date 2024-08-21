@@ -1,4 +1,5 @@
-﻿using Entities.ViewModels;
+﻿using Entities.Models;
+using Entities.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +13,7 @@ namespace Repositories.IRepositories
         Task<GenericViewModel<OrderViewModel>> GetList(OrderViewSearchModel searchModel);
         Task<OrderDetailViewModel> GetOrderDetailByOrderId(long OrderId);
         Task<TotalCountSumOrder> GetTotalCountSumOrder(OrderViewSearchModel searchModel);
+        Task<long> UpdateOrder(Order model);
+
     }
 }

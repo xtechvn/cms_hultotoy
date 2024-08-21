@@ -87,5 +87,29 @@ var _orderDetail = {
             }
         });
     },
+    ChangeOrderSaler: function (order_id, order_no) {
+       
+        var title = 'Nhận xử lý đơn hàng';
+        var description = 'Bạn có chắc chắn muốn nhận xử lý đơn hàng này không?';
+        _msgconfirm.openDialog(title, description, function () {
+            $.ajax({
+                url: "/Order/ChangeOrderSaler",
+                type: "Post",
+                data: { order_id: order_id, saleid: 0, OrderNo: order_no},
+                success: function (result) {
+                    if (result.status === 0) {
+                        _msgalert.success(result.msg);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 1000);
+                    }
+                    else {
+                        _msgalert.error(result.msg);
+
+                    }
+                }
+            });
+        });
+    },
 
 }

@@ -1,13 +1,17 @@
 ﻿using Aspose.Cells;
 using Entities.Models;
 using Entities.ViewModels;
+using Entities.ViewModels.Mongo;
 using Microsoft.AspNetCore.Mvc;
 using Nest;
 using Repositories.IRepositories;
+using System.Security.Claims;
 using Utilities;
 using Utilities.Contants;
+using WEB.Adavigo.CMS.Service;
+using WEB.CMS.Customize;
 
-namespace WEB.CMS.Controllers.Order
+namespace WEB.CMS.Controllers
 {
 
     public class OrderController : Controller
@@ -256,5 +260,50 @@ namespace WEB.CMS.Controllers.Order
                 return PartialView();
             }
         }
+        [HttpPost]
+        public async Task<IActionResult> ChangeOrderSaler(long? order_id, int saleid, string OrderNo)
+        {
+
+            try
+            {
+                var model = new LogActionModel();
+                model.Type = (int)AttachmentType.OrderDetail;
+                model.LogId = (long)order_id;
+                if (order_id == null || order_id <= 0)
+                {
+                    return Ok(new
+                    {
+                        status = (int)ResponseType.FAILED,
+                        msg = "Dữ liệu gửi lên không chính xác, vui lòng kiểm tra lại"
+                    });
+                }
+                int _UserId = 0;
+                if (HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
+                {
+                    _UserId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                }
+                if (saleid != 0) _UserId = _UserId = saleid;
+                var order = new Entities.Models.Order();
+                order.OrderId = (long)order_id;
+                order.SalerId = _UserId;
+                var success = await _orderRepository.UpdateOrder(order);
+              
+                return Ok(new
+                {
+                    status = (int)ResponseType.SUCCESS,
+                    msg = "Đổi điều hành viên thành công"
+                });
+
+            }
+            catch
+            {
+                return Ok(new
+                {
+                    status = (int)ResponseType.ERROR,
+                    msg = "Đổi điều hành viên thất bại, vui lòng liên hệ IT"
+                });
+            }
+        }
+
     }
 }

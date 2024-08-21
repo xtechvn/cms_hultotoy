@@ -86,7 +86,7 @@
                         <div class="border bg-white p-3 mb20">
                             <div class="flex space-between">
                                 <h5 class="text-uppercase">Thông tin đơn hàng</h5>
-                                <a class="edit" href=""><i class="icofont-ui-edit"></i><i class="icofont-save"></i></a>
+                               @* <a class="edit" href=""><i class="icofont-ui-edit"></i><i class="icofont-save"></i></a>*@
                             </div>
                             @if(Model.OrderStatus != null){
                                 @switch ((int)Model.OrderStatus)
@@ -216,8 +216,9 @@
                     </div>
 
                     <div class="form-group align-right mt20 block pin-btn-bottom ">
-                        <b class="btn btn-default cancel ml-1" onclick="history.back()">Quay lại</b>
-
+                        <button type="button" class="btn btn-default cancel ml-1" onclick="history.back()">Quay lại</button>
+                     
+                        <button type="button" class="btn btn-default ml-1" onclick="_orderDetail.ChangeOrderSaler(@ViewBag.OrderId,'@ViewBag.OrderNo')">Nhận xử lý đơn hàng</button>
                     </div>
                 </div>
             </div>

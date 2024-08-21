@@ -95,5 +95,10 @@ namespace Repositories.Repositories
             }
             return model;
         }
+        public async Task<long> UpdateOrder(Order model)
+        {
+            return await _OrderDal.UpdateOrder( model);
+        }
+    
     }
 }
