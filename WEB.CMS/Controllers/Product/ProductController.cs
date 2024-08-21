@@ -4,7 +4,11 @@ using HuloToys_Service.ElasticSearch.NewEs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Nest;
+using Newtonsoft.Json;
+using Utilities.Contants.ProductV2;
+using WEB.Adavigo.CMS.Service;
 using WEB.CMS.Customize;
+using WEB.CMS.Models;
 using WEB.CMS.Models.Product;
 
 namespace WEB.CMS.Controllers
@@ -15,12 +19,14 @@ namespace WEB.CMS.Controllers
         private readonly ProductDetailMongoAccess _productV2DetailMongoAccess;
         private readonly ProductSpecificationMongoAccess _productSpecificationMongoAccess;
         private readonly GroupProductESService _groupProductESService;
+        private  StaticAPIService _staticAPIService;
         private readonly int group_product_root = 1;
         public ProductController(IConfiguration configuration)
         {
             _productV2DetailMongoAccess = new ProductDetailMongoAccess(configuration);
             _groupProductESService = new GroupProductESService(configuration["DataBaseConfig:Elastic:Host"], configuration);
             _productSpecificationMongoAccess = new ProductSpecificationMongoAccess( configuration);
+            _staticAPIService = new StaticAPIService( configuration);
         }
         public IActionResult Index()
         {
@@ -77,6 +83,26 @@ namespace WEB.CMS.Controllers
                 is_success = false
             });
         }
+        public async Task<IActionResult> ProductSubListing(string parent_id)
+        {
+            try
+            {
+                return Ok(new
+                {
+                    is_success = true,
+                    data = await _productV2DetailMongoAccess.SubListing(parent_id)
+                });
+
+            }
+            catch
+            {
+
+            }
+            return Ok(new
+            {
+                is_success = false
+            });
+        }
         public async Task<IActionResult> ProductDetail(string product_id)
         {
             try
@@ -96,7 +122,7 @@ namespace WEB.CMS.Controllers
                 is_success = false
             });
         }
-        public async Task<IActionResult> Summit(ProductMongoDbModel request)
+        public async Task<IActionResult> Summit(ProductMongoDbSummitModel request)
         {
             try
             {
@@ -113,34 +139,103 @@ namespace WEB.CMS.Controllers
                         msg = "Dữ liệu sản phẩm không chính xác, vui lòng chỉnh sửa và thử lại",
                     });
                 }
-                request.status=0;
-                if(request._id==null || request._id.Trim() == "")
+                string rs = "";
+                var uploaded_image = new List<string>();
+                //-- IMg
+                if (request.images != null && request.images.Count > 0)
                 {
-                    var rs=await _productV2DetailMongoAccess.AddNewAsync(request);
-                    if (rs != null)
+                    foreach (var img in request.images)
                     {
-                        return Ok(new
+                        if(img!=null && img.Trim() != "")
                         {
-                            is_success = true,
-                            msg="Thêm mới sản phẩm thành công",
-                            data=rs
-                        });
+                            var data_img = _staticAPIService.GetImageSrcBase64Object(img);
+                            if (data_img != null)
+                            {
+                                var url = await _staticAPIService.UploadImageBase64(data_img);
+                                if (url != null && url.Trim() != "")
+                                {
+                                    uploaded_image.Add(url);
+                                    continue;
+                                }
+                            }
+                            uploaded_image.Add(img);
+
+                        }
+                       
                     }
+                }
+                request.images = uploaded_image;
+                //-- Avt:
+                if (request.avatar != null && request.avatar.Trim() != "")
+                {
+                    if (request.avatar != null && request.avatar.Trim() != "" && request.avatar.Contains("data:image") && request.avatar.Contains("base64"))
+                    {
+                        var data_img = _staticAPIService.GetImageSrcBase64Object(request.avatar);
+                        if (data_img != null)
+                        {
+                            request.avatar = await _staticAPIService.UploadImageBase64(data_img);
+                        }
+
+                    }
+                }
+                //-- Attributes Img:
+                if (request.attributes_detail != null && request.attributes_detail.Count > 0)
+                {
+                    foreach (var attributes_detail in request.attributes_detail)
+                    {
+                        if (attributes_detail.img!=null && attributes_detail.img.Trim()!="" && attributes_detail.img.Contains("data:image") && attributes_detail.img.Contains("base64"))
+                        {
+                            var data_img = _staticAPIService.GetImageSrcBase64Object(attributes_detail.img);
+                            if (data_img != null)
+                            {
+                                attributes_detail.img = await _staticAPIService.UploadImageBase64(data_img);
+                            }
+
+                        }
+                    }
+                }
+                //-- Add/Update product_main
+                var product_main = JsonConvert.DeserializeObject<ProductMongoDbModel>(JsonConvert.SerializeObject(request));
+                product_main.parent_product_id = "";
+                if (product_main._id==null || product_main._id.Trim() == "")
+                {
+                    product_main.status = (int)ProductStatus.ACTIVE;
+                    rs = await _productV2DetailMongoAccess.AddNewAsync(product_main);
                 }
                 else
                 {
-                    var rs = await _productV2DetailMongoAccess.UpdateAsync(request);
-                    if (rs != null)
+                    rs = await _productV2DetailMongoAccess.UpdateAsync(product_main);
+                    await _productV2DetailMongoAccess.DeactiveByParentId(product_main._id);
+                    
+                    
+                }
+                //-- Add / Update Sub product
+                if (request.variations != null && request.variations.Count > 0)
+                {
+                    foreach (var variation in request.variations)
                     {
-                        return Ok(new
-                        {
-                            is_success = true,
-                            msg = "Cập nhật sản phẩm thành công",
-                            data = rs
-                        });
+                        var product_by_variations = JsonConvert.DeserializeObject<ProductMongoDbModel>(JsonConvert.SerializeObject(request));
+                        //product_by_variations._id = variation._id;
+                        product_by_variations.variation_detail = variation.variation_attributes;
+                        product_by_variations.status = (int)ProductStatus.ACTIVE;
+                        product_by_variations.parent_product_id = product_main._id;
+                        product_by_variations.price = variation.price;
+                        product_by_variations.profit = variation.profit;
+                        product_by_variations.amount = variation.amount;
+                        product_by_variations.quanity_of_stock = variation.quanity_of_stock;
+                        product_by_variations.sku = variation.sku;
+                        await _productV2DetailMongoAccess.AddNewAsync(product_by_variations);
                     }
                 }
-               
+                if (rs != null)
+                {
+                    return Ok(new
+                    {
+                        is_success = true,
+                        msg = "Thêm mới / Cập nhật sản phẩm thành công",
+                        data = rs
+                    });
+                }
 
             }
             catch (Exception ex)

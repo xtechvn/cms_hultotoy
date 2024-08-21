@@ -469,12 +469,21 @@ var product_detail = {
 
         //-- Image
         $(product.images).each(function (index, item) {
-            $('#images .list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', item).replaceAll('{id}', '-1'))
+            var img_src = item
+            if (item == null || item.trim() == '') return true
+            if (!(item.includes('data:image') && item.includes('base64')) || !(item.startsWith("http"))) {
+                img_src = _product_constants.VALUES.StaticDomain+item
+            }
+            $('#images .list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', img_src).replaceAll('{id}', '-1'))
             $('#images .items .count').html($('#images .items .count').closest('.list').find('.magnific_popup').length)
 
         })
         //-- Avatar
-        $('#avatar .list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', product.avatar).replaceAll('{id}', '-1'))
+        var img_src = product.avatar
+        if (!(img_src.includes('data:image') && img_src.includes('base64')) || !(img_src.startsWith("http"))) {
+            img_src = _product_constants.VALUES.StaticDomain + product.avatar
+        }
+        $('#avatar .list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', img_src).replaceAll('{id}', '-1'))
         $('#avatar .items .count').html($('#avatar .items .count').closest('.list').find('.magnific_popup').length)
 
         $(product.videos).each(function (index, item) {
@@ -523,7 +532,7 @@ var product_detail = {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_Input
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
                         .replaceAll('{id}', item.id)
-                        .replaceAll('{value}', specification[0].value)
+                        .replaceAll('{value}', specification.length>0? specification[0].value:'')
 
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item
                         .replaceAll('{type}', item.type)
@@ -536,7 +545,7 @@ var product_detail = {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_DateTime
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
                         .replaceAll('{id}', item.id)
-                        .replaceAll('{value}', specification[0].value)
+                        .replaceAll('{value}', specification.length > 0 ? specification[0].value : '')
 
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item
                         .replaceAll('{type}', item.type).replaceAll('{name}', item.name).replaceAll('{wrap_input}', html_item)
@@ -547,7 +556,7 @@ var product_detail = {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
                         .replaceAll('{id}', item.id)
-                        .replaceAll('{value}', specification[0].value)
+                        .replaceAll('{value}', specification.length > 0 ? specification[0].value : '')
 
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item
                         .replaceAll('{type}', item.type).replaceAll('{name}', item.name).replaceAll('{wrap_input}', html_item)
@@ -605,21 +614,29 @@ var product_detail = {
             })
         })
         product_detail.RenderRowAttributeTablePrice()
-        $('#product-attributes-price tbody tr').each(function (index, item) {
-            var element = $(this)
-            var list = product.variations
-            for (var i = 1; i <= product.attributes.length; i++) {
-                list = list.filter(obj => {
-                    //return obj.variation_attributes.includes({ level: i, name: element.attr('data-attribute-'+i)})
-                    return obj.variation_attributes.some(e => e.level == i && e.name== element.attr('data-attribute-' + i))
+        _product_function.POST('/Product/ProductSubListing', { parent_id: product._id }, function (result) {
+            if (result.is_success && result.data) {
+                $('#product-attributes-price tbody tr').each(function (index, item) {
+                    var element = $(this)
+                    var list = result.data
+                    for (var i = 1; i <= product.attributes.length; i++) {
+                        list = list.filter(obj => {
+                            //return obj.variation_attributes.includes({ level: i, name: element.attr('data-attribute-'+i)})
+                            return obj.variation_detail.some(e => e.id == i && e.name == element.attr('data-attribute-' + i))
+                        })
+                    }
+                    element.attr('data-id', list[0]._id)
+                    element.find('.td-price').find('input').val(Comma(list[0].price))
+                    element.find('.td-profit').find('input').val(Comma(list[0].profit))
+                    element.find('.td-amount').find('input').val(Comma(list[0].amount))
+                    element.find('.td-stock').find('input').val(Comma(list[0].quanity_of_stock))
+                    element.find('.td-sku').find('input').val(list[0].sku)
                 })
+
             }
-            element.find('.td-price').find('input').val(Comma(list[0].price))
-            element.find('.td-profit').find('input').val(Comma(list[0].profit))
-            element.find('.td-amount').find('input').val(Comma(list[0].amount))
-            element.find('.td-stock').find('input').val(Comma(list[0].quanity_of_stock))
-            element.find('.td-sku').find('input').val(list[0].sku)
-        })
+        });
+       
+
         if (product.discount_group_buy != undefined && product.discount_group_buy.length > 0) {
             $('.btn-add-discount-groupbuy').closest('.col-md-6').hide()
             $('#discount-groupbuy').show()
@@ -898,10 +915,11 @@ var product_detail = {
         model.variations = []
         $('#product-attributes-price tbody tr').each(function (index, index) {
             var element = $(this)
+            var var_id = element.attr('data-id')
+            if (var_id = undefined) var_id =''
             var variation = {
-                _id: '-1',
+                _id: var_id,
                 variation_attributes: [],
-                code: model.code,
                 price: parseFloat(element.find('.td-price').find('input').val().replaceAll(',', '')),
                 profit: parseFloat(element.find('.td-profit').find('input').val().replaceAll(',', '')),
                 amount: parseFloat(element.find('.td-amount').find('input').val().replaceAll(',', '')),
@@ -912,7 +930,7 @@ var product_detail = {
                 var attr_value = element.attr('data-attribute-' + i)
                 
                 variation.variation_attributes.push({
-                    level: i,
+                    id: i,
                     name: attr_value
                 })
             }

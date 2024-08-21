@@ -37,7 +37,8 @@ var _product_constants = {
             { id: 3, name: 'Tên tổ chức chịu trách nhiệm sản xuất', type: 3 },
             { id: 7, name: 'Địa chỉ tổ chức chịu trách nghiệm sản xuất', type: 3 },
             { id: 4, name: 'Sản phẩm đặt theo yêu cầu', type: 3 },
-        ]
+        ],
+        StaticDomain:`https://static-image.adavigo.com`
     },
     HTML: {
         Product: `
