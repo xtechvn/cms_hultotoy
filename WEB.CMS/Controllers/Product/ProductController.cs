@@ -143,7 +143,7 @@ namespace WEB.CMS.Controllers
                
 
             }
-            catch
+            catch (Exception ex)
             {
 
             }
