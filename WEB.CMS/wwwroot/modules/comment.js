@@ -152,7 +152,7 @@ $(document).ready(function () {
         obj.createDateFrom = DateSelected.start;
         obj.createDateTo = DateSelected.end;
         _comment.GetComment();
-    });;
+    });
     var InputClientElement = $('.select2-selection__arrow')
     InputClientElement[0].classList.add('ClientInput_Arrow'); 
     _comment.GetComment();
