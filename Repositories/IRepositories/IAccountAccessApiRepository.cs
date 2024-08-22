@@ -12,8 +12,8 @@ namespace Repositories.IRepositories
     {
         Task<int> InsertAccountAccessAPI(AccountAccessApiSubmitModel model);
         Task<int> UpdateAccountAccessAPI(AccountAccessApiSubmitModel model);
-        Task<List<AccountAccessApi>> GetAccountAccessApis();
-        Task<AccountAccessApi> GetAccountAccessApiByID(int id);
+        Task<List<AccountAccessApiViewModel>> GetAllAccountAccessAPI();
+        Task<AccountAccessApiViewModel> GetAccountAccessApiByID(int id);
         Task<int> ResetPassword(int id);
     }
 }

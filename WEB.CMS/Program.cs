@@ -67,9 +67,13 @@ builder.Services.AddTransient<IProductRepository, ProductRepository>();
 builder.Services.AddTransient<ILocationProductRepository, LocationProductRepository>();
 builder.Services.AddTransient<IAccountAccessApiRepository, AccountAccessApiRepository>();
 builder.Services.AddTransient<IAccountAccessApiPermissionRepository, AccountAccessApiPermissionRepository>();
+
+builder.Services.AddTransient<ICommentRepository, CommentRepository>();
+
 builder.Services.AddTransient<IOrderRepository, OrderRepository>();
 builder.Services.AddTransient<IContractPayRepository, ContractPayRepository>();
 builder.Services.AddTransient<IPaymentRequestRepository, PaymentRequestRepository>();
+
 
 // Setting Redis                     
 builder.Services.AddSingleton<RedisConn>();

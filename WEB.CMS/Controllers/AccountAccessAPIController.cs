@@ -30,32 +30,8 @@ namespace WEB.CMS.Controllers
         public async Task<IActionResult> Index()
         {
             List<AllCode> lstAllCode = await _allCodeRepository.GetAllSortByIDAndType(((int)AllCodeTypeEqualsPROJECT_TYPESortById.Default),AllCodeType.PROJECT_TYPE);
-            List<AccountAccessApi> lstAAA = await _accountAccessApiRepository.GetAccountAccessApis();
-            List<AccountAccessApiPermission> lstAAAP = await _accountAccessApiPermissionRepository.GetAllAccountAccessAPIPermissionAsync();
-            List<AccountAccessApiViewModel> LstAAAViewModel = new();
-            if (lstAllCode.Count >0 && lstAAA.Count > 0 && lstAAAP.Count > 0) 
-            {
-                LstAAAViewModel = (from aaa in lstAAA
-                                   join aaap in lstAAAP on aaa.Id equals aaap.AccountAccessApiId
-                                   join code in lstAllCode on aaap.ProjectType equals code.CodeValue
-                                   orderby aaa.Status // Sort by Status directly
-                                   select new AccountAccessApiViewModel
-                                   {
-                                       Id = aaa.Id,
-                                       CodeName = code.Description,
-                                       UserName = aaa.UserName,
-                                       Description = aaa.Description,
-                                       CreateDate = aaa.CreateDate,
-                                       UpdateLast = aaa.UpdateLast,
-                                       Status = aaa.Status,
-                                       Id_AccountAccessAPIPermission = aaap.Id,
-                                       Id_AllCode = code.Id,
-                                   }).ToList();
-
-            }
-
-
-            return View(LstAAAViewModel);
+            List<AccountAccessApiViewModel> lstAcountAccessAPIVM = await _accountAccessApiRepository.GetAllAccountAccessAPI();
+            return View(lstAcountAccessAPIVM);
         }
 
 
@@ -63,27 +39,11 @@ namespace WEB.CMS.Controllers
         [HttpGet]
         public async Task<IActionResult> Update(int id,int id_AllCode, int id_AccountAccessAPIPermission) 
         {
-            AccountAccessApiViewModel AAAViewModel = new();
-            AccountAccessApi AAA = await _accountAccessApiRepository.GetAccountAccessApiByID(id);
+            AccountAccessApiViewModel AccountAccessApiViewModel = await _accountAccessApiRepository.GetAccountAccessApiByID(id);
             List<AllCode> Code = await _allCodeRepository.GetAllSortByIDAndType(id_AllCode, AllCodeType.PROJECT_TYPE);
             AccountAccessApiPermission AAAP = await _accountAccessApiPermissionRepository.GetAccountAccessApiPermissionByID(id_AccountAccessAPIPermission);
-            if (AAA != null && AAAP != null && Code != null)
-            {
-                AAAViewModel = new AccountAccessApiViewModel
-                {
-                    Id = AAA.Id,
-                    CodeName = "", // Handle potential null in Code
-                    UserName = AAA.UserName,
-                    Description = AAA.Description,
-                    CreateDate = AAA.CreateDate,
-                    UpdateLast = AAA.UpdateLast,
-                    Status = AAA.Status,
-                    Id_AccountAccessAPIPermission = AAAP.Id,
-                    Id_AllCode = id_AllCode, // Handle potential null in Code
-                };
-            }
 
-            ViewBag.ViewModel = AAAViewModel;
+            ViewBag.ViewModel = AccountAccessApiViewModel;
             return View(Code);
         }
 
