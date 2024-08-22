@@ -4,10 +4,7 @@
 
 <section class="main-container main-customer">
     <div class="row-main container">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">Khách hàng</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Chi tiết khách hàng</li>
-        </ol>
+
 
         <div class="row">
             <div class="col-lg-3">
@@ -59,12 +56,12 @@
                 <div class="mt-3">
                     <div class="flex flex-end">
                         <b class="btn btn-default cancel ml-1" onclick="history.back()">Quay lại</b>
-                        <button type="button" class="btn btn-default ml-1" onclick="_customer_manager.OpenPopup('@ViewBag.id')">Sửa thông tin khách hàng</button>
+                        @*<button type="button" class="btn btn-default ml-1" onclick="_customer_manager.OpenPopup('@ViewBag.id')">Sửa thông tin khách hàng</button>
                         <button type="button" class="btn btn-default ml-1" onclick="_customer_manager_Detail.OpenPopupUserAgent('')">Đổi nhân viên phụ trách</button>
                         @if (ViewBag.btnStatus == 1)
                         {
                             <button type="button" class="btn btn-default ml-1" onclick="_customer_manager_Detail.SendMailResetPasswordb2b(@ViewBag.id)">Gửi email tài khoản</button>
-                        }
+                        }*@
                     </div>
                 </div>
   

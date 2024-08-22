@@ -19,11 +19,33 @@ var _customer_manager_Detail = {
         objSearch = _searchModel;
 
         this.Search(objSearch);
-        this.SearchOrder(objSearch);
+   
         this.SearchPaymentAccount(objSearch);
         this.SearchDetailCustomerManager(objSearch);
         this.SearchContract(objSearch);
-
+        let _searchModel2 = {
+            ClientId: $('#id_userid').val(), 
+            OrderNo: null,
+            StartDateFrom: null,
+            StartDateTo: null,
+            EndDateFrom: null,
+            EndDateTo: null,
+            Note: null,
+            UtmSource: null,
+            ServiceType: null,
+            Status: null,
+            CreateTime: null,
+            CreateName: null,
+            HINHTHUCTT: null,
+            Sale: null,
+            BoongKingCode: null,
+            sysTemType: -1,
+            StatusTab: 99,
+            PageIndex: 1,
+            pageSize: 20,
+            currentPage:1,
+        };
+        this.SearchOrder(_searchModel2);
     },
     ReLoad: function () {
         let _searchModel = {
@@ -74,12 +96,22 @@ var _customer_manager_Detail = {
     },
     SearchOrder: function (input) {
         $.ajax({
-            url: "/CustomerManager/ListOrder",
-            type: "Post",
+            url: "/order/search",
+            type: "post",
             data: input,
             success: function (result) {
-                $('#imgLoading_order').hide();
+                $('#imgLoading').hide();
                 $('#grid_data_order').html(result);
+
+                $('#select2-selectPaggingOptions-container').html(input.pageSize + " kết quả/trang");
+                $('#select2-selectPaggingOptions-container').prop('title', input.pageSize + " kết quả/trang");
+                $('#selectPaggingOptions option[value=' + input.pageSize + ']').prop("selected", true);
+                $('#List-Order-Status').html('');
+                $('#List-Order-Amount').html('');
+
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log("Status: " + textStatus);
             }
         });
     },

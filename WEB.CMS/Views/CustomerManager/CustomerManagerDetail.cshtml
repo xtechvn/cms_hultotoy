@@ -90,7 +90,7 @@
                     </div>
                     <div class="col-md-4 mb10"><label class="lbl mt5 mb0">Loại khách hàng <sup class="red">*</sup></label></div>
                     <div class="col-md-8 mb10">
-                        <select class="select2 form-control" value="@dataModel.ClientType" asp-for="@Model.id_loaikhach" style="width: 100%; background: #F1F5F9" disabled>
+                        <select class="select2 form-control" value="@dataModel.ClientType" asp-for="@Model.id_loaikhach" style="width: 100%;" >
                             <option value="-1">Tất cả loại khách hàng</option>
                             @if (ClientType != null)
                             {
@@ -120,7 +120,7 @@
                     </div>
                     <div class="col-md-4 mb10"><label class="lbl mt5 mb0">Nhóm khách hàng <sup class="red">*</sup></label></div>
                     <div class="col-md-8 mb10">
-                        <select class="select2 form-control" asp-for="@Model.id_nhomkhach" value="@dataModel.PermisionType" style="width: 100%; background: #F1F5F9" disabled>
+                        <select class="select2 form-control" asp-for="@Model.id_nhomkhach" value="@dataModel.PermisionType" style="width: 100%; ">
                             <option value="-1">Tất cả nhóm khách hàng</option>
                             @if (PermisionType != null)
                             {

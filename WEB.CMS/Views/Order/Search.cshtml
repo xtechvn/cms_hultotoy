@@ -13,7 +13,7 @@
 
 }
 <div class="bg-white pd-16 radius10">
-    <div class="line-bottom mb15" style="padding-bottom: 0;">
+    <div id="List-Order-Status" class="line-bottom mb15" style="padding-bottom: 0;">
         <div class="row" style=" width: 100%; ">
             <input id="countOrder" value="@Model.TotalRecord" style="display:none" />
             <div class="tab-default col-md-9 mb0 mt10">
@@ -30,7 +30,7 @@
             </div>
         </div>
     </div>
-    <div class="flex mb15">
+    <div id="List-Order-Amount" class="flex mb15">
         <div class="mb10 mr-4">Tổng giá trị: <strong>@Total.TotalAmmount</strong></div>
         <div class="mb10 mr-4">Đã thanh toán: <strong>@Total.TotalProductService</strong></div>
         <div class="mb10 mr-4">Chưa thanh toán: <strong>@((Convert.ToDouble(Total.TotalAmmount) - Convert.ToDouble(Total.TotalProductService)).ToString("N0"))</strong></div>
@@ -220,22 +220,26 @@
                 </tbody>
             </table>
         </div>
-        <div class="bottom-action flex flex-nowrap gap10 justify-content-end mt-3">
-            <button class="btn btn-default white" style="padding: 0 10px;">
-                <i class="icofont-gear"></i>
-                <span>Tùy chỉnh</span>
-            </button>
-            <div class="form-group select-icon">
-                <select class="select2" id="selectPaggingOptions" onchange="_ordersCMS.onSelectPageSize()">
-                    <option value="10">10 kết quả/trang</option>
-                    <option value="20">20 kết quả/trang</option>
-                    <option value="50">50 kết quả/trang</option>
-                    <option value="100">100 kết quả/trang</option>
-                    <option value="200">200 kết quả/trang</option>
-                    <option value="300">300 kết quả/trang</option>
-                </select>
+        @if (Model.ListData != null && Model.ListData.Count > 0)
+        {
+            <div class="bottom-action flex flex-nowrap gap10 justify-content-end mt-3">
+                <button class="btn btn-default white" style="padding: 0 10px;">
+                    <i class="icofont-gear"></i>
+                    <span>Tùy chỉnh</span>
+                </button>
+                <div class="form-group select-icon">
+                    <select class="select2" id="selectPaggingOptions" onchange="_ordersCMS.onSelectPageSize()">
+                        <option value="10">10 kết quả/trang</option>
+                        <option value="20">20 kết quả/trang</option>
+                        <option value="50">50 kết quả/trang</option>
+                        <option value="100">100 kết quả/trang</option>
+                        <option value="200">200 kết quả/trang</option>
+                        <option value="300">300 kết quả/trang</option>
+                    </select>
+                </div>
             </div>
-        </div>
+        }
+
     </div>
 
 </div>
