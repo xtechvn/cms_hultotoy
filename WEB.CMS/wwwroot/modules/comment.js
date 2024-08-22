@@ -144,7 +144,15 @@ $(document).ready(function () {
                 };
             },
         }
-    });
+    }).on('select2:opening', function (e) {
+        //Bỏ chọn option sẽ load lại với các giá trị mặc định
+        obj.pageSize = $("#selectPaggingOptions").find(':selected').val();
+        obj.clientID = null;
+        var DateSelected = _comment.getDateTimeRanges($("#DateInput").find(':selected').val());
+        obj.createDateFrom = DateSelected.start;
+        obj.createDateTo = DateSelected.end;
+        _comment.GetComment();
+    });;
     var InputClientElement = $('.select2-selection__arrow')
     InputClientElement[0].classList.add('ClientInput_Arrow'); 
     _comment.GetComment();
