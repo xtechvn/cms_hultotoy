@@ -303,6 +303,8 @@ var _customer_manager = {
                         $('td:nth-child(' + id + '),th:nth-child(' + id + ')').addClass('mfp-hide');
                     }
                 });
+                $('#select2-selectPaggingOptions-container').html(input.PageSize + " kết quả/trang");
+                $('#select2-selectPaggingOptions-container').prop('title', input.PageSize + " kết quả/trang");
                 $('#selectPaggingOptions').val(input.PageSize).attr("selected", "selected");
          
             }

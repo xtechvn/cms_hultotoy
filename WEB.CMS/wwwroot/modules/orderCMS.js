@@ -554,7 +554,10 @@ var _ordersCMS = {
                 });
                 _ordersCMS.checkCheckBox();
                 _ordersCMS.SetActive(tabActive);
-                $('#selectPaggingOptions').val(input.pageSize).attr("selected", "selected");
+                $('#select2-selectPaggingOptions-container').html(input.searchModel.pageSize + " kết quả/trang");
+                $('#select2-selectPaggingOptions-container').prop('title', input.searchModel.pageSize + " kết quả/trang");
+                $('#selectPaggingOptions option[value=' + input.searchModel.pageSize+']').prop("selected", true);
+               
                 if (window.location.href.indexOf("Index") != -1) {
                     _ordersCMS.eraseCookie(cookieFilterName)
                 }
