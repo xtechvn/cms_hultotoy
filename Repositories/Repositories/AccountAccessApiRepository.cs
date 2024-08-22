@@ -22,28 +22,29 @@ namespace Repositories.Repositories
             _accountAccessApiDAL = new AccountAccessApiDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
         }
 
-        public async Task<AccountAccessApi> GetAccountAccessApiByID(int id)
+        public async Task<AccountAccessApiViewModel> GetAccountAccessApiByID(int id)
         {
             try
             {
-                return await _accountAccessApiDAL.FindAsync(id);
+                var lst = await _accountAccessApiDAL.GetAllAccountAccessAPI();
+                return lst.FirstOrDefault(x => x.Id == id);
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("Insert - AccountAccessAPI" + ex);
+                LogHelper.InsertLogTelegram("GetAccountAccessApiByID - AccountAccessAPI" + ex);
                 return null;
             }
         }
 
-        public async Task<List<AccountAccessApi>> GetAccountAccessApis()
+        public async Task<List<AccountAccessApiViewModel>> GetAllAccountAccessAPI()
         {
             try
             {
-                return await _accountAccessApiDAL.GetAllAsync();
+                return await _accountAccessApiDAL.GetAllAccountAccessAPI();
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("Insert - AccountAccessAPI" + ex);
+                LogHelper.InsertLogTelegram("GetAccountAccessApis - AccountAccessAPI" + ex);
                 return null;
             }
         }
@@ -82,7 +83,7 @@ namespace Repositories.Repositories
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("Insert - AccountAccessAPI" + ex);
+                LogHelper.InsertLogTelegram("Update - AccountAccessAPI" + ex);
                 return -1;
             }
         }

@@ -1,0 +1,29 @@
+﻿@using Entities.ViewModels
+@{
+    Layout = null;
+}
+<style>
+    .OptionRow {
+        vertical-align: middle !important;
+    }
+
+    .thead-fields {
+        text-align: center;
+    }
+
+    .trow-fields {
+        text-align: center;
+    }
+
+    table, th, td {
+        border: 1px solid #CCCCCC;
+    }
+</style>
+<table id="table-comment" class="table table-nowrap mt-3">
+    <thead id="table-head">
+        
+    </thead>
+    <tbody id="table-comment-body">
+    </tbody>
+</table>
+@await Component.InvokeAsync("PagingV2")
