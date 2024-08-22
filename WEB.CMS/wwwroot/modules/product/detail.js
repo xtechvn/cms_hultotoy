@@ -469,8 +469,12 @@ var product_detail = {
 
         //-- Image
         $(product.images).each(function (index, item) {
-            var img_src = item
             if (item == null || item.trim() == '') return true
+            var img_src = item
+            if (!img_src.includes(product_detail_constants.StaticDomain)
+                && !img_src.includes("data:image")
+                && !img_src.includes("http"))
+                img_src = _product_constants.VALUES.StaticDomain + item
             if (!(item.includes('data:image') && item.includes('base64')) || !(item.startsWith("http"))) {
                 img_src = _product_constants.VALUES.StaticDomain+item
             }
@@ -480,9 +484,11 @@ var product_detail = {
         })
         //-- Avatar
         var img_src = product.avatar
-        if (!(img_src.includes('data:image') && img_src.includes('base64')) || !(img_src.startsWith("http"))) {
+        if (!img_src.includes(product_detail_constants.StaticDomain)
+            && !img_src.includes("data:image")
+            && !img_src.includes("http"))
             img_src = _product_constants.VALUES.StaticDomain + product.avatar
-        }
+       
         $('#avatar .list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', img_src).replaceAll('{id}', '-1'))
         $('#avatar .items .count').html($('#avatar .items .count').closest('.list').find('.magnific_popup').length)
 
