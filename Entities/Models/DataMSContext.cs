@@ -63,6 +63,8 @@ public partial class DataMSContext : DbContext
 
     public virtual DbSet<ClientLinkAff> ClientLinkAffs { get; set; }
 
+    public virtual DbSet<Comment> Comments { get; set; }
+
     public virtual DbSet<ContactClient> ContactClients { get; set; }
 
     public virtual DbSet<Contract> Contracts { get; set; }
@@ -144,6 +146,8 @@ public partial class DataMSContext : DbContext
     public virtual DbSet<Program> Programs { get; set; }
 
     public virtual DbSet<Province> Provinces { get; set; }
+
+    public virtual DbSet<ReceivePromotion> ReceivePromotions { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
 
@@ -570,6 +574,15 @@ public partial class DataMSContext : DbContext
             entity.Property(e => e.LinkAff)
                 .IsRequired()
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<Comment>(entity =>
+        {
+            entity.Property(e => e.Content)
+                .IsRequired()
+                .HasMaxLength(1000);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<ContactClient>(entity =>
@@ -1074,6 +1087,13 @@ public partial class DataMSContext : DbContext
                 .IsRequired()
                 .HasMaxLength(200)
                 .IsUnicode(false);
+            entity.Property(e => e.ProductId)
+                .IsRequired()
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.ProductLink)
+                .HasMaxLength(1000)
+                .IsUnicode(false);
             entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
         });
 
@@ -1109,6 +1129,9 @@ public partial class DataMSContext : DbContext
             entity.Property(e => e.Branch)
                 .HasMaxLength(50)
                 .HasComment("Chi nhánh");
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.IsDelete).HasDefaultValue(0);
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<PaymentRequest>(entity =>
@@ -1320,6 +1343,13 @@ public partial class DataMSContext : DbContext
             entity.Property(e => e.Type)
                 .IsRequired()
                 .HasMaxLength(30);
+        });
+
+        modelBuilder.Entity<ReceivePromotion>(entity =>
+        {
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Role>(entity =>

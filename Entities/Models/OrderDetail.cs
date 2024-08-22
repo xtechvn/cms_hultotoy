@@ -9,7 +9,7 @@ public partial class OrderDetail
 
     public long OrderId { get; set; }
 
-    public int ProductId { get; set; }
+    public string ProductId { get; set; }
 
     public string ProductCode { get; set; }
 
@@ -18,6 +18,14 @@ public partial class OrderDetail
     public double? Price { get; set; }
 
     public double? Profit { get; set; }
+
+    public int? Quantity { get; set; }
+
+    public double? TotalAmount { get; set; }
+
+    public double? TotalPrice { get; set; }
+
+    public string ProductLink { get; set; }
 
     public int? UserCreate { get; set; }
 

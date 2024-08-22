@@ -135,6 +135,26 @@ namespace WEB.CMS.Models.Product
             return null;
 
         }
+        public async Task<List<ProductMongoDbModel>> GetListByIds(string ids)
+        {
+            try
+            {
+                var filter = Builders<ProductMongoDbModel>.Filter;
+                var filterDefinition = filter.Empty;
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Where(x => ids.Contains(x._id));
+
+                var model = _productDetailCollection.Find(filterDefinition);
+                var result = await model.ToListAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Utilities.LogHelper.InsertLogTelegram("ProductDetailMongoAccess - GetListByIds Error: " + ex);
+            }
+            return null;
+
+        }
+        
 
     }
 }

@@ -1,8 +1,10 @@
 ﻿using DAL;
+using DAL.OrderDetail;
 using DAL.StoreProcedure;
 using Entities.ConfigModels;
 using Entities.Models;
 using Entities.ViewModels;
+using Entities.ViewModels.OrderDetail;
 using Microsoft.Extensions.Options;
 using Nest;
 using PdfSharp;
@@ -23,6 +25,7 @@ namespace Repositories.Repositories
         private readonly ClientDAL _clientDAL;
         private readonly AllCodeDAL allCodeDAL;
         private readonly UserDAL userDAL;
+        private readonly OrderDetailDAL _orderDetailDAL;
 
 
 
@@ -33,6 +36,7 @@ namespace Repositories.Repositories
             allCodeDAL = new AllCodeDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
             userDAL = new UserDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
             _clientDAL = new ClientDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
+            _orderDetailDAL = new OrderDetailDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
 
 
         }
@@ -97,8 +101,27 @@ namespace Repositories.Repositories
         }
         public async Task<long> UpdateOrder(Order model)
         {
-            return await _OrderDal.UpdateOrder( model);
+            try
+            {
+                return await _OrderDal.UpdateOrder(model);
+            }
+            catch(Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetTotalCountSumOrder in OrderRepository: " + ex);
+            }
+            return -1;
         }
-    
+        public async Task<List<ListOrderDetailViewModel>> GetListOrderDetail(long orderid)
+        {
+            try
+            {
+                return await _orderDetailDAL.GetListOrderDetail(orderid);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetTotalCountSumOrder in OrderRepository: " + ex);
+            }
+            return null;
+        }
     }
 }

@@ -10,6 +10,7 @@ using Utilities;
 using Utilities.Contants;
 using WEB.Adavigo.CMS.Service;
 using WEB.CMS.Customize;
+using WEB.CMS.Models.Product;
 
 namespace WEB.CMS.Controllers
 {
@@ -23,6 +24,7 @@ namespace WEB.CMS.Controllers
         private readonly IClientRepository _clientRepository;
         private readonly IContractPayRepository _contractPayRepository;
         private readonly IPaymentRequestRepository _paymentRequestRepository;
+        private readonly ProductDetailMongoAccess _productV2DetailMongoAccess;
 
         public OrderController(IConfiguration configuration, IAllCodeRepository allCodeRepository, IOrderRepository orderRepository, IClientRepository clientRepository, 
             IUserRepository userRepository, IContractPayRepository contractPayRepository, IPaymentRequestRepository paymentRequestRepository)
@@ -34,6 +36,7 @@ namespace WEB.CMS.Controllers
             _userRepository = userRepository;
             _contractPayRepository = contractPayRepository;
             _paymentRequestRepository = paymentRequestRepository;
+            _productV2DetailMongoAccess = new ProductDetailMongoAccess(configuration);
         }
         public IActionResult Index()
         {
@@ -195,8 +198,19 @@ namespace WEB.CMS.Controllers
 
             try
             {
-
-                return PartialView();
+                ViewBag.domainImg = _configuration["DomainConfig:ImageStatic"];
+                var list_OrderDetail =await _orderRepository.GetListOrderDetail(orderId);
+                var ids= list_OrderDetail.Select(s=>s.ProductId).ToList();
+                var List_product = await _productV2DetailMongoAccess.GetListByIds(string.Join(",", ids));
+                ViewBag.data = List_product;
+                var dataOrder = await _orderRepository.GetOrderDetailByOrderId(orderId);
+                ViewBag.dataOrder = dataOrder;
+                var data2 = await _contractPayRepository.GetContractPayByOrderId(orderId);
+                if (data2 != null)
+                {
+                    ViewBag.paymentAmount = data2.Sum(s => s.AmountPay);
+                }
+                return PartialView(list_OrderDetail);
             }
             catch (Exception ex)
             {

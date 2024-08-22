@@ -65,6 +65,7 @@ namespace DAL.StoreProcedure
         public const string Sp_GetListComments = "Sp_GetListComments";
         public const string SP_GetListAccountAccessAPI = "SP_GetListAccountAccessAPI";
         public const string SP_GetDetailOrderByOrderId = "SP_GetDetailOrderByOrderId";
+        public const string SP_GetListOrderDetail = "SP_GetListOrderDetail";
 
     }
     

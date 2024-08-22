@@ -214,6 +214,9 @@ namespace Entities.ViewModels
         public string SalerGroupId { get; set; }
         public string BranchCodeName { get; set; }
         public string code { get; set; }
+        public long Discount { get; set; }
+        public long Profit { get; set; }
+        public long Refund { get; set; }
     }
     public class OrderServiceViewModel
     {

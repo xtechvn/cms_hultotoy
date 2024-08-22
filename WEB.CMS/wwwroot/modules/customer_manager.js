@@ -224,7 +224,8 @@ $(document).ready(function () {
 
     });
     _customer_manager.ClearlocalStorage();
-
+    var model = [{ url: '/', name: 'Trang chủ' }, { url: '/CustomerManager/Index', name: 'Quản lý khách hàng', activated: true }]
+    _global_function.RenderBreadcumb(model)
 });
 
 var _customer_manager = {
