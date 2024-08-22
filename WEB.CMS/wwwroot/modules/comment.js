@@ -112,7 +112,6 @@ var _comment =
         var DateSelected = this.getDateTimeRanges($("#DateInput").find(':selected').val());
         obj.createDateFrom = DateSelected.start;
         obj.createDateTo = DateSelected.end;
-        console.log(obj);
         this.GetComment();
     },
 }

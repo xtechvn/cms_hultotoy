@@ -160,8 +160,6 @@
             "Description": Description
         }
 
-        console.log(AccountAccessAPI, CodeValue, Id_AccountAccessAPIPermission)
-
         let urlAAA = "/AccountAccessAPI/UpdateAccountAccessAPI";
 
 
