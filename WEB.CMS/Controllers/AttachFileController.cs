@@ -1,21 +1,9 @@
-﻿using Entities.Models;
-using Entities.ViewModels.Attachment;
-using ENTITIES.ViewModels.AttachFiles;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+﻿using Entities.ViewModels.Attachment;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Repositories.IRepositories;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using Utilities;
 using Utilities.Contants;
+using Utilities;
 using WEB.CMS.Models;
 
 namespace WEB.CMS.Controllers
@@ -31,8 +19,7 @@ namespace WEB.CMS.Controllers
             _WebHostEnvironment = hostEnvironment;
             config = ReadFile.LoadConfig();
         }
-
-        public async Task<IActionResult> Widget(string id,long DataId, int Type, AttachmentsOption option)
+        public async Task<IActionResult> Widget(string id, long DataId, int Type, AttachmentsOption option)
         {
             var _UserLogin = 0;
             if (HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
@@ -65,7 +52,7 @@ namespace WEB.CMS.Controllers
                     foreach (var file in files)
                     {
                         string _FileName = file.FileName;
-                        string _UploadFolder = @"uploads/images/"+ _UserLogin;
+                        string _UploadFolder = @"uploads/images/" + _UserLogin;
                         string _UploadDirectory = Path.Combine(_WebHostEnvironment.WebRootPath, _UploadFolder);
 
                         if (!Directory.Exists(_UploadDirectory))
@@ -119,14 +106,14 @@ namespace WEB.CMS.Controllers
             {
                 var key = MFAService.Get_AESKey(MFAService.ConvertBase64StringToByte(ReadFile.LoadConfig().AES_KEY));
                 var iv = MFAService.Get_AESIV(MFAService.ConvertBase64StringToByte(ReadFile.LoadConfig().AES_IV));
-                
+
 
                 var _UserLogin = 0;
                 if (HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
                 {
                     _UserLogin = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 }
-                if(files != null && files.Count > 0)
+                if (files != null && files.Count > 0)
                 {
                     string url_post = config.IMAGE_DOMAIN + config.API_STATIC_UPLOADFILE;
                     var _httpClient = new HttpClient();
@@ -135,7 +122,7 @@ namespace WEB.CMS.Controllers
                         string full_path = Directory.GetCurrentDirectory() + "\\wwwroot\\" + file.path.Replace("/", "\\");
                         try
                         {
-                            var path =  file.path.Split("/");
+                            var path = file.path.Split("/");
                             var file_name = path[path.Length - 1];
                             var encrypt = MFAService.AES_EncryptToByte(DateTime.Now.ToString(), key, iv);
                             var token = MFAService.ConvertByteToBase64String(encrypt);
@@ -143,11 +130,11 @@ namespace WEB.CMS.Controllers
                             var readFileData = System.IO.File.ReadAllBytes(full_path);
                             //Create Multipart Request
                             var formContent = new MultipartFormDataContent();
-                            
+
                             ByteArrayContent bytes = new ByteArrayContent(readFileData);
                             MultipartFormDataContent multiContent = new MultipartFormDataContent();
                             formContent.Add(bytes, "data", path[path.Length - 1]);
-                            
+
                             formContent.Add(new StringContent(path[path.Length - 1]), "name");
                             formContent.Add(new StringContent(data_id.ToString()), "data_id");
                             formContent.Add(new StringContent(service_type.ToString()), "type");
@@ -156,8 +143,8 @@ namespace WEB.CMS.Controllers
                             if (response.StatusCode == System.Net.HttpStatusCode.OK)
                             {
                                 var content = Newtonsoft.Json.Linq.JObject.Parse(response.Content.ReadAsStringAsync().Result);
-                                if (content["status"]!=null && content["status"].ToString()!=null && content["status"].ToString().Trim()!=""
-                                    && content["url"]!=null && content["url"].ToString()!=null && content["url"].ToString().Trim()!="")
+                                if (content["status"] != null && content["status"].ToString() != null && content["status"].ToString().Trim() != ""
+                                    && content["url"] != null && content["url"].ToString() != null && content["url"].ToString().Trim() != "")
                                 {
                                     file.path = config.IMAGE_DOMAIN + content["url"].ToString();
                                     try
@@ -166,19 +153,19 @@ namespace WEB.CMS.Controllers
                                     }
                                     catch { }
                                 }
-                               
+
                             }
 
                         }
                         catch
                         {
-                          
+
                         }
                         var ext_split = file.path.Split(".");
                         file.ext = ext_split[^1];
                     }
                     await _AttachFileRepository.SaveAttachFileURL(files, data_id, _UserLogin, service_type);
-                    await _AttachFileRepository.DeleteNonExistsAttachFile(files.Select(x=>x.id).ToList(), data_id, service_type);
+                    await _AttachFileRepository.DeleteNonExistsAttachFile(files.Select(x => x.id).ToList(), data_id, service_type);
                     return Ok(new
                     {
                         status = (int)ResponseType.SUCCESS,

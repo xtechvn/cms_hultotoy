@@ -7,10 +7,15 @@
   "KEY_TOKEN_CMS": "1372498309AAH0fVro47y1o5mIIcwVkR3k",
   "API_SYNC_ARTICLE": "/api/caching/sync-article.json",
   "API_SYNC_CATEGORY": "/api/caching/sync-category.json",
-  "API_ADAVIGO_URL": "http://qc-api-hulotoy.x-tech.vn",
+  "API_URL": "http://qc-api-hulotoy.x-tech.vn",
   "ROLE_ADMIN": "1",
   "LoginURL": "/Account/Login",
-  "SIZE_IMG": "16x9"
+  "SIZE_IMG": "16x9",
+  "LoginTokenExprire": 4000,
+  "AES_KEY": "bXny0OMniop5U1fpZ6u7zAHg7KxRdUcp7OuhU7L9Oo62k+FLShyDuwjBGuXWtRMK",
+  "AES_IV": "KFavGEDPdhddqjl9CQVC2c0jYoMJKzmqlBDS+JBbSK6QwgG79XWs9ltH0i5DaJm2",
+  "Images_Location": "images",
+  "Images_URL": "/images"
 
 
 }

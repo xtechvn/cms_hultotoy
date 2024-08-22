@@ -1,6 +1,11 @@
 ﻿using Entities.ViewModels.Products;
 using MongoDB.Driver;
+using Nest;
 using Newtonsoft.Json;
+using System.Collections.Concurrent;
+using System.Reflection;
+using Utilities.Contants;
+using Utilities.Contants.ProductV2;
 
 namespace WEB.CMS.Models.Product
 {
@@ -91,8 +96,45 @@ namespace WEB.CMS.Models.Product
                 return null;
             }
         }
-        
+        public async Task<List<ProductMongoDbModel>> SubListing(string parent_id)
+        {
+            try
+            {
+                var filter = Builders<ProductMongoDbModel>.Filter;
+                var filterDefinition = filter.Empty;
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.parent_product_id, parent_id);
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.status, (int)ProductStatus.ACTIVE); ;
 
+                var model = _productDetailCollection.Find(filterDefinition);
+                var result = await model.ToListAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Utilities.LogHelper.InsertLogTelegram("ProductDetailMongoAccess - SubListing Error: " + ex);
+                return null;
+            }
+        }
+       
+        public async Task<string> DeactiveByParentId(string id)
+        {
+            try
+            {
+                var filter = Builders<ProductMongoDbModel>.Filter;
+                var filterDefinition = filter.Empty;
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.parent_product_id, id);
+                var update = Builders<ProductMongoDbModel>.Update.Set(x => x.status, (int)ProductStatus.DEACTIVE);
+
+                var updated_item = await _productDetailCollection.UpdateManyAsync(filterDefinition, update);
+                return id;
+            }
+            catch (Exception ex)
+            {
+                Utilities.LogHelper.InsertLogTelegram("ProductDetailMongoAccess - DeactiveByParentId Error: " + ex);
+            }
+            return null;
+
+        }
 
     }
 }

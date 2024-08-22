@@ -307,7 +307,7 @@ namespace WEB.CMS.Controllers
             try
             {
                 var api = new APIService2(_configuration);
-                var apiPrefix = ReadFile.LoadConfig().API_ADAVIGO_URL + ReadFile.LoadConfig().API_SYNC_ARTICLE;
+                var apiPrefix = ReadFile.LoadConfig().API_URL + ReadFile.LoadConfig().API_SYNC_ARTICLE;
                 var key_token_api = ReadFile.LoadConfig().KEY_TOKEN_API;
                 HttpClient httpClient = new HttpClient();
                 var j_param = new Dictionary<string, string> {

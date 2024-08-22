@@ -62,7 +62,7 @@ namespace WEB.Adavigo.CMS.Controllers
             try
             {
                 var key_token_api = _configuration["DataBaseConfig:key_api:api_manual"];
-                string ApiPrefix = ReadFile.LoadConfig().API_URL + ReadFile.LoadConfig().API_ALLCODE;
+                //string ApiPrefix = ReadFile.LoadConfig().API_URL + ReadFile.LoadConfig().API_ALLCODE;
                 var AgencyType = _allCodeRepository.GetListByType(AllCodeType.AGENCY_TYPE);
                 var PermisionType = _allCodeRepository.GetListByType(AllCodeType.PERMISION_TYPE);
                 var ClientType = _allCodeRepository.GetListByType(AllCodeType.CLIENT_TYPE);
@@ -438,16 +438,16 @@ namespace WEB.Adavigo.CMS.Controllers
             {
 
                 var key_token_api = _configuration["DataBaseConfig:key_api:api_manual"];
-                string ApiPrefix = ReadFile.LoadConfig().API_URL + ReadFile.LoadConfig().API_ALLCODE;
+                //string ApiPrefix = ReadFile.LoadConfig().API_URL + ReadFile.LoadConfig().API_ALLCODE;
 
-                var ClientType = await _allCodeRepository.GetAllCodeValueByType<AllCodeData>(ApiPrefix, key_token_api, "type", "CLIENT_TYPE");
-                var PermisionType = await _allCodeRepository.GetAllCodeValueByType<AllCodeData>(ApiPrefix, key_token_api, "type", "PERMISION_TYPE");
+                var ClientType =  _allCodeRepository.GetListByType( "CLIENT_TYPE");
+                var PermisionType = _allCodeRepository.GetListByType( "PERMISION_TYPE");
                 if (id != 1)
                 {
                     return Ok(new
                     {
                         status = (int)ResponseType.SUCCESS,
-                        data = ClientType.Data
+                        data = ClientType
                     });
                 }
                 else
@@ -455,7 +455,7 @@ namespace WEB.Adavigo.CMS.Controllers
                     return Ok(new
                     {
                         status = (int)ResponseType.SUCCESS,
-                        data = PermisionType.Data
+                        data = PermisionType
                     });
                 }
 
@@ -732,7 +732,7 @@ namespace WEB.Adavigo.CMS.Controllers
             }
             catch (Exception ex)
             {
-                LogHelper.InsertLogTelegram("UserSuggestion - OrderManualController: " + ex.ToString());
+                LogHelper.InsertLogTelegram("UserSuggestion - CustomerManagerController: " + ex.ToString());
                 return Ok(new
                 {
                     status = (int)ResponseType.SUCCESS,

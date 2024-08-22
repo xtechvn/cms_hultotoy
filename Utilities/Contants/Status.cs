@@ -58,6 +58,7 @@ namespace Utilities.Contants
         THANH_TOAN_DICH_VU = 1,
         THANH_TOAN_KHAC = 2,
         HOAN_TRA_KHACH_HANG = 3,
+        CHI_PHI_MARKETING = 4,
     }
 
     public enum INVOICE_REQUEST_STATUS

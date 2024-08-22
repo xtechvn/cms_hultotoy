@@ -13,11 +13,11 @@ let fields = {
     NhomKH: true,
     TongTT: true,
     VNPhuTrach: true,
-    NgayTao: false,
-    NgayCN: false,
-    NgayDuyet: false,
-    NguoiTao: false,
-    Status: false,
+    NgayTao: true,
+    NgayCN: true,
+    NgayDuyet: true,
+    NguoiTao: true,
+    Status: true,
 }
 let _searchModel = {
     MaKH: null,
@@ -43,6 +43,7 @@ var x = localStorage.getItem("cookiesearchModel");
 var textClient = localStorage.getItem("textClient");
 var textNV = localStorage.getItem("textNV");
 var textNT = localStorage.getItem("textNT");
+
 $(document).ready(function () {
 
     var user_Id = $('#id_userid').val();
@@ -223,7 +224,7 @@ $(document).ready(function () {
 
     });
     _customer_manager.ClearlocalStorage();
- 
+
 });
 
 var _customer_manager = {

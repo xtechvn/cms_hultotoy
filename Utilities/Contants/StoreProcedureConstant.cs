@@ -302,6 +302,7 @@ namespace Utilities.Contants
         public static string sp_UpdateUserAgent = "sp_UpdateUserAgent";
         public static string SP_InsertUserAgent = "SP_InsertUserAgent";
         public static string SP_GetUserAgentByClientId = "SP_GetUserAgentByClientId";
+        public static string Sp_UpdateOrder = "Sp_UpdateOrder";
 
 
         #region vin wonder

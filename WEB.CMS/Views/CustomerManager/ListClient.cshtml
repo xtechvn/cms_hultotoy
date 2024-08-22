@@ -15,32 +15,31 @@
 }
 else
 {
-<div class="wrap_bg wrap_bg_no-padding mb20">
-    <div class="table-responsive table-default table-gray wrap_bg wrap_bg_no-padding">
+    <input id="countClient" value="@Model.TotalRecord" style="display:none" />
+    <div class="table-responsive table-default table-scroll">
         <table class="table table-nowrap">
-            <thead>
+            <thead class="text-uppercase">
                 <tr>
                     <th style="width: 40px;">STT</th>
                     <th style="width: 80px;">Mã khách hàng</th>
-                    <th class="mfp-hide" style="width: 160px;">Tên khách hàng</th>
-                    <th class="mfp-hide" style="width: 100px;">Liên hệ</th>
-                    <th class="mfp-hide" style="width: 80px;">Đối tượng</th>
-                    <th class="mfp-hide" style="width: 100px;">Loại khách hàng</th>
-                    <th class="mfp-hide" style="width: 130px;">Nhóm khách hàng</th>
+                    <th class="" style="width: 160px;">Tên khách hàng</th>
+                    <th class="" style="width: 100px;">Liên hệ</th>
+                    <th class="" style="width: 80px;">Đối tượng</th>
+                    <th class="" style="width: 100px;">Loại khách hàng</th>
+                    <th class="" style="width: 130px;">Nhóm khách hàng</th>
 
-                    <th class="mfp-hide text-right" style="width: 100px;">Tổng thanh toán</th>
+                    <th class=" text-right" style="width: 100px;">Tổng thanh toán</th>
 
-                    <th class="mfp-hide" style="width: 150px;">Nhân viên phụ trách</th>
+                    <th class="" style="width: 150px;">Nhân viên phụ trách</th>
 
-                    <th class="mfp-hide" style="width: 100px;">Ngày tạo</th>
+                    <th class="" style="width: 100px;">Ngày tạo</th>
 
-                    <th class="mfp-hide" style="width: 120px;">Ngày cập nhật</th>
+                    <th class="" style="width: 120px;">Ngày cập nhật</th>
 
-                    <th class="mfp-hide" style="width: 120px;">Người tạo</th>
-                    <th class="mfp-hide" style="width: 100px;">Trạng thái</th>
+                    <th class="" style="width: 120px;">Người tạo</th>
+                    @*<th class="" style="width: 100px;">Trạng thái</th>*@
                 </tr>
             </thead>
-
             <tbody>
 
                 @if (Model.ListData != null && Model.ListData.Count > 0)
@@ -52,28 +51,28 @@ else
                         STT++;
                         <tr>
                             <td>@STT</td>
-                            <td >
+                            <td>
                                 <a class="blue" href="/CustomerManager/Detail/@item.Id">@(item.ClientCode!=""? item.ClientCode: item.Id.ToString())</a>
 
                             </td>
-                            <td class="mfp-hide"> <a class="blue" href="/CustomerManager/Detail/@item.Id">@item.ClientName</a></td>
-                            <td class="mfp-hide">
+                            <td class=""> <a class="blue" href="/CustomerManager/Detail/@item.Id">@item.ClientName</a></td>
+                            <td class="">
                                 <div>@item.Phone</div>
                                 <div>@item.Email</div>
                             </td>
-                            <td class="mfp-hide">@(item.AgencyType_name != "" ? item.AgencyType_name : "Cá nhân")</td>
-                            <td class="mfp-hide">@item.client_type_name</td>
-                            <td class="mfp-hide">@(item.PermisionType_name != "" ? item.PermisionType_name : "Không được công nợ")</td>
+                            <td class="">@(item.AgencyType_name != "" ? item.AgencyType_name : "Cá nhân")</td>
+                            <td class="">@item.client_type_name</td>
+                            <td class="">@(item.PermisionType_name != "" ? item.PermisionType_name : "Không được công nợ")</td>
 
-                            <td class="mfp-hide text-right">@item.sum_payment.ToString("###,###,###")</td>
-                            <td class="mfp-hide">@(item.UserId_name == null ? "N/A" : item.UserId_name)</td>
-                            
+                            <td class=" text-right">@item.sum_payment.ToString("###,###,###")</td>
+                            <td class="">@(item.UserId_name == null ? "N/A" : item.UserId_name)</td>
 
-                            <td class="mfp-hide">@item.JoinDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                            <td class="mfp-hide">@(item.UpdateLast != "" ?Convert.ToDateTime(item.UpdateLast).ToString("dd/MM/yyy HH:mm:ss") : "N/A")</td>
-                            <td class="mfp-hide">@(item.Create_name == null ? "N/A" : item.Create_name)</td>
 
-                            <td class="mfp-hide">
+                            <td class="">@item.JoinDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            <td class="">@(item.UpdateLast != "" ?Convert.ToDateTime(item.UpdateLast).ToString("dd/MM/yyy HH:mm:ss") : "N/A")</td>
+                            <td class="">@(item.Create_name == null ? "N/A" : item.Create_name)</td>
+
+                            @*<td class="">
                                 <div class="on-off-btn">
                                     @if (item.ACStatus == 0)
                                     {
@@ -86,7 +85,7 @@ else
                                         <i id="Status_1_@item.Id" class="fa fa-power-off status-red" aria-hidden="true" onclick="_customer_manager.OnResetStatus(@item.Id,'1')"></i>
                                     }
                                 </div>
-                            </td>
+                            </td>*@
 
                         </tr>
                     }
@@ -95,41 +94,22 @@ else
             </tbody>
         </table>
     </div>
-    <style>
-        .status-grey {
-            font-size: 12px;
-            background: #40424452;
-            color: #fff;
-            padding: 2px 10px;
-            border-radius: 5px;
-        }
-    </style>
-    @*@await Component.InvokeAsync("Paging", new
-        {
-            pageModel = new Paging()
-            {
-                TotalRecord = Model.TotalRecord,
-                TotalPage = Model.TotalPage,
-                CurrentPage = Model.CurrentPage,
-                PageSize = Model.PageSize,
-                RecordName = "Khách hàng",
-                PageAction = "_customer_manager.ClientOnPaging({0})"
-            }
-        })*@
-    <input id="countClient" value="@Model.TotalRecord" style="display:none"/>
-    @await Component.InvokeAsync("PagingNew", new
-{
-    
-        pageModel = new Paging()
-        {
-            TotalRecord = Model.TotalRecord,
-            TotalPage = Model.TotalPage,
-            CurrentPage = Model.CurrentPage,
-            PageSize = Model.PageSize,
-            RecordName = "Khách hàng",
-            PageAction = "_customer_manager.ClientOnPaging({0})",
-            PageSelectPageSize = "_customer_manager.onSelectPageSize()"
-        }
-    })
-</div>
+    <div class="bottom-action flex flex-nowrap gap10 justify-content-end mt-3">
+        <button class="btn btn-default white" style="padding: 0 10px;">
+            <i class="icofont-gear"></i>
+            <span>Tùy chỉnh</span>
+        </button>
+        <div class="form-group select-icon">
+            <select class="select2" id="selectPaggingOptions" onchange="_customer_manager.onSelectPageSize()">
+                <option value="10" selected>10 kết quả/trang</option>
+                <option value="20">20 kết quả/trang</option>
+                <option value="50">50 kết quả/trang</option>
+                <option value="100">100 kết quả/trang</option>
+                <option value="200">200 kết quả/trang</option>
+            </select>
+        </div>
+    </div>
+    <script>
+        $('#selectPaggingOptions').select2();
+    </script>
 }

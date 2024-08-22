@@ -7,7 +7,7 @@ namespace Entities.ViewModels
     public class OrderViewModel
     {
         public string OrderId { get; set; }
-        public string OrderCode { get; set; }
+        public string OrderNo { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public string ClientName { get; set; }
@@ -23,14 +23,14 @@ namespace Entities.ViewModels
         public string Status { get; set; }
         public int StatusCode { get; set; }
         public int PayDetailId { get; set; }
-        public string CreateDate { get; set; }
+        public DateTime CreateTime { get; set; }
         public string CreateName { get; set; }
         public string UpdateName { get; set; }
-        public string UpdateDate { get; set; }
+        public DateTime UpdateLast { get; set; }
         public string SalerName { get; set; }
         public string SalerUserName { get; set; }
         public string SalerEmail { get; set; }
-        public string SaleGroupName { get; set; }
+        public string SalerGroupName { get; set; }
         public string PaymentStatus { get; set; }
         public double TotalDisarmed { get; set; }
         public double TotalAmount{ get; set; }
@@ -97,7 +97,35 @@ namespace Entities.ViewModels
         public string[] SuggestOrder { get; set; }
 
     }
-    
+    public class OrderViewSearchModel
+    {
+        public int SysTemType { get; set; } = -1;
+        public string PaymentStatus { get; set; }
+        public string PermisionType { get; set; }
+        public string[] HINHTHUCTT { get; set; }
+
+        public string OrderNo { get; set; }
+        public DateTime? StartDateFrom { get; set; }
+        public DateTime? StartDateTo { get; set; }
+        public DateTime? EndDateFrom { get; set; }
+        public DateTime? EndDateTo { get; set; }
+        public string Note { get; set; }
+        public string UtmSource { get; set; }
+        public List<int>? ServiceType { get; set; }
+        public List<int>? Status { get; set; }
+        public string CreateTime { get; set; }
+        public string ToDateTime { get; set; }
+        public string CreateName { get; set; }
+        public string OperatorId { get; set; }
+        public string Sale { get; set; }
+        public string SaleGroup { get; set; }
+        public string ClientId { get; set; }
+        public string SalerPermission { get; set; }
+        public string BoongKingCode { get; set; }
+        public int StatusTab { get; set; } = 99;
+        public int PageIndex { get; set; }
+        public int pageSize { get; set; }
+    }
     public class SearchOrder
     {
         public string Id { get; set; }
@@ -153,11 +181,10 @@ namespace Entities.ViewModels
         public DateTime EndDate { get; set; }
         public DateTime CreateTime { get; set; }
         public double Amount { get; set; }
-        public string OrderStatus { get; set; }
         public int Status { get; set; }
-        public string PaymentStatus { get; set; }
         public string PermisionTypeName { get; set; }
         public string FullName { get; set; }
+        public string UserUpdateFullName { get; set; }
         public double AmountPay { get; set; }
         public string ClientName { get; set; }
         public string Email { get; set; }
@@ -166,9 +193,27 @@ namespace Entities.ViewModels
         public string BusinessAddress { get; set; }
         public double Id { get; set; }
         public long ClientId { get; set; }
+        public long CreatedBy { get; set; }
         public int ContactClientId { get; set; }
         public int SalerId { get; set; }
-
+        public DateTime? UpdateLast { get; set; }
+        public long? UserUpdateId { get; set; }
+        public long? AccountClientId { get; set; }
+        public int? OrderStatus { get; set; }
+        public string BankCode { get; set; }
+        public string Note { get; set; }
+        public short? BranchCode { get; set; }
+        public int? PaymentStatus { get; set; }
+        public byte? ServiceType { get; set; }
+        public short? SystemType { get; set; }
+        public string OrderStatusName { get; set; }
+        public string PaymentStatusName { get; set; }
+        public string SystemTypeName { get; set; }
+        public string PaymentTypeName { get; set; }
+        public DateTime PaymentDate { get; set; }
+        public string SalerGroupId { get; set; }
+        public string BranchCodeName { get; set; }
+        public string code { get; set; }
     }
     public class OrderServiceViewModel
     {
@@ -224,6 +269,9 @@ namespace Entities.ViewModels
         public int Status { get; set; }
         public double Amount { get; set; }
         public string ClientId { get; set; }
+        public string Note { get; set; }
+        public string StatusName { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
     public class OrderandService
     {
