@@ -51,7 +51,7 @@ var _comment =
                             <h7>${item.email}</h7>
                         </div>
                     </td>
-                    <td class="OptionRow" style="max-width:500px">
+                    <td class="OptionRow" style="max-width:500px;word-wrap: break-word">
                         <div class="">${item.content}</div>
                     </td>
                     <td class="OptionRow">
