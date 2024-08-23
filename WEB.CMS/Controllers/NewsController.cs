@@ -49,7 +49,7 @@ namespace WEB.CMS.Controllers
 
         public async Task<IActionResult> Index()
         {
-           var NEWS_CATEGORY_ID = Convert.ToInt32(_configuration["Config:default_news_root_group"]);
+            var NEWS_CATEGORY_ID = Convert.ToInt32(_configuration["Config:default_news_root_group"]);
             ViewBag.ListArticleStatus = await _CommonRepository.GetAllCodeByType(AllCodeType.ARTICLE_STATUS);
             ViewBag.StringTreeViewCate = await _GroupProductRepository.GetListTreeViewCheckBox(NEWS_CATEGORY_ID, -1);
             ViewBag.ListAuthor = await _UserRepository.GetUserSuggestionList(string.Empty);
@@ -70,7 +70,7 @@ namespace WEB.CMS.Controllers
             try
             {
                 model = _ArticleRepository.GetPagingList(searchModel, currentPage, pageSize);
-                ViewBag.ListID = (model!=null&&model.ListData!=null&& model.ListData.Select(x => x.Id).ToList() != null && model.ListData.Select(x => x.Id).ToList().Count>0) ? JsonConvert.SerializeObject(model.ListData.Select(x => x.Id).ToList()) : "";
+                ViewBag.ListID = (model != null && model.ListData != null && model.ListData.Select(x => x.Id).ToList() != null && model.ListData.Select(x => x.Id).ToList().Count > 0) ? JsonConvert.SerializeObject(model.ListData.Select(x => x.Id).ToList()) : "";
             }
             catch
             {
@@ -82,7 +82,7 @@ namespace WEB.CMS.Controllers
         public async Task<IActionResult> Detail(long Id)
         {
             var model = new ArticleModel();
-           var size_img = ReadFile.LoadConfig().SIZE_IMG;
+            var size_img = ReadFile.LoadConfig().SIZE_IMG;
             ViewBag.size_img = size_img;
             if (Id > 0)
             {
@@ -138,7 +138,7 @@ namespace WEB.CMS.Controllers
         {
             try
             {
-                
+
                 var settings = new JsonSerializerSettings
                 {
                     NullValueHandling = NullValueHandling.Ignore,
@@ -156,7 +156,7 @@ namespace WEB.CMS.Controllers
                 }
 
                 model.Body = ArticleHelper.HighLightLinkTag(model.Body);
-                if (model.Body == null || model.Body.Trim() == ""|| model.Title == null || model.Title.Trim() == "" || model.Lead == null || model.Lead.Trim() == "")
+                if (model.Body == null || model.Body.Trim() == "" || model.Title == null || model.Title.Trim() == "" || model.Lead == null || model.Lead.Trim() == "")
                 {
                     return new JsonResult(new
                     {
@@ -164,7 +164,7 @@ namespace WEB.CMS.Controllers
                         message = "Phần Tiêu đề, Mô tả và Nội dung bài viết không được để trống"
                     });
                 }
-                if(model.Lead.Length >= 400)
+                if (model.Lead.Length >= 400)
                 {
                     return new JsonResult(new
                     {
@@ -181,7 +181,7 @@ namespace WEB.CMS.Controllers
                     if (model.Categories != null && model.Categories.Count > 0)
                         strCategories = string.Join(",", model.Categories);
 
-                    await ClearCacheArticle(articleId, strCategories);
+                     ClearCacheArticle(articleId, strCategories);
 
                     return new JsonResult(new
                     {
@@ -233,7 +233,7 @@ namespace WEB.CMS.Controllers
                 {
                     //  clear cache article
                     var Categories = await _ArticleRepository.GetArticleCategoryIdList(Id);
-                    await ClearCacheArticle(Id, string.Join(",", Categories));
+                    ClearCacheArticle(Id, string.Join(",", Categories));
 
                     return new JsonResult(new
                     {
@@ -272,7 +272,7 @@ namespace WEB.CMS.Controllers
                 if (rs > 0)
                 {
                     //  clear cache article
-                    await ClearCacheArticle(Id, string.Join(",", Categories));
+                    ClearCacheArticle(Id, string.Join(",", Categories));
 
                     return new JsonResult(new
                     {
@@ -315,7 +315,19 @@ namespace WEB.CMS.Controllers
                     { "category_id",ArrCategoryId }
                 };
                 api.POST(ReadFile.LoadConfig().API_SYNC_ARTICLE, j_param);
-               
+                var category_list_id = ArrCategoryId.Split(",");
+                foreach (var item in category_list_id)
+                {
+                    var j_param2 = new Dictionary<string, string> {
+                        { "category_id", ArrCategoryId.ToString() },
+                        { "skip","1" },
+                        { "take","10" }
+                    };
+                    api.POST(_configuration["API:Api_get_list_by_categoryid_order"], j_param);
+                    api.POST(_configuration["API:Api_get_list_by_categoryid"], j_param);
+                }
+
+
             }
             catch (Exception ex)
             {
@@ -323,7 +335,7 @@ namespace WEB.CMS.Controllers
             }
         }
         [HttpPost]
-        public  async Task<List<NewsViewCount>> GetPageViewByList(List<long> article_id)
+        public async Task<List<NewsViewCount>> GetPageViewByList(List<long> article_id)
         {
             try
             {
@@ -334,8 +346,8 @@ namespace WEB.CMS.Controllers
             {
 
             }
-            return null;        
+            return null;
         }
-        
+
     }
 }
