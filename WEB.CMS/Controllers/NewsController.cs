@@ -319,12 +319,12 @@ namespace WEB.CMS.Controllers
                 foreach (var item in category_list_id)
                 {
                     var j_param2 = new Dictionary<string, string> {
-                        { "category_id", ArrCategoryId.ToString() },
+                        { "category_id", item },
                         { "skip","1" },
                         { "take","10" }
                     };
-                    api.POST(_configuration["API:Api_get_list_by_categoryid_order"], j_param);
-                    api.POST(_configuration["API:Api_get_list_by_categoryid"], j_param);
+                    api.POST(_configuration["API:Api_get_list_by_categoryid_order"], j_param2);
+                    api.POST(_configuration["API:Api_get_list_by_categoryid"], j_param2);
                 }
 
 
