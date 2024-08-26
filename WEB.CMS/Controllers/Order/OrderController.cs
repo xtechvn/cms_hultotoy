@@ -299,7 +299,7 @@ namespace WEB.CMS.Controllers
                 if (saleid != 0) _UserId = _UserId = saleid;
                 var order = new Entities.Models.Order();
                 order.OrderId = (long)order_id;
-                order.SalerId = _UserId;
+                order.UserId = _UserId;
                 var success = await _orderRepository.UpdateOrder(order);
               
                 return Ok(new

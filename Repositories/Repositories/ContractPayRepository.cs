@@ -854,7 +854,7 @@ namespace Repositories.Repositories
                         {
                             item.PermisionType = (int)client.Result.PermisionType;
                         }
-                        item.OrderStatus = orderInfo.OrderStatus;
+                        item.OrderStatus = (byte?)orderInfo.Status;
                         //nếu đã hết phiếu thu giải trừ cho đơn thì đổi trạng thái đơn, đổi trạng thái dịch vụ theo đơn
                         if (listContractPayByOrderIdS.Count == 0)
                         {

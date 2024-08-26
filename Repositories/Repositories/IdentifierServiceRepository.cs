@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Utilities;
+using Utilities.Contants;
 
 namespace Repositories.Repositories
 {
@@ -15,11 +16,13 @@ namespace Repositories.Repositories
     {
 
         private readonly OrderDAL orderDAL;
+        private readonly ClientDAL clientDAL;
       
 
         public IdentifierServiceRepository(IOptions<DataBaseConfig> dataBaseConfig)
         {
             orderDAL = new OrderDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
+            clientDAL = new ClientDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
           
         }
 
@@ -96,6 +99,34 @@ namespace Repositories.Repositories
         }
 
 
-       
+        public async Task<string> buildClientNo( int client_type)
+        {
+            string code = ClientTypeName.service[Convert.ToInt16(client_type)];
+
+            try
+            {
+                var current_date = DateTime.Now;
+                int count = clientDAL.countClientTypeUse(client_type);
+
+                //so tu tang
+                string s_format = string.Format(String.Format("{0,5:00000}", count + 1));
+
+                //1. 2 số cuối của năm
+                string two_year_last = current_date.Year.ToString().Substring(current_date.Year.ToString().Length - 2, 2);
+
+                code = code + two_year_last + s_format;
+
+                return code;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("buildClientNo - IdentifierServiceRepository" + ex.ToString());
+                //Trả mã random
+                var rd = new Random();
+                var num_default = rd.Next(DateTime.Now.Day, DateTime.Now.Year) + rd.Next(1, 999);
+                code = code + num_default;
+                return code;
+            }
+        }
     }
 }

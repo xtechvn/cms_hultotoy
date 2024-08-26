@@ -6,14 +6,12 @@ namespace Utilities.Contants
 {
      public class ClientType
     {
-        public static int Saller = 6; //Saller
-        public static int kl = 5; //khách le
-        public static int DLC3 = 4; //Đại lý cấp 3
-        public static int DALC2 = 3; //Đại lý cấp 2
-        public static int DALC1 = 2; //Đại lý cấp 1
-        public static int DL = 1; //Đại lý
-        public static int DN = 7; //Doanh nghiêp
-        public static int CTV = 8; //Cộng tác viên
+        public static int KL = 0;
+        public static int DOI_TAC_CL = 1;
+        public static int CTV = 2;
+        public static int DAILYC1 = 3;
+        public static int DOANH_NGHIEP = 4;
+
     }
     public enum ClientTypeEnum
     {

@@ -854,6 +854,7 @@ public partial class DataMSContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.UpdateLast).HasColumnType("datetime");
+            entity.Property(e => e.UserGroupIds).HasMaxLength(250);
             entity.Property(e => e.UtmMedium).HasMaxLength(250);
             entity.Property(e => e.UtmSource).HasMaxLength(50);
         });

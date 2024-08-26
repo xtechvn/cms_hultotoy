@@ -42,9 +42,10 @@ namespace WEB.Adavigo.CMS.Controllers
         private LogCacheFilterMongoService _logCacheFilterMongoService;
         private IUserAgentRepository _userAgentRepository;
         private UserESRepository _userESRepository;
+        private IIdentifierServiceRepository _identifierServiceRepository;
 
         public CustomerManagerController(IConfiguration configuration, ICustomerManagerRepository customerManagerRepositories,  ManagementUser ManagementUser, IWebHostEnvironment WebHostEnvironment, IAccountClientRepository accountClientRepository,
-         IAllCodeRepository allCodeRepository,  IClientRepository clientRepository, IUserRepository userRepository, IBankingAccountRepository bankingAccountRepository, IUserAgentRepository userAgentRepository)
+         IAllCodeRepository allCodeRepository,  IClientRepository clientRepository, IUserRepository userRepository, IBankingAccountRepository bankingAccountRepository, IUserAgentRepository userAgentRepository, IIdentifierServiceRepository identifierServiceRepository)
         {
             _customerManagerRepositories = customerManagerRepositories;
             _configuration = configuration;
@@ -58,6 +59,7 @@ namespace WEB.Adavigo.CMS.Controllers
             _logCacheFilterMongoService = new LogCacheFilterMongoService(configuration);
             _userAgentRepository = userAgentRepository;
             _userESRepository = new UserESRepository(configuration["DataBaseConfig:Elastic:Host"]);
+            _identifierServiceRepository = identifierServiceRepository;
         }
         public async Task<IActionResult> Index()
         {
@@ -71,18 +73,7 @@ namespace WEB.Adavigo.CMS.Controllers
                 ViewBag.AgencyType = AgencyType;
                 ViewBag.PermisionType = PermisionType;
                 ViewBag.ClientType = ClientType;
-                var Saller = await _clientRepository.GetClientType(Utilities.Contants.ClientType.Saller);
-                var DALC1 = await _clientRepository.GetClientType(Utilities.Contants.ClientType.DALC1);
-                var DALC2 = await _clientRepository.GetClientType(Utilities.Contants.ClientType.DALC2);
-                var DLC3 = await _clientRepository.GetClientType(Utilities.Contants.ClientType.DLC3);
-                var DL = await _clientRepository.GetClientType(Utilities.Contants.ClientType.DL);
-                var kl = await _clientRepository.GetClientType(Utilities.Contants.ClientType.kl);
-                ViewBag.Saller = Saller.Count();
-                ViewBag.DALC1 = DALC1.Count();
-                ViewBag.DALC2 = DALC2.Count();
-                ViewBag.DL = DL.Count();
-                ViewBag.kl = kl.Count();
-                ViewBag.TT = kl.Count() + DL.Count() + DALC2.Count() + DALC1.Count() + Saller.Count();
+      
                 var current_user = _ManagementUser.GetCurrentUser();
                 ViewBag.buttomThem = 0;
                 if (current_user != null)
@@ -217,7 +208,7 @@ namespace WEB.Adavigo.CMS.Controllers
             {
                 var model = await _clientRepository.GetClientDetailByClientId(id);
 
-                if (model != null && model.ClientType != ClientType.kl)
+                if (model != null && model.ClientType != ClientType.KL)
                 {
                     ViewBag.btnStatus = 1;
                 }
@@ -255,8 +246,8 @@ namespace WEB.Adavigo.CMS.Controllers
 
                 if (email == null && DataModel.Id == 0)
                 {
-                    APIService apiService = new APIService(_configuration, _userRepository);
-                    DataModel.ClientCode = await apiService.buildClientCode(DataModel.id_ClientType);
+                    
+                    DataModel.ClientCode = await _identifierServiceRepository.buildClientNo(Convert.ToInt32(DataModel.id_ClientType));
                     var Result = _customerManagerRepositories.SetUpClient(DataModel);
                     if (Result != 0)
                     {
@@ -585,7 +576,7 @@ namespace WEB.Adavigo.CMS.Controllers
 
                 APIService apiService = new APIService(_configuration, _userRepository);
 
-                if (Ac != null && model != null && model.ClientType != ClientType.kl)
+                if (Ac != null && model != null && model.ClientType != ClientType.KL)
                 {
                     apiService.SendMailResetPassword(Ac.UserName);
                 }

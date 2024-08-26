@@ -1043,10 +1043,8 @@ namespace DAL
                 SqlParameter[] objParam_contractPayDetail = new SqlParameter[5];
                 objParam_contractPayDetail[0] = new SqlParameter("@OrderId", model.OrderId);
                 objParam_contractPayDetail[1] = new SqlParameter("@IsFinishPayment", false);
-                if (!isPayment && model.PermisionType != PermisionType.DUOC_CN)
-                    objParam_contractPayDetail[2] = new SqlParameter("@Status", Convert.ToInt32((int)OrderStatus.CREATED_ORDER));
-                else
-                    objParam_contractPayDetail[2] = new SqlParameter("@Status", model.OrderStatus);
+              
+                objParam_contractPayDetail[2] = new SqlParameter("@Status", model.OrderStatus);
                 if (!isPayment)
                     objParam_contractPayDetail[3] = new SqlParameter("@DebtStatus", Convert.ToInt32(0));
                 else
@@ -1054,13 +1052,13 @@ namespace DAL
                 objParam_contractPayDetail[4] = new SqlParameter("@PaymentStatus", isPayment ? (int)PaymentStatus.PAID_NOT_ENOUGH :
                     Convert.ToInt32((int)PaymentStatus.UNPAID));
                 _DbWorker.ExecuteNonQuery(StoreProcedureConstant.SP_UpdateOrderFinishPayment, objParam_contractPayDetail);
-                if (!isPayment && model.PermisionType != PermisionType.DUOC_CN)
-                {
-                    SqlParameter[] objParam_updateServiceStatus = new SqlParameter[2];
-                    objParam_updateServiceStatus[0] = new SqlParameter("@OrderId", model.OrderId);
-                    objParam_updateServiceStatus[1] = new SqlParameter("@Status", Convert.ToInt32((int)ServiceStatus.New));
-                    _DbWorker.ExecuteNonQuery(StoreProcedureConstant.SP_UpdateAllServiceStatusByOrderId, objParam_updateServiceStatus);
-                }
+                //if (!isPayment && model.PermisionType != PermisionType.DUOC_CN)
+                //{
+                //    SqlParameter[] objParam_updateServiceStatus = new SqlParameter[2];
+                //    objParam_updateServiceStatus[0] = new SqlParameter("@OrderId", model.OrderId);
+                //    objParam_updateServiceStatus[1] = new SqlParameter("@Status", Convert.ToInt32((int)ServiceStatus.New));
+                //    _DbWorker.ExecuteNonQuery(StoreProcedureConstant.SP_UpdateAllServiceStatusByOrderId, objParam_updateServiceStatus);
+                //}
 
                 SqlParameter[] objParam_UpdateContractPayDebtStatus = new SqlParameter[3];
                 objParam_UpdateContractPayDebtStatus[0] = new SqlParameter("@PayId", Convert.ToInt32(model.PayId));

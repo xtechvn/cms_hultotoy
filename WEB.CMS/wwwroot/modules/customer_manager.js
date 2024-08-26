@@ -45,16 +45,15 @@ var textNV = localStorage.getItem("textNV");
 var textNT = localStorage.getItem("textNT");
 
 $(document).ready(function () {
-
-    $(document).click(function (event) {
-        var $target = $(event.target);
-        if (!$target.closest('.onclick-active').length) {
-            $('.onclick-active').addClass('onclick');
-            $('.onclick-active').removeClass('onclick-active');
-            $('.form-down').hide();
+    $(document).click(function () {
+        if ($(event.target).closest('.relative').length == 0) {
+            $(".form-down").slideUp();
+            $(".onclick-togle, .dropdown .dropbtn,.down-up .onclick").removeClass('active');
+            $(".dropdown.active").find('.dropdown-content').slideUp();
+            $(".select--v2__content").slideUp();
         }
-       
     });
+
     var user_Id = $('#id_userid').val();
     if (user_Id == null) {
         
@@ -889,25 +888,6 @@ var _customer_manager = {
 
         }
     },
-    OnChangeClientType: function () {
-        var id_loaikhach = $('#id_loaikhach').val();
-        if (id_loaikhach == 5) {
-            $('#id_nhomkhach').attr('disabled', 'disabled');
-            $('#id_nhomkhach').html(`<option value="0" selected="selected">Không được công nợ</option>`);
-       
-            
-        } else {
-            $('#id_nhomkhach').html(`
-                                <option value="">Tất cả nhóm khách hàng</option>
-                                        <option value="0">Không được công nợ</option>
-                                        <option value="1">Được công nợ</option>
-                                        <option value="2">Phải ký quỹ</option>
-                                        <option value="3">Không phải ký quỹ</option>
-                            `);
-            $('#id_nhomkhach').removeAttr("disabled");
-        }
-    },
-
     setCookie: function (name, value, days) {
         var expires = "";
         if (days) {

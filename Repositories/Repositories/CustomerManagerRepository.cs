@@ -124,7 +124,7 @@ namespace Repositories.Repositories
                                 UserId = (int)model.UserId,
                             };
                             var CreateUserAgent = _UserAgentDAL.CreateUserAgent(UserAgent);
-                            if(CreateAccountClient==1 && CreateUserAgent == 1)
+                            if(CreateAccountClient > 0 && CreateUserAgent == 1)
                             {
                                 return 1;
                             }

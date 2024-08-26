@@ -43,4 +43,6 @@ public partial class Order
     public int? IsDelete { get; set; }
 
     public int? UserId { get; set; }
+
+    public string UserGroupIds { get; set; }
 }
