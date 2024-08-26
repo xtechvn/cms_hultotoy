@@ -1,4 +1,5 @@
-﻿using DAL.Generic;
+﻿using Azure.Core;
+using DAL.Generic;
 using DAL.StoreProcedure;
 using Entities.Models;
 using Entities.ViewModels;
@@ -218,29 +219,26 @@ namespace DAL
         {
             try
             {
-                SqlParameter[] objParam = new SqlParameter[47];
-                objParam[0] = new SqlParameter("@OrderId", model.OrderId);
-                objParam[1] = model.OrderNo == null ? new SqlParameter("@OrderNo", DBNull.Value) : new SqlParameter("@OrderNo", model.OrderNo);
-                objParam[3] =  new SqlParameter("@CreateTime", DBNull.Value);             
-                objParam[4] = model.Amount == null ? new SqlParameter("@Amount", DBNull.Value) : new SqlParameter("@Amount", model.Amount);             
-                objParam[5] = model.PaymentStatus == null ? new SqlParameter("@PaymentStatus", DBNull.Value) : new SqlParameter("@PaymentStatus", model.PaymentStatus);             
-                objParam[6] = model.ClientId == null ? new SqlParameter("@ClientId", DBNull.Value) : new SqlParameter("@ClientId", model.ClientId);             
-                objParam[8] = model.Status == null ? new SqlParameter("@OrderStatus", DBNull.Value) : new SqlParameter("@OrderStatus", model.Status);                        
-                objParam[10] = model.PaymentType == null ? new SqlParameter("@PaymentType", DBNull.Value) : new SqlParameter("@PaymentType", model.PaymentType);             
-                objParam[12] = new SqlParameter("@PaymentDate", DBNull.Value);             
-                objParam[14] = new SqlParameter("@ColorCode", DBNull.Value);             
-                objParam[15] = model.Discount == null ? new SqlParameter("@Discount", DBNull.Value) : new SqlParameter("@Discount", model.Discount);             
-                objParam[16] = model.Profit == null ? new SqlParameter("@Profit", DBNull.Value) : new SqlParameter("@Profit", model.Profit);             
-               
-                objParam[21] = model.Note == null ? new SqlParameter("@Note", DBNull.Value) : new SqlParameter("@Note", model.Note);             
-                objParam[22] = model.UtmSource == null ? new SqlParameter("@UtmSource", DBNull.Value) : new SqlParameter("@UtmSource", model.UtmSource);             
-                objParam[23] = new SqlParameter("@UpdateLast", model.UpdateLast);             
-                objParam[24] = model.UserId==0? new SqlParameter("@SalerId", DBNull.Value) : new SqlParameter("@SalerId", model.UserId);             
+                SqlParameter[] objParam = new SqlParameter[] {
+                     new SqlParameter("@OrderId", model.OrderId),
+                     new SqlParameter("@ClientId", model.ClientId),
+                     new SqlParameter("@OrderNo", model.OrderNo),
+                     new SqlParameter("@Price", model.Price),
+                     new SqlParameter("@Profit", model.Profit),
+                     new SqlParameter("@Discount", model.Discount),
+                     new SqlParameter("@Amount", model.Amount),
+                     new SqlParameter("@Status", model.Status),
+                     new SqlParameter("@PaymentType", model.PaymentType),
+                     new SqlParameter("@PaymentStatus", model.PaymentStatus),
+                     new SqlParameter("@UtmSource", model.UtmSource),
+                     new SqlParameter("@UtmMedium", model.UtmMedium),
+                     new SqlParameter("@Note", model.Note),
+                     new SqlParameter("@VoucherId", model.VoucherId),
+                     new SqlParameter("@IsDelete", model.IsDelete),
+                     new SqlParameter("@UserId", model.UserId),
+                     new SqlParameter("@UserGroupIds", model.UserGroupIds),
 
-                objParam[35] = model.VoucherId == null ? new SqlParameter("@VoucherId", DBNull.Value) : new SqlParameter("@VoucherId", model.VoucherId);             
-                objParam[36] = model.Price == null ? new SqlParameter("@Price", DBNull.Value) : new SqlParameter("@Price", model.Price);             
-
-                objParam[45] = model.UtmMedium == null ? new SqlParameter("@UtmMedium", DBNull.Value) : new SqlParameter("@UtmMedium", model.UtmMedium);             
+                };
 
                 return _DbWorker.ExecuteNonQuery(StoreProcedureConstant.Sp_UpdateOrder, objParam);
 

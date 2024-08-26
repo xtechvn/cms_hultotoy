@@ -78,6 +78,7 @@ namespace WEB.CMS.Models.Product
                 var filter = Builders<ProductMongoDbModel>.Filter;
                 var filterDefinition = filter.Empty;
                 filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.name, keyword);
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.parent_product_id, "");
                 if (group_id > 0)
                 {
                     filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.group_product_id, group_id.ToString());
@@ -115,7 +116,26 @@ namespace WEB.CMS.Models.Product
                 return null;
             }
         }
-       
+        public async Task<List<ProductMongoDbModel>> SubListing(IEnumerable<string> parent_id)
+        {
+            try
+            {
+                var filter = Builders<ProductMongoDbModel>.Filter;
+                var filterDefinition = filter.Empty;
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.status, (int)ProductStatus.ACTIVE); ;
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.In(x=>x.parent_product_id, parent_id);
+
+                var model = _productDetailCollection.Find(filterDefinition);
+                var result = await model.ToListAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Utilities.LogHelper.InsertLogTelegram("ProductDetailMongoAccess - SubListing Error: " + ex);
+                return null;
+            }
+        }
+
         public async Task<string> DeactiveByParentId(string id)
         {
             try

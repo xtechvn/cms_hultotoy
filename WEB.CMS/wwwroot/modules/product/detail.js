@@ -471,20 +471,18 @@ var product_detail = {
         $(product.images).each(function (index, item) {
             if (item == null || item.trim() == '') return true
             var img_src = item
-            if (!img_src.includes(product_detail_constants.StaticDomain)
+            if (!img_src.includes(_product_constants.VALUES.StaticDomain)
                 && !img_src.includes("data:image")
                 && !img_src.includes("http"))
                 img_src = _product_constants.VALUES.StaticDomain + item
-            if (!(item.includes('data:image') && item.includes('base64')) || !(item.startsWith("http"))) {
-                img_src = _product_constants.VALUES.StaticDomain+item
-            }
+          
             $('#images .list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', img_src).replaceAll('{id}', '-1'))
             $('#images .items .count').html($('#images .items .count').closest('.list').find('.magnific_popup').length)
 
         })
         //-- Avatar
         var img_src = product.avatar
-        if (!img_src.includes(product_detail_constants.StaticDomain)
+        if (!img_src.includes(_product_constants.VALUES.StaticDomain)
             && !img_src.includes("data:image")
             && !img_src.includes("http"))
             img_src = _product_constants.VALUES.StaticDomain + product.avatar

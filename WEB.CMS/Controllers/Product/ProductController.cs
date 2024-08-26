@@ -67,10 +67,12 @@ namespace WEB.CMS.Controllers
             {
                 if (page_size <= 0) page_size = 10;
                 if (page_index < 1) page_index = 1;
+                var main_products = await _productV2DetailMongoAccess.Listing(keyword, group_id, page_index, page_size);
                 return Ok(new
                 {
                     is_success = true,
-                    data = await _productV2DetailMongoAccess.Listing(keyword, group_id, page_index, page_size)
+                    data = main_products,
+                    subdata = await _productV2DetailMongoAccess.SubListing(main_products.Select(x=>x._id))
                 });
 
             }
@@ -194,8 +196,17 @@ namespace WEB.CMS.Controllers
                         }
                     }
                 }
+               
                 //-- Add/Update product_main
                 var product_main = JsonConvert.DeserializeObject<ProductMongoDbModel>(JsonConvert.SerializeObject(request));
+                //-- Add / Update Sub product
+                if (request.variations != null && request.variations.Count > 0)
+                {
+                    var amount_variations = request.variations.Select(x => x.amount);
+                    product_main.amount_max = amount_variations.OrderByDescending(x => x).First();
+                    product_main.amount_min = amount_variations.OrderBy(x => x).First();
+                    product_main.quanity_of_stock = request.variations.Sum(x => x.quanity_of_stock);
+                }
                 product_main.parent_product_id = "";
                 if (product_main._id==null || product_main._id.Trim() == "")
                 {

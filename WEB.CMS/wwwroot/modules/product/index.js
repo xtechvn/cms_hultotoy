@@ -1,4 +1,5 @@
-﻿$(document).ready(function () {
+﻿
+$(document).ready(function () {
     product_index.Initialization()
 })
 var product_index = {
@@ -35,14 +36,26 @@ var product_index = {
 
             }
         });
-        $('body').on('click', '.btn-export-excel', function () {
-
+        $('body').on('click', '.xemthem', function () {
+            var element = $(this)
+            var data_id = element.attr('data-main-id')
+            var count=0
+            $('#product_list .sub-product').each(function (index, item) {
+                var element_compare=$(this)
+                if (count >= 5) return false;
+                else if (element_compare.is(':hidden')) {
+                    element_compare.show()
+                    count++
+                }
+            })
+            element.find('nw').html('Xem thêm (còn ' + (parseInt(element.find('nw').attr('data-count')) - count) + ' phân loại)')
         });
+       
     },
     Listing: function () {
         _product_function.POST('/Product/ProductListing', product_index.Model, function (result) {
             if (result.is_success && result.data && result.data.length > 0) {
-                product_index.RenderSearch(result.data)
+                product_index.RenderSearch(result.data, result.subdata)
             }
             else {
                 $('#product_list').html('')
@@ -51,35 +64,57 @@ var product_index = {
         });
 
     },
-    RenderSearch: function (main_products) {
+    RenderSearch: function (main_products,sub_products) {
         var html = ''
+      
         $(main_products).each(function (index, item) {
-            
+            var img_src = item.avatar
+            if (!img_src.includes(_product_constants.VALUES.StaticDomain)
+                && !img_src.includes("data:image")
+                && !img_src.includes("http"))
+                img_src = _product_constants.VALUES.StaticDomain + item.avatar
+
             var html_item = _product_constants.HTML.Product
             html_item = html_item.replaceAll('{id}', item._id)
-            html_item = html_item.replaceAll('{avatar}', item.avatar)
+            html_item = html_item.replaceAll('{avatar}', img_src)
             html_item = html_item.replaceAll('{name}', item.name)           
             html_item = html_item.replaceAll('{attribute}', '')
-            if (item.amount > 0) {
-                html_item = html_item.replaceAll('{amount}', _product_function.Comma(item.amount) +' đ')
-            } 
+            var amount_html = 'Giá liên hệ'
+            if (item.amount_max != undefined
+                && item.amount_max != null
+                && item.amount_min != undefined
+                && item.amount_min != null) {
+                amount_html = _product_function.Comma(item.amount_min) + ' - '+_product_function.Comma(item.amount_max)
+            }
+            else if (item.amount != undefined
+                && item.amount != null && item.amount > 0) {
+                amount_html = global_service.Comma(item.amount)
+
+            }
+            html_item = html_item.replaceAll('{amount}', amount_html)
+
             if (item.quanity_of_stock > 0) {
                 html_item = html_item.replaceAll('{stock}', _product_function.Comma(item.quanity_of_stock))
             } 
             html_item = html_item.replaceAll('{order_count}', '')
-            var html_variations=''
-            if (item.variations && item.variations.length > 0) {
+            var html_variations = ''
+
+            var variation = sub_products.filter(obj => {
+                return obj.parent_product_id.trim() == item._id
+            })
+            if (variation && variation.length > 0) {
                 var amount=[]
                 var quanity_stock=[]
-                $(item.variations).each(function (index, sub_item) {
+                $(variation).each(function (index, sub_item) {
                     var html_sub_item = _product_constants.HTML.SubProduct
                         .replaceAll('{id}', item._id)
-                        .replaceAll('{main_id}', item._id)
+                        .replaceAll('{main_id}', item.parent_product_id)
                         .replaceAll('{name}', sub_item.name)
                         .replaceAll('{sku}', sub_item.sku)
                         .replaceAll('{amount}', _product_function.Comma(sub_item.amount) + ' đ')
                         .replaceAll('{stock}', _product_function.Comma(sub_item.quanity_of_stock))
                         .replaceAll('{order_count}', '')
+                        .replaceAll('{display}', index>1 ? 'display:none;':'')
                     var html_sub_attr = ''
 
                     //var result = jsObjects.filter(obj => {
@@ -111,6 +146,13 @@ var product_index = {
                     amount.push(sub_item.amount)
                     quanity_stock.push(sub_item.quanity_of_stock)
                 });
+                if ($(variation).length > 2) {
+                    html_variations += _product_constants.HTML.SubProductViewMore
+                        .replaceAll('{count}', ($(variation).length - 2))
+                        .replaceAll('{count_item}', ($(variation).length - 2))
+                        .replaceAll('{main_id}', (item._id))
+
+                }
                 const sum_stock = quanity_stock.reduce((partialSum, a) => partialSum + a, 0);
                 var max = Math.max(...amount);
                 var min = Math.min(...amount);
