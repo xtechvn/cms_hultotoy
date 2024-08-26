@@ -1,5 +1,6 @@
 ﻿using Azure.Core;
 using Caching.Elasticsearch;
+using Entities.ViewModels;
 using Entities.ViewModels.Comment;
 using HuloToys_Service.ElasticSearch.NewEs;
 using Microsoft.AspNetCore.Mvc;
@@ -23,12 +24,13 @@ namespace WEB.CMS.Controllers
             return View();
         }
 
-        public async Task<IActionResult> ListComment()
+        public async Task<IActionResult> ListComment(CommentParamRequest request)
         {
-            return View();
+            var lst = await _IcommentRepository.GetAllComment(request);
+            return View(lst);
         }
 
-        public async Task<List<CommentViewModel>> GetAllComment(CommentParamRequest request) 
+        public async Task<GenericViewModel<CommentViewModel>> GetAllComment(CommentParamRequest request) 
         {
             return await _IcommentRepository.GetAllComment(request);
         }

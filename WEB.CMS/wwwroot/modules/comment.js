@@ -13,69 +13,9 @@ var _comment =
 {
     LoadComment: function () {
         let url = '/Comment/ListComment';
-        _ajax_caller.post(url, null, function (result) {
+        _ajax_caller.post(url, { request: obj }, function (result) {
             $('#Comment-content').html(``);
             $('#Comment-content').append(result);
-        });
-    },
-
-    GetComment: function ()
-    {
-        let url = '/Comment/GetAllComment';
-        _ajax_caller.post(url, { request: obj }, function (result) {
-
-
-            $('#table-head').html(``);
-            $('#table-head').append(`
-            <tr class="bg-main2" style="background-color:#F3F5F8">
-            <th class="thead-fields">STT</th>
-            <th class="thead-fields">KHÁCH HÀNG</th>
-            <th class="thead-fields">NỘI DUNG CÂU HỎI - PHẢN HỒI </th>
-            <th class="thead-fields">NGÀY TẠO</th>
-            </tr>
-            `);
-            $('#table-comment-body').html(``);
-            if (result != null && result.length > 0) {
-                var STT = 1;
-                result.forEach(item => {
-                    const date = new Date(item.createdDate);
-                    const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()} ${date.getHours().toString().padStart(2,
-                        '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
-                    $('#table-comment-body').append(`
-                    <tr>
-                    <td class="OptionRow trow-fields">${STT}</td>
-                    <td class="OptionRow">
-                        <div style="display: flex; flex-direction: column;">
-                            <h5>${item.clientName}</h5>
-                            <h7>${item.phone}</h7>
-                            <h7>${item.email}</h7>
-                        </div>
-                    </td>
-                    <td class="OptionRow" style="max-width:500px;word-wrap: break-word">
-                        <div class="">${item.content}</div>
-                    </td>
-                    <td class="OptionRow">
-                        <div class="trow-fields">${formattedDate}</div>
-                    </td>
-
-                    </tr>
-                    `);
-                    STT += 1;
-                })
-            }
-            else
-            {
-                $('#table-head').html(``);
-                $('#table-head').append(`
-                <div class="search-null center mb40">
-                    <div class="mb24">
-                        <img src="/images/graphics/icon-search.png" alt="">
-                    </div>
-                    <h2 class="title txt_24">Không tìm thấy kết quả</h2>
-                    <div class="gray">Chúng tôi không tìm thấy thông tin mà bạn cần, vui lòng thử lại</div>
-                </div>
-                `);
-            }
         });
     },
     getDateTimeRanges: function (type) {
@@ -105,14 +45,34 @@ var _comment =
         }
     },
 
-    OnchangeConditions: function ()
+    OnChangePageSize: function ()
     {
         obj.pageSize = $("#selectPaggingOptions").find(':selected').val();
+        sessionStorage.setItem("SelectedPageSize", obj.pageSize);
+        obj.pageIndex = 1;
+        _comment.LoadComment();
+    },
+
+    OnChangeClient: function ()
+    {
         obj.clientID = $("#clientInput").find(':selected').val();
+        obj.pageIndex = 1;
+        _comment.LoadComment();
+    },
+
+    OnChanggeDate: function ()
+    {
         var DateSelected = this.getDateTimeRanges($("#DateInput").find(':selected').val());
         obj.createDateFrom = DateSelected.start;
         obj.createDateTo = DateSelected.end;
-        this.GetComment();
+        obj.pageIndex = 1;
+        _comment.LoadComment();
+    },
+
+    OnPanging: function (value)
+    {
+        obj.pageIndex = value;
+        _comment.LoadComment();
     },
 }
 
@@ -150,10 +110,12 @@ $(document).ready(function () {
         var DateSelected = _comment.getDateTimeRanges($("#DateInput").find(':selected').val());
         obj.createDateFrom = DateSelected.start;
         obj.createDateTo = DateSelected.end;
-        _comment.GetComment();
+        obj.pageIndex = 1;
+        _comment.LoadComment();
     });
+
+
     var InputClientElement = $('.select2-selection__arrow')
     InputClientElement[0].classList.add('ClientInput_Arrow'); 
-    _comment.GetComment();
     _comment.LoadComment();
 });
