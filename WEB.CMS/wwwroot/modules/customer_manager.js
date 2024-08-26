@@ -46,6 +46,15 @@ var textNT = localStorage.getItem("textNT");
 
 $(document).ready(function () {
 
+    $(document).click(function (event) {
+        var $target = $(event.target);
+        if (!$target.closest('.onclick-active').length) {
+            $('.onclick-active').addClass('onclick');
+            $('.onclick-active').removeClass('onclick-active');
+            $('.form-down').hide();
+        }
+       
+    });
     var user_Id = $('#id_userid').val();
     if (user_Id == null) {
         
@@ -79,7 +88,7 @@ $(document).ready(function () {
          placeholder: "Tên KH, Điện Thoại, Email",
          maximumSelectionLength: 1,
         ajax: {
-            url: "/Contract/ClientSuggestion",
+            url: "/CustomerManager/ClientSuggestion",
             type: "post",
             dataType: 'json',
             delay: 250,
@@ -96,36 +105,6 @@ $(document).ready(function () {
                     results: $.map(response.data, function (item) {
                         return {
                             text: item.clientname + ' - ' + item.email + ' - ' + item.phone,
-                            id: item.id,
-                        }
-                    })
-                };
-            },
-            cache: true
-        }
-    });
-    $("#filter-client").select2({
-        theme: 'bootstrap4',
-        placeholder: "Bộ lọc đã lưu",
-        maximumSelectionLength: 1,
-        ajax: {
-            url: "/Order/UserSuggestion",
-            type: "post",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {
-                var query = {
-                    txt_search: params.term,
-                }
-
-                // Query parameters will be ?search=[term]&type=public
-                return query;
-            },
-            processResults: function (response) {
-                return {
-                    results: $.map(response.data, function (item) {
-                        return {
-                            text: item.fullname + ' - ' + item.email,
                             id: item.id,
                         }
                     })
@@ -1406,7 +1385,13 @@ var _customer_manager = {
         this.SearchClient(objSearch);
     },
     Clearboloc: function (id) {
-        document.getElementById(id).reset()
+        document.getElementById(id).reset();
+        var text_ClientType = $('#ClientType').select2('data')[0].text;
+        var text_AgencyType = $('#AgencyType').select2('data')[0].text;
+        $('#select2-AgencyType-container').html(text_AgencyType);
+        $('#select2-AgencyType-container').title(text_AgencyType);
+        $('#select2-ClientType-container').html(text_ClientType);
+        $('#select2-ClientType-container').title(text_ClientType);
     },
     Closeboloc: function () {
         $('#bo-loc-date').hide();

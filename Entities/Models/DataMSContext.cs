@@ -29,12 +29,6 @@ public partial class DataMSContext : DbContext
 
     public virtual DbSet<AllCode> AllCodes { get; set; }
 
-    public virtual DbSet<AllotmentFund> AllotmentFunds { get; set; }
-
-    public virtual DbSet<AllotmentHistory> AllotmentHistories { get; set; }
-
-    public virtual DbSet<AllotmentUse> AllotmentUses { get; set; }
-
     public virtual DbSet<Article> Articles { get; set; }
 
     public virtual DbSet<ArticleCategory> ArticleCategories { get; set; }
@@ -44,8 +38,6 @@ public partial class DataMSContext : DbContext
     public virtual DbSet<ArticleTag> ArticleTags { get; set; }
 
     public virtual DbSet<AttachFile> AttachFiles { get; set; }
-
-    public virtual DbSet<Baggage> Baggages { get; set; }
 
     public virtual DbSet<BankOnePay> BankOnePays { get; set; }
 
@@ -57,17 +49,11 @@ public partial class DataMSContext : DbContext
 
     public virtual DbSet<CampaignAd> CampaignAds { get; set; }
 
-    public virtual DbSet<Cashback> Cashbacks { get; set; }
-
     public virtual DbSet<Client> Clients { get; set; }
 
     public virtual DbSet<ClientLinkAff> ClientLinkAffs { get; set; }
 
     public virtual DbSet<Comment> Comments { get; set; }
-
-    public virtual DbSet<ContactClient> ContactClients { get; set; }
-
-    public virtual DbSet<Contract> Contracts { get; set; }
 
     public virtual DbSet<ContractHistory> ContractHistories { get; set; }
 
@@ -86,8 +72,6 @@ public partial class DataMSContext : DbContext
     public virtual DbSet<GroupProduct> GroupProducts { get; set; }
 
     public virtual DbSet<ImageSize> ImageSizes { get; set; }
-
-    public virtual DbSet<IndustrySpecialLuxury> IndustrySpecialLuxuries { get; set; }
 
     public virtual DbSet<Invoice> Invoices { get; set; }
 
@@ -117,8 +101,6 @@ public partial class DataMSContext : DbContext
 
     public virtual DbSet<Order> Orders { get; set; }
 
-    public virtual DbSet<OrderBak> OrderBaks { get; set; }
-
     public virtual DbSet<OrderDetail> OrderDetails { get; set; }
 
     public virtual DbSet<Payment> Payments { get; set; }
@@ -137,13 +119,7 @@ public partial class DataMSContext : DbContext
 
     public virtual DbSet<PolicyDetail> PolicyDetails { get; set; }
 
-    public virtual DbSet<Position> Positions { get; set; }
-
-    public virtual DbSet<PriceProductLevel> PriceProductLevels { get; set; }
-
     public virtual DbSet<Product> Products { get; set; }
-
-    public virtual DbSet<Program> Programs { get; set; }
 
     public virtual DbSet<Province> Provinces { get; set; }
 
@@ -304,44 +280,6 @@ public partial class DataMSContext : DbContext
             entity.Property(e => e.UpdateTime).HasColumnType("datetime");
         });
 
-        modelBuilder.Entity<AllotmentFund>(entity =>
-        {
-            entity.ToTable("AllotmentFund");
-
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
-            entity.Property(e => e.UpdateTime).HasColumnType("datetime");
-        });
-
-        modelBuilder.Entity<AllotmentHistory>(entity =>
-        {
-            entity.ToTable("AllotmentHistory");
-
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
-            entity.Property(e => e.Description).HasMaxLength(200);
-
-            entity.HasOne(d => d.AllotmentFund).WithMany(p => p.AllotmentHistories)
-                .HasForeignKey(d => d.AllotmentFundId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_AllotmentHistory_AllotmentFund");
-        });
-
-        modelBuilder.Entity<AllotmentUse>(entity =>
-        {
-            entity.ToTable("AllotmentUse");
-
-            entity.Property(e => e.AllomentFundId).HasComment("Thông tin số tiền của quỹ đã được phân bổ");
-            entity.Property(e => e.AmountUse).HasComment("Số tiền đã sử dụng cho dịch vụ");
-            entity.Property(e => e.CreateDate)
-                .HasComment("Ngày tạo đơn hàng")
-                .HasColumnType("datetime");
-            entity.Property(e => e.DataId).HasComment("Là lưu trữ id dịch vụ");
-
-            entity.HasOne(d => d.AllomentFund).WithMany(p => p.AllotmentUses)
-                .HasForeignKey(d => d.AllomentFundId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_AllotmentUse_AllotmentFund");
-        });
-
         modelBuilder.Entity<Article>(entity =>
         {
             entity.ToTable("Article");
@@ -411,28 +349,6 @@ public partial class DataMSContext : DbContext
                 .HasMaxLength(30)
                 .IsUnicode(false);
             entity.Property(e => e.Path).HasMaxLength(400);
-        });
-
-        modelBuilder.Entity<Baggage>(entity =>
-        {
-            entity.ToTable("Baggage");
-
-            entity.Property(e => e.Airline)
-                .IsRequired()
-                .HasMaxLength(50);
-            entity.Property(e => e.Code)
-                .IsRequired()
-                .HasMaxLength(100);
-            entity.Property(e => e.Currency).HasMaxLength(50);
-            entity.Property(e => e.EndPoint).HasMaxLength(250);
-            entity.Property(e => e.Name)
-                .IsRequired()
-                .HasMaxLength(250);
-            entity.Property(e => e.StartPoint).HasMaxLength(250);
-            entity.Property(e => e.StatusCode).HasMaxLength(50);
-            entity.Property(e => e.Value)
-                .IsRequired()
-                .HasMaxLength(250);
         });
 
         modelBuilder.Entity<BankOnePay>(entity =>
@@ -520,16 +436,6 @@ public partial class DataMSContext : DbContext
             entity.Property(e => e.StartDate).HasColumnType("datetime");
         });
 
-        modelBuilder.Entity<Cashback>(entity =>
-        {
-            entity.ToTable("Cashback");
-
-            entity.Property(e => e.CashbackDate).HasColumnType("datetime");
-            entity.Property(e => e.CreatedOn).HasColumnType("datetime");
-            entity.Property(e => e.ModifiedOn).HasColumnType("datetime");
-            entity.Property(e => e.Note).HasMaxLength(500);
-        });
-
         modelBuilder.Entity<Client>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_tblAccount");
@@ -583,47 +489,6 @@ public partial class DataMSContext : DbContext
                 .HasMaxLength(1000);
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.ModifiedDate).HasColumnType("datetime");
-        });
-
-        modelBuilder.Entity<ContactClient>(entity =>
-        {
-            entity.ToTable("ContactClient");
-
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
-            entity.Property(e => e.Email)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-            entity.Property(e => e.Mobile)
-                .IsRequired()
-                .HasMaxLength(50)
-                .IsUnicode(false);
-            entity.Property(e => e.Name)
-                .IsRequired()
-                .HasMaxLength(50);
-        });
-
-        modelBuilder.Entity<Contract>(entity =>
-        {
-            entity.ToTable("Contract");
-
-            entity.Property(e => e.ContractDate).HasColumnType("datetime");
-            entity.Property(e => e.ContractNo)
-                .IsRequired()
-                .HasMaxLength(50)
-                .IsUnicode(false);
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
-            entity.Property(e => e.DebtType).HasComment("1: 7 ngày, 2: 15 ngày");
-            entity.Property(e => e.ExpireDate).HasColumnType("datetime");
-            entity.Property(e => e.Note).HasMaxLength(500);
-            entity.Property(e => e.ServiceType)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-            entity.Property(e => e.TotalVerify).HasComment("Tổng số lần được duyệt của hợp đồng. Cộng dồn sau mỗi lần duyệt");
-            entity.Property(e => e.UpdateLast).HasColumnType("datetime");
-            entity.Property(e => e.UserIdVerify).HasComment("AccountClientID là user sẽ duyệt hđ này");
-            entity.Property(e => e.VerifyDate)
-                .HasComment("Ngày duyệt hợp đồng")
-                .HasColumnType("datetime");
         });
 
         modelBuilder.Entity<ContractHistory>(entity =>
@@ -796,19 +661,6 @@ public partial class DataMSContext : DbContext
             entity.Property(e => e.PositionName)
                 .IsRequired()
                 .HasMaxLength(250);
-        });
-
-        modelBuilder.Entity<IndustrySpecialLuxury>(entity =>
-        {
-            entity.ToTable("IndustrySpecialLuxury");
-
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
-            entity.Property(e => e.ExpireDate).HasColumnType("datetime");
-            entity.Property(e => e.GroupLabelId)
-                .HasMaxLength(30)
-                .IsUnicode(false)
-                .HasComment("Nhóm sản phẩm áp dụng so sánh với nhóm sản phẩm nổi trội");
-            entity.Property(e => e.UpdateLast).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Invoice>(entity =>
@@ -995,87 +847,15 @@ public partial class DataMSContext : DbContext
         {
             entity.ToTable("Order");
 
-            entity.Property(e => e.BankCode)
-                .HasMaxLength(100)
-                .IsUnicode(false);
-            entity.Property(e => e.ColorCode).HasMaxLength(10);
-            entity.Property(e => e.CreateTime).HasColumnType("datetime");
-            entity.Property(e => e.DebtNote).HasMaxLength(500);
-            entity.Property(e => e.Description).HasMaxLength(250);
-            entity.Property(e => e.EndDate)
-                .HasComment("Ngay ket thuc dich vu")
-                .HasColumnType("datetime");
-            entity.Property(e => e.ExpriryDate).HasColumnType("datetime");
-            entity.Property(e => e.Label).HasMaxLength(500);
-            entity.Property(e => e.Note)
-                .HasMaxLength(300)
-                .HasComment("Chính là label so với wiframe");
-            entity.Property(e => e.OperatorId)
-                .HasMaxLength(500)
-                .IsUnicode(false);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.Note).HasComment("Chính là label so với wiframe");
             entity.Property(e => e.OrderNo)
                 .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false);
-            entity.Property(e => e.PaymentDate).HasColumnType("datetime");
-            entity.Property(e => e.PaymentNo).HasMaxLength(250);
-            entity.Property(e => e.ProductService)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-            entity.Property(e => e.Refund).HasDefaultValue(0.0);
-            entity.Property(e => e.SalerGroupId)
-                .HasMaxLength(400)
-                .IsUnicode(false);
-            entity.Property(e => e.SmsContent).HasMaxLength(400);
-            entity.Property(e => e.StartDate)
-                .HasComment("ngay bat dau khoi tao dich vu")
-                .HasColumnType("datetime");
             entity.Property(e => e.UpdateLast).HasColumnType("datetime");
-            entity.Property(e => e.UtmMedium)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-            entity.Property(e => e.UtmSource)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-            entity.Property(e => e.VerifyDate).HasColumnType("datetime");
-
-            entity.HasOne(d => d.ContactClient).WithMany(p => p.Orders)
-                .HasForeignKey(d => d.ContactClientId)
-                .HasConstraintName("FK_Order_ContactClient");
-        });
-
-        modelBuilder.Entity<OrderBak>(entity =>
-        {
-            entity
-                .HasNoKey()
-                .ToTable("Order_bak");
-
-            entity.Property(e => e.BankCode)
-                .HasMaxLength(100)
-                .IsUnicode(false);
-            entity.Property(e => e.ColorCode).HasMaxLength(10);
-            entity.Property(e => e.CreateTime).HasColumnType("datetime");
-            entity.Property(e => e.Description).HasMaxLength(250);
-            entity.Property(e => e.EndDate).HasColumnType("datetime");
-            entity.Property(e => e.ExpriryDate).HasColumnType("datetime");
-            entity.Property(e => e.Label).HasMaxLength(500);
-            entity.Property(e => e.Note).HasMaxLength(300);
-            entity.Property(e => e.OrderId).ValueGeneratedOnAdd();
-            entity.Property(e => e.OrderNo)
-                .IsRequired()
-                .HasMaxLength(50)
-                .IsUnicode(false);
-            entity.Property(e => e.PaymentDate).HasColumnType("datetime");
-            entity.Property(e => e.PaymentNo).HasMaxLength(250);
-            entity.Property(e => e.ProductService)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-            entity.Property(e => e.SalerGroupId)
-                .HasMaxLength(400)
-                .IsUnicode(false);
-            entity.Property(e => e.SmsContent).HasMaxLength(400);
-            entity.Property(e => e.StartDate).HasColumnType("datetime");
-            entity.Property(e => e.UpdateLast).HasColumnType("datetime");
+            entity.Property(e => e.UtmMedium).HasMaxLength(250);
+            entity.Property(e => e.UtmSource).HasMaxLength(50);
         });
 
         modelBuilder.Entity<OrderDetail>(entity =>
@@ -1243,31 +1023,6 @@ public partial class DataMSContext : DbContext
             entity.Property(e => e.VinWonderDepositAmount).HasColumnType("decimal(18, 2)");
         });
 
-        modelBuilder.Entity<Position>(entity =>
-        {
-            entity.ToTable("Position");
-
-            entity.Property(e => e.PositionName)
-                .IsRequired()
-                .HasMaxLength(250);
-        });
-
-        modelBuilder.Entity<PriceProductLevel>(entity =>
-        {
-            entity.HasKey(e => e.PriceId);
-
-            entity.ToTable("PriceProductLevel");
-
-            entity.Property(e => e.CreateDate).HasColumnType("datetime");
-            entity.Property(e => e.FromDate).HasColumnType("datetime");
-            entity.Property(e => e.LabelId)
-                .IsRequired()
-                .HasMaxLength(100)
-                .IsUnicode(false);
-            entity.Property(e => e.Note).HasMaxLength(2000);
-            entity.Property(e => e.ToDate).HasColumnType("datetime");
-        });
-
         modelBuilder.Entity<Product>(entity =>
         {
             entity.ToTable("Product");
@@ -1303,26 +1058,6 @@ public partial class DataMSContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.UpdateLast).HasColumnType("datetime");
             entity.Property(e => e.Variations).HasMaxLength(400);
-        });
-
-        modelBuilder.Entity<Program>(entity =>
-        {
-            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
-            entity.Property(e => e.Description).HasMaxLength(500);
-            entity.Property(e => e.EndDate).HasColumnType("datetime");
-            entity.Property(e => e.ProgramCode)
-                .IsRequired()
-                .HasMaxLength(50)
-                .IsUnicode(false);
-            entity.Property(e => e.ProgramName)
-                .IsRequired()
-                .HasMaxLength(500);
-            entity.Property(e => e.ServiceName).HasMaxLength(500);
-            entity.Property(e => e.StartDate).HasColumnType("datetime");
-            entity.Property(e => e.StayEndDate).HasColumnType("datetime");
-            entity.Property(e => e.StayStartDate).HasColumnType("datetime");
-            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
-            entity.Property(e => e.VerifyDate).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Province>(entity =>

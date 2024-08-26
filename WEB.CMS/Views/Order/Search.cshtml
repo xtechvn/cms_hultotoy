@@ -220,7 +220,7 @@
                 </tbody>
             </table>
         </div>
-        @if (Model.ListData != null && Model.ListData.Count > 0)
+        @*@if (Model.ListData != null && Model.ListData.Count > 0)
         {
             <div class="bottom-action flex flex-nowrap gap10 justify-content-end mt-3">
                 <button class="btn btn-default white" style="padding: 0 10px;">
@@ -238,11 +238,23 @@
                     </select>
                 </div>
             </div>
-        }
-
+        }*@
+        @await Component.InvokeAsync("PagingNew", new
+{
+    pageModel = new Paging()
+    {
+        TotalRecord = Model.TotalRecord,
+        TotalPage = Model.TotalPage,
+        CurrentPage = Model.CurrentPage,
+        PageSize = Model.PageSize,
+        RecordName = "hợp đồng",
+        PageAction = "_ordersCMS.OnPaging({0})",
+        PageSelectPageSize = "_ordersCMS.onSelectPageSize()"
+    }
+})
     </div>
 
 </div>
-<script>
+@*<script>
     $('#selectPaggingOptions').select2();
-</script>
+</script>*@

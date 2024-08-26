@@ -19,11 +19,17 @@ public partial class OrderDetail
 
     public double? Profit { get; set; }
 
+    public double? Discount { get; set; }
+
     public int? Quantity { get; set; }
 
-    public double? TotalAmount { get; set; }
-
     public double? TotalPrice { get; set; }
+
+    public double? TotalProfit { get; set; }
+
+    public double? TotalDiscount { get; set; }
+
+    public double? TotalAmount { get; set; }
 
     public string ProductLink { get; set; }
 

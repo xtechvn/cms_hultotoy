@@ -73,19 +73,19 @@ else
                             <td class="">@(item.Create_name == null ? "N/A" : item.Create_name)</td>
 
                             @*<td class="">
-                                <div class="on-off-btn">
-                                    @if (item.ACStatus == 0)
-                                    {
-                                        <i id="Status_0_@item.Id" class="fa fa-check status-green" aria-hidden="true" onclick="_customer_manager.OnResetStatus(@item.Id,'0')"></i>
-                                        <i id="Status_1_@item.Id" class="fa fa-power-off status-grey" onclick="_customer_manager.OnResetStatus(@item.Id,'1')"></i>
-                                    }
-                                    else
-                                    {
-                                        <i id="Status_0_@item.Id" class="fa fa-check status-grey" onclick="_customer_manager.OnResetStatus(@item.Id,'0')"></i>
-                                        <i id="Status_1_@item.Id" class="fa fa-power-off status-red" aria-hidden="true" onclick="_customer_manager.OnResetStatus(@item.Id,'1')"></i>
-                                    }
-                                </div>
-                            </td>*@
+                                    <div class="on-off-btn">
+                                        @if (item.ACStatus == 0)
+                                        {
+                                            <i id="Status_0_@item.Id" class="fa fa-check status-green" aria-hidden="true" onclick="_customer_manager.OnResetStatus(@item.Id,'0')"></i>
+                                            <i id="Status_1_@item.Id" class="fa fa-power-off status-grey" onclick="_customer_manager.OnResetStatus(@item.Id,'1')"></i>
+                                        }
+                                        else
+                                        {
+                                            <i id="Status_0_@item.Id" class="fa fa-check status-grey" onclick="_customer_manager.OnResetStatus(@item.Id,'0')"></i>
+                                            <i id="Status_1_@item.Id" class="fa fa-power-off status-red" aria-hidden="true" onclick="_customer_manager.OnResetStatus(@item.Id,'1')"></i>
+                                        }
+                                    </div>
+                                </td>*@
 
                         </tr>
                     }
@@ -94,7 +94,21 @@ else
             </tbody>
         </table>
     </div>
-    <div class="bottom-action flex flex-nowrap gap10 justify-content-end mt-3">
+    @await Component.InvokeAsync("PagingNew", new
+{
+
+    pageModel = new Paging()
+    {
+        TotalRecord = Model.TotalRecord,
+        TotalPage = Model.TotalPage,
+        CurrentPage = Model.CurrentPage,
+        PageSize = Model.PageSize,
+        RecordName = "Khách hàng",
+        PageAction = "_customer_manager.ClientOnPaging({0})",
+        PageSelectPageSize = "_customer_manager.onSelectPageSize()"
+    }
+})
+    @*<div class="bottom-action flex flex-nowrap gap10 justify-content-end mt-3">
         <button class="btn btn-default white" style="padding: 0 10px;">
             <i class="icofont-gear"></i>
             <span>Tùy chỉnh</span>
@@ -111,5 +125,5 @@ else
     </div>
     <script>
         $('#selectPaggingOptions').select2();
-    </script>
+    </script>*@
 }

@@ -7,12 +7,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Repositories.IRepositories;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Utilities;
@@ -733,6 +735,71 @@ namespace WEB.Adavigo.CMS.Controllers
             catch (Exception ex)
             {
                 LogHelper.InsertLogTelegram("UserSuggestion - CustomerManagerController: " + ex.ToString());
+                return Ok(new
+                {
+                    status = (int)ResponseType.SUCCESS,
+                    data = new List<CustomerESViewModel>()
+                });
+            }
+
+        }
+        public async Task<IActionResult> ClientSuggestion(string txt_search)
+        {
+
+            try
+            {
+
+                if (string.IsNullOrEmpty(txt_search))
+                {
+                    return Ok(new
+                    {
+                        status = (int)ResponseType.EMPTY
+                    });
+                }
+                else
+                {
+                    bool isUnicode = Encoding.ASCII.GetByteCount(txt_search) != Encoding.UTF8.GetByteCount(txt_search);
+
+
+                    byte[] utfBytes = Encoding.UTF8.GetBytes(txt_search.Trim());
+                    txt_search = Encoding.UTF8.GetString(utfBytes);
+                }
+
+                var es_service = new esService(_configuration);
+                var data_hotel = await es_service.search(txt_search, "searchClient.json");
+                if (data_hotel != "{}")
+                {
+                    //var es_result =// ((RestSharp.RestResponseBase)find_hotel).Content;                       
+
+                    JObject jsonObject = JObject.Parse(data_hotel);
+                    var hits = (JArray)jsonObject["hits"]["hits"];
+                    var hotel_result = new List<earchClientESViewModel>();
+                    foreach (var hit in hits)
+                    {
+                        var source = JsonConvert.DeserializeObject<earchClientESViewModel>(hit["_source"].ToString());
+                        hotel_result.Add(source);
+                    }
+
+                    return Ok(new
+                    {
+                        status = (int)ResponseType.SUCCESS,
+                        data = hotel_result,
+                    });
+                }
+                else
+                {
+                    return Ok(new
+                    {
+                        status = (int)ResponseType.EMPTY,
+                        msg = "Không có dữ liệu nào thỏa mãn từ khóa " + txt_search
+                    });
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("ClientSuggestion - ContractController: " + ex);
                 return Ok(new
                 {
                     status = (int)ResponseType.SUCCESS,

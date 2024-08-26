@@ -7,11 +7,9 @@ public partial class ReceivePromotion
 {
     public int Id { get; set; }
 
-    public int ClientId { get; set; }
+    public string Email { get; set; }
 
     public DateTime? CreatedDate { get; set; }
 
     public DateTime? ModifiedDate { get; set; }
-
-    public string Email { get; set; }
 }
