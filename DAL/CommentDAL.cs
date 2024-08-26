@@ -22,7 +22,7 @@ namespace DAL
             _DbWorker = new DbWorker(connection);
         }
 
-        public async Task<List<CommentViewModel>> GetAllComment(CommentParamRequest request)
+        public async Task<DataTable> GetAllComment(CommentParamRequest request)
         {
             SqlParameter[] sqlParameters = new SqlParameter[]
             {
@@ -32,16 +32,15 @@ namespace DAL
                 new SqlParameter("@PageIndex", request.PageIndex != null ? request.PageIndex : DBNull.Value),
                 new SqlParameter("@PageSize", request.PageSize != null ? request.PageSize : DBNull.Value) 
             };
-            var lstObj = _DbWorker.GetDataTable(ProcedureConstants.Sp_GetListComments, sqlParameters);
-            List<CommentViewModel> Comments = lstObj.AsEnumerable().Select(row => new CommentViewModel
+/*            List<CommentViewModel> Comments = lstObj.AsEnumerable().Select(row => new CommentViewModel
             {
                 ClientName = row.Field<string>("ClientName"),
                 Content = row.Field<string>("Content"),
                 Email = row.Field<string>("Email"),
                 Phone = row.Field<string>("Phone"),
                 CreatedDate = row.Field<DateTime>("CreatedDate")
-            }).ToList();
-            return Comments;
+            }).ToList();*/
+            return _DbWorker.GetDataTable(ProcedureConstants.Sp_GetListComments, sqlParameters);
         }
     }
 }

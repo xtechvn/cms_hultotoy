@@ -9,9 +9,9 @@ namespace WEB.CMS.ViewComponents
 {
     public class PagingV2ViewComponent : ViewComponent
     {
-        public IViewComponentResult Invoke()
+        public IViewComponentResult Invoke(Paging pageModel)
         {
-            return View();
+            return View(pageModel);
         }
     }
 }
