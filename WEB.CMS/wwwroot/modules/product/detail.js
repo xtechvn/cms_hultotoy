@@ -459,6 +459,7 @@ var product_detail = {
     },
     RenderExistsProduct: function (product) {
         //--Init
+        $('#product_detail').attr('data-status', product.status)
         $('.add-product').removeClass('placeholder')
         $('.add-product').removeClass('box-placeholder')
         $('#images .list').html(_product_constants.HTML.ProductDetail_Images_AddImagesButton.replace('{0}', '0').replace('{max}', _product_constants.VALUES.ProductDetail_Max_Image))
@@ -851,6 +852,7 @@ var product_detail = {
     Summit: function () {
         var model = {
             _id: $('#product_detail').val() == undefined || $('#product_detail').val().trim() == '' ? null : $('#product_detail').val(),
+            status: $('#product_detail').attr('data-status') == undefined || $('#product_detail').attr('data-status').trim() == '' ? null : $('#product_detail').attr('data-status'),
             code: $('#product_detail').attr('data-code') == undefined || $('#product_detail').attr('data-code').trim() == '' ? null : $('#product_detail').attr('data-code'),
             amount: $('#main-amount input').val() == undefined || $('#main-amount input').val().trim() == ''?0: parseFloat($('#main-amount input').val().replaceAll(',','')),
             discount: 0,

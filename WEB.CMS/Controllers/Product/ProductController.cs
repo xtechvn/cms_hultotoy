@@ -202,6 +202,7 @@ namespace WEB.CMS.Controllers
                 //-- Add / Update Sub product
                 if (request.variations != null && request.variations.Count > 0)
                 {
+                    product_main.status = (int)ProductStatus.ACTIVE;
                     var amount_variations = request.variations.Select(x => x.amount);
                     product_main.amount_max = amount_variations.OrderByDescending(x => x).First();
                     product_main.amount_min = amount_variations.OrderBy(x => x).First();
