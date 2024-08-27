@@ -79,14 +79,13 @@ $(document).ready(function () {
         placeholder: "Mã đơn hàng",
         /* tags: true,*/
         ajax: {
-            url: "/Order/OrderNoSuggestion",
+            url: "/OrderManual/OrderNoSuggestion",
             type: "post",
             dataType: 'json',
             delay: 250,
             data: function (params) {
                 var query = {
                     txt_search: params.term,
-                    systemtype: $('input[name="SysTemType"]:checked').val(),
                 }
                 return query;
             },
@@ -100,24 +99,17 @@ $(document).ready(function () {
                     })
                 };
             },
-            /*            createTag: function (params) {
-                            let term = $.trim(params.term);
-                            return {
-                                id: term,
-                                text: term,
-                                newTag: true,
-                            }
-                        },*/
             cache: true
         }
     });
+
 
     $("#CreateName").select2({
         theme: 'bootstrap4',
         placeholder: "Người tạo",
         maximumSelectionLength: 1,
         ajax: {
-            url: "/Order/UserSuggestion",
+            url: "/OrderManual/UserSuggestion",
             type: "post",
             dataType: 'json',
             delay: 250,
@@ -148,7 +140,7 @@ $(document).ready(function () {
         placeholder: "Thông tin khách hàng",
         maximumSelectionLength: 1,
         ajax: {
-            url: "/Contract/ClientSuggestion",
+            url: "/CustomerManager/ClientSuggestion",
             type: "post",
             dataType: 'json',
             delay: 250,
@@ -178,7 +170,7 @@ $(document).ready(function () {
         placeholder: "Điều hành viên",
         maximumSelectionLength: 1,
         ajax: {
-            url: "/Order/UserSuggestion",
+            url: "/OrderManual/UserSuggestion",
             type: "post",
             dataType: 'json',
             delay: 250,

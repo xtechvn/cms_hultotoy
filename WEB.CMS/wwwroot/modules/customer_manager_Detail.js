@@ -438,7 +438,7 @@ var _customer_manager_Detail = {
                     if (result.stt_code === 0) {
                         _msgalert.success(result.msg);
                         $.magnificPopup.close();
-                        _customer_manager_Detail.SearchDetailCustomerManager(objSearch);
+                        window.location.reload();
 
                     }
                 }

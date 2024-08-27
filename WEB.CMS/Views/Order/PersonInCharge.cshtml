@@ -18,10 +18,7 @@
                         {
                             <option selected="selected" value="@Saler.Id">@Saler.FullName - @Saler.UserName</option>
                         }
-                        else
-                        {
-                            <option selected="selected" value="">Chọn nhân viên</option>
-                        }
+                        
                     </select>
                 </div>
             </div>
@@ -37,9 +34,6 @@
                             {
                                 <option selected="selected" value="@item.Id">@item.FullName - @item.UserName</option>
                             }
-                        } else
-                        {
-                            <option selected="selected" value="">Chọn nhân viên phụ</option>
                         }
                     </select>
                 </div>
@@ -48,10 +42,66 @@
     </div>
 </div>
 <script>
-    $('#SalerGroup').select2({
+    $("#SalerId").select2({
         theme: 'bootstrap4',
+        placeholder: "Nhân viên chính",
+        maximumSelectionLength: 1,
+        ajax: {
+            url: "/Order/UserSuggestion",
+            type: "post",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                var query = {
+                    txt_search: params.term,
+                }
+
+                // Query parameters will be ?search=[term]&type=public
+                return query;
+            },
+            processResults: function (response) {
+                return {
+                    results: $.map(response.data, function (item) {
+                        return {
+                            text: item.fullname + ' - ' + item.email,
+                            id: item.id,
+                        }
+                    })
+                };
+            },
+            cache: true
+        }
     });
-    $('#SalerId').select2();
+    $("#SalerGroup").select2({
+        theme: 'bootstrap4',
+        placeholder: "Nhân viên phụ",
+        ajax: {
+            url: "/Order/UserSuggestion",
+            type: "post",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                var query = {
+                    txt_search: params.term,
+                }
+
+                // Query parameters will be ?search=[term]&type=public
+                return query;
+            },
+            processResults: function (response) {
+                return {
+                    results: $.map(response.data, function (item) {
+                        return {
+                            text: item.fullname + ' - ' + item.email,
+                            id: item.id,
+                        }
+                    })
+                };
+            },
+            cache: true
+        }
+    });
+
 </script>
 
 

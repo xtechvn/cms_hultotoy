@@ -131,7 +131,7 @@ namespace WEB.CMS.Controllers
                             ViewBag.createTime = Convert.ToDateTime(dataOrder.StartDate).ToString("dd/MM/yyyy HH:mm:ss");
                         if (dataOrder.EndDate != null)
                             ViewBag.ExpriryDate = Convert.ToDateTime(dataOrder.EndDate).ToString("dd/MM/yyyy HH:mm:ss");
-                        if (dataOrder.AccountClientId != null)
+                        if (dataOrder.ClientId != null)
                         {
                             var UserCreateclient = await _clientRepository.GetClientDetailByClientId((long)dataOrder.ClientId);
                             if (UserCreateclient != null)

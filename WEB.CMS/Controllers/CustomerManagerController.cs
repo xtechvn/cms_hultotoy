@@ -44,8 +44,8 @@ namespace WEB.Adavigo.CMS.Controllers
         private UserESRepository _userESRepository;
         private IIdentifierServiceRepository _identifierServiceRepository;
 
-        public CustomerManagerController(IConfiguration configuration, ICustomerManagerRepository customerManagerRepositories,  ManagementUser ManagementUser, IWebHostEnvironment WebHostEnvironment, IAccountClientRepository accountClientRepository,
-         IAllCodeRepository allCodeRepository,  IClientRepository clientRepository, IUserRepository userRepository, IBankingAccountRepository bankingAccountRepository, IUserAgentRepository userAgentRepository, IIdentifierServiceRepository identifierServiceRepository)
+        public CustomerManagerController(IConfiguration configuration, ICustomerManagerRepository customerManagerRepositories, ManagementUser ManagementUser, IWebHostEnvironment WebHostEnvironment, IAccountClientRepository accountClientRepository,
+         IAllCodeRepository allCodeRepository, IClientRepository clientRepository, IUserRepository userRepository, IBankingAccountRepository bankingAccountRepository, IUserAgentRepository userAgentRepository, IIdentifierServiceRepository identifierServiceRepository)
         {
             _customerManagerRepositories = customerManagerRepositories;
             _configuration = configuration;
@@ -58,7 +58,7 @@ namespace WEB.Adavigo.CMS.Controllers
             _accountClientRepository = accountClientRepository;
             _logCacheFilterMongoService = new LogCacheFilterMongoService(configuration);
             _userAgentRepository = userAgentRepository;
-            _userESRepository = new UserESRepository(configuration["DataBaseConfig:Elastic:Host"]);
+            _userESRepository = new UserESRepository(configuration["DataBaseConfig:Elastic:Host"], configuration);
             _identifierServiceRepository = identifierServiceRepository;
         }
         public async Task<IActionResult> Index()
@@ -73,7 +73,7 @@ namespace WEB.Adavigo.CMS.Controllers
                 ViewBag.AgencyType = AgencyType;
                 ViewBag.PermisionType = PermisionType;
                 ViewBag.ClientType = ClientType;
-      
+
                 var current_user = _ManagementUser.GetCurrentUser();
                 ViewBag.buttomThem = 0;
                 if (current_user != null)
@@ -107,7 +107,7 @@ namespace WEB.Adavigo.CMS.Controllers
         {
             try
             {
-               
+
                 var AgencyType = _allCodeRepository.GetListByType("AGENCY_TYPE");
                 var PermisionType = _allCodeRepository.GetListByType("PERMISION_TYPE");
                 var ClientType = _allCodeRepository.GetListByType("CLIENT_TYPE");
@@ -141,7 +141,7 @@ namespace WEB.Adavigo.CMS.Controllers
                 if (current_user != null)
                 {
                     var i = 0;
-                    if(searchModel.CacheName != null)
+                    if (searchModel.CacheName != null)
                     {
                         var data = _logCacheFilterMongoService.GetListLogCache(null, searchModel.CacheName);
                         if (data != null)
@@ -161,7 +161,7 @@ namespace WEB.Adavigo.CMS.Controllers
                             searchModel.MaxAmount = data[0].MaxAmount;
                             searchModel.SalerPermission = data[0].SalerPermission;
                         }
-                       
+
                     }
                     if (current_user != null && !string.IsNullOrEmpty(current_user.Role))
                     {
@@ -220,7 +220,7 @@ namespace WEB.Adavigo.CMS.Controllers
             }
             return View();
         }
-       
+
         [HttpPost]
         public async Task<IActionResult> Setup(string data)
         {
@@ -246,7 +246,7 @@ namespace WEB.Adavigo.CMS.Controllers
 
                 if (email == null && DataModel.Id == 0)
                 {
-                    
+
                     DataModel.ClientCode = await _identifierServiceRepository.buildClientNo(Convert.ToInt32(DataModel.id_ClientType));
                     var Result = _customerManagerRepositories.SetUpClient(DataModel);
                     if (Result != 0)
@@ -433,8 +433,8 @@ namespace WEB.Adavigo.CMS.Controllers
                 var key_token_api = _configuration["DataBaseConfig:key_api:api_manual"];
                 //string ApiPrefix = ReadFile.LoadConfig().API_URL + ReadFile.LoadConfig().API_ALLCODE;
 
-                var ClientType =  _allCodeRepository.GetListByType( "CLIENT_TYPE");
-                var PermisionType = _allCodeRepository.GetListByType( "PERMISION_TYPE");
+                var ClientType = _allCodeRepository.GetListByType("CLIENT_TYPE");
+                var PermisionType = _allCodeRepository.GetListByType("PERMISION_TYPE");
                 if (id != 1)
                 {
                     return Ok(new
@@ -572,7 +572,7 @@ namespace WEB.Adavigo.CMS.Controllers
             {
 
                 var model = await _clientRepository.GetClientDetailByClientId(id);
-                var Ac =  _accountClientRepository.AccountClientByClientId(id);
+                var Ac = _accountClientRepository.AccountClientByClientId(id);
 
                 APIService apiService = new APIService(_configuration, _userRepository);
 
@@ -601,9 +601,9 @@ namespace WEB.Adavigo.CMS.Controllers
             string msg = "Error On Excution";
             try
             {
-              
-              var Insert =await  _logCacheFilterMongoService.InsertLogCache(searchModel);
-                if(Insert > 0)
+
+                var Insert = await _logCacheFilterMongoService.InsertLogCache(searchModel);
+                if (Insert > 0)
                 {
                     status = (int)ResponseType.SUCCESS;
                     msg = "Lưu thành công thành công";
@@ -613,10 +613,10 @@ namespace WEB.Adavigo.CMS.Controllers
                     status = (int)ResponseType.SUCCESS;
                     msg = "Lưu thành không công thành công";
                 }
-            
+
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LogHelper.InsertLogTelegram("InsertLogCache - CustomerManagerController: " + ex);
                 status = (int)ResponseType.ERROR;
@@ -633,8 +633,8 @@ namespace WEB.Adavigo.CMS.Controllers
         {
             try
             {
-                
-                var data =  _logCacheFilterMongoService.GetListLogCache(txt_search,null);
+
+                var data = _logCacheFilterMongoService.GetListLogCache(txt_search, null);
                 return JsonConvert.SerializeObject(data);
             }
             catch (Exception ex)
@@ -643,7 +643,7 @@ namespace WEB.Adavigo.CMS.Controllers
                 return null;
             }
         }
-        public async Task<IActionResult> DetailUserAgent(int user_Id,long client)
+        public async Task<IActionResult> DetailUserAgent(int user_Id, long client)
         {
 
             try
@@ -651,9 +651,9 @@ namespace WEB.Adavigo.CMS.Controllers
                 ViewBag.client = client;
                 if (user_Id != 0)
                 {
-                    var model = _userAgentRepository.UserAgentByClient(0,user_Id);
-                    if(model != null && model.Count > 0)
-                    return PartialView(model[0]);
+                    var model = _userAgentRepository.UserAgentByClient(0, user_Id);
+                    if (model != null && model.Count > 0)
+                        return PartialView(model[0]);
                 }
             }
             catch (Exception ex)
@@ -663,35 +663,34 @@ namespace WEB.Adavigo.CMS.Controllers
             return PartialView();
         }
         [HttpPost]
-        public IActionResult UpdatalUserAgent(int id, int userId,long clientId)
+        public IActionResult UpdatalUserAgent(int id, int userId, long clientId)
         {
 
             try
             {
-                if (id != 0)
+
+                var create_id = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var model = _userAgentRepository.UpdataUserAgent(id, userId, create_id, clientId);
+                if (model > 0)
                 {
-                    var create_id = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-                    var model = _userAgentRepository.UpdataUserAgent(id, userId, create_id, clientId);
-                    if (model > 0)
+                    return Ok(new
                     {
-                        return Ok(new
-                        {
-                            stt_code = (int)ResponseType.SUCCESS,
-                            msg = "Đổi nhân viên thành công",
+                        stt_code = (int)ResponseType.SUCCESS,
+                        msg = "Đổi nhân viên thành công",
 
-                        });
-                    }
-                    else
-                    {
-
-                        return Ok(new
-                        {
-                            stt_code = (int)ResponseType.FAILED,
-                            msg = "Đổi nhân viên không thành công",
-
-                        });
-                    }
+                    });
                 }
+                else
+                {
+
+                    return Ok(new
+                    {
+                        stt_code = (int)ResponseType.FAILED,
+                        msg = "Đổi nhân viên không thành công",
+
+                    });
+                }
+
             }
             catch (Exception ex)
             {

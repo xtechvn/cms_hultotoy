@@ -25,7 +25,7 @@
                 <li>
                     <i class="fa fa-check"></i>
                     <a href="/Order/@item.OrderId"><span class="blue">@item.UserVerify</span> chuyển trạng thái đơn hàng @item.OrderNo - @item.OrderStatus</a>
-                    <div class="date">Thời gian: @((item.UpdateLast ?? item.CreateTime).Value.ToString("dd/MM/yyyy HH:mm"))</div>
+                    <div class="date">Thời gian: @((item.UpdateLast ?? item.CreatedDate).Value.ToString("dd/MM/yyyy HH:mm"))</div>
                 </li>
             }
         }

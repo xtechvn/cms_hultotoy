@@ -45,42 +45,18 @@
                         <th>STT</th>
                         <th>Mã đơn</th>
                         <th>
-                            Ngày bắt đầu - </br>
-                            Ngày kết thúc
+                           Tên sản phẩm
                         </th>
-
-
-                        <th> Khách hàng </th>
-
-
-                        <th> Nhãn đơn </th>
-
-
-                        <th class="text-right">Thanh toán</th>
-                        <th class="mfp-hide">Nguồn</th>
-                        <th class="text-right">Lợi nhuận</th>
-                        <th>Mã giới thiệu</th>
-                        <th>Trạng thái</th>
-                        <th>Ngày tạo <a class="sort">&#8595;</a></th>
-                        <th class="mfp-hide">Người tạo</th>
-                        <th class="mfp-hide">
-                            Ngày cập nhật
-                            <a class="sort">&#8593;</a>
-                        </th>
-                        <th class="mfp-hide">Người cập nhật</th>
-                        <th class="mfp-hide">Nhân viên chính</th>
-                        <th class="mfp-hide">Nhân viên phụ</th>
-                        <th class="mfp-hide">Voucher áp dụng</th>
-                        <th class="mfp-hide">Điều hành viên</th>
-                        <th class="mfp-hide action-btn">Action</th>
-                        <th class="mfp-hide action-tc">Action</th>
-
-                        <th class="mfp-hide">Mã hóa đơn</th>
-                        <th>Hình thức thanh toán</th>
-                        <th class="mfp-hide">Khách phải trả</th>
-
-
-
+                        <th> Tổng tiền </th>
+                        <th> Lợi nhuận </th>
+                        <th> Trạng thái đơn</th>
+                        <th> Trạng thái thanh toán</th>
+                        <th> Hình thức thanh toán</th>
+                        <th> Ngày tạo đơn</th>
+                        <th> khách hàng</th>
+                        <th>Voucher </th>
+                        <th>Người phụ trách </th>
+                        <th>Nguồn đơn </th>                      
                     </tr>
                 </thead>
                 <tbody>
@@ -95,23 +71,13 @@
                                 <td>
                                     <a class="blue" href="/Order/@item.OrderId" onclick="_ordersCMS.saveCookieFilter()">@item.OrderNo</a>
                                 </td>
-                                <td style="width:15%">
-                                    @(((Convert.ToDateTime(item.StartDate)).ToString("dd/MM/yyyy") + " - " + (Convert.ToDateTime(item.EndDate)).ToString("dd/MM/yyyy")).TrimEnd(' ', '-'))
-                                </td>
-                                <td>
-                                    <div class="blue">@item.ClientName</div>
-                                    <div>@item.ClientNumber</div>
-                                    <div>@item.ClientEmail</div>
-                                </td>
-                                <td style="width:15%;"><textarea style="min-height: 95px !important; border: 1px solid #ffff !important; overflow-y: hidden !important;" readonly="readonly">@item.Note</textarea> </td>
+                                <td>@item.ListProductId</td>
                                 <td class="text-right">
                                     <div class="green">@item.Payment.ToString("#,##0")/</div>
-                                    <div class="red">@(item.Amount ==0? "0":item.Amount.ToString("#,##"))</div>
+                                    <div class="red">@(item.Amount == 0 ? "0" : item.Amount.ToString("#,##"))</div>
                                 </td>
-                                <td class="mfp-hide">@item.UtmSource</td>
-                                <td class="text-right">@item.Profit.ToString("#,##")</td>
-                                <td class="text-right">@item.UtmMedium</td>
-                                <td style="width:12% !important">
+                                <td>@item.Profit.ToString("#,##")</td>
+                                <td>
                                     @switch (item.StatusCode)
                                     {
                                         case (int)(OrderStatus.CREATED_ORDER):
@@ -123,7 +89,6 @@
                                         case (int)(OrderStatus.WAITING_FOR_OPERATOR):
 
                                             {
-                                                @*<div class="status-green">@(item.PermisionTypeName==null|| item.PermisionTypeName.Trim() == "" ? "Không công nợ": item.PermisionTypeName) - @item.PaymentStatusName</div>*@
                                                 <span class="status-green">@item.Status</span>
 
                                             }
@@ -147,72 +112,48 @@
                                             }
                                             break;
                                     }
-
-                                    <br />
-
                                 </td>
                                 <td>
-                                    @item.CreateTime.ToString("dd/MM/yyyy")
-                                </td>
-
-                                <td class="mfp-hide">@item.CreateName</td>
-
-                                <td class="mfp-hide">@item.UpdateLast.ToString("dd/MM/yyyy")</td>
-
-                                <td class="mfp-hide">@item.UpdateName</td>
-
-                                <td class="mfp-hide">
-                                    <div>@item.SalerName </div>
-                                    <div>@item.SalerUserName </div>
-                                    <div>@item.SalerEmail </div>
-                                </td>
-
-                                <td class="mfp-hide">@(item.SalerGroupName!=null? item.SalerGroupName.TrimEnd(' ', ','):"") </td>
-                                <td class="mfp-hide">@item.Vouchercode </td>
-                                <td class="mfp-hide">@(item.OperatorIdName.TrimEnd(' ',',')) </td>
-                                <td class="mfp-hide action-btn">
-                                    @if (!item.OrderNo.ToUpper().StartsWith("DH") && !item.OrderNo.ToUpper().StartsWith("O") && (item.ServiceType == "" || item.ServiceType == null))
-                                    {
-                                        <button type="button" class="btn btn-default bg-main" onclick="_ordersCMS.ReCreateOrder(@item.OrderId)">
-                                            <i class="fa fa-plus-circle"></i>
-                                            Tạo lại đơn
-                                        </button>
-                                    }
-                                </td>
-                                <td class="mfp-hide action-tc">
-                                    <button type="button" class="btn btn-default bg-main" onclick=" _ordersCMS.OpenPopupAddSale(@item.OrderId)">
-                                        Nhận xử lý đơn hàng
-                                    </button>
-                                </td>
-
-                                <td class="mfp-hide">@item.UpdateName</td>
-                                <td style="width:12% !important">
                                     @if (item.PaymentStatus != "")
                                     {
                                         @if (Convert.ToInt32(item.PaymentStatus) == (int)PaymentStatus.UNPAID)
                                         {
                                             <div class="status-oranger">
-                                                @(item.PermisionTypeName == null || item.PermisionTypeName.Trim()=="" ? "Không công nợ": item.PermisionTypeName) - @item.PaymentStatusName
+                                                @item.PaymentStatusName
                                             </div>
                                         }
                                         @if (Convert.ToInt32(item.PaymentStatus) == (int)PaymentStatus.PAID)
                                         {
                                             <div class="status-green">
-                                                @(item.PermisionTypeName == null || item.PermisionTypeName.Trim()=="" ? "Không công nợ": item.PermisionTypeName) - @item.PaymentStatusName
+                                                @item.PaymentStatusName
                                             </div>
                                         }
                                         @if (Convert.ToInt32(item.PaymentStatus) == (int)PaymentStatus.PAID_NOT_ENOUGH)
                                         {
                                             <div class="status-blue">
-                                                @(item.PermisionTypeName == null || item.PermisionTypeName.Trim()=="" ? "Không công nợ": item.PermisionTypeName) - @item.PaymentStatusName
+                                                @item.PaymentStatusName
                                             </div>
                                         }
                                     }
                                 </td>
-                                <td class="mfp-hide text-right">
-                                    @((item.Amount - item.Payment).ToString("N0"))
+                                <td>
+                                    @item.PaymentTypeName
                                 </td>
-
+                                <td>
+                                    @item.CreatedDate.ToString("dd/MM/yyyy")
+                                </td>
+                                <td>
+                                    <div class="blue">@item.ClientName</div>
+                                    <div>@item.ClientNumber</div>
+                                    <div>@item.ClientEmail</div>
+                                </td>
+                                <td>
+                                    @item.Vouchercode
+                                </td>
+                                <td>
+                                    <div>@item.SalerName </div>
+                                </td>
+                                <td>@item.UtmSource</td>
                             </tr>
                         }
                     }

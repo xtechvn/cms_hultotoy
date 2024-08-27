@@ -1,5 +1,6 @@
 ﻿using Elasticsearch.Net;
 using Entities.ViewModels.ElasticSearch;
+using Microsoft.Extensions.Configuration;
 using Nest;
 using System;
 using System.Collections.Generic;
@@ -10,9 +11,14 @@ namespace Caching.Elasticsearch
 {
     public class UserESRepository : ESRepository<UserESViewModel>
     {
-        public UserESRepository(string Host) : base(Host) { }
+        public string index_name = "users_hulotoys_store";
+        private readonly IConfiguration configuration;
+        public UserESRepository(string Host, IConfiguration _configuration) : base(Host) {
+            configuration = _configuration;
+            index_name = _configuration["DataBaseConfig:Elastic:Index:users"];
+        }
 
-        public async Task<List<UserESViewModel>> GetUserSuggesstion(string txt_search, string index_name = "user")
+        public async Task<List<UserESViewModel>> GetUserSuggesstion(string txt_search)
         {
             List<UserESViewModel> result = new List<UserESViewModel>();
             try

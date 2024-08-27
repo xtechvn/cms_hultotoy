@@ -12,6 +12,6 @@ namespace Entities.ViewModels.DashBoard
         public string OrderStatus { get; set; }
         public DateTime? UpdateLast { get; set; }
         public string UserCreated { get; set; }
-        public DateTime? CreateTime { get; set; }
+        public DateTime? CreatedDate { get; set; }
     }
 }

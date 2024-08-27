@@ -23,7 +23,7 @@ namespace Entities.ViewModels
         public string Status { get; set; }
         public int StatusCode { get; set; }
         public int PayDetailId { get; set; }
-        public DateTime CreateTime { get; set; }
+        public DateTime CreatedDate { get; set; }
         public string CreateName { get; set; }
         public string UpdateName { get; set; }
         public DateTime UpdateLast { get; set; }
@@ -31,6 +31,7 @@ namespace Entities.ViewModels
         public string SalerUserName { get; set; }
         public string SalerEmail { get; set; }
         public string SalerGroupName { get; set; }
+        public string PaymentTypeName { get; set; }
         public string PaymentStatus { get; set; }
         public double TotalDisarmed { get; set; }
         public double TotalAmount{ get; set; }
@@ -46,6 +47,7 @@ namespace Entities.ViewModels
         public string OperatorIdName { get; set; }
         public string UtmMedium { get; set; }
         public int IsFinishPayment { get; set; }
+        public string ListProductId { get; set; }
 
 
 

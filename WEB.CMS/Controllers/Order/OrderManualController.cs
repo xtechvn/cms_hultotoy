@@ -1,6 +1,7 @@
 ﻿using Caching.Elasticsearch;
 using Entities.ViewModels.ElasticSearch;
 using Entities.ViewModels.OrderManual;
+using ENTITIES.ViewModels.ElasticSearch;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.IRepositories;
 using Repositories.Repositories;
@@ -22,7 +23,7 @@ namespace WEB.CMS.Controllers.Order
         private readonly IAccountClientRepository _accountClientRepository;
         private UserESRepository _userESRepository;
         private readonly IUserRepository _userRepository;
-
+        private OrderESRepository _orderESRepository;
         public OrderManualController(IConfiguration configuration, IAllCodeRepository allCodeRepository, IOrderRepository orderRepository, IIdentifierServiceRepository identifierServiceRepository,
             IAccountClientRepository accountClientRepository, IUserRepository userRepository)
         {
@@ -31,8 +32,9 @@ namespace WEB.CMS.Controllers.Order
             _orderRepository = orderRepository;
             _identifierServiceRepository = identifierServiceRepository;
             _accountClientRepository = accountClientRepository;
-            _userESRepository = new UserESRepository(_configuration["DataBaseConfig:Elastic:Host"]);
+            _userESRepository = new UserESRepository(_configuration["DataBaseConfig:Elastic:Host"], configuration);
             _userRepository = userRepository;
+            _orderESRepository = new OrderESRepository(_configuration["DataBaseConfig:Elastic:Host"], configuration);
         }
         [HttpPost]
         public IActionResult CreateOrderManual()
@@ -82,6 +84,47 @@ namespace WEB.CMS.Controllers.Order
             }
 
         }
+        [HttpPost]
+        public async Task<IActionResult> OrderNoSuggestion(string txt_search)
+        {
 
+            try
+            {
+                long _UserId = 0;
+                var data = new List<OrderElasticsearchViewModel>();
+                if (HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
+                {
+                    _UserId = Convert.ToInt64(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                }
+                if (txt_search != null)
+                {
+                    data = await _orderESRepository.GetOrderNoSuggesstion(txt_search);
+                    return Ok(new
+                    {
+                        status = (int)ResponseType.SUCCESS,
+                        data = data,
+                        selected = _UserId
+                    });
+                }
+                else
+                {
+                    return Ok(new
+                    {
+                        status = (int)ResponseType.SUCCESS,
+                        data = new List<OrderElasticsearchViewModel>()
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("OrderNoSuggestion - OrderManualController: " + ex.ToString());
+                return Ok(new
+                {
+                    status = (int)ResponseType.SUCCESS,
+                    data = new List<OrderElasticsearchViewModel>()
+                });
+            }
+
+        }
     }
 }

@@ -47,7 +47,7 @@ namespace WEB.CMS.Controllers
                     OrderStatus = s["OrderStatus"].ToString(),
                     UserCreated = s["UserCreated"].ToString(),
                     UpdateLast = string.IsNullOrEmpty(s["UpdateLast"].ToString()) ? (DateTime?)null : DateTime.Parse(s["UpdateLast"].ToString()),
-                    CreateTime = string.IsNullOrEmpty(s["CreateTime"].ToString()) ? (DateTime?)null : DateTime.Parse(s["CreateTime"].ToString())
+                    CreatedDate = string.IsNullOrEmpty(s["CreatedDate"].ToString()) ? (DateTime?)null : DateTime.Parse(s["CreatedDate"].ToString())
                 }).AsEnumerable();
 
                 ViewBag.UserId = _UserId;
