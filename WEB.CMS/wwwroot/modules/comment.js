@@ -16,6 +16,7 @@ var _comment =
         _ajax_caller.post(url, { request: obj }, function (result) {
             $('#Comment-content').html(``);
             $('#Comment-content').append(result);
+            window.scrollTo(0, 0);
         });
     },
     getDateTimeRanges: function (type) {
@@ -79,7 +80,7 @@ var _comment =
 $(document).ready(function () {
     $("#clientInput").select2({
         //theme: 'bootstrap4',
-        placeholder: "Tìm kiếm theo tên,số điện thoại khách hàng",
+        placeholder: "Tìm kiếm theo tên, số điện thoại, email khách hàng",
         ajax: {
             url: "/Comment/Client",
             type: "post",
@@ -96,7 +97,7 @@ $(document).ready(function () {
                 return {
                     results: $.map(response.data, function (item) {
                         return {
-                            text: item.clientname + " - " + item.phone,
+                            text: item.clientname + " - " + item.phone + " - " + item.email,
                             id: item.id,
                         }
                     })

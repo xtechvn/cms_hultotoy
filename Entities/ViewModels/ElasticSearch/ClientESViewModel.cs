@@ -11,5 +11,6 @@ namespace Entities.ViewModels.ElasticSearch
         public int Id { get; set; }
         public string clientname { get; set; }
         public string Phone { get; set; }
+        public string email { get; set; }
     }
 }
