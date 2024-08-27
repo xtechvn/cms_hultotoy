@@ -56,11 +56,11 @@ $(document).ready(function () {
 
     var user_Id = $('#id_userid').val();
     if (user_Id == null) {
-        
+
         _customer_manager.LoaddataClient();
-        
+
     }
-   
+
     if (_customer_manager.getCookie('customer_manager_filter') != null) {
         let cookie = _customer_manager.getCookie(cookieName)
         fields = JSON.parse(cookie)
@@ -84,8 +84,8 @@ $(document).ready(function () {
 
     $("#client").select2({
         theme: 'bootstrap4',
-         placeholder: "Tên KH, Điện Thoại, Email",
-         maximumSelectionLength: 1,
+        placeholder: "Tên KH, Điện Thoại, Email",
+        maximumSelectionLength: 1,
         ajax: {
             url: "/CustomerManager/ClientSuggestion",
             type: "post",
@@ -163,7 +163,7 @@ $(document).ready(function () {
                 return {
                     results: $.map(response.data, function (item) {
                         return {
-                            text: item.fullname ,
+                            text: item.fullname,
                             id: item.id,
                         }
                     })
@@ -210,27 +210,7 @@ var _customer_manager = {
 
     LoaddataClient: function () {
         var objSearch = this.SearchParam;
-        var x = localStorage.getItem("cookiesearchModel");
-        if (x != null) {
-            
-            input = JSON.parse(x)
-            _searchModel.MaKH = input.MaKH
-            _searchModel.CreatedBy = input.CreatedBy
-            _searchModel.TenKH = input.TenKH
-            _searchModel.Email = input.Email
-            _searchModel.Phone = input.Phone
-            _searchModel.AgencyType = input.AgencyType
-            _searchModel.ClientType = input.ClientType
-            _searchModel.PermissionType = input.PermissionType
-            _searchModel.PageIndex = 1
-            _searchModel.PageSize = 10
-            _searchModel.MinAmount = input.MinAmount
-            _searchModel.MaxAmount = input.MaxAmount
-            _searchModel.CreateDate = input.CreateDate
-            _searchModel.EndDate = input.EndDate
-            objSearch = _searchModel
-        }
-        else {
+
         let _searchModel = {
             MaKH: null,
             CreatedBy: null,
@@ -244,10 +224,10 @@ var _customer_manager = {
             PageSize: 10,
             MinAmount: null,
             MaxAmount: null,
-            };
-            objSearch = _searchModel;
-        }
-      
+        };
+        objSearch = _searchModel;
+
+
         this.SearchClient(objSearch);
         this.setValueFilter(objSearch);
         $('#imgLoading_order').hide();
@@ -264,7 +244,7 @@ var _customer_manager = {
 
     },
     SearchClient: function (input) {
-       
+
         $.ajax({
             url: "/CustomerManager/ListClient",
             type: "Post",
@@ -284,10 +264,10 @@ var _customer_manager = {
                 $('#select2-selectPaggingOptions-container').html(input.PageSize + " kết quả/trang");
                 $('#select2-selectPaggingOptions-container').prop('title', input.PageSize + " kết quả/trang");
                 $('#selectPaggingOptions').val(input.PageSize).attr("selected", "selected");
-         
+
             }
         });
-       
+
     },
     SearchPaymentAccount: function (input) {
         $.ajax({
@@ -357,7 +337,7 @@ var _customer_manager = {
     ClientOnPaging: function (value) {
         var CreateDate;
         var EndDate;
-        var MaKH_data= $('#client').select2("val");
+        var MaKH_data = $('#client').select2("val");
         var UserId_data = $('#txtNguoiTao').select2("val");
         var CreatedBy_data = $('#CreatedBy').select2("val");
         if ($('#createdate').data('daterangepicker') !== undefined &&
@@ -371,7 +351,7 @@ var _customer_manager = {
         let _searchModel = {
             MaKH: null,
             CreatedBy: null,
-            UserId: null ,
+            UserId: null,
             TenKH: null,
             Email: null,
             Phone: null,
@@ -612,7 +592,7 @@ var _customer_manager = {
             };
         }
         _magnific.OpenSmallPopup(title, url, param);
-   
+
     },
     Showlabel: function (input) {
         var label = document.getElementById('sothue_cmnd');
@@ -625,20 +605,20 @@ var _customer_manager = {
                 type: "post",
                 success: function (result) {
                     if (result != undefined && result.data != undefined && result.data.length > 0) {
-                        
+
                         if (x < result.data.length) {
                             $('#id_loaikhach').append('<option value="">Tất cả loại khách hàng</option>')
                             result.data.forEach(function (item) {
-                            if (item.codeValue != 6) {
-                                $('#id_loaikhach').append(_customer_manager_html.html_Client_option.replaceAll('{Client_id}', item.codeValue).replace('{Client_name}', item.description))
-                            }
+                                if (item.codeValue != 6) {
+                                    $('#id_loaikhach').append(_customer_manager_html.html_Client_option.replaceAll('{Client_id}', item.codeValue).replace('{Client_name}', item.description))
+                                }
 
                             });
                         }
                     }
                     else {
                         $("#id_loaikhach").trigger('change');
-                       
+
                     }
 
                 }
@@ -653,18 +633,18 @@ var _customer_manager = {
                 type: "post",
                 success: function (result) {
                     if (result != undefined && result.data != undefined && result.data.length > 0) {
-                       
+
                         if (x < result.data.length) {
                             $('#id_loaikhach').append('<option value="">Tất cả loại khách hàng</option>')
-                        result.data.forEach(function (item) {
-                            if (item.codeValue != 6) {
-                                $('#id_loaikhach').append(_customer_manager_html.html_Client_option.replaceAll('{Client_id}', item.codeValue).replace('{Client_name}', item.description))
-                            } else {
-                              /*  $('#id_loaikhach').append(_customer_manager_html.html_Client_option_B2C.replaceAll('{Client_id}', item.codeValue).replace('{Client_name}', item.description))*/
-                            }
+                            result.data.forEach(function (item) {
+                                if (item.codeValue != 6) {
+                                    $('#id_loaikhach').append(_customer_manager_html.html_Client_option.replaceAll('{Client_id}', item.codeValue).replace('{Client_name}', item.description))
+                                } else {
+                                    /*  $('#id_loaikhach').append(_customer_manager_html.html_Client_option_B2C.replaceAll('{Client_id}', item.codeValue).replace('{Client_name}', item.description))*/
+                                }
 
-                        });
-                        $("#id_loaikhach").trigger('change');
+                            });
+                            $("#id_loaikhach").trigger('change');
 
                         }
                     }
@@ -697,7 +677,7 @@ var _customer_manager = {
             EndDate = null
         }
         let _searchModel = {
-            MaKH:  null ,
+            MaKH: null,
             UserId: null,
             CreatedBy: null,
             TenKH: null,
@@ -716,36 +696,36 @@ var _customer_manager = {
         };
         if (MaKH_data != null && MaKH_data[0] != null) {
             _searchModel.MaKH = MaKH_data[0]
-            window.localStorage.setItem("textClient", JSON.stringify(textClient));
+
         }
         else {
             window.localStorage.removeItem("textClient")
         }
         if (UserId_data != null && UserId_data[0] != null) {
             _searchModel.UserId = UserId_data[0]
-            window.localStorage.setItem("textNV", JSON.stringify(textNV));
+
         }
         else {
             window.localStorage.removeItem("textNV")
         }
         if (CreatedBy_data != null && CreatedBy_data[0] != null) {
             _searchModel.CreatedBy = CreatedBy_data[0]
-            window.localStorage.setItem("textNT", JSON.stringify(textNT));
+
         }
         else {
             window.localStorage.removeItem("textNT")
         }
         if (CacheName_data != null && CacheName_data[0] != null) {
             _searchModel.CacheName = CacheName_data[0]
-     
+
         }
         var objSearch = this.SearchParam;
         objSearch = _searchModel;
 
-        localStorage.setItem("cookiesearchModel", JSON.stringify(_searchModel));
-        
+
+
         this.SearchClient(objSearch);
-        
+
     },
     SearchData2: function () {
         var CreateDate;
@@ -785,33 +765,32 @@ var _customer_manager = {
         };
         if (MaKH_data != null && MaKH_data[0] != null) {
             _searchModel.MaKH = MaKH_data[0]
-            window.localStorage.setItem("textClient", JSON.stringify(textClient));
+
         }
         else {
             window.localStorage.removeItem("textClient")
         }
         if (UserId_data != null && UserId_data[0] != null) {
             _searchModel.UserId = UserId_data[0]
-            window.localStorage.setItem("textNV", JSON.stringify(textNV));
+
         }
         else {
             window.localStorage.removeItem("textNV")
         }
         if (CreatedBy_data != null && CreatedBy_data[0] != null) {
             _searchModel.CreatedBy = CreatedBy_data[0]
-            window.localStorage.setItem("textNT", JSON.stringify(textNT));
+
         }
         else {
             window.localStorage.removeItem("textNT")
         }
         if (CacheName_data != null && CacheName_data[0] != null) {
-            _searchModel.CacheName = CacheName_data[0]
+
 
         }
         var objSearch = this.SearchParam;
         objSearch = _searchModel;
 
-        localStorage.setItem("cookiesearchModel", JSON.stringify(_searchModel));
 
         $(".onclick-active").addClass('onclick');
         $(".onclick-active").removeClass('onclick-active');
@@ -848,7 +827,7 @@ var _customer_manager = {
             rules: {
 
                 "Client_name": "required",
-              
+
                 "phone": {
                     required: true,
                     number: true,
@@ -857,16 +836,16 @@ var _customer_manager = {
                     required: true,
                     email: true,
                 },
-                
+
                 "id_loaikhach": "required",
                 "id_nhomkhach": "required",
-              
-                "So_tk": { number: true,},
+
+                "So_tk": { number: true, },
 
             },
             messages: {
                 "Client_name": "Tên khách hàng không được bỏ trống",
-               
+
                 "phone": {
                     required: "Số điện thoại không được bỏ trống",
                     number: "Nhập đúng định dạng số",
@@ -875,18 +854,17 @@ var _customer_manager = {
                     required: "Email không được bỏ trống",
                     email: "Nhập đúng định dạnh email",
                 },
-               
+
                 "id_loaikhach": "Vui lòng chọn loại khách hàng",
                 "id_nhomkhach": "Vui lòng chọn nhóm khách hàng",
-               
+
                 "So_tk": {
                     number: "Nhập đúng định dạng số",
                 },
             }
         });
         if (FromCreate.valid()) {
-            if (So_tk == "" && Name_tk == "" && Name_nh == "" && diachi_chinhanh == "" || So_tk != "" && Name_tk != "" && Name_nh != "" && diachi_chinhanh != "")
-            {
+            if (So_tk == "" && Name_tk == "" && Name_nh == "" && diachi_chinhanh == "" || So_tk != "" && Name_tk != "" && Name_nh != "" && diachi_chinhanh != "") {
                 var object_summit = {
                     Id: Id,
                     JoinDate: JoinDate,
@@ -946,12 +924,12 @@ var _customer_manager = {
                 if (diachi_chinhanh == "") { $('#diachi_chinhanh_err').show().text("Tên chi nhánh không được bỏ trống") }
                 else { $('#diachi_chinhanh-error').hide() }
             }
-            
-          
-        }
-       
 
-        
+
+        }
+
+
+
     },
     OnChangeUserId: function (value, type) {
         if (type == 1) {
@@ -988,12 +966,12 @@ var _customer_manager = {
         this.setCookie(cookieFilterName, JSON.stringify(this.getModel()), 1)
 
     },
- 
+
     SetActive: function (status) {
         $('.data_order').removeClass('active')
-        
-        $('#data_order_'+status).addClass('active')
-        
+
+        $('#data_order_' + status).addClass('active')
+
     },
     OnStatuse: function (value) {
         if (value != 99) {
@@ -1012,9 +990,9 @@ var _customer_manager = {
         }
 
     },
- 
+
     onSelectPageSize: function (value) {
-          
+
         var CreateDate;
         var EndDate;
         var MaKH_data = $('#client').select2("val");
@@ -1048,12 +1026,12 @@ var _customer_manager = {
         if (UserId_data != null) { _searchModel.UserId = UserId_data[0] }
         if (CreatedBy_data != null) { _searchModel.CreatedBy = CreatedBy_data[0] }
         _searchModel.PageSize = $("#selectPaggingOptions").find(':selected').val()
-       
+
         var objSearch = this.SearchParam;
         objSearch = _searchModel
         this.SearchClient(objSearch);
         this.setValueFilter(objSearch);
-       
+
     },
     setValueFilter: function (objSearch) {
 
@@ -1072,9 +1050,9 @@ var _customer_manager = {
                 type: "post",
                 data: { clientId: id, Status: status },
                 success: function (result) {
-                    if (result.status==0) {
+                    if (result.status == 0) {
                         _msgalert.success(result.msg);
-                       
+
                     } else {
                         _msgalert.error(result.msg);
                     }
@@ -1136,7 +1114,7 @@ var _customer_manager = {
         $('#btnExport').prop('disabled', true);
         $('#icon-export').removeClass('fa-file-excel-o');
         $('#icon-export').addClass('fa-spinner fa-pulse');
-       
+
         objSearch.PageIndex = 1;
         this.searchModel = objSearch
         _global_function.AddLoading()
@@ -1389,7 +1367,7 @@ var _customer_manager = {
                     searchModel.FromDateStr = $('#createdate').data('daterangepicker').startDate._d.toLocaleDateString("en-GB");
                     searchModel.ToDateStr = $('#createdate').data('daterangepicker').endDate._d.toLocaleDateString("en-GB");
                 } else {
-                    searchModel.FromDateStr  = null
+                    searchModel.FromDateStr = null
                     searchModel.ToDateStr = null
                 }
                 $('#check_radio_name').text("Khác")
@@ -1404,7 +1382,7 @@ var _customer_manager = {
         textNV = $('#txtNguoiTao').find(':selected').text();
         var CreatedBy_data = $('#CreatedBy').select2("val");
         textNT = $('#CreatedBy').find(':selected').text();
-       
+
         let _searchModel = {
             MaKH: null,
             UserId: null,
@@ -1423,16 +1401,16 @@ var _customer_manager = {
             PageSize: $("#selectPaggingOptions").find(':selected').val(),
         };
         if (MaKH_data != null && MaKH_data[0] != null) {
-            _searchModel.MaKH = MaKH_data[0]       
+            _searchModel.MaKH = MaKH_data[0]
         }
 
         if (UserId_data != null && UserId_data[0] != null) {
-            _searchModel.UserId = UserId_data[0] 
+            _searchModel.UserId = UserId_data[0]
         }
         if (CreatedBy_data != null && CreatedBy_data[0] != null) {
             _searchModel.CreatedBy = CreatedBy_data[0]
         }
-       
+
         var objSearch = this.SearchParam;
         objSearch = _searchModel;
 
@@ -1443,13 +1421,13 @@ var _customer_manager = {
         var text_ClientType = $('#ClientType').select2('data')[0].text;
         var text_AgencyType = $('#AgencyType').select2('data')[0].text;
         $('#select2-AgencyType-container').html(text_AgencyType);
-      
+
         $('#select2-ClientType-container').html(text_ClientType);
         $('#select2-CreatedBy-container').html('');
         $('#minamount').val('');
         $('#maxamount').val('');
 
-      
+
     },
     Closeboloc: function () {
         $('#bo-loc-date').hide();
@@ -1469,4 +1447,4 @@ function delay_callback(callback, ms) {
             callback.apply(context, args);
         }, ms || 0);
     };
-} 
+}
