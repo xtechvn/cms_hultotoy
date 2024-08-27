@@ -28,7 +28,7 @@ namespace Caching.Elasticsearch
         }
 
         public List<ClientSeachESViewModel> GetClientByNameOrPhone(string phoneOrName) 
-        {
+       {
             try 
             {
                 bool check = Regex.IsMatch(phoneOrName, @"^\d+$");
@@ -41,9 +41,9 @@ namespace Caching.Elasticsearch
                 .Index(index)
                 .Query(q =>
                 q.Bool(
-                    qb => qb.Must(sh => sh.Match(m => m
-                    .Field(check? "phone" : "clientname")
-                    .Query(phoneOrName)
+                    qb => qb.Must(sh => sh.QueryString(m => m
+                    .Fields(new[] { "clientname","phone","email" })
+                    .Query("*" + phoneOrName + "*")
                     )
                     )
                     )
@@ -57,6 +57,7 @@ namespace Caching.Elasticsearch
                         Id = a.Id,
                         clientname = a.clientname,
                         Phone = a.Phone,
+                        email = a.email,
                     }).ToList();
                     return result;
                 }
