@@ -47,6 +47,8 @@ var textNT = localStorage.getItem("textNT");
 $(document).ready(function () {
     $(document).click(function () {
         if ($(event.target).closest('.relative').length == 0) {
+            $(".onclick-active").addClass('onclick');
+            $(".onclick-active").removeClass('onclick-active');
             $(".form-down").slideUp();
             $(".onclick-togle, .dropdown .dropbtn,.down-up .onclick").removeClass('active');
             $(".dropdown.active").find('.dropdown-content').slideUp();
