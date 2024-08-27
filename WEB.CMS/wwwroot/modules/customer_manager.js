@@ -117,7 +117,7 @@ $(document).ready(function () {
         placeholder: "Tên nhân viên, Email",
         maximumSelectionLength: 1,
         ajax: {
-            url: "/Order/UserSuggestion",
+            url: "/OrderManual/UserSuggestion",
             type: "post",
             dataType: 'json',
             delay: 250,
@@ -147,7 +147,7 @@ $(document).ready(function () {
         placeholder: "Người tạo",
         maximumSelectionLength: 1,
         ajax: {
-            url: "/Order/UserSuggestion",
+            url: "/OrderManual/UserSuggestion",
             type: "post",
             dataType: 'json',
             delay: 250,
