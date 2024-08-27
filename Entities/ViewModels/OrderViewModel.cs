@@ -1,4 +1,5 @@
 ﻿using Entities.Models;
+using Entities.ViewModels.Products;
 using System;
 using System.Collections.Generic;
 
@@ -48,9 +49,7 @@ namespace Entities.ViewModels
         public string UtmMedium { get; set; }
         public int IsFinishPayment { get; set; }
         public string ListProductId { get; set; }
-
-
-
+        public List<ProductMongoDbModel> ListProduct { get; set; }
     }
     public class TotalValueOrder
     {

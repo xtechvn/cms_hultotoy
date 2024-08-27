@@ -44,7 +44,7 @@
                     <tr>
                         <th>STT</th>
                         <th>Mã đơn</th>
-                        <th>
+                        <th style="max-width:150px;">
                            Tên sản phẩm
                         </th>
                         <th> Tổng tiền </th>
@@ -71,7 +71,25 @@
                                 <td>
                                     <a class="blue" href="/Order/@item.OrderId" onclick="_ordersCMS.saveCookieFilter()">@item.OrderNo</a>
                                 </td>
-                                <td>@item.ListProductId</td>
+                                <td>
+                                    @if(item.ListProduct != null && item.ListProduct.Count > 0)
+                                    {
+                                        foreach (var item2 in item.ListProduct)
+                                        {
+                                            <div class="item-order mb-3" style="display: flex; flex-direction: row; flex-wrap: nowrap;">
+                                                <div class="img mr-2" style="width:80px;">
+                                                    <img src="@(item2.avatar.Contains("https") ? item2.avatar:ViewBag.domainImg +item2.avatar)" style="width:80px;" alt="">
+                                                </div>
+                                                <div class="info">
+                                                    <h6 class="bold" style="white-space: break-spaces;">@item2.name</h6>
+                                                    <div class="cat"> Phân loại: @(string.Join(",", item2.variation_detail.Select(s => s.name).ToList()))</div>
+                                                </div>
+                                            </div>
+                                        }
+                                      
+                                    }
+                                    
+                                </td>
                                 <td class="text-right">
                                     <div class="green">@item.Payment.ToString("#,##0")/</div>
                                     <div class="red">@(item.Amount == 0 ? "0" : item.Amount.ToString("#,##"))</div>

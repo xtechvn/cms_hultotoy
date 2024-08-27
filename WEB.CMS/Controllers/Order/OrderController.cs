@@ -4,6 +4,7 @@ using Entities.ViewModels;
 using Entities.ViewModels.Mongo;
 using Microsoft.AspNetCore.Mvc;
 using Nest;
+using NuGet.Packaging.Signing;
 using Repositories.IRepositories;
 using System.Security.Claims;
 using Utilities;
@@ -73,11 +74,19 @@ namespace WEB.CMS.Controllers
 
             try
             {
+                ViewBag.domainImg = _configuration["DomainConfig:ImageStatic"];
                 searchModel.pageSize = (int)pageSize;
                 searchModel.PageIndex = (int)currentPage;
                 var model = new GenericViewModel<OrderViewModel>();
                 var model2 = new TotalCountSumOrder();
                 model = await _orderRepository.GetList(searchModel);
+                if(model != null && model.ListData != null && model.ListData.Count>0)
+                {
+                    foreach(var item in model.ListData)
+                    {
+                        item.ListProduct= await _productV2DetailMongoAccess.GetListByIds(item.ListProductId);
+                    }
+                }
                 model2 = await _orderRepository.GetTotalCountSumOrder(searchModel);
                 ViewBag.TotalValueOrder = new TotalValueOrder()
                 {

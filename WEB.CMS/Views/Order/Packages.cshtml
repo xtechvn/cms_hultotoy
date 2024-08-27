@@ -20,7 +20,7 @@
             <thead>
                 <tr class="text-uppercase">
                     <th>STT</th>
-                    <th>Tên sản phẩm</th>
+                    <th style="width:350px">Tên sản phẩm</th>
                     <th style="width:150px">Giá nhập</th>
                     <th style="width: 150px;">Giá bán</th>
                     <th style="width: 50px;">SL</th>
@@ -37,7 +37,7 @@
                 </tr>
             </thead>
             <tbody>
-                @if (Model != null && Model.Count > 0 && data != null && data.Count > 0 )
+                @if (Model != null && Model.Count > 0 && data != null && data.Count > 0)
                 {
                     var i = 0;
                     @foreach (var item in Model)
@@ -47,17 +47,20 @@
                         <tr>
                             <td>@i</td>
                             <td class="text-left" style="width: 100px;">
-                                <div class="flex  item-order">
+                                <div class="flex  item-order" style="flex-direction: row;flex-wrap: nowrap;">
                                     <div class="img mr-2" style="width: 100px;">
-                                        <img src="@ViewBag.domainImg@detail.avatar" alt="">
+                                        <img src="@(detail.avatar.Contains("https") ? detail.avatar:ViewBag.domainImg +detail.avatar)" alt="">
                                     </div>
-                                    <div class="info text-primary">@detail.name</div>
+                                    <div class="info">
+                                        <h6 class="bold" style="white-space: break-spaces;"> @detail.name</h6>
+                                        <p class="cat mt-2">
+                                            Mã sản phẩm: @(detail.code == null ? detail._id : detail.code)<br>
+                                            Phân loại: @(string.Join(",", detail.variation_detail.Select(s => s.name).ToList()))<br>
+                                            Mã SKU: @detail.sku
+                                        </p>
+                                    </div>
                                 </div>
-                                <div class="cat mt-2">
-                                    Mã sản phẩm: @(detail.code == null ? detail._id : detail.code)<br>
-                                    Phân loại: @(string.Join(",", detail.variation_detail.Select(s => s.name).ToList()))<br>
-                                    Mã SKU: @detail.sku
-                                </div>
+
                             </td>
                             <td>@item.Price.ToString("N0") đ</td>
                             <td>@item.Amount.ToString("N0") đ</td>
