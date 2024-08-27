@@ -747,7 +747,81 @@ var _customer_manager = {
         this.SearchClient(objSearch);
         
     },
+    SearchData2: function () {
+        var CreateDate;
+        var EndDate;
+        var CacheName_data = $('#filter-client').select2("val");
+        var MaKH_data = $('#client').select2("val");
+        textClient = $('#client').find(':selected').text();
+        var UserId_data = $('#txtNguoiTao').select2("val");
+        textNV = $('#txtNguoiTao').find(':selected').text();
+        var CreatedBy_data = $('#CreatedBy').select2("val");
+        textNT = $('#CreatedBy').find(':selected').text();
+        if ($('#createdate').data('daterangepicker') !== undefined &&
+            $('#createdate').data('daterangepicker') != null && isPickerApprove) {
+            CreateDate = $('#createdate').data('daterangepicker').startDate._d.toLocaleDateString("en-GB");
+            EndDate = $('#createdate').data('daterangepicker').endDate._d.toLocaleDateString("en-GB");
+        } else {
+            CreateDate = null
+            EndDate = null
+        }
+        let _searchModel = {
+            MaKH: null,
+            UserId: null,
+            CreatedBy: null,
+            TenKH: null,
+            Email: null,
+            Phone: null,
+            CacheName: null,
+            AgencyType: $('#AgencyType').val(),
+            ClientType: $('#ClientType').val(),
+            PermissionType: $('#PermisionType').val(),
+            CreateDate: CreateDate,
+            EndDate: EndDate,
+            MinAmount: $('#minamount').val().replaceAll(',', ''),
+            MaxAmount: $('#maxamount').val().replaceAll(',', ''),
+            PageIndex: 1,
+            PageSize: $("#selectPaggingOptions").find(':selected').val(),
+        };
+        if (MaKH_data != null && MaKH_data[0] != null) {
+            _searchModel.MaKH = MaKH_data[0]
+            window.localStorage.setItem("textClient", JSON.stringify(textClient));
+        }
+        else {
+            window.localStorage.removeItem("textClient")
+        }
+        if (UserId_data != null && UserId_data[0] != null) {
+            _searchModel.UserId = UserId_data[0]
+            window.localStorage.setItem("textNV", JSON.stringify(textNV));
+        }
+        else {
+            window.localStorage.removeItem("textNV")
+        }
+        if (CreatedBy_data != null && CreatedBy_data[0] != null) {
+            _searchModel.CreatedBy = CreatedBy_data[0]
+            window.localStorage.setItem("textNT", JSON.stringify(textNT));
+        }
+        else {
+            window.localStorage.removeItem("textNT")
+        }
+        if (CacheName_data != null && CacheName_data[0] != null) {
+            _searchModel.CacheName = CacheName_data[0]
 
+        }
+        var objSearch = this.SearchParam;
+        objSearch = _searchModel;
+
+        localStorage.setItem("cookiesearchModel", JSON.stringify(_searchModel));
+
+        $(".onclick-active").addClass('onclick');
+        $(".onclick-active").removeClass('onclick-active');
+        $(".form-down").slideUp();
+        $(".onclick-togle, .dropdown .dropbtn,.down-up .onclick").removeClass('active');
+        $(".dropdown.active").find('.dropdown-content').slideUp();
+        $(".select--v2__content").slideUp();
+        this.SearchClient(objSearch);
+
+    },
     OnCreateClient: function () {
         var Id = $('#CustomerManager_Id').val();
         var JoinDate = $('#JoinDate').val();
@@ -1369,9 +1443,13 @@ var _customer_manager = {
         var text_ClientType = $('#ClientType').select2('data')[0].text;
         var text_AgencyType = $('#AgencyType').select2('data')[0].text;
         $('#select2-AgencyType-container').html(text_AgencyType);
-        $('#select2-AgencyType-container').title(text_AgencyType);
+      
         $('#select2-ClientType-container').html(text_ClientType);
-        $('#select2-ClientType-container').title(text_ClientType);
+        $('#select2-CreatedBy-container').html('');
+        $('#minamount').val('');
+        $('#maxamount').val('');
+
+      
     },
     Closeboloc: function () {
         $('#bo-loc-date').hide();

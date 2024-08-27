@@ -75,7 +75,7 @@ namespace WEB.CMS.Service
                 {
                     filter &= Builders<CustomerManagerViewSearchModel>.Filter.Where(s => s.CacheName.ToUpper().Contains(name.Trim().ToUpper()));
                 }
-                if (name != null)
+                if (_id != null)
                 {
                     filter &= Builders<CustomerManagerViewSearchModel>.Filter.Where(s => s._id.ToUpper().Contains(_id.Trim().ToUpper()));
                 }
