@@ -132,12 +132,13 @@ namespace Caching.Elasticsearch
             {
                 string endpoint = string.Empty;
                 string url_es = configuration["DataBaseConfig:Elastic:Host"];
+                string Client = configuration["Elastic:Index:Client"];
                 var workingDirectory = Environment.CurrentDirectory;
                 //  var currentDirectory = Directory.GetParent(workingDirectory);
                 var query = workingDirectory + @"\QueryEs\" + file_name;
 
                 var body_raw_input = File.ReadAllText(query);
-                body_raw_input = body_raw_input.Replace("{index_name}", "customer" + ( (_company_type.Trim() == "0" ? "" : "_" + _company_type.Trim())));
+                body_raw_input = body_raw_input.Replace("{index_name}", Client);
 
                 var j_input = JObject.Parse(body_raw_input);
                 endpoint = j_input["endpoint"].ToString();
