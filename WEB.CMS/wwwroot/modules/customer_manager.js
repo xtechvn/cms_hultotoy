@@ -1421,8 +1421,6 @@ var _customer_manager = {
     Clearboloc: function (id) {
         document.getElementById(id).reset();
         var text_ClientType = $('#ClientType').select2('data')[0].text;
-        var text_AgencyType = $('#AgencyType').select2('data')[0].text;
-        $('#select2-AgencyType-container').html(text_AgencyType);
 
         $('#select2-ClientType-container').html(text_ClientType);
         $('#select2-CreatedBy-container').html('');
