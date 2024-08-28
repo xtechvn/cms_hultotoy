@@ -1,4 +1,5 @@
 ﻿using DAL.Generic;
+using Entities.ConfigModels;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -51,6 +52,7 @@ namespace DAL
                 return null;
             }
         }
+    
         public int Setup(PaymentAccount model)
         {
             try
