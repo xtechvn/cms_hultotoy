@@ -13,7 +13,11 @@ public partial class Order
 
     public DateTime CreatedDate { get; set; }
 
+    public int? CreatedBy { get; set; }
+
     public DateTime? UpdateLast { get; set; }
+
+    public int? UserUpdateId { get; set; }
 
     public double? Price { get; set; }
 
@@ -23,7 +27,7 @@ public partial class Order
 
     public double? Amount { get; set; }
 
-    public int Status { get; set; }
+    public int OrderStatus { get; set; }
 
     public short PaymentType { get; set; }
 

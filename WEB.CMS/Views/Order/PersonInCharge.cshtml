@@ -28,7 +28,7 @@
                 <label class="lbl">Nhân viên phụ:</label><br />
                 <div class="list-select-tag">
                     <select class="form-control select2 js-example-basic-multiple" name="SalerGroup" id="SalerGroup" multiple="multiple">
-                        @if (Saler != null)
+                        @if (SalerGroup != null)
                         {
                             foreach (var item in SalerGroup)
                             {
@@ -47,7 +47,7 @@
         placeholder: "Nhân viên chính",
         maximumSelectionLength: 1,
         ajax: {
-            url: "/Order/UserSuggestion",
+            url: "/OrderManual/UserSuggestion",
             type: "post",
             dataType: 'json',
             delay: 250,
@@ -76,7 +76,7 @@
         theme: 'bootstrap4',
         placeholder: "Nhân viên phụ",
         ajax: {
-            url: "/Order/UserSuggestion",
+            url: "/OrderManual/UserSuggestion",
             type: "post",
             dataType: 'json',
             delay: 250,

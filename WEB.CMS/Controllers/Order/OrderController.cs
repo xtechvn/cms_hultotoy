@@ -171,7 +171,6 @@ namespace WEB.CMS.Controllers
                     var data = await _orderRepository.GetOrderDetailByOrderId(orderId);
                     if (data.SalerId != null)
                     {
-                        
                         var SalerGroup =await _userRepository.GetClientDetailAsync(data.SalerId);
                         ViewBag.Saler = SalerGroup;
                     }
@@ -309,6 +308,7 @@ namespace WEB.CMS.Controllers
                 var order = new Entities.Models.Order();
                 order.OrderId = (long)order_id;
                 order.UserId = _UserId;
+                order.UserUpdateId = _UserId;
                 var success = await _orderRepository.UpdateOrder(order);
               
                 return Ok(new

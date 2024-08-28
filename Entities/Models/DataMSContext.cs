@@ -119,9 +119,13 @@ public partial class DataMSContext : DbContext
 
     public virtual DbSet<PolicyDetail> PolicyDetails { get; set; }
 
+    public virtual DbSet<Position> Positions { get; set; }
+
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<Province> Provinces { get; set; }
+
+    public virtual DbSet<ProvinceHotel> ProvinceHotels { get; set; }
 
     public virtual DbSet<ReceivePromotion> ReceivePromotions { get; set; }
 
@@ -865,7 +869,6 @@ public partial class DataMSContext : DbContext
 
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.ProductCode)
-                .IsRequired()
                 .HasMaxLength(200)
                 .IsUnicode(false);
             entity.Property(e => e.ProductId)
@@ -1024,6 +1027,15 @@ public partial class DataMSContext : DbContext
             entity.Property(e => e.VinWonderDepositAmount).HasColumnType("decimal(18, 2)");
         });
 
+        modelBuilder.Entity<Position>(entity =>
+        {
+            entity.ToTable("Position");
+
+            entity.Property(e => e.PositionName)
+                .IsRequired()
+                .HasMaxLength(250);
+        });
+
         modelBuilder.Entity<Product>(entity =>
         {
             entity.ToTable("Product");
@@ -1079,6 +1091,16 @@ public partial class DataMSContext : DbContext
             entity.Property(e => e.Type)
                 .IsRequired()
                 .HasMaxLength(30);
+        });
+
+        modelBuilder.Entity<ProvinceHotel>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__ProvinceHotel");
+
+            entity.ToTable("ProvinceHotel");
+
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<ReceivePromotion>(entity =>
