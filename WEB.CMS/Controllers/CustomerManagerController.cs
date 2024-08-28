@@ -146,20 +146,20 @@ namespace WEB.Adavigo.CMS.Controllers
                         var data = _logCacheFilterMongoService.GetListLogCache(null, searchModel.CacheName);
                         if (data != null)
                         {
-                            searchModel.MaKH = data[0].MaKH;
-                            searchModel.CreatedBy = data[0].CreatedBy;
-                            searchModel.UserId = data[0].UserId;
-                            searchModel.TenKH = data[0].TenKH;
-                            searchModel.Email = data[0].Email;
-                            searchModel.Phone = data[0].Phone;
-                            searchModel.AgencyType = data[0].AgencyType;
-                            searchModel.ClientType = data[0].ClientType;
-                            searchModel.PermissionType = data[0].PermissionType;
-                            searchModel.CreateDate = data[0].CreateDate;
-                            searchModel.EndDate = data[0].EndDate;
-                            searchModel.MinAmount = data[0].MinAmount;
-                            searchModel.MaxAmount = data[0].MaxAmount;
-                            searchModel.SalerPermission = data[0].SalerPermission;
+                            searchModel.MaKH = searchModel.MaKH == -1 ? data[0].MaKH : searchModel.MaKH;
+                            searchModel.CreatedBy = searchModel.CreatedBy == -1 ? data[0].CreatedBy : searchModel.CreatedBy;
+                            searchModel.UserId = searchModel.UserId == -1 ? data[0].UserId : searchModel.UserId;
+                            searchModel.TenKH = searchModel.TenKH == null ? data[0].TenKH : searchModel.TenKH;
+                            searchModel.Email = searchModel.Email == null ? data[0].Email : searchModel.Email;
+                            searchModel.Phone = searchModel.Phone == null ? data[0].Phone : searchModel.Phone;
+                            searchModel.AgencyType = searchModel.AgencyType == -1 ? data[0].AgencyType : searchModel.AgencyType;
+                            searchModel.ClientType = searchModel.ClientType == -1 ? data[0].ClientType : searchModel.ClientType;
+                            searchModel.PermissionType = searchModel.PermissionType == -1 ? data[0].PermissionType : searchModel.PermissionType;
+                            searchModel.CreateDate = searchModel.CreateDate == null ? data[0].CreateDate : searchModel.CreateDate;
+                            searchModel.EndDate = searchModel.EndDate == null ? data[0].EndDate : searchModel.EndDate;
+                            searchModel.MinAmount = searchModel.MinAmount == -1 ? data[0].MinAmount : searchModel.MinAmount;
+                            searchModel.MaxAmount = searchModel.MaxAmount == -1 ? data[0].MaxAmount : searchModel.MaxAmount;
+
                         }
 
                     }

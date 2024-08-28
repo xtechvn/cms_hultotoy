@@ -97,10 +97,14 @@
                     <div class="col-md-5 col-xs-12">
                         <select class="form-control sl-image-size" asp-for="@Model.PositionId" style="width: 200px;">
                             <option value="-1" size="150x200">Chọn kích thước</option>
-                            @foreach (var item in PositionList)
+                            @if (PositionList != null)
                             {
-                                <option value="@item.Id" size="@(item.Width+"x"+item.Height)">@item.PositionName (@(item.Width+"x"+item.Height))</option>
+                                @foreach (var item in PositionList)
+                                {
+                                    <option value="@item.Id" size="@(item.Width+"x"+item.Height)">@item.PositionName (@(item.Width+"x"+item.Height))</option>
+                                }
                             }
+
                         </select>
                     </div>
                 </div>

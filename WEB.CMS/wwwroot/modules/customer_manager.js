@@ -45,6 +45,7 @@ var textNV = localStorage.getItem("textNV");
 var textNT = localStorage.getItem("textNT");
 
 $(document).ready(function () {
+    
     $(document).click(function () {
         if ($(event.target).closest('.relative').length == 0) {
             $(".onclick-active").addClass('onclick');
@@ -53,6 +54,12 @@ $(document).ready(function () {
             $(".onclick-togle, .dropdown .dropbtn,.down-up .onclick").removeClass('active');
             $(".dropdown.active").find('.dropdown-content').slideUp();
             $(".select--v2__content").slideUp();
+        }
+        var type_val = $('input[name=optradio]:checked').val();
+        if (type_val == 8) {
+            $('#createdate').removeAttr('disabled')
+        } else {
+            $('#createdate').attr("disabled", true)
         }
     });
 
@@ -265,7 +272,12 @@ var _customer_manager = {
                 });
                 $('#select2-selectPaggingOptions-container').html(input.PageSize + " kết quả/trang");
                 $('#select2-selectPaggingOptions-container').prop('title', input.PageSize + " kết quả/trang");
-                $('#selectPaggingOptions').val(input.PageSize).attr("selected", "selected");
+                if (input.PageSize == undefined) {
+                    $('#selectPaggingOptions').val(20).attr("selected", "selected");
+                } else {
+                    $('#selectPaggingOptions').val(input.PageSize).attr("selected", "selected");
+                }
+            
 
             }
         });
@@ -1206,12 +1218,16 @@ var _customer_manager = {
         var type = $('input[name=optradio]:checked').val();
         $('#form_down_check_radio').attr('style', 'display: none');
         $('#btn_check_radio').removeClass('active');
-
+       
         var searchModel = {
             FromDateStr: null,
             ToDateStr: null,
         };
         switch (type) {
+            case "0": {
+                $('#check_radio_name').text("Tất cả")
+            }
+                break;
             case "1": {
                 searchModel.FromDateStr = new Date().toLocaleDateString("en-GB");
                 searchModel.ToDateStr = new Date().toLocaleDateString("en-GB");
@@ -1229,10 +1245,23 @@ var _customer_manager = {
                 break;
             case "3": {
                 var newDate = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                var newDate2 = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                
+                for (var i = 0; ; i++) {
 
+                    var newDate3 = new Date(_global_function.ParseDateTostring(new Date().toLocaleDateString("en-GB")));
+                    newDate3.setDate(newDate3.getDate() + i);
+                    var current_day = newDate3.getDay();
+                    if (current_day == 0) {
+                        newDate.setDate(newDate.getDate() + i);
+                        newDate2.setDate(newDate2.getDate() + i);
+                        break;
+                    }
+                }
                 newDate.setDate(newDate.getDate() - 7);
-                searchModel.FromDateStr = newDate.toLocaleDateString("en-GB");
-                searchModel.ToDateStr = new Date().toLocaleDateString("en-GB");
+                newDate2.setDate(newDate2.getDate() - 14);
+                searchModel.FromDateStr = newDate2.toLocaleDateString("en-GB");
+                searchModel.ToDateStr = newDate.toLocaleDateString("en-GB");
                 $('#check_radio_name').text("Tuần trước")
             }
                 break;
