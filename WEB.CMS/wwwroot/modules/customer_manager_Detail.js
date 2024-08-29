@@ -227,7 +227,7 @@ var _customer_manager_Detail = {
 
     },
    DeletePaymentAccount: function (id) {
-       let url = '/Supplier/PaymentDelete';
+       let url = '/PaymentAccount/DeleteBankingAccount';
        let title = 'Xác nhận xóa thông tin thanh toán';
        let description = 'Bạn có chắc chắn muốn thông tin thanh toán?';
        _msgconfirm.openDialog(title, description, function () {

@@ -17,5 +17,6 @@ namespace Repositories.IRepositories
         Task<PaymentAccount> getPaymentAccountById(int Id);
         int UpsertBankingAccount(BankingAccount model);
         BankingAccount GetBankingAccountById(int Id);
+        int DeleteBankingAccountById(int id);
     }
 }

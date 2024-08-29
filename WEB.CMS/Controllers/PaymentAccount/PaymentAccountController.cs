@@ -105,5 +105,39 @@ namespace WEB.CMS.Controllers.PaymentAccount
             }
             return PartialView();
         }
+        [HttpPost]
+        public IActionResult DeleteBankingAccount(int id)
+        {
+            try
+            {
+                var result = _paymentAccountRepository.DeleteBankingAccountById(id);
+
+                if (result > 0)
+                {
+                    return new JsonResult(new
+                    {
+                        isSuccess = true,
+                        message = "Xóa thông tin thành công"
+                    });
+                }
+                else
+                {
+                    return new JsonResult(new
+                    {
+                        isSuccess = false,
+                        message = "Xóa thông tin thất bại"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("PaymentDelete - SupplierController: " + ex.Message);
+                return new JsonResult(new
+                {
+                    isSuccess = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }

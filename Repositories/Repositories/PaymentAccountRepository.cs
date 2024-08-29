@@ -2,6 +2,7 @@
 using Entities.ConfigModels;
 using Entities.Models;
 using Entities.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Repositories.IRepositories;
 using System;
@@ -110,5 +111,18 @@ namespace Repositories.Repositories
                 throw;
             }
         }
+        public int DeleteBankingAccountById(int id)
+        {
+            try
+            {
+                bankingAccountDAL.Delete(id);
+                return id;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
     }
 }

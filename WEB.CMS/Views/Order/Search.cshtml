@@ -111,20 +111,14 @@
 
                                             }
                                             break;
-                                        case (int)(OrderStatus.WAITING_FOR_ACCOUNTANT):
-                                            {
-                                                <span class="status-green">@item.Status</span>
-                                            }
-                                            break;
+                         
                                         case (int)(OrderStatus.FINISHED):
                                             {
                                                 <span class="status-green">@item.Status</span>
                                             }
                                             break;
                                         case ((int)(OrderStatus.CANCEL)):
-                                        case ((int)(OrderStatus.ACCOUNTANT_DECLINE)):
-                                        case ((int)(OrderStatus.OPERATOR_DECLINE)):
-                                        case ((int)(OrderStatus.DonRac)):
+
                                             {
                                                 <span class="status-red">@item.Status</span>
                                             }

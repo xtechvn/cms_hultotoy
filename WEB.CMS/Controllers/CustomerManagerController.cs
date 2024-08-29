@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Repositories.IRepositories;
 using System;
 using System.Collections.Generic;
@@ -810,6 +811,7 @@ namespace WEB.Adavigo.CMS.Controllers
                 searchModel.PageIndex = (int)currentPage;
                 var model = new GenericViewModel<OrderViewModel>();
                 model = await _orderRepository.GetList(searchModel);
+           
                 return PartialView(model);
             }
             catch (Exception ex)
