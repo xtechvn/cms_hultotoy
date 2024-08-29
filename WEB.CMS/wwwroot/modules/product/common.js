@@ -47,7 +47,10 @@ var _product_constants = {
             { id: 7, name: 'Địa chỉ tổ chức chịu trách nghiệm sản xuất', type: 3 },
             { id: 4, name: 'Sản phẩm đặt theo yêu cầu', type: 3 },
         ],
-        StaticDomain:`https://static-image.adavigo.com`
+        StaticDomain: `https://static-image.adavigo.com`,
+        ImageExtension: ['jpeg', 'jpg', 'png', 'bmp'],
+        VideoExtension: ['mp4'],
+
     },
     HTML: {
         Product: `
@@ -118,10 +121,19 @@ var _product_constants = {
                                     </div>
                                 </label>
                             </div>`,
-        ProductDetail_Images_Item:` <div class="items magnific_popup" data-src="{src}" data-id="{id}">
+        ProductDetail_Images_Item:` <div class="items magnific_popup" data-id="{id}">
                                 <button type="button" class="delete"><i class="icofont-close-line"></i></button>
                                 <a class="thumb_img thumb_1x1 magnific_thumb">
                                     <img src="{src}">
+                                </a>
+                            </div>`,
+        ProductDetail_Video_Item:` <div class="items magnific_popup" data-id="{id}">
+                                <button type="button" class="delete"><i class="icofont-close-line"></i></button>
+                                <a class="thumb_img thumb_1x1 magnific_thumb">
+                                   <video>
+                                      <source src="{src}" type="video/mp4">
+                                      Your browser does not support the video tag.
+                                    </video>
                                 </a>
                             </div>`,
         ProductDetail_Attribute_Row_Item:` <div class="col-md-6 lastest-attribute-value item">

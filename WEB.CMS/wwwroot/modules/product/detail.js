@@ -497,7 +497,7 @@ var product_detail = {
         $('#avatar .items .count').html($('#avatar .items .count').closest('.list').find('.magnific_popup').length)
 
         $(product.videos).each(function (index, item) {
-            $('#videos .list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', item).replaceAll('{id}', '-1'))
+            $('#videos .list').prepend(_product_constants.HTML.ProductDetail_Video_Item.replaceAll('{src}', item).replaceAll('{id}', '-1'))
             $('#videos .items .count').html($('#videos .items .count').closest('.list').find('.magnific_popup').length)
 
         })
@@ -829,40 +829,61 @@ var product_detail = {
         });
     },
     AddProductImages: function (element) {
-        var max_item = _product_constants.VALUES.ProductDetail_Max_Image
         switch (element.closest('.flex-lg-nowrap').attr('id')) {
-            case 'images': {
-
-            } break
+            case 'images': 
             case 'avatar': {
-                max_item = _product_constants.VALUES.ProductDetail_Max_Avt
-            } break
-            case 'videos': {
-                max_item = _product_constants.VALUES.ProductDetail_Max_Avt
+                var max_item = _product_constants.VALUES.ProductDetail_Max_Image
+                if (element.closest('.flex-lg-nowrap').find('.magnific_popup').length >= max_item) {
+                    _msgalert.error('Số lượng ảnh vượt quá giới hạn')
+                    element.val(null)
+                }
+                else {
+                    if ($.inArray(element.val().split('.').pop().toLowerCase(), _product_constants.VALUES.ImageExtension) == -1) {
+                        _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.ImageExtension.join(', '));
+                        return
+                    }
+                    $(element[0].files).each(function (index, item) {
 
-            } break
-        }
-        if (element.closest('.flex-lg-nowrap').find('.magnific_popup').length >= max_item) {
-            _msgalert.error('Số lượng ảnh/videos vượt quá giới hạn')
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            element.closest('.list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
+                            element.closest('.items').find('.count').html(element.closest('.list').find('.magnific_popup').length)
 
-
-            element.val(null)
-        }
-        else {
-            $(element[0].files).each(function (index, item) {
-
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    element.closest('.list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
-                    element.closest('.items').find('.count').html(element.closest('.list').find('.magnific_popup').length)
+                        }
+                        reader.readAsDataURL(item);
+                    });
+                    element.val(null)
 
                 }
-                reader.readAsDataURL(item);
+            } break
+            case 'videos': {
+                var max_item = _product_constants.VALUES.ProductDetail_Max_Avt
+                if (element.closest('.flex-lg-nowrap').find('.magnific_popup').length >= max_item) {
+                    _msgalert.error('Số lượng video vượt quá giới hạn')
+                    element.val(null)
+                }
+                else {
+                    if ($.inArray(element.val().split('.').pop().toLowerCase(), _product_constants.VALUES.VideoExtension) == -1) {
+                        _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.VideoExtension.join(', '));
+                        return
+                    }
+                    $(element[0].files).each(function (index, item) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            element.closest('.list').prepend(_product_constants.HTML.ProductDetail_Video_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
+                            element.closest('.items').find('.count').html(element.closest('.list').find('.magnific_popup').length)
 
-            });
-            element.val(null)
+                        }
+                        reader.readAsDataURL(item);
+                    });
+                    element.val(null)
 
+                }
+
+            } break
         }
+       
+       
 
     },
     Summit: function () {
@@ -888,7 +909,7 @@ var product_detail = {
         model.videos = []
         $('#videos .list .items').each(function (index, item) {
             var element_image = $(this)
-            model.images.push(element_image.find('img').attr('src'))
+            model.videos.push(element_image.find('video').find('source').attr('src'))
         })
         model.name = $('#product-name input').val()
         model.group_product_id = $('#group-id input').attr('data-id')
