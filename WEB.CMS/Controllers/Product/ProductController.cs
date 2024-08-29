@@ -109,10 +109,26 @@ namespace WEB.CMS.Controllers
         {
             try
             {
+                var product = await _productV2DetailMongoAccess.GetByID(product_id);
+                var group_string = "";
+                if (product != null && product.group_product_id!=null && product.group_product_id.Trim()!="") {
+                    try
+                    {
+                        var split_value = product.group_product_id.Split(",");
+                        for (int i=0;i<split_value.Length;i++) {
+                            var group = _groupProductESService.GetDetailGroupProductById(Convert.ToInt64(split_value[i]));
+                            group_string += group.Name;
+                            if (i < (split_value.Length - 1)) group_string += " > ";
+                        }
+                    }
+                    catch { }
+                    
+                }
                 return Ok(new
                 {
                     is_success = true,
                     data = JsonConvert.SerializeObject(await _productV2DetailMongoAccess.GetByID(product_id)),
+                    product_group= group_string
                 });
             }
             catch
