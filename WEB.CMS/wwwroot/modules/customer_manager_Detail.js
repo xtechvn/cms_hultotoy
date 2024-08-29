@@ -437,8 +437,11 @@ var _customer_manager_Detail = {
 
                     if (result.stt_code === 0) {
                         _msgalert.success(result.msg);
-                        $.magnificPopup.close();
-                        window.location.reload();
+                        setTimeout(function () {
+                            $.magnificPopup.close();
+                            window.location.reload();
+                        }, 500);
+                       
 
                     }
                 }
