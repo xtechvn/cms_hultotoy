@@ -300,11 +300,12 @@ var product_detail = {
             $(html).insertBefore('#discount-groupbuy .summary')
 
         });
-        $('body').on('click', '#them-nganhhang .col-md-4 li', function () {
+        $('body').on('click', '#them-nganhhang li', function () {
             var element = $(this)
             element.closest('.col-md-4').find('li').removeClass('active')
             element.addClass('active')
             product_detail.RenderOnSelectGroupProduct(element)
+
         });
         $('body').on('click', '.action .btn-outline-base', function () {
             $.magnificPopup.close()
@@ -364,7 +365,7 @@ var product_detail = {
         if (product_id != null && product_id != undefined && product_id.trim() != '') {
             _product_function.POST('/Product/ProductDetail', { product_id: $('#product_detail').val() }, function (result) {
                 if (result.is_success && result.data) {
-                    product_detail.RenderExistsProduct(JSON.parse(result.data))
+                    product_detail.RenderExistsProduct(JSON.parse(result.data), result.product_group)
 
                 }
                 else {
@@ -470,7 +471,7 @@ var product_detail = {
             SingleDatePicker(element, 'down')
         })
     },
-    RenderExistsProduct: function (product) {
+    RenderExistsProduct: function (product, group_string) {
         //--Init
         $('#product_detail').attr('data-status', product.status)
         $('.add-product').removeClass('placeholder')
@@ -497,7 +498,7 @@ var product_detail = {
         $('#avatar .items .count').html($('#avatar .items .count').closest('.list').find('.magnific_popup').length)
 
         $(product.videos).each(function (index, item) {
-            $('#videos .list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', item).replaceAll('{id}', '-1'))
+            $('#videos .list').prepend(_product_constants.HTML.ProductDetail_Video_Item.replaceAll('{src}', item).replaceAll('{id}', '-1'))
             $('#videos .items .count').html($('#videos .items .count').closest('.list').find('.magnific_popup').length)
 
         })
@@ -506,6 +507,7 @@ var product_detail = {
 
         //-- Group Product
         $('#group-id input').attr('data-id', product.group_product_id)
+        $('#group-id input').val(group_string)
         _product_function.POST('/Product/GroupProduct', { group_id: 1 }, function (result) {
             if (result.is_success && result.data) {
                 $('#them-nganhhang .bg-box .row').html('')
@@ -518,15 +520,20 @@ var product_detail = {
                 html = html.replace('{li}', html_item).replaceAll('{name}', 'HuloToy').replaceAll('{level}', '0')
                 $('#them-nganhhang .bg-box .row').html(html)
                 //$('.select-group-product').trigger('click')
-                $('#them-nganhhang .col-md-4').first().find('li[data-id="' + product.group_product_id.split(',')[0] + '"]').trigger('click')
-                var group_split = product.group_product_id.split(',')
-
-                for (var i = 1; i < group_split.length; i++) {
+                //$('#them-nganhhang .col-md-4').first().find('li[data-id="' + product.group_product_id.split(',')[0] + '"]').trigger('click')
+                //var group_split = product.group_product_id.split(',')
+                //for (var i = 0; i < group_split.length; i++) {
+                //    setTimeout(function () {
+                //        $('#them-nganhhang li').removeClass('active')
+                //        $('#them-nganhhang li[data-id="' + group_split[i] + '"]').addClass('active')
+                //        debugger
+                //    },200);
+                //}
+                $(product.group_product_id.split(',')).each(function (index, item) {
                     setTimeout(function () {
-                        $('#them-nganhhang li[data-id="' + group_split[i] + '"]').trigger('click')
-                        product_detail.RenderSelectedGroupProduct()
-                    }, 100);
-                }
+                        $('#them-nganhhang li[data-id="' + item + '"]').click()
+                    }, 500);
+                })
             }
         });
         
@@ -763,27 +770,7 @@ var product_detail = {
             }
         });
     },
-    RenderSelectedGroupProduct: function () {
-        var html_selected_input = ''
-        var group_selected =''
-        $('#them-nganhhang .col-md-4').each(function (index, item) {
-            var element = $(this)
-            var selected = element.find('ul').find('.active').attr('data-name')
-            if (element.find('ul').find('.active').attr('data-id') == undefined) return true
-            if (index >= ($('#them-nganhhang .col-md-4').length - 1)) {
-                html_selected_input += selected
-                group_selected += element.find('ul').find('.active').attr('data-id')
-            } else {
-
-                html_selected_input += selected + ' > '
-                group_selected += element.find('ul').find('.active').attr('data-id')+','
-
-            }
-        })
-        $('#group-id input').val(html_selected_input)
-        $('#group-id input').attr('data-id', group_selected )
-
-    },
+    
     RenderSingleProductAmount: function () {
         var price = parseFloat($('#main-price input').val().replaceAll(',',''))
         var profit = parseFloat($('#main-profit input').val().replaceAll(',', ''))
@@ -829,40 +816,61 @@ var product_detail = {
         });
     },
     AddProductImages: function (element) {
-        var max_item = _product_constants.VALUES.ProductDetail_Max_Image
         switch (element.closest('.flex-lg-nowrap').attr('id')) {
-            case 'images': {
-
-            } break
+            case 'images': 
             case 'avatar': {
-                max_item = _product_constants.VALUES.ProductDetail_Max_Avt
-            } break
-            case 'videos': {
-                max_item = _product_constants.VALUES.ProductDetail_Max_Avt
+                var max_item = _product_constants.VALUES.ProductDetail_Max_Image
+                if (element.closest('.flex-lg-nowrap').find('.magnific_popup').length >= max_item) {
+                    _msgalert.error('Số lượng ảnh vượt quá giới hạn')
+                    element.val(null)
+                }
+                else {
+                    if ($.inArray(element.val().split('.').pop().toLowerCase(), _product_constants.VALUES.ImageExtension) == -1) {
+                        _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.ImageExtension.join(', '));
+                        return
+                    }
+                    $(element[0].files).each(function (index, item) {
 
-            } break
-        }
-        if (element.closest('.flex-lg-nowrap').find('.magnific_popup').length >= max_item) {
-            _msgalert.error('Số lượng ảnh/videos vượt quá giới hạn')
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            element.closest('.list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
+                            element.closest('.items').find('.count').html(element.closest('.list').find('.magnific_popup').length)
 
-
-            element.val(null)
-        }
-        else {
-            $(element[0].files).each(function (index, item) {
-
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    element.closest('.list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
-                    element.closest('.items').find('.count').html(element.closest('.list').find('.magnific_popup').length)
+                        }
+                        reader.readAsDataURL(item);
+                    });
+                    element.val(null)
 
                 }
-                reader.readAsDataURL(item);
+            } break
+            case 'videos': {
+                var max_item = _product_constants.VALUES.ProductDetail_Max_Avt
+                if (element.closest('.flex-lg-nowrap').find('.magnific_popup').length >= max_item) {
+                    _msgalert.error('Số lượng video vượt quá giới hạn')
+                    element.val(null)
+                }
+                else {
+                    if ($.inArray(element.val().split('.').pop().toLowerCase(), _product_constants.VALUES.VideoExtension) == -1) {
+                        _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.VideoExtension.join(', '));
+                        return
+                    }
+                    $(element[0].files).each(function (index, item) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            element.closest('.list').prepend(_product_constants.HTML.ProductDetail_Video_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
+                            element.closest('.items').find('.count').html(element.closest('.list').find('.magnific_popup').length)
 
-            });
-            element.val(null)
+                        }
+                        reader.readAsDataURL(item);
+                    });
+                    element.val(null)
 
+                }
+
+            } break
         }
+       
+       
 
     },
     Summit: function () {
@@ -888,7 +896,7 @@ var product_detail = {
         model.videos = []
         $('#videos .list .items').each(function (index, item) {
             var element_image = $(this)
-            model.images.push(element_image.find('img').attr('src'))
+            model.videos.push(element_image.find('video').find('source').attr('src'))
         })
         model.name = $('#product-name input').val()
         model.group_product_id = $('#group-id input').attr('data-id')
