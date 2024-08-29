@@ -103,7 +103,7 @@ var product_index = {
             }
             else if (item.amount != undefined
                 && item.amount != null && item.amount > 0) {
-                amount_html = global_service.Comma(item.amount)
+                amount_html = _product_function.Comma(item.amount)
 
             }
             html_item = html_item.replaceAll('{amount}', amount_html)
