@@ -43,9 +43,10 @@ namespace WEB.Adavigo.CMS.Controllers
         private IUserAgentRepository _userAgentRepository;
         private UserESRepository _userESRepository;
         private IIdentifierServiceRepository _identifierServiceRepository;
-
+        private readonly IOrderRepository _orderRepository;
         public CustomerManagerController(IConfiguration configuration, ICustomerManagerRepository customerManagerRepositories, ManagementUser ManagementUser, IWebHostEnvironment WebHostEnvironment, IAccountClientRepository accountClientRepository,
-         IAllCodeRepository allCodeRepository, IClientRepository clientRepository, IUserRepository userRepository, IBankingAccountRepository bankingAccountRepository, IUserAgentRepository userAgentRepository, IIdentifierServiceRepository identifierServiceRepository)
+         IAllCodeRepository allCodeRepository, IClientRepository clientRepository, IUserRepository userRepository, IBankingAccountRepository bankingAccountRepository, IUserAgentRepository userAgentRepository,
+         IIdentifierServiceRepository identifierServiceRepository, IOrderRepository orderRepository)
         {
             _customerManagerRepositories = customerManagerRepositories;
             _configuration = configuration;
@@ -60,6 +61,7 @@ namespace WEB.Adavigo.CMS.Controllers
             _userAgentRepository = userAgentRepository;
             _userESRepository = new UserESRepository(configuration["DataBaseConfig:Elastic:Host"], configuration);
             _identifierServiceRepository = identifierServiceRepository;
+            _orderRepository = orderRepository;
         }
         public async Task<IActionResult> Index()
         {
@@ -797,6 +799,25 @@ namespace WEB.Adavigo.CMS.Controllers
                 });
             }
 
+        }
+        [HttpPost]
+        public async Task<IActionResult> ListOrderbyClientid(OrderViewSearchModel searchModel, long currentPage, long pageSize)
+        {
+
+            try
+            {
+                searchModel.pageSize = (int)pageSize;
+                searchModel.PageIndex = (int)currentPage;
+                var model = new GenericViewModel<OrderViewModel>();
+                model = await _orderRepository.GetList(searchModel);
+                return PartialView(model);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("ListOrderbyClientid - CustomerManagerController: " + ex.ToString());
+
+            }
+            return PartialView();
         }
     }
 }
