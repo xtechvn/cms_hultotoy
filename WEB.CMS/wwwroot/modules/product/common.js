@@ -30,7 +30,7 @@
             && !img_src.includes("data:image")
             && !img_src.includes("http")
             && !img_src.includes("base64,"))
-            img_src = _product_constants.VALUES.StaticDomain + item
+            img_src = _product_constants.VALUES.StaticDomain + image
         return img_src
     }
 }
