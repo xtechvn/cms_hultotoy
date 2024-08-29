@@ -1,9 +1,11 @@
-﻿using Entities.ViewModels.Products;
+﻿using Azure.Core;
+using Entities.ViewModels.Products;
 using MongoDB.Driver;
 using Nest;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Utilities.Contants;
 using Utilities.Contants.ProductV2;
 
@@ -77,7 +79,7 @@ namespace WEB.CMS.Models.Product
             {
                 var filter = Builders<ProductMongoDbModel>.Filter;
                 var filterDefinition = filter.Empty;
-                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.name, keyword);
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.name, new Regex(keyword.ToLower().Trim(), RegexOptions.IgnoreCase));
                 filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.parent_product_id, "");
                 if (group_id > 0)
                 {

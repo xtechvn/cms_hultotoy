@@ -71,8 +71,8 @@ namespace WEB.CMS.Controllers
                 return Ok(new
                 {
                     is_success = true,
-                    data = main_products,
-                    subdata = await _productV2DetailMongoAccess.SubListing(main_products.Select(x=>x._id))
+                    data = JsonConvert.SerializeObject(main_products),
+                    subdata =JsonConvert.SerializeObject(await _productV2DetailMongoAccess.SubListing(main_products.Select(x => x._id)))
                 });
 
             }
@@ -112,7 +112,7 @@ namespace WEB.CMS.Controllers
                 return Ok(new
                 {
                     is_success = true,
-                    data = await _productV2DetailMongoAccess.GetByID(product_id),
+                    data = JsonConvert.SerializeObject(await _productV2DetailMongoAccess.GetByID(product_id)),
                 });
             }
             catch

@@ -102,10 +102,15 @@ var product_detail = {
         $('body').on('click', '.btn-add-attributes', function () {
             var element = $(this)
             product_detail.AddProductAttributes()
-            product_detail.RenderRowAttributeTablePrice()
             $('#single-product-amount').hide()
+            if ($('#product-attributes-box').is(':hidden')) {
+                $('#product-attributes-2').hide()
+
+            }
+            $('#product-attributes-box').show()
             $('#product-attributes-price').show()
             $('#product-attributes-all-price').closest('.item-edit').show()
+            $('#product-attributes-price').closest('.item-edit').show()
 
         });
         
@@ -345,13 +350,21 @@ var product_detail = {
         $('body').on('keyup', '.col-md-6 .input-select-option', function (e) {
             e.preventDefault()
         });
+        $('body').on('keyup', '#single-product-amount input', function (e) {
+            var element = $(this)
+            var value = element.val()
+            product_detail.RenderSingleProductAmount()
+            if (element.closest('.price').length > 0) {
+                element.val(_product_function.Comma(element.val()))
+            }
+        });
     },
     Detail: function () {
         var product_id = $('#product_detail').val()
         if (product_id != null && product_id != undefined && product_id.trim() != '') {
             _product_function.POST('/Product/ProductDetail', { product_id: $('#product_detail').val() }, function (result) {
                 if (result.is_success && result.data) {
-                    product_detail.RenderExistsProduct(result.data)
+                    product_detail.RenderExistsProduct(JSON.parse(result.data))
 
                 }
                 else {
@@ -471,23 +484,15 @@ var product_detail = {
         //-- Image
         $(product.images).each(function (index, item) {
             if (item == null || item.trim() == '') return true
-            var img_src = item
-            if (!img_src.includes(_product_constants.VALUES.StaticDomain)
-                && !img_src.includes("data:image")
-                && !img_src.includes("http"))
-                img_src = _product_constants.VALUES.StaticDomain + item
+            var img_src = _product_function.CorrectImage(item)
           
             $('#images .list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', img_src).replaceAll('{id}', '-1'))
             $('#images .items .count').html($('#images .items .count').closest('.list').find('.magnific_popup').length)
 
         })
         //-- Avatar
-        var img_src = product.avatar
-        if (!img_src.includes(_product_constants.VALUES.StaticDomain)
-            && !img_src.includes("data:image")
-            && !img_src.includes("http"))
-            img_src = _product_constants.VALUES.StaticDomain + product.avatar
-       
+        var img_src = _product_function.CorrectImage(product.avatar)
+
         $('#avatar .list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', img_src).replaceAll('{id}', '-1'))
         $('#avatar .items .count').html($('#avatar .items .count').closest('.list').find('.magnific_popup').length)
 
@@ -579,11 +584,11 @@ var product_detail = {
             SingleDatePicker(element, 'down')
         })
         $('#description textarea').val(product.description)
-        $('#main-price input').val(product.price)
-        $('#main-amount input').val(product.amount)
-        $('#main-stock input').val(product.stock)
+        $('#main-price input').val(_product_function.Comma(product.price) )
+        $('#main-amount input').val(_product_function.Comma(product.amount)  )
+        $('#main-stock input').val(_product_function.Comma(product.quanity_of_stock) )
         $('#main-sku input').val(product.sku)
-        $('#main-profit input').val(product.profit)
+        $('#main-profit input').val(_product_function.Comma(product.profit)  )
         if (product.attributes != undefined && product.attributes.length > 0) {
             $('#single-product-amount').hide()
             $('#product-attributes-box').show()
@@ -591,55 +596,61 @@ var product_detail = {
             $('#single-product-amount').show()
             $('#product-attributes-box').hide()
         }
-        //Attribute:
-        $('#product-attributes-box').html('')
-        for (var i = 0; i < product.attributes.length; i++) {
-            product_detail.AddProductAttributes()
+        if (product.attributes == null || product.attributes.length <= 0) {
+            $('#product-attributes-price').closest('.item-edit').hide()
         }
-        $('.product-attributes').each(function (index, item) {
-            var element = $(this)
-            var attribute = product.attributes.filter(obj => {
-                return obj._id == ('' + (index + 1))
-            })
-            element.find('.attribute-name').val(attribute[0].name)
-            element.find('.edit-attributes-name-confirm').trigger('click')
-            //element.find('.row-attributes-value').html('')
-            var attribute_detail = product.attributes_detail.filter(obj => {
-                return obj.attribute_id == ('' + (index + 1))
-            })
-            var first=true
-            $(attribute_detail).each(function (index_detail, item_detail) {
-                $(element.find('.row-attributes-value').find('.col-md-6').find('.attributes-name')).each(function (index_element, item_element) {
-                    if (index_element == index_detail) {
-                        var element_attr_detail = $(this)
-                        element_attr_detail.val(item_detail.name)
-                        element_attr_detail.trigger('keyup')
-                    }
-                })
-            })
-        })
-        product_detail.RenderRowAttributeTablePrice()
-        _product_function.POST('/Product/ProductSubListing', { parent_id: product._id }, function (result) {
-            if (result.is_success && result.data) {
-                $('#product-attributes-price tbody tr').each(function (index, item) {
-                    var element = $(this)
-                    var list = result.data
-                    for (var i = 1; i <= product.attributes.length; i++) {
-                        list = list.filter(obj => {
-                            //return obj.variation_attributes.includes({ level: i, name: element.attr('data-attribute-'+i)})
-                            return obj.variation_detail.some(e => e.id == i && e.name == element.attr('data-attribute-' + i))
-                        })
-                    }
-                    element.attr('data-id', list[0]._id)
-                    element.find('.td-price').find('input').val(Comma(list[0].price))
-                    element.find('.td-profit').find('input').val(Comma(list[0].profit))
-                    element.find('.td-amount').find('input').val(Comma(list[0].amount))
-                    element.find('.td-stock').find('input').val(Comma(list[0].quanity_of_stock))
-                    element.find('.td-sku').find('input').val(list[0].sku)
-                })
-
+        else {
+            //Attribute:
+            $('#product-attributes-box').html('')
+            for (var i = 0; i < product.attributes.length; i++) {
+                product_detail.AddProductAttributes()
             }
-        });
+            $('.product-attributes').each(function (index, item) {
+                var element = $(this)
+                var attribute = product.attributes.filter(obj => {
+                    return obj._id == ('' + (index + 1))
+                })
+                element.find('.attribute-name').val(attribute[0].name)
+                element.find('.edit-attributes-name-confirm').trigger('click')
+                //element.find('.row-attributes-value').html('')
+                var attribute_detail = product.attributes_detail.filter(obj => {
+                    return obj.attribute_id == ('' + (index + 1))
+                })
+                var first = true
+                $(attribute_detail).each(function (index_detail, item_detail) {
+                    $(element.find('.row-attributes-value').find('.col-md-6').find('.attributes-name')).each(function (index_element, item_element) {
+                        if (index_element == index_detail) {
+                            var element_attr_detail = $(this)
+                            element_attr_detail.val(item_detail.name)
+                            element_attr_detail.trigger('keyup')
+                        }
+                    })
+                })
+            })
+            product_detail.RenderRowAttributeTablePrice()
+            _product_function.POST('/Product/ProductSubListing', { parent_id: product._id }, function (result) {
+                if (result.is_success && result.data) {
+                    $('#product-attributes-price tbody tr').each(function (index, item) {
+                        var element = $(this)
+                        var list = result.data
+                        for (var i = 1; i <= product.attributes.length; i++) {
+                            list = list.filter(obj => {
+                                //return obj.variation_attributes.includes({ level: i, name: element.attr('data-attribute-'+i)})
+                                return obj.variation_detail.some(e => e.id == i && e.name == element.attr('data-attribute-' + i))
+                            })
+                        }
+                        element.attr('data-id', list[0]._id)
+                        element.find('.td-price').find('input').val(Comma(list[0].price))
+                        element.find('.td-profit').find('input').val(Comma(list[0].profit))
+                        element.find('.td-amount').find('input').val(Comma(list[0].amount))
+                        element.find('.td-stock').find('input').val(Comma(list[0].quanity_of_stock))
+                        element.find('.td-sku').find('input').val(list[0].sku)
+                    })
+
+                }
+            });
+        }
+       
        
 
         if (product.discount_group_buy != undefined && product.discount_group_buy.length > 0) {
@@ -773,6 +784,11 @@ var product_detail = {
         $('#group-id input').attr('data-id', group_selected )
 
     },
+    RenderSingleProductAmount: function () {
+        var price = parseFloat($('#main-price input').val().replaceAll(',',''))
+        var profit = parseFloat($('#main-profit input').val().replaceAll(',', ''))
+        $('#main-amount input').val(_product_function.Comma(price + profit))
+    },
     GetImagesCount: function () {
         return (($('#images .list .items').length) - 1);
     },
@@ -854,6 +870,8 @@ var product_detail = {
             _id: $('#product_detail').val() == undefined || $('#product_detail').val().trim() == '' ? null : $('#product_detail').val(),
             status: $('#product_detail').attr('data-status') == undefined || $('#product_detail').attr('data-status').trim() == '' ? null : $('#product_detail').attr('data-status'),
             code: $('#product_detail').attr('data-code') == undefined || $('#product_detail').attr('data-code').trim() == '' ? null : $('#product_detail').attr('data-code'),
+            price: $('#main-price input').val() == undefined || $('#main-price input').val().trim() == '' ? 0 : parseFloat($('#main-price input').val().replaceAll(',','')),
+            profit: $('#main-profit input').val() == undefined || $('#main-profit input').val().trim() == '' ? 0 : parseFloat($('#main-profit input').val().replaceAll(',','')),
             amount: $('#main-amount input').val() == undefined || $('#main-amount input').val().trim() == ''?0: parseFloat($('#main-amount input').val().replaceAll(',','')),
             discount: 0,
             quanity_of_stock: $('#main-stock input').val() == undefined || $('#main-stock input').val().trim() == '' ? 0 : parseInt($('#main-stock input').val().replaceAll(',', ''))
@@ -887,9 +905,7 @@ var product_detail = {
             })
 
         })
-        var attribute_model =  product_detail.GetAttributeItem()
-        model.attributes = attribute_model.attributes
-        model.attributes_detail = attribute_model.attributes_detail
+       
         
         
         model.discount_group_buy = []
@@ -919,30 +935,37 @@ var product_detail = {
         })
         
         model.variations = []
-        $('#product-attributes-price tbody tr').each(function (index, index) {
-            var element = $(this)
-            var var_id = element.attr('data-id')
-            if (var_id = undefined) var_id =''
-            var variation = {
-                _id: var_id,
-                variation_attributes: [],
-                price: parseFloat(element.find('.td-price').find('input').val().replaceAll(',', '')),
-                profit: parseFloat(element.find('.td-profit').find('input').val().replaceAll(',', '')),
-                amount: parseFloat(element.find('.td-amount').find('input').val().replaceAll(',', '')),
-                quanity_of_stock: parseFloat(element.find('.td-stock').find('input').val().replaceAll(',', '')),
-                sku: element.find('.td-sku').find('input').val(),
-            }
-            for (var i = 1; i <= $('.product-attributes').length; i++) {
-                var attr_value = element.attr('data-attribute-' + i)
-                
-                variation.variation_attributes.push({
-                    id: i,
-                    name: attr_value
-                })
-            }
-            model.variations.push(variation)
-        })
-        
+        if (!$('#product-attributes-price').closest('.item-edit').is(':hidden')) {
+            var attribute_model = product_detail.GetAttributeItem()
+            model.attributes = attribute_model.attributes
+            model.attributes_detail = attribute_model.attributes_detail
+            $('#product-attributes-price tbody tr').each(function (index, index) {
+                var element = $(this)
+                var var_id = element.attr('data-id')
+                if (var_id = undefined) var_id = ''
+                var variation = {
+                    _id: var_id,
+                    variation_attributes: [],
+                    price: parseFloat(element.find('.td-price').find('input').val().replaceAll(',', '')),
+                    profit: parseFloat(element.find('.td-profit').find('input').val().replaceAll(',', '')),
+                    amount: parseFloat(element.find('.td-amount').find('input').val().replaceAll(',', '')),
+                    quanity_of_stock: parseFloat(element.find('.td-stock').find('input').val().replaceAll(',', '')),
+                    sku: element.find('.td-sku').find('input').val(),
+                }
+                for (var i = 1; i <= $('.product-attributes').length; i++) {
+                    var attr_value = element.attr('data-attribute-' + i)
+
+                    variation.variation_attributes.push({
+                        id: i,
+                        name: attr_value
+                    })
+                }
+                model.variations.push(variation)
+            })
+
+        }
+
+      
         model.preorder_status = $('input[name="preorder_status"]') == 1 ? true : false
         model.condition_of_product = $('#condition_of_product').find(':selected').val()
         model.sku = $('#sku input').val()

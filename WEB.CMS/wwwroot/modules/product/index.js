@@ -14,8 +14,13 @@ var product_index = {
         _global_function.RenderBreadcumb(model)
         product_index.Listing();
         product_index.DynamicBind()
+        $('#product_list').closest('.table-responsive').addClass('placeholder')
+        $('.hanmuc').closest('.flex-lg-nowrap').addClass('placeholder')
     },
     DynamicBind: function () {
+        $('body').on('click', '.btn-search-product', function () {
+            product_index.Listing();
+        });
         $('body').on('click', '.btn-add-product', function () {
             window.location.href='/product/detail'
         });
@@ -53,14 +58,24 @@ var product_index = {
        
     },
     Listing: function () {
-        _product_function.POST('/Product/ProductListing', product_index.Model, function (result) {
+        var request = {
+            keyword: $('#input-search-product-name').val(),
+            group_id: -1,
+            page_index: product_index.Model.page_index,
+            page_size: parseInt($('#item-per-page').find(':selected').val())
+        }
+        _product_function.POST('/Product/ProductListing', request, function (result) {
             if (result.is_success && result.data && result.data.length > 0) {
-                product_index.RenderSearch(result.data, result.subdata)
+                product_index.RenderSearch(JSON.parse(result.data), JSON.parse(result.subdata))
+               
             }
             else {
                 $('#product_list').html('')
+               
             }
-            
+            $('#product_list').closest('.table-responsive').removeClass('placeholder')
+            $('.hanmuc').closest('.flex-lg-nowrap').removeClass('placeholder')
+            $('.hanmuc').closest('.flex-lg-nowrap').find('.count').html(JSON.parse(result.data).length)
         });
 
     },
@@ -88,7 +103,7 @@ var product_index = {
             }
             else if (item.amount != undefined
                 && item.amount != null && item.amount > 0) {
-                amount_html = global_service.Comma(item.amount)
+                amount_html = _product_function.Comma(item.amount)
 
             }
             html_item = html_item.replaceAll('{amount}', amount_html)
@@ -140,8 +155,17 @@ var product_index = {
                         }
                         
                     })
+                    var img_src_sub =''
+                    if (sub_attr_img.length > 0) {
+                        img_src_sub = sub_attr_img[0]
+                        if (!img_src_sub.includes(_product_constants.VALUES.StaticDomain)
+                            && !img_src_sub.includes("data:image")
+                            && !img_src_sub.includes("http"))
+                            img_src_sub = _product_constants.VALUES.StaticDomain + sub_attr_img[0]
+                    }
+
                     html_sub_item = html_sub_item.replaceAll('{attribute}','Phân loại hàng: '+ html_sub_attr)
-                    html_sub_item = html_sub_item.replaceAll('{avatar}', sub_attr_img.length > 0 ? sub_attr_img[0] : item.avatar)
+                    html_sub_item = html_sub_item.replaceAll('{avatar}', sub_attr_img.length > 0 ? img_src_sub : img_src)
                     html_variations += html_sub_item
                     amount.push(sub_item.amount)
                     quanity_stock.push(sub_item.quanity_of_stock)

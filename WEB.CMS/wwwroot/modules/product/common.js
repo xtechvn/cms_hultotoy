@@ -24,6 +24,15 @@
             x1 = x1.replace(rgx, '$1' + ',' + '$2');
         return x1 + x2;
     },
+    CorrectImage: function (image) {
+        var img_src = image
+        if (!img_src.includes(_product_constants.VALUES.StaticDomain)
+            && !img_src.includes("data:image")
+            && !img_src.includes("http")
+            && !img_src.includes("base64,"))
+            img_src = _product_constants.VALUES.StaticDomain + image
+        return img_src
+    }
 }
 var _product_constants = {
     VALUES: {
