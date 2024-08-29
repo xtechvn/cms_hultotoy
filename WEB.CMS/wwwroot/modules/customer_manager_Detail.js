@@ -96,7 +96,7 @@ var _customer_manager_Detail = {
     },
     SearchOrder: function (input) {
         $.ajax({
-            url: "/order/search",
+            url: "/CustomerManager/ListOrderbyClientid",
             type: "post",
             data: input,
             success: function (result) {
@@ -474,5 +474,6 @@ var _customer_manager_Detail = {
             }
         });
     },
+
 }
 
