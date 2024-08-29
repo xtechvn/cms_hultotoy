@@ -14,8 +14,13 @@ var product_index = {
         _global_function.RenderBreadcumb(model)
         product_index.Listing();
         product_index.DynamicBind()
+        $('#product_list').closest('.table-responsive').addClass('placeholder')
+        $('.hanmuc').closest('.flex-lg-nowrap').addClass('placeholder')
     },
     DynamicBind: function () {
+        $('body').on('click', '.btn-search-product', function () {
+            product_index.Listing();
+        });
         $('body').on('click', '.btn-add-product', function () {
             window.location.href='/product/detail'
         });
@@ -53,14 +58,24 @@ var product_index = {
        
     },
     Listing: function () {
-        _product_function.POST('/Product/ProductListing', product_index.Model, function (result) {
+        var request = {
+            keyword: $('#input-search-product-name').val(),
+            group_id: -1,
+            page_index: product_index.Model.page_index,
+            page_size: parseInt($('#item-per-page').find(':selected').val())
+        }
+        _product_function.POST('/Product/ProductListing', request, function (result) {
             if (result.is_success && result.data && result.data.length > 0) {
                 product_index.RenderSearch(JSON.parse(result.data), JSON.parse(result.subdata))
+               
             }
             else {
                 $('#product_list').html('')
+               
             }
-            
+            $('#product_list').closest('.table-responsive').removeClass('placeholder')
+            $('.hanmuc').closest('.flex-lg-nowrap').removeClass('placeholder')
+            $('.hanmuc').closest('.flex-lg-nowrap').find('.count').html(JSON.parse(result.data).length)
         });
 
     },
