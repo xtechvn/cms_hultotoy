@@ -112,7 +112,7 @@ namespace WEB.CMS.Controllers
                 return Ok(new
                 {
                     is_success = true,
-                    data = await _productV2DetailMongoAccess.GetByID(product_id),
+                    data = JsonConvert.SerializeObject(await _productV2DetailMongoAccess.GetByID(product_id)),
                 });
             }
             catch
