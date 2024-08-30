@@ -180,7 +180,7 @@ namespace Entities.ViewModels
         public string Label { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public DateTime CreateTime { get; set; }
+        public DateTime CreatedDate { get; set; }
         public double Amount { get; set; }
         public int Status { get; set; }
         public string PermisionTypeName { get; set; }

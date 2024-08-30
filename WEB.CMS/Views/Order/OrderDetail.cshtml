@@ -86,9 +86,10 @@
                         <div class="border bg-white p-3 mb20">
                             <div class="flex space-between">
                                 <h5 class="text-uppercase">Thông tin đơn hàng</h5>
-                               @* <a class="edit" href=""><i class="icofont-ui-edit"></i><i class="icofont-save"></i></a>*@
+                                @* <a class="edit" href=""><i class="icofont-ui-edit"></i><i class="icofont-save"></i></a>*@
                             </div>
-                            @if(Model.OrderStatus != null){
+                            @if (Model.OrderStatus != null)
+                            {
                                 @switch ((int)Model.OrderStatus)
                                 {
                                     case (int)(OrderStatus.CREATED_ORDER):
@@ -104,21 +105,21 @@
 
                                         }
                                         break;
-                        
+
                                     case (int)(OrderStatus.FINISHED):
                                         {
                                             <span class="status-green">@Model.OrderStatusName </span>
                                         }
                                         break;
                                     case ((int)(OrderStatus.CANCEL)):
-               
+
                                         {
                                             <span class="status-red">@Model.OrderStatusName </span>
                                         }
                                         break;
                                 }
                             }
-                                
+
                             <div class="flex justify-content-end w-100">
                                 <ul class="w-100 my-3">
                                     <li class="flex justify-content-between mb-2">
@@ -127,7 +128,7 @@
                                     </li>
                                     <li class="flex justify-content-between mb-2">
                                         <div class="">Ngày tạo</div>
-                                        <div class="text-right">@Model.CreateTime.ToString("dd/MM/yyyy")</div>
+                                        <div class="text-right">@Model.CreatedDate.ToString("dd/MM/yyyy")</div>
                                     </li>
                                     <li class="flex justify-content-between mb-2">
                                         <div class="">Hình thức thanh toán</div>
@@ -137,20 +138,31 @@
                                         <div class="">Trạng thái</div>
                                         <div class="text-right">@Model.PaymentStatusName</div>
                                     </li>
-                              
+
                                     <li class="flex justify-content-between mb-2">
                                         <div class="">Ngày thanh toán</div>
-                                        <div class="text-right">@Model.PaymentStatusName</div>
+                                        @if (Model.PaymentStatus != (int)PaymentStatus.UNPAID)
+                                        {
+                                            <div class="text-right">
+                                                @Model.PaymentDate
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-right">
+                                            </div>
+                                        }
+
                                     </li>
                                     <li class="flex justify-content-between mb-2">
                                         <div class="">UTM source</div>
-                                        <div class="text-right">-</div>
+                                        <div class="text-right"></div>
                                     </li>
                                     <li class="flex justify-content-between mb-2">
                                         <div class="">Voucher</div>
                                         <div class="text-right">@Model.code</div>
                                     </li>
-                   
+
                                     <li class="flex justify-content-between mb-2">
                                         <div class="">Chi nhánh</div>
                                         <div class="text-right">@Model.BranchCodeName</div>
@@ -178,13 +190,13 @@
                             <div class="lb-form pd10">
                                 Thông tin hệ thống
                             </div>
-                            @if(Model.CreatedBy != null)
+                            @if (Model.CreatedBy != null)
                             {
                                 <div class="pd10">
                                     <ul class="mb0">
                                         <li class="grid grid__2">
                                             <div>Ngày tạo</div>
-                                            <div>: @Model.CreateTime.ToString("dd/MM/yyyy")</div>
+                                            <div>: @Model.CreatedDate.ToString("dd/MM/yyyy")</div>
                                         </li>
                                         <li class="grid grid__2">
                                             <div>Người tạo</div>
@@ -199,7 +211,8 @@
                                             <div>: @(Model.UserUpdateFullName != null ? Model.UserUpdateFullName : "N/A")</div>
                                         </li>
                                     </ul>
-                                </div> }
+                                </div>
+                            }
                             else
                             {
                                 <div class="pd10">
@@ -211,7 +224,7 @@
 
                     <div class="form-group align-right mt20 block pin-btn-bottom ">
                         <button type="button" class="btn btn-default cancel ml-1" onclick="history.back()">Quay lại</button>
-                     
+
                         <button type="button" class="btn btn-default ml-1" onclick="_orderDetail.ChangeOrderSaler(@ViewBag.OrderId,'@ViewBag.OrderNo')">Nhận xử lý đơn hàng</button>
                     </div>
                 </div>

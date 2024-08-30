@@ -118,8 +118,8 @@ namespace WEB.CMS.Controllers
                     if (dataOrder != null)
                     {
                      
-                        if (dataOrder.CreateTime != null)
-                            ViewBag.UserCreateTime = ((DateTime)dataOrder.CreateTime).ToString("dd/MM/yyyy HH:mm:ss");
+                        if (dataOrder.CreatedDate != null)
+                            ViewBag.UserCreateTime = ((DateTime)dataOrder.CreatedDate).ToString("dd/MM/yyyy HH:mm:ss");
                         if (dataOrder.UpdateLast != null)
                             ViewBag.UserUpdateTime = ((DateTime)dataOrder.UpdateLast).ToString("dd/MM/yyyy HH:mm:ss");
                         if (dataOrder.CreatedBy != null && dataOrder.CreatedBy != 0)
