@@ -1,10 +1,12 @@
-﻿using Entities.Models;
+﻿using Caching.RedisWorker;
+using Entities.Models;
 using Entities.ViewModels.Products;
 using HuloToys_Service.ElasticSearch.NewEs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Nest;
 using Newtonsoft.Json;
+using Utilities.Contants;
 using Utilities.Contants.ProductV2;
 using WEB.Adavigo.CMS.Service;
 using WEB.CMS.Customize;
@@ -19,14 +21,19 @@ namespace WEB.CMS.Controllers
         private readonly ProductDetailMongoAccess _productV2DetailMongoAccess;
         private readonly ProductSpecificationMongoAccess _productSpecificationMongoAccess;
         private readonly GroupProductESService _groupProductESService;
+        private readonly RedisConn _redisConn;
         private  StaticAPIService _staticAPIService;
         private readonly int group_product_root = 1;
-        public ProductController(IConfiguration configuration)
+        private readonly int db_index = 9;
+        public ProductController(IConfiguration configuration, RedisConn redisConn)
         {
             _productV2DetailMongoAccess = new ProductDetailMongoAccess(configuration);
             _groupProductESService = new GroupProductESService(configuration["DataBaseConfig:Elastic:Host"], configuration);
             _productSpecificationMongoAccess = new ProductSpecificationMongoAccess( configuration);
             _staticAPIService = new StaticAPIService( configuration);
+            _redisConn = redisConn;
+            _redisConn.Connect();
+            db_index = Convert.ToInt32(configuration["Redis:db_search_result"]);
         }
         public IActionResult Index()
         {
@@ -257,6 +264,15 @@ namespace WEB.CMS.Controllers
                 }
                 if (rs != null)
                 {
+                    if(product_main.group_product_id!=null && product_main.group_product_id.Trim() != "")
+                    {
+                        foreach(var group in product_main.group_product_id.Split(","))
+                        {
+                            await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING + group, db_index);
+                        }
+                    }
+                    await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_DETAIL + product_main._id, db_index);
+
                     return Ok(new
                     {
                         is_success = true,
