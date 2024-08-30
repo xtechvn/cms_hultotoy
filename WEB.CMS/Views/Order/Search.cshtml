@@ -155,7 +155,8 @@
                                     @item.CreatedDate.ToString("dd/MM/yyyy")
                                 </td>
                                 <td>
-                                    <div class="blue">@item.ClientName</div>
+                                    <a class="blue" href="/CustomerManager/Detail/@item.ClientId">@item.ClientName</a>
+                                   
                                     <div>@item.ClientNumber</div>
                                     <div>@item.ClientEmail</div>
                                 </td>
