@@ -6,6 +6,12 @@
 @{
     var data_UserAgent = (List<UserAgentViewModel>)ViewBag.userAgent;
 }
+<style>
+    .main-customer .btn-default {
+        height: auto !important;
+        min-height:35px !important;
+    } 
+</style>
 <div class="bg-white rounded p-3 side-left">
     <div class="flex flex-nowrap gap10 align-items-center mb-3">
         <div class="img-avatar ">
@@ -79,7 +85,7 @@
         <div class="col-6">
             <div class="select-list">
                 <div class="relative select-user">
-                    <a href="#" class="btn btn-default white">
+                    <a href="#" class=" btn-default white">
                         <i class="icofont-user"></i>
                         <span>@Model.client_type_name</span>
                         <svg class="icon-svg ml-1">
@@ -97,7 +103,7 @@
         <div class="col-6">
             <div class="select-list">
                 <div class="relative select-user">
-                    <a href="#" class="btn btn-default white">
+                    <a href="#" class="btn-default white">
                         <i class="icofont-user"></i>
                        @if (data_UserAgent != null && data_UserAgent.Count > 0)
                             {
