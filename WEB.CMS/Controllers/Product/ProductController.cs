@@ -1,4 +1,5 @@
-﻿using Caching.RedisWorker;
+﻿using Azure.Core;
+using Caching.RedisWorker;
 using Entities.Models;
 using Entities.ViewModels.Products;
 using HuloToys_Service.ElasticSearch.NewEs;
@@ -151,7 +152,8 @@ namespace WEB.CMS.Controllers
         {
             try
             {
-                if(
+                //ProductMongoDbSummitModel request = JsonConvert.DeserializeObject<ProductMongoDbSummitModel>(request_object);
+                if (request==null||
                     request.name==null || request.name.Trim()==""
                     || request.images == null || request.images.Count<=0
                     || request.avatar == null || request.avatar.Trim() == ""
@@ -166,59 +168,59 @@ namespace WEB.CMS.Controllers
                 }
                 string rs = "";
                 var uploaded_image = new List<string>();
-                //-- IMg
-                if (request.images != null && request.images.Count > 0)
-                {
-                    foreach (var img in request.images)
-                    {
-                        if(img!=null && img.Trim() != "")
-                        {
-                            var data_img = _staticAPIService.GetImageSrcBase64Object(img);
-                            if (data_img != null)
-                            {
-                                var url = await _staticAPIService.UploadImageBase64(data_img);
-                                if (url != null && url.Trim() != "")
-                                {
-                                    uploaded_image.Add(url);
-                                    continue;
-                                }
-                            }
-                            uploaded_image.Add(img);
+                ////-- IMg
+                //if (request.images != null && request.images.Count > 0)
+                //{
+                //    foreach (var img in request.images)
+                //    {
+                //        if(img!=null && img.Trim() != "")
+                //        {
+                //            var data_img = _staticAPIService.GetImageSrcBase64Object(img);
+                //            if (data_img != null)
+                //            {
+                //                var url = await _staticAPIService.UploadImageBase64(data_img);
+                //                if (url != null && url.Trim() != "")
+                //                {
+                //                    uploaded_image.Add(url);
+                //                    continue;
+                //                }
+                //            }
+                //            uploaded_image.Add(img);
 
-                        }
+                //        }
                        
-                    }
-                }
-                request.images = uploaded_image;
-                //-- Avt:
-                if (request.avatar != null && request.avatar.Trim() != "")
-                {
-                    if (request.avatar != null && request.avatar.Trim() != "" && request.avatar.Contains("data:image") && request.avatar.Contains("base64"))
-                    {
-                        var data_img = _staticAPIService.GetImageSrcBase64Object(request.avatar);
-                        if (data_img != null)
-                        {
-                            request.avatar = await _staticAPIService.UploadImageBase64(data_img);
-                        }
+                //    }
+                //}
+                //request.images = uploaded_image;
+                ////-- Avt:
+                //if (request.avatar != null && request.avatar.Trim() != "")
+                //{
+                //    if (request.avatar != null && request.avatar.Trim() != "" && request.avatar.Contains("data:image") && request.avatar.Contains("base64"))
+                //    {
+                //        var data_img = _staticAPIService.GetImageSrcBase64Object(request.avatar);
+                //        if (data_img != null)
+                //        {
+                //            request.avatar = await _staticAPIService.UploadImageBase64(data_img);
+                //        }
 
-                    }
-                }
-                //-- Attributes Img:
-                if (request.attributes_detail != null && request.attributes_detail.Count > 0)
-                {
-                    foreach (var attributes_detail in request.attributes_detail)
-                    {
-                        if (attributes_detail.img!=null && attributes_detail.img.Trim()!="" && attributes_detail.img.Contains("data:image") && attributes_detail.img.Contains("base64"))
-                        {
-                            var data_img = _staticAPIService.GetImageSrcBase64Object(attributes_detail.img);
-                            if (data_img != null)
-                            {
-                                attributes_detail.img = await _staticAPIService.UploadImageBase64(data_img);
-                            }
+                //    }
+                //}
+                ////-- Attributes Img:
+                //if (request.attributes_detail != null && request.attributes_detail.Count > 0)
+                //{
+                //    foreach (var attributes_detail in request.attributes_detail)
+                //    {
+                //        if (attributes_detail.img!=null && attributes_detail.img.Trim()!="" && attributes_detail.img.Contains("data:image") && attributes_detail.img.Contains("base64"))
+                //        {
+                //            var data_img = _staticAPIService.GetImageSrcBase64Object(attributes_detail.img);
+                //            if (data_img != null)
+                //            {
+                //                attributes_detail.img = await _staticAPIService.UploadImageBase64(data_img);
+                //            }
 
-                        }
-                    }
-                }
+                //        }
+                //    }
+                //}
                
                 //-- Add/Update product_main
                 var product_main = JsonConvert.DeserializeObject<ProductMongoDbModel>(JsonConvert.SerializeObject(request));
@@ -240,6 +242,7 @@ namespace WEB.CMS.Controllers
                 else
                 {
                     rs = await _productV2DetailMongoAccess.UpdateAsync(product_main);
+                    await _productV2DetailMongoAccess.DeleteInactiveByParentId(product_main._id);
                     await _productV2DetailMongoAccess.DeactiveByParentId(product_main._id);
                     
                     
@@ -292,6 +295,77 @@ namespace WEB.CMS.Controllers
                 msg = "Thêm mới / Cập nhật sản phẩm thất bại, vui lòng liên hệ bộ phận IT",
             });
         }
+        public async Task<IActionResult> SummitImages(string data_image)
+        {
+            try
+            {
+                if (
+                    data_image == null || data_image.Trim() == ""
+                    )
+                {
+                    return Ok(new
+                    {
+                        is_success = false,
+
+                    });
+                }
+                var data_img = _staticAPIService.GetImageSrcBase64Object(data_image);
+                if (data_img != null)
+                {
+                    var url = await _staticAPIService.UploadImageBase64(data_img);
+                    return Ok(new
+                    {
+                        is_success = true,
+                        data = url
+                    });
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return Ok(new
+            {
+                is_success = false,
+            });
+        } 
+        public async Task<IActionResult> SummitVideo(string data_video)
+        {
+            try
+            {
+                if (
+                    data_video == null || data_video.Trim() == ""
+                    )
+                {
+                    return Ok(new
+                    {
+                        is_success = false,
+
+                    });
+                }
+                var data_img = _staticAPIService.GetVideoSrcBase64Object(data_video);
+                if (data_img != null)
+                {
+                    var url = await _staticAPIService.UploadVideoBase64(data_img);
+                    return Ok(new
+                    {
+                        is_success = true,
+                        data = url
+                    });
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return Ok(new
+            {
+                is_success = false,
+                msg = "Thêm mới / Cập nhật sản phẩm thất bại, vui lòng liên hệ bộ phận IT",
+            });
+        }
         public async Task<IActionResult> ProductDetailGroupProducts(string ids)
         {
             try
@@ -323,6 +397,35 @@ namespace WEB.CMS.Controllers
                 is_success = false
             });
         }
+        public async Task<IActionResult> DeleteProductByID(string product_id)
+        {
+            try
+            {
+                if (product_id == null || product_id.Trim() == "")
+                {
+                    return Ok(new
+                    {
+                        is_success = false
+                    });
+                }
+                await _productV2DetailMongoAccess.Delete(product_id);
+                await _productV2DetailMongoAccess.DeactiveByParentId(product_id);
+
+                return Ok(new
+                {
+                    is_success = true
+                });
+            }
+            catch
+            {
+
+            }
+            return Ok(new
+            {
+                is_success = false
+            });
+        }
+
         public async Task<IActionResult> AddProductSpecification(int type, string name)
         {
             try

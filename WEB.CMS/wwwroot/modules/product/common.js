@@ -1,5 +1,5 @@
 ﻿var _product_function = {
-    POST: function (url,model,callback) {
+    POST: function (url, model, callback) {
         $.ajax({
             url: url,
             type: "POST",
@@ -10,6 +10,37 @@
             error: function (err) {
                 console.log(err)
             }
+        });
+    },
+    POSTSynchorus: function (url, model) {
+        var data = undefined
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: model,
+            success: function (result) {
+                data = result;
+            },
+            error: function (err) {
+                console.log(err)
+            },
+            async: false
+        });
+        return data
+    },
+    POSTPromise: function (url, data) {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                type: 'post',
+                url: url,
+                data: { request: data },
+                success: function (data) {
+                    resolve(data);
+                },
+                error: function (err) {
+                    reject(err);
+                }
+            });
         });
     },
     Comma: function (number) { //function to add commas to textboxes
@@ -32,17 +63,25 @@
             && !img_src.includes("base64,"))
             img_src = _product_constants.VALUES.StaticDomain + image
         return img_src
-    }
+    },
+    CheckIfImageVideoIsLocal: function (data) {
+        if (data.includes("data:image") || data.includes("data:video") || data.includes("base64,")) {
+            return true
+        }
+        else {
+            return false
+        }
+    },
 }
 var _product_constants = {
     VALUES: {
         ProductDetail_Max_Image: 9,
         ProductDetail_Max_Avt: 1,
         DefaultSpecificationValue: [
-            { id: 1, name:'Thương hiệu',type:3},
-            { id: 5, name: 'Chất liệu', type: 3},
+            { id: 1, name: 'Thương hiệu', type: 3 },
+            { id: 5, name: 'Chất liệu', type: 3 },
             { id: 2, name: 'Độ tuổi khuyến nghị', type: 3 },
-            { id: 6, name: 'Ngày sản xuất', type: 2},
+            { id: 6, name: 'Ngày sản xuất', type: 2 },
             { id: 3, name: 'Tên tổ chức chịu trách nhiệm sản xuất', type: 3 },
             { id: 7, name: 'Địa chỉ tổ chức chịu trách nghiệm sản xuất', type: 3 },
             { id: 4, name: 'Sản phẩm đặt theo yêu cầu', type: 3 },
@@ -84,7 +123,7 @@ var _product_constants = {
                             </td>
                         </tr>
         `,
-        SubProduct:`  <tr class="sub-product"data-id="{id}"data-main-id="{main_id}" style="{display}">
+        SubProduct: `  <tr class="sub-product"data-id="{id}"data-main-id="{main_id}" style="{display}">
                             <td style="width: 0;">
                             </td>
                             <td style="width: 100px;">
@@ -112,7 +151,7 @@ var _product_constants = {
                                         </a>
                                     </td>
                                 </tr>`,
-        ProductDetail_Images_AddImagesButton:`<div class="items import">
+        ProductDetail_Images_AddImagesButton: `<div class="items import">
                                 <label class="choose choose-wrap">
                                     <input class="image_input" type="file" name="myFile">
                                     <div class="choose-content choose-product-images">
@@ -121,13 +160,13 @@ var _product_constants = {
                                     </div>
                                 </label>
                             </div>`,
-        ProductDetail_Images_Item:` <div class="items magnific_popup" data-id="{id}">
+        ProductDetail_Images_Item: ` <div class="items magnific_popup" data-id="{id}">
                                 <button type="button" class="delete"><i class="icofont-close-line"></i></button>
                                 <a class="thumb_img thumb_1x1 magnific_thumb">
                                     <img src="{src}">
                                 </a>
                             </div>`,
-        ProductDetail_Video_Item:` <div class="items magnific_popup" data-id="{id}">
+        ProductDetail_Video_Item: ` <div class="items magnific_popup" data-id="{id}">
                                 <button type="button" class="delete"><i class="icofont-close-line"></i></button>
                                 <a class="thumb_img thumb_1x1 magnific_thumb">
                                    <video>
@@ -136,7 +175,7 @@ var _product_constants = {
                                     </video>
                                 </a>
                             </div>`,
-        ProductDetail_Attribute_Row_Item:` <div class="col-md-6 lastest-attribute-value item">
+        ProductDetail_Attribute_Row_Item: ` <div class="col-md-6 lastest-attribute-value item">
                             <div class="box-list">
                                 <div class="form-group namesp flex-input-choose">
                                     <label class="choose choose-wrap">
@@ -159,7 +198,7 @@ var _product_constants = {
                             </div>
                         </div>`,
 
-        ProductDetail_Attribute_Row_Add_Attributes:` <div class="item-edit item flex flex-lg-nowrap gap10 mb-2 w-100 product-attributes-add">
+        ProductDetail_Attribute_Row_Add_Attributes: ` <div class="item-edit item flex flex-lg-nowrap gap10 mb-2 w-100 product-attributes-add">
                 <label class="label"></label>
                 <div class="wrap_input pb-4">
                     <button  class="btn btn-add btn-add-attributes"><i class="icofont-plus"></i>Thêm phân loại</button>
@@ -198,7 +237,7 @@ var _product_constants = {
                     </div>
                 </div>
             </div>`,
-       
+
         ProductDetail_Specification_Row_Item: ` <div class="col-md-6 " >
                         <div class="item flex flex-lg-nowrap gap10 mb-2 w-100">
                             <label class="label">{name}<span style="display:none;">0/10</span></label>
@@ -208,7 +247,7 @@ var _product_constants = {
                             </div>
                         </div>
                     </div>`,
-        ProductDetail_Specification_Row_Item_DateTime:`<div class="datepicker-wrap namesp" data-type="2" data-attr-id="{id}">
+        ProductDetail_Specification_Row_Item_DateTime: `<div class="datepicker-wrap namesp" data-type="2" data-attr-id="{id}">
                                 <input  placeholder="Vui lòng chọn"
                                        class="datepicker-input form-control" type="text" value="{value}">
                             </div>`,
@@ -217,7 +256,7 @@ var _product_constants = {
                 <a href="" class="edit"><i class="icofont-thin-down"></i></a>
            
             </div>`,
-        ProductDetail_Specification_Row_Item_SelectOptions_NewOptions:`<li style=" list-style: none; "><input class="checkbox-option" type="checkbox" name="{option-name}" value="{value}" {checked}> <span>{name}</span></li>`,
+        ProductDetail_Specification_Row_Item_SelectOptions_NewOptions: `<li style=" list-style: none; "><input class="checkbox-option" type="checkbox" name="{option-name}" value="{value}" {checked}> <span>{name}</span></li>`,
         ProductDetail_Specification_Row_Item_SelectOptions: ` <div class="form-group namesp"data-type="1" data-attr-id="{id}">
                 <input type="text" class="form-control input-select-option" placeholder="{placeholder}" readonly value="{value}">
                 <a href="" class="edit"><i class="icofont-thin-down"></i></a>
@@ -259,8 +298,8 @@ var _product_constants = {
                     </div>
                 </div>
             </div>`,
-        ProductDetail_Attribute_Price_Tr_Td:`<td class="td-attributes td-attribute-{i}" {row_span}>{name}</td>`,
-        ProductDetail_Attribute_Price_TrMain:` <tr class="tr-main" data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-1">
+        ProductDetail_Attribute_Price_Tr_Td: `<td class="td-attributes td-attribute-{i}" {row_span}>{name}</td>`,
+        ProductDetail_Attribute_Price_TrMain: ` <tr class="tr-main" data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-1">
                                    {td_arrtibute}
                                     <td class="td-price">
                                         <div class="form-group mb-0 price">
@@ -291,7 +330,7 @@ var _product_constants = {
                                         </div>
                                     </td>
                                 </tr>  `,
-        ProductDetail_Attribute_Price_TrSub:`<tr class="tr-sub" data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-2">
+        ProductDetail_Attribute_Price_TrSub: `<tr class="tr-sub" data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-2">
                                    {td_arrtibute}
                                     <td class="td-price">
                                         <div class="form-group mb-0 price">
@@ -322,7 +361,7 @@ var _product_constants = {
                                         </div>
                                     </td>
                                 </tr>`,
-        ProductDetail_DiscountGroupBuy_Row:` <tr class="discount-groupbuy-row">
+        ProductDetail_DiscountGroupBuy_Row: ` <tr class="discount-groupbuy-row">
                                     <td class="name">Khoảng giá 1</td>
                                     <td>
                                         <div class="flex gap10 flex-nowrap align-items-center justify-content-center">
@@ -366,10 +405,10 @@ var _product_constants = {
                                     </td>
 
                                 </tr>`,
-        ProductDetail_GroupProduct_ResultDirection:`<b>{name}<i class="icofont-thin-right"></i></b>`,
-        ProductDetail_GroupProduct_ResultSelected:`<b >{name}</b>`,
-        ProductDetail_GroupProduct_colmd4_Li:` <li data-id="{id}" data-name="{name}"><a href="javascript:;">{name}<i class="{icofont-thin-right}"></i></a></li>`,
-        ProductDetail_GroupProduct_colmd4:`<div class="col-md-4" data-level="{level}">
+        ProductDetail_GroupProduct_ResultDirection: `<b>{name}<i class="icofont-thin-right"></i></b>`,
+        ProductDetail_GroupProduct_ResultSelected: `<b >{name}</b>`,
+        ProductDetail_GroupProduct_colmd4_Li: ` <li data-id="{id}" data-name="{name}"><a href="javascript:;">{name}<i class="{icofont-thin-right}"></i></a></li>`,
+        ProductDetail_GroupProduct_colmd4: `<div class="col-md-4" data-level="{level}">
                         <div class="list-toys">
                             <h6><a href="">{name}<i class="icofont-thin-right"></i></a></h6>
                             <ul>

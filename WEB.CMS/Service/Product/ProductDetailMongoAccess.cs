@@ -176,7 +176,61 @@ namespace WEB.CMS.Models.Product
             return null;
 
         }
-        
 
+        public async Task<string> Delete(string id)
+        {
+            try
+            {
+                var filter = Builders<ProductMongoDbModel>.Filter;
+                var filterDefinition = filter.Empty;
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x._id, id);
+
+                var updated_item = await _productDetailCollection.DeleteOneAsync(filterDefinition);
+                return id;
+            }
+            catch (Exception ex)
+            {
+                Utilities.LogHelper.InsertLogTelegram("ProductDetailMongoAccess - DeactiveByParentId Error: " + ex);
+            }
+            return null;
+
+        }
+        public async Task<string> DeleteByParentId(string id)
+        {
+            try
+            {
+                var filter = Builders<ProductMongoDbModel>.Filter;
+                var filterDefinition = filter.Empty;
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.parent_product_id, id);
+
+                var updated_item = await _productDetailCollection.DeleteManyAsync(filterDefinition);
+                return id;
+            }
+            catch (Exception ex)
+            {
+                Utilities.LogHelper.InsertLogTelegram("ProductDetailMongoAccess - DeactiveByParentId Error: " + ex);
+            }
+            return null;
+
+        }
+        public async Task<string> DeleteInactiveByParentId(string id)
+        {
+            try
+            {
+                var filter = Builders<ProductMongoDbModel>.Filter;
+                var filterDefinition = filter.Empty;
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.parent_product_id, id);
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.status, (int)ProductStatus.DEACTIVE);
+
+                var updated_item = await _productDetailCollection.DeleteManyAsync(filterDefinition);
+                return id;
+            }
+            catch (Exception ex)
+            {
+                Utilities.LogHelper.InsertLogTelegram("ProductDetailMongoAccess - DeactiveByParentId Error: " + ex);
+            }
+            return null;
+
+        }
     }
 }

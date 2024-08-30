@@ -94,7 +94,7 @@ var product_index = {
             html_item = html_item.replaceAll('{avatar}', img_src)
             html_item = html_item.replaceAll('{name}', item.name)           
             html_item = html_item.replaceAll('{attribute}', '')
-            var amount_html = 'Giá liên hệ'
+            var amount_html = '0'
             if (item.amount_max != undefined
                 && item.amount_max != null
                 && item.amount_min != undefined
@@ -108,9 +108,8 @@ var product_index = {
             }
             html_item = html_item.replaceAll('{amount}', amount_html)
 
-            if (item.quanity_of_stock > 0) {
-                html_item = html_item.replaceAll('{stock}', _product_function.Comma(item.quanity_of_stock))
-            } 
+            html_item = html_item.replaceAll('{stock}', _product_function.Comma(item.quanity_of_stock))
+
             html_item = html_item.replaceAll('{order_count}', '')
             var html_variations = ''
 
