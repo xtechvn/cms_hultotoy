@@ -1003,13 +1003,17 @@ var product_detail = {
                 var element = $(this)
                 var var_id = element.attr('data-id')
                 if (var_id = undefined) var_id = ''
+                var price = parseFloat(element.find('.td-price').find('input').val().replaceAll(',', ''))
+                var profit = parseFloat(element.find('.td-profit').find('input').val().replaceAll(',', ''))
+                var amount = parseFloat(element.find('.td-amount').find('input').val().replaceAll(',', ''))
+                var quanity_of_stock = parseFloat(element.find('.td-stock').find('input').val().replaceAll(',', ''))
                 var variation = {
                     _id: var_id,
                     variation_attributes: [],
-                    price: parseFloat(element.find('.td-price').find('input').val().replaceAll(',', '')),
-                    profit: parseFloat(element.find('.td-profit').find('input').val().replaceAll(',', '')),
-                    amount: parseFloat(element.find('.td-amount').find('input').val().replaceAll(',', '')),
-                    quanity_of_stock: parseFloat(element.find('.td-stock').find('input').val().replaceAll(',', '')),
+                    price: (price == undefined|| isNaN(price) || price <= 0) ? 0 : price,
+                    profit: (profit == undefined || isNaN(profit) || profit <= 0) ? 0 : profit,
+                    amount: (amount == undefined || isNaN(amount) || amount <= 0) ? 0 : amount,
+                    quanity_of_stock: (quanity_of_stock == undefined || isNaN(quanity_of_stock) || quanity_of_stock <= 0) ? 0 : quanity_of_stock,
                     sku: element.find('.td-sku').find('input').val(),
                 }
                 for (var i = 1; i <= $('.product-attributes').length; i++) {
