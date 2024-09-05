@@ -49,4 +49,16 @@ public partial class Order
     public int? UserId { get; set; }
 
     public string UserGroupIds { get; set; }
+
+    public string ReceiverName { get; set; }
+
+    public string Phone { get; set; }
+
+    public int? ProvinceId { get; set; }
+
+    public int? DistrictId { get; set; }
+
+    public int? WardId { get; set; }
+
+    public string Address { get; set; }
 }
