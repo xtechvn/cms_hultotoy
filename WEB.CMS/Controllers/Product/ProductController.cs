@@ -241,11 +241,19 @@ namespace WEB.CMS.Controllers
                 }
                 else
                 {
+                    var old_product= await _productV2DetailMongoAccess.GetByID(product_main._id);
+                    if (old_product.group_product_id != null && old_product.group_product_id.Trim() != "")
+                    {
+                        foreach (var group in old_product.group_product_id.Split(","))
+                        {
+                            await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING + group, db_index);
+                        }
+                    }
+                    await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_DETAIL + product_main._id, db_index);
+
                     rs = await _productV2DetailMongoAccess.UpdateAsync(product_main);
-                    await _productV2DetailMongoAccess.DeleteInactiveByParentId(product_main._id);
                     await _productV2DetailMongoAccess.DeactiveByParentId(product_main._id);
-                    
-                    
+                    //await _productV2DetailMongoAccess.DeleteInactiveByParentId(product_main._id);
                 }
                 //-- Add / Update Sub product
                 if (request.variations != null && request.variations.Count > 0)
@@ -267,14 +275,7 @@ namespace WEB.CMS.Controllers
                 }
                 if (rs != null)
                 {
-                    if(product_main.group_product_id!=null && product_main.group_product_id.Trim() != "")
-                    {
-                        foreach(var group in product_main.group_product_id.Split(","))
-                        {
-                            await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING + group, db_index);
-                        }
-                    }
-                    await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_DETAIL + product_main._id, db_index);
+                  
 
                     return Ok(new
                     {
