@@ -249,9 +249,17 @@ namespace WEB.CMS.Controllers
                             await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING + group, db_index);
                         }
                     }
+                    if (product_main.group_product_id != null && product_main.group_product_id.Trim() != "")
+                    {
+                        foreach (var group in product_main.group_product_id.Split(","))
+                        {
+                            await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING + group, db_index);
+                        }
+                    }
                     await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_DETAIL + product_main._id, db_index);
 
                     rs = await _productV2DetailMongoAccess.UpdateAsync(product_main);
+
                     await _productV2DetailMongoAccess.DeactiveByParentId(product_main._id);
                     //await _productV2DetailMongoAccess.DeleteInactiveByParentId(product_main._id);
                 }

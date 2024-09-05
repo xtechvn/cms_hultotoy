@@ -1,6 +1,7 @@
 ﻿using Caching.RedisWorker;
 using Entities.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Repositories.IRepositories;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Utilities;
+using Utilities.Contants;
 using WEB.CMS.Customize;
 
 namespace CMS.Controllers
@@ -28,7 +30,7 @@ namespace CMS.Controllers
             _wardRepository = wardRepository;
             _RedisService = redisService;
             _Configuration = configuration;
-
+            _RedisService.Connect();
         }
         public IActionResult Index()
         {
@@ -590,6 +592,42 @@ namespace CMS.Controllers
                 return Content(error);
             }
         }
-       
+        public async Task<IActionResult> Sync()
+        {
+            try 
+            {
+
+                var province=await _provinceRepository.GetProvincesList();
+                if(province!=null && province.Count > 0)
+                {
+                    _RedisService.Set(CacheName.PROVINCE, JsonConvert.SerializeObject(province), Convert.ToInt32(_Configuration["Redis:Database:db_common"]));
+                }
+                var districts = await _districtRepository.GetDistrictList();
+                if (districts != null && districts.Count > 0)
+                {
+                    _RedisService.Set(CacheName.DISTRICT, JsonConvert.SerializeObject(districts), Convert.ToInt32(_Configuration["Redis:Database:db_common"]));
+                }
+                var ward = await _wardRepository.GetWardList();
+                if (ward != null && ward.Count > 0)
+                {
+                    _RedisService.Set(CacheName.WARD, JsonConvert.SerializeObject(ward), Convert.ToInt32(_Configuration["Redis:Database:db_common"]));
+                }
+                return Ok(new
+                {
+                    is_success = true
+                });
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("Sync - LocationController : " + ex.ToString());
+                string error = "Error: " + ex.ToString();
+                return Ok(new
+                {
+                    is_success = false
+                });
+            }
+        }
+
     }
 }

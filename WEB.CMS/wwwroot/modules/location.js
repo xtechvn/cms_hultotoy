@@ -649,7 +649,25 @@ var _location = {
         };
         $('#onapply_location').css('display', 'none');
     },
-    
+    Sync: function () {
+        $.ajax({
+            url: 'location/Sync',
+            type: 'POST',
+            data: {
+               
+            },
+            success: function (result) {
+                if (result.is_success) {
+                    _msgalert.success('Success');
+
+                }
+                else {
+                    _msgalert.error('Failed');
+
+                }
+            }
+        });
+    }
 };
 
 
