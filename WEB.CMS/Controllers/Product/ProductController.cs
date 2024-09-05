@@ -34,7 +34,7 @@ namespace WEB.CMS.Controllers
             _staticAPIService = new StaticAPIService( configuration);
             _redisConn = redisConn;
             _redisConn.Connect();
-            db_index = Convert.ToInt32(configuration["Redis:db_search_result"]);
+            db_index = Convert.ToInt32(configuration["Redis:Database:db_search_result"]);
         }
         public IActionResult Index()
         {
@@ -238,6 +238,7 @@ namespace WEB.CMS.Controllers
                 {
                     product_main.status = (int)ProductStatus.ACTIVE;
                     rs = await _productV2DetailMongoAccess.AddNewAsync(product_main);
+                   
                 }
                 else
                 {
@@ -249,19 +250,18 @@ namespace WEB.CMS.Controllers
                             await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING + group, db_index);
                         }
                     }
-                    if (product_main.group_product_id != null && product_main.group_product_id.Trim() != "")
-                    {
-                        foreach (var group in product_main.group_product_id.Split(","))
-                        {
-                            await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING + group, db_index);
-                        }
-                    }
+                  
                     await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_DETAIL + product_main._id, db_index);
-
                     rs = await _productV2DetailMongoAccess.UpdateAsync(product_main);
-
                     await _productV2DetailMongoAccess.DeactiveByParentId(product_main._id);
                     //await _productV2DetailMongoAccess.DeleteInactiveByParentId(product_main._id);
+                }
+                if (product_main.group_product_id != null && product_main.group_product_id.Trim() != "")
+                {
+                    foreach (var group in product_main.group_product_id.Split(","))
+                    {
+                        await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING + group, db_index);
+                    }
                 }
                 //-- Add / Update Sub product
                 if (request.variations != null && request.variations.Count > 0)
