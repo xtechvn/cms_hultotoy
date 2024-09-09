@@ -303,25 +303,25 @@ var _product_constants = {
                                    {td_arrtibute}
                                     <td class="td-price">
                                         <div class="form-group mb-0 price">
-                                            <input type="text" class="form-control" placeholder="Giá nhập">
+                                            <input type="text" class="form-control input-price" placeholder="Giá nhập">
                                             <span class="note">đ</span>
                                         </div>
                                     </td>
                                     <td class="td-profit">
                                         <div class="form-group mb-0 price">
-                                            <input type="text" class="form-control" placeholder="Lợi nhuận">
+                                            <input type="text" class="form-control input-price" placeholder="Lợi nhuận">
                                             <span class="note">đ</span>
                                         </div>
                                     </td>
                                     <td class="td-amount">
                                         <div class="form-group mb-0 price">
-                                            <input type="text" class="form-control" placeholder="Giá bán">
+                                            <input type="text" class="form-control input-price" placeholder="Giá bán">
                                             <span class="note">đ</span>
                                         </div>
                                     </td>
                                     <td class="td-stock">
                                         <div class="form-group mb-0">
-                                            <input type="text" class="form-control" placeholder="Kho hàng">
+                                            <input type="text" class="form-control input-price" placeholder="Kho hàng">
                                         </div>
                                     </td>
                                     <td class="td-sku">
