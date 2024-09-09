@@ -175,6 +175,7 @@ var product_detail = {
             element.closest('h6').find('.edit-attributes-name-nw').hide()
             element.closest('h6').find('b').show()
             element.closest('h6').find('span').show()
+            element.closest('h6').find('.attribute-name-edit').show()
 
         });
         $('body').on('keyup', '#specifications .them-chatlieu .input_search', function () {
