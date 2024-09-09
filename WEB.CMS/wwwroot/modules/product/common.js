@@ -119,7 +119,7 @@ var _product_constants = {
                             <td class="text-center">{stock}</td>
                             <td class="text-center">
                                 <a href="javascript:;" class="product-edit">Cập nhật</a><br />
-                                <a href="javascript:;" class="product-viewmore">Xem thêm</a>
+                                <a href="javascript:;" class="product-viewmore" style="display: none;" >Xem thêm</a>
                             </td>
                         </tr>
         `,
