@@ -111,13 +111,19 @@ var product_detail = {
             $('#product-attributes-price').show()
             $('#product-attributes-all-price').closest('.item-edit').show()
             $('#product-attributes-price').closest('.item-edit').show()
+            if ($('.product-attributes').length < 2) {
+                $('.btn-add-attributes').show()
 
+            } else {
+                $('.btn-add-attributes').hide()
+            }
         });
         
-        $('body').on('keyup', '.lastest-attribute-value .attributes-name', function () {
+        $('body').on('keyup', '.lastest-attribute-value .attributes-name, .lastest-attribute-value .attributes-name-add', function () {
             var element = $(this)
             element.closest('.relative').find('.error').hide()
             product_detail.ValidateAttributesInput(element)
+
             element.closest('.lastest-attribute-value').removeClass('lastest-attribute-value')
             if (element.val() != undefined && element.val().trim() != '') {
                 element.closest('.row-attributes-value').append(_product_constants.HTML.ProductDetail_Attribute_Row_Item)
@@ -127,6 +133,7 @@ var product_detail = {
                 }
             }
         });
+        
         $('body').on('click', '.attribute-item-delete', function () {
             var element = $(this)
             if (element.closest('.row-attributes-value').find('.col-md-6').length <= 2) {
@@ -140,6 +147,8 @@ var product_detail = {
             var element = $(this)
             element.closest('.row-attributes-value').append(_product_constants.HTML.ProductDetail_Attribute_Row_Item)
             element.closest('.row-attributes-value').find('.attribute-item-delete').show()
+            //element.closest('.row-attributes-value').find('.attributes-name').addClass('attributes-name-add')
+            //element.closest('.row-attributes-value').find('.attributes-name').removeClass('attributes-name')
 
         });
         $('body').on('click', '.attribute-name-edit', function () {
@@ -1075,6 +1084,12 @@ var product_detail = {
             //if ($('.product-attributes').length < attribute_max_count) {
             //    $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row_Add_Attributes)
             //}
+        }
+        if($('.product-attributes').length < attribute_max_count-1) {
+            $('.btn-add-attributes').show()
+        }
+        else {
+            $('.btn-add-attributes').hide()
         }
       
     },
