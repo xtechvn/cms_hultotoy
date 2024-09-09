@@ -269,7 +269,6 @@ namespace WEB.CMS.Controllers
                     foreach (var variation in request.variations)
                     {
                         var product_by_variations = JsonConvert.DeserializeObject<ProductMongoDbModel>(JsonConvert.SerializeObject(request));
-                        //product_by_variations._id = variation._id;
                         product_by_variations.variation_detail = variation.variation_attributes;
                         product_by_variations.status = (int)ProductStatus.ACTIVE;
                         product_by_variations.parent_product_id = product_main._id;
@@ -278,7 +277,15 @@ namespace WEB.CMS.Controllers
                         product_by_variations.amount = variation.amount;
                         product_by_variations.quanity_of_stock = variation.quanity_of_stock;
                         product_by_variations.sku = variation.sku;
-                        await _productV2DetailMongoAccess.AddNewAsync(product_by_variations);
+                        if (variation._id != null && variation._id != "")
+                        {
+                            product_by_variations._id = variation._id;
+                            await _productV2DetailMongoAccess.UpdateAsync(product_by_variations);
+                        }
+                        else
+                        {
+                            await _productV2DetailMongoAccess.AddNewAsync(product_by_variations);
+                        }
                     }
                 }
                 if (rs != null)
