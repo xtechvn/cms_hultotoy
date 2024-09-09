@@ -185,7 +185,7 @@ var _product_constants = {
                                         </div>
                                     </label>
                                     <div class="relative w-100">
-                                        <input type="text" class="form-control attributes-name" placeholder="Tên thuộc tính" maxlength="14" value="">
+                                        <input type="text" class="form-control attributes-name attributes-name-{index}" data-id="{index}" placeholder="Tên thuộc tính" maxlength="14" value="">
                                         <p class="error" style="display:none;"> </p>
                                         <span class="note"><nw class="count">0</nw>/14</span>
                                     </div>
@@ -298,7 +298,7 @@ var _product_constants = {
                     </div>
                 </div>
             </div>`,
-        ProductDetail_Attribute_Price_Tr_Td: `<td class="td-attributes td-attribute-{i}" {row_span}>{name}</td>`,
+        ProductDetail_Attribute_Price_Tr_Td: `<td class="td-attributes td-attribute-{i} td-attributes-name-{data-id}" {row_span}>{name}</td>`,
         ProductDetail_Attribute_Price_TrMain: ` <tr class="tr-main" data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-1">
                                    {td_arrtibute}
                                     <td class="td-price">

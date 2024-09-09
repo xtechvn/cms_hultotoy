@@ -122,11 +122,18 @@ var product_detail = {
         $('body').on('keyup', '.lastest-attribute-value .attributes-name, .lastest-attribute-value .attributes-name-add', function () {
             var element = $(this)
             element.closest('.relative').find('.error').hide()
-            product_detail.ValidateAttributesInput(element)
+            var text = element.attr('data-id')
 
+           var text= $('.attributes-name-' + text).val();
+            $('.td-attributes-name-' + text).val('');
+            product_detail.ValidateAttributesInput(element)
+            var i = 0;
+            $('.attributes-name').each(function (index, item) {
+                i = index + 1;
+            })
             element.closest('.lastest-attribute-value').removeClass('lastest-attribute-value')
             if (element.val() != undefined && element.val().trim() != '') {
-                element.closest('.row-attributes-value').append(_product_constants.HTML.ProductDetail_Attribute_Row_Item)
+                element.closest('.row-attributes-value').append(_product_constants.HTML.ProductDetail_Attribute_Row_Item.replaceAll("{index}", i))
                 $('.row-attributes-value .col-md-6 .attribute-item-delete').show()
                 if (element.closest('.row-attributes-value').find('.col-md-6').length < 2) {
                     element.closest('.row-attributes-value').find('.attribute-item-delete').hide()
@@ -145,7 +152,11 @@ var product_detail = {
         });
         $('body').on('click', '.attribute-item-add', function () {
             var element = $(this)
-            element.closest('.row-attributes-value').append(_product_constants.HTML.ProductDetail_Attribute_Row_Item)
+            var i = 0;
+            $('.attributes-name').each(function (index, item) {
+                i = index
+            })
+            element.closest('.row-attributes-value').append(_product_constants.HTML.ProductDetail_Attribute_Row_Item.replaceAll("{index}",i))
             element.closest('.row-attributes-value').find('.attribute-item-delete').show()
             //element.closest('.row-attributes-value').find('.attributes-name').addClass('attributes-name-add')
             //element.closest('.row-attributes-value').find('.attributes-name').removeClass('attributes-name')
@@ -1079,8 +1090,12 @@ var product_detail = {
     },
     AddProductAttributes: function () {
         var attribute_max_count = 2
+        var i = 0;
+        $('.attributes-name').each(function (index, item) {
+            i = index
+        })
         if ($('.product-attributes').length < attribute_max_count) {
-            $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row.replaceAll('{html}', _product_constants.HTML.ProductDetail_Attribute_Row_Item))
+            $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row.replaceAll('{html}', _product_constants.HTML.ProductDetail_Attribute_Row_Item.replaceAll("{index}", i)))
             //if ($('.product-attributes').length < attribute_max_count) {
             //    $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row_Add_Attributes)
             //}
@@ -1166,16 +1181,28 @@ var product_detail = {
     RenderRowAttributeTablePrice: function () {
         var html=''
         var product_attributes = []
+        var attributes_name = []
         $('.product-attributes').each(function (index, item) {
             var element = $(this)
             var product_attribute_by_id = {
                 id: index,
-                data_values:[]
+                data_values: [],
             }
+        
             element.find('.attributes-name').each(function (index, item) {
                 var element_input = $(this)
-                if (element_input != undefined && element_input.val() != undefined && element_input.val().trim() != '')
-                product_attribute_by_id.data_values.push(element_input.val())
+                var product_attribute_by_dataid = {
+                    dataid: 0,
+                    data_values: "",
+                }
+                if (element_input != undefined && element_input.val() != undefined && element_input.val().trim() != '') {
+                    product_attribute_by_id.data_values.push(element_input.val())
+
+                    product_attribute_by_dataid.dataid = element_input.attr('data-id')
+                    product_attribute_by_dataid.data_values = element_input.val()
+                    attributes_name.push(product_attribute_by_dataid)
+                }
+                    
             })
             product_attributes.push(product_attribute_by_id)
         })
@@ -1203,11 +1230,16 @@ var product_detail = {
                         return obj.attribute_id == (index_attribute + 2)
                     }).length
                     if (row_span <= 0) row_span = 1
-
+                    var data_id = 0;
+                    $(attributes_name).each(function (index, data_item) {
+                        if (data_item.data_values.trim() == attribute_name.trim())
+                            data_id = data_item.dataid
+                    })
                     var html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                         .replaceAll('{i}', index_attribute)
                         .replaceAll('{name}', attribute_name.trim())
                         .replaceAll('{row_span}', 'rowspan="' + row_span + '"')
+                        .replaceAll('{data-id}', data_id)
                     html_attribute_attr += 'data-attribute-' + (index_attribute + 1) + '="' + attribute_name.trim() + '" '
                     html_td_attribute += html_item;
                     
