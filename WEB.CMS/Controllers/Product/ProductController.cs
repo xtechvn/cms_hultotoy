@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Nest;
 using Newtonsoft.Json;
+using Utilities;
 using Utilities.Contants;
 using Utilities.Contants.ProductV2;
 using WEB.Adavigo.CMS.Service;
@@ -303,7 +304,7 @@ namespace WEB.CMS.Controllers
             }
             catch (Exception ex)
             {
-
+                LogHelper.InsertLogTelegram("Summit - ProductController: " + ex.ToString());
             }
             return Ok(new
             {
