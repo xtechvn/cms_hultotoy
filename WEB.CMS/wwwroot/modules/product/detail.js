@@ -1003,7 +1003,7 @@ var product_detail = {
             $('#product-attributes-price tbody tr').each(function (index, index) {
                 var element = $(this)
                 var var_id = element.attr('data-id')
-                if (var_id = undefined) var_id = ''
+                if (var_id == undefined) var_id = ''
                 var price = parseFloat(element.find('.td-price').find('input').val().replaceAll(',', ''))
                 var profit = parseFloat(element.find('.td-profit').find('input').val().replaceAll(',', ''))
                 var amount = parseFloat(element.find('.td-amount').find('input').val().replaceAll(',', ''))
