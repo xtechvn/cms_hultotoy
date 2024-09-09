@@ -118,15 +118,11 @@ var product_detail = {
                 $('.btn-add-attributes').hide()
             }
         });
-        
+
         $('body').on('keyup', '.lastest-attribute-value .attributes-name, .lastest-attribute-value .attributes-name-add', function () {
             var element = $(this)
             element.closest('.relative').find('.error').hide()
-            var text = element.attr('data-id')
-
-           var text= $('.attributes-name-' + text).val();
-            $('.td-attributes-name-' + text).val('');
-            product_detail.ValidateAttributesInput(element)
+         
             var i = 0;
             $('.attributes-name').each(function (index, item) {
                 i = index + 1;
@@ -278,8 +274,20 @@ var product_detail = {
 
         });
         $('body').on('focusout', '.attributes-name', function () {
-            product_detail.RenderRowAttributeTablePrice()
+      
+            var element = $(this)
+           
+            var id_attributes = element.attr('data-id')
 
+            var text = $('.attributes-name-' + id_attributes).val();
+            
+            if ($('.td-attributes-name-' + id_attributes).length > 0) {
+                $('.td-attributes-name-' + id_attributes).html(text);
+            } else {
+                product_detail.RenderRowAttributeTablePrice()
+            }
+            
+          
         });
         $('body').on('click', '.btn-all', function () {
             product_detail.ApplyAllPriceToTable()
