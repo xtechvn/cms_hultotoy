@@ -1652,6 +1652,9 @@ var product_detail = {
                 $(item).each(function (index_attribute, attribute_name) {
                     var rowspan = $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan')
                     $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan', parseFloat(rowspan) - 1)
+                    if((parseFloat(rowspan) - 1 )== 1){
+                        ('.' + attribute_name.trim().replaceAll(' ', '-')).show()
+                    }
                 })
             })
         }
