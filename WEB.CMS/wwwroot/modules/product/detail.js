@@ -751,7 +751,7 @@ var product_detail = {
             $('#discount-groupbuy').hide()
         }
         $('#other-information input[name="preorder_status"][value=' + product.preorder_status + ']').prop('checked', 'checked')
-        $('#condition_of_product').val(product.condition_of_product).trigger('change')
+        $('#condition_of_product .select2').val(product.condition_of_product).trigger('change')
         $('#sku input').val(product.sku)
 
     },
@@ -1093,7 +1093,7 @@ var product_detail = {
         }
 
 
-        model.preorder_status = $('input[name="preorder_status"]') == 1 ? true : false
+        model.preorder_status = $('input[name="preorder_status"]:checked').val() == '1' ? 1 : 0
         model.condition_of_product = $('#condition_of_product').find(':selected').val()
         model.sku = $('#sku input').val()
 
