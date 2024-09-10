@@ -1,4 +1,5 @@
 ﻿let i_attributes = 0;
+let index_attributes = 0;
 $(document).ready(function () {
     if (window.history && window.history.pushState) {
         $(window).on('popstate', function () {
@@ -1154,12 +1155,12 @@ var product_detail = {
     },
     AddProductAttributes: function () {
         var attribute_max_count = 2
-        var i = 0;
+       
         $('.attributes-name').each(function (index, item) {
-            i = index
+           index_attributes ++
         })
         if ($('.product-attributes').length < attribute_max_count) {
-            $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row.replaceAll('{html}', _product_constants.HTML.ProductDetail_Attribute_Row_Item.replaceAll("{index}", i)))
+            $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row.replaceAll('{html}', _product_constants.HTML.ProductDetail_Attribute_Row_Item.replaceAll("{index}", index_attributes)))
             //if ($('.product-attributes').length < attribute_max_count) {
             //    $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row_Add_Attributes)
             //}
