@@ -414,6 +414,7 @@ var product_detail = {
         $('body').on('keyup', '.col-md-6 .input-select-option', function (e) {
             e.preventDefault()
         });
+
         $('body').on('keyup', '#single-product-amount input', function (e) {
             var element = $(this)
             var value = element.val()
@@ -421,6 +422,24 @@ var product_detail = {
             if (element.closest('.price').length > 0) {
                 element.val(_product_function.Comma(element.val()))
             }
+        });
+        $('body').on('keyup', '.discount-percent input', function (e) {
+            $('#discount-groupbuy tbody .discount-groupbuy-row').each(function (index, item) {
+                var element = $(this)
+                var checkbox_value = element.find('input[name="discount-type-' + (index + 1) + '"]:checked').val()
+                var discount = 0
+                switch (checkbox_value) {
+
+                    case '1': {
+                        discount = parseFloat(element.find('.discount-percent').find('input').val().replaceAll(',', ''))
+                        if (discount > 100) {
+                            _msgalert.error("Chiết khấu tối đa 100%")
+                        }
+                    } break
+                }
+            })
+
+
         });
     },
     Detail: function () {
@@ -1046,7 +1065,10 @@ var product_detail = {
                 } break
                 case '1': {
                     discount = parseFloat(element.find('.discount-percent').find('input').val().replaceAll(',', ''))
-
+                    if (discount > 100) {
+                        _msgalert.error("Chiết khấu tối đa 100%")
+                    }
+                    return false
                 } break
             }
             model.discount_group_buy.push({
@@ -1142,7 +1164,7 @@ var product_detail = {
             //    $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row_Add_Attributes)
             //}
         }
-        if ($('.product-attributes').length < attribute_max_count - 1) {
+        if ($('.product-attributes').length < attribute_max_count ) {
             $('.btn-add-attributes').show()
         }
         else {
