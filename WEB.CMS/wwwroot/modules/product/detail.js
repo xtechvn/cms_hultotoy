@@ -1,5 +1,11 @@
 ﻿
 $(document).ready(function () {
+    if (window.history && window.history.pushState) {
+        $(window).on('popstate', function () {
+            window.location.reload()
+        });
+
+    }
     product_detail.Initialization()
 })
 var product_detail = {
@@ -8,7 +14,7 @@ var product_detail = {
         _global_function.RenderBreadcumb(model)
         $('.add-product').addClass('placeholder')
         $('.add-product').addClass('box-placeholder')
-
+        $('#specifications').hide()
         product_detail.HideProductTab()
         product_detail.Detail()
         product_detail.DynamicBind()
