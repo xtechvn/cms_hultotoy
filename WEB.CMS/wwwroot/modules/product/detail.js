@@ -1,4 +1,4 @@
-﻿
+﻿let i_attributes = 0;
 $(document).ready(function () {
     if (window.history && window.history.pushState) {
         $(window).on('popstate', function () {
@@ -57,7 +57,7 @@ var product_detail = {
         $('body').on('click', '.magnific_popup .delete', function () {
             var element = $(this)
             element.closest('.items').remove()
-       
+
         });
         $('body').on('click', '.choose-product-images', function () {
             var element = $(this)
@@ -131,13 +131,19 @@ var product_detail = {
             var element = $(this)
             element.closest('.relative').find('.error').hide()
 
-            var i = 0;
+
             $('.attributes-name').each(function (index, item) {
-                i = index + 1;
+                if (i_attributes == 0) {
+                    i_attributes = index + 1;
+                }
+                else {
+                    i_attributes++;
+                }
             })
+
             element.closest('.lastest-attribute-value').removeClass('lastest-attribute-value')
             if (element.val() != undefined && element.val().trim() != '') {
-                element.closest('.row-attributes-value').append(_product_constants.HTML.ProductDetail_Attribute_Row_Item.replaceAll("{index}", i))
+                element.closest('.row-attributes-value').append(_product_constants.HTML.ProductDetail_Attribute_Row_Item.replaceAll("{index}", i_attributes))
                 $('.row-attributes-value .col-md-6 .attribute-item-delete').show()
                 if (element.closest('.row-attributes-value').find('.col-md-6').length < 2) {
                     element.closest('.row-attributes-value').find('.attribute-item-delete').hide()
@@ -1434,7 +1440,7 @@ var product_detail = {
             if (product_attribute_by_id.data_values.length > 0)
                 product_attributes.push(product_attribute_by_id)
         })
-        if (product_attributes3.length > 0 && product_attributes3[0].id != product_attributes[0].id) {
+        if (product_attributes.length > 0 && product_attributes3.length > 0 && product_attributes3[0].id != product_attributes[0].id) {
             product_attributes.push(product_attributes3[0])
         }
         var combination_array = []
@@ -1536,12 +1542,13 @@ var product_detail = {
             })
 
         }
-        if (product_attributes2.length > 0 && product_attributes2[0].id != product_attributes[0].id) {
+        if (product_attributes.length > 0 && product_attributes2.length > 0 && product_attributes2[0].id != product_attributes[0].id) {
             if (combination_array2.length > 0) {
                 var name = combination_array2[0][0]
 
                 $(combination_array2).each(function (index, item) {
                     var last_element = null;
+                    var dem = 0;
                     $(item).each(function (index_attribute, attribute_name) {
                         var rowspan = $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan')
                         $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan', parseFloat(rowspan) + 1)
@@ -1550,8 +1557,19 @@ var product_detail = {
                             var attr_value = element.attr('data-attribute-1')
                             if (attr_value.trim() == attribute_name.trim()) {
                                 last_element = element
+                                dem++;
                             }
                         })
+                        if (dem == 0) {
+                            $('.tr-main').each(function (index_td, item_td) {
+                                var element = $(this)
+                                var attr_value = element.attr('data-attribute-1')
+                                if (attr_value.trim() == attribute_name.trim()) {
+                                    last_element = element
+                                    dem++;
+                                }
+                            })
+                        }
                     })
                     $(html).insertAfter(last_element)
 
@@ -1572,11 +1590,11 @@ var product_detail = {
             HideAttributes(item, 1)
         })
     },
-    DeleteRowAttributeTablePrice: function (attribute_name,id) {
+    DeleteRowAttributeTablePrice: function (attribute_name, id) {
         var product_attributes2 = []
         $('.product-attributes').each(function (index, item) {
             var element = $(this)
-      
+
             if (index == 0) {
                 var product_attribute_by_id2 = {
                     id: index,
@@ -1592,7 +1610,7 @@ var product_detail = {
                 if (product_attribute_by_id2.data_values.length > 0)
                     product_attributes2.push(product_attribute_by_id2)
             }
-            
+
         })
         var combination_array2 = []
         if (id != 0) {
@@ -1614,13 +1632,12 @@ var product_detail = {
                 })
             })
         }
-   
+
         $('.tr-sub').each(function (index_td, item_td) {
             var element = $(this)
             var attr_value = element.attr('data-attribute-1')
             var attr_value2 = element.attr('data-attribute-2')
-            if (attr_value.trim() == attribute_name.trim() || attr_value2.trim() == attribute_name.trim())
-            {
+            if (attr_value != undefined && attr_value.trim() == attribute_name.trim() || attr_value2 != undefined && attr_value2.trim() == attribute_name.trim()) {
                 element.remove()
             }
         })
@@ -1629,8 +1646,7 @@ var product_detail = {
             var element = $(this)
             var attr_value = element.attr('data-attribute-1')
             var attr_value2 = element.attr('data-attribute-2')
-            if (attr_value.trim() == attribute_name.trim() || attr_value2.trim() == attribute_name.trim())
-            {
+            if (attr_value.trim() == attribute_name.trim() || attr_value2.trim() == attribute_name.trim()) {
                 element.remove()
             }
         })
