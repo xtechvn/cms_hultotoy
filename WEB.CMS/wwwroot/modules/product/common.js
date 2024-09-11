@@ -221,7 +221,7 @@ var _product_constants = {
                                         chỉnh)
                                     </span>
                                     <nw class="edit-attributes-name-nw item "style="display:flex;" >
-                                         <input type="text" class="form-control  attribute-name">
+                                         <input type="text" class="form-control  edit-attribute-name">
                                          <p type="error" style="display:none;"> </p>
                                         <a href="javascript:;" class="text-base edit-attributes-name-confirm"><i class="icofont-checked"></i></a>
                                         <a href="javascript:;" class="text-base edit-attributes-name-cancel" ><i class="icofont-close-squared-alt"></i></a>

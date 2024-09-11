@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Nest;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using Utilities;
 using Utilities.Contants;
 using Utilities.Contants.ProductV2;
@@ -494,6 +495,7 @@ namespace WEB.CMS.Controllers
                 is_success = false
             });
         }
+        
     }
   
 }

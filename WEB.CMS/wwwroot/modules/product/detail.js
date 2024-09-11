@@ -85,9 +85,16 @@ var product_detail = {
             element.closest('.item').find('.count').html(_product_function.Comma(element.val().length))
 
         });
-        $('body').on('click', '.btn-cancel', function () {
+        $('body').on('click', '#product-detail-cancel', function () {
             var element = $(this)
-            product_detail.Cancel()
+            /* product_detail.Cancel()*/
+            var title = 'Xác nhận hủy sản phẩm';
+            var description = 'Bạn có chắc chắn muốn hủy chỉnh sửa/ thêm mới sản phẩm này?';
+
+            _msgconfirm.openDialog(title, description, function () {
+                window.location.href = '/Product'
+
+            });
 
         });
         $('body').on('click', '.btn-hide', function () {
@@ -212,7 +219,7 @@ var product_detail = {
         });
         $('body').on('click', '.edit-attributes-name-confirm', function () {
             var element = $(this)
-            var value = element.closest('h6').find('.attribute-name').val()
+            var value = element.closest('h6').find('.edit-attribute-name').val()
             element.closest('h6').find('b').html(value)
             element.closest('h6').find('b').show()
 
@@ -382,11 +389,11 @@ var product_detail = {
             let title = 'Xác nhận hủy';
             let description = 'Dữ liệu đã chỉnh sửa sẽ không được lưu, bạn có chắc chắn không?';
             _msgconfirm.openDialog(title, description, function () {
-                window.location.href('/product/detail')
+                window.location.href='/product'
 
             });
         });
-        $('body').on('click', '#product-detail-cancel', function () {
+        $('body').on('click', '#product-detail-hide', function () {
             let title = 'Xác nhận ẩn sản phẩm';
             let description = 'Sản phẩm sẽ không còn được hiển thị ngoài trang sản phẩm, bạn có chắc chắn không?';
             _msgconfirm.openDialog(title, description, function () {
@@ -881,8 +888,8 @@ var product_detail = {
         $('#other-information').hide()
     },
     Cancel: function () {
-        let title = 'Xác nhận hủy sản phẩm';
-        let description = 'Bạn có chắc chắn muốn hủy chỉnh sửa/ thêm mới sản phẩm này?';
+        var title = 'Xác nhận hủy sản phẩm';
+        var description = 'Bạn có chắc chắn muốn hủy chỉnh sửa/ thêm mới sản phẩm này?';
 
         _msgconfirm.openDialog(title, description, function () {
             window.location.href = '/Product'
@@ -890,8 +897,8 @@ var product_detail = {
         });
     },
     Hide: function () {
-        let title = 'Xác nhận ẩn sản phẩm';
-        let description = 'Bạn có chắc chắn muốn ẩn sản phẩm này?';
+        var title = 'Xác nhận ẩn sản phẩm';
+        var description = 'Bạn có chắc chắn muốn ẩn sản phẩm này?';
 
         _msgconfirm.openDialog(title, description, function () {
             window.location.href = '/Product'
