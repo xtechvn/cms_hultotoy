@@ -213,7 +213,7 @@ var product_detail = {
         });
         $('body').on('keyup', '.edit-attributes-name-nw input', function () {
             var element = $(this)
-            var value = element.closest('h6').find('.attribute-name').val()
+            var value = element.closest('h6').find('.edit-attribute-name').val()
             element.closest('h6').find('b').html(value)
 
         });
@@ -629,51 +629,51 @@ var product_detail = {
 
         //-- Specification
         var html = ''
+        //
+        //$(_product_constants.VALUES.DefaultSpecificationValue).each(function (index, item) {
+        //    var specification = product.specification.filter(obj => {
+        //        return obj.attribute_id === item.attribute_id
+        //    })
+        //    switch (item.type) {
+        //        case 1: {
+        //            var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_Input
+        //                .replaceAll('{placeholder}', ('Nhập ' + item.name))
+        //                .replaceAll('{id}', item.id)
+        //                .replaceAll('{value}', specification.length > 0 ? specification[0].value : '')
 
-        $(_product_constants.VALUES.DefaultSpecificationValue).each(function (index, item) {
-            var specification = product.specification.filter(obj => {
-                return obj.attribute_id === item.attribute_id
-            })
-            switch (item.type) {
-                case 1: {
-                    var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_Input
-                        .replaceAll('{placeholder}', ('Nhập ' + item.name))
-                        .replaceAll('{id}', item.id)
-                        .replaceAll('{value}', specification.length > 0 ? specification[0].value : '')
-
-                    html += _product_constants.HTML.ProductDetail_Specification_Row_Item
-                        .replaceAll('{type}', item.type)
-                        .replaceAll('{name}', item.name)
-                        .replaceAll('{wrap_input}', html_item)
-
-
-                } break;
-                case 2: {
-                    var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_DateTime
-                        .replaceAll('{placeholder}', ('Nhập ' + item.name))
-                        .replaceAll('{id}', item.id)
-                        .replaceAll('{value}', specification.length > 0 ? specification[0].value : '')
-
-                    html += _product_constants.HTML.ProductDetail_Specification_Row_Item
-                        .replaceAll('{type}', item.type).replaceAll('{name}', item.name).replaceAll('{wrap_input}', html_item)
+        //            html += _product_constants.HTML.ProductDetail_Specification_Row_Item
+        //                .replaceAll('{type}', item.type)
+        //                .replaceAll('{name}', item.name)
+        //                .replaceAll('{wrap_input}', html_item)
 
 
-                } break;
-                default: {
-                    var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions
-                        .replaceAll('{placeholder}', ('Nhập ' + item.name))
-                        .replaceAll('{id}', item.id)
-                        .replaceAll('{value}', specification.length > 0 ? specification[0].value : '')
+        //        } break;
+        //        case 2: {
+        //            var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_DateTime
+        //                .replaceAll('{placeholder}', ('Nhập ' + item.name))
+        //                .replaceAll('{id}', item.id)
+        //                .replaceAll('{value}', specification.length > 0 ? specification[0].value : '')
 
-                    html += _product_constants.HTML.ProductDetail_Specification_Row_Item
-                        .replaceAll('{type}', item.type).replaceAll('{name}', item.name).replaceAll('{wrap_input}', html_item)
-
-
+        //            html += _product_constants.HTML.ProductDetail_Specification_Row_Item
+        //                .replaceAll('{type}', item.type).replaceAll('{name}', item.name).replaceAll('{wrap_input}', html_item)
 
 
-                } break;
-            }
-        })
+        //        } break;
+        //        default: {
+        //            var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions
+        //                .replaceAll('{placeholder}', ('Nhập ' + item.name))
+        //                .replaceAll('{id}', item.id)
+        //                .replaceAll('{value}', specification.length > 0 ? specification[0].value : '')
+
+        //            html += _product_constants.HTML.ProductDetail_Specification_Row_Item
+        //                .replaceAll('{type}', item.type).replaceAll('{name}', item.name).replaceAll('{wrap_input}', html_item)
+
+
+
+
+        //        } break;
+        //    }
+        //})
 
         $('.specifications-box').html(html)
         $('#specifications .datepicker-input').each(function (index, item) {
@@ -1168,6 +1168,7 @@ var product_detail = {
         })
         if ($('.product-attributes').length < attribute_max_count) {
             $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row.replaceAll('{html}', _product_constants.HTML.ProductDetail_Attribute_Row_Item.replaceAll("{index}", index_attributes)))
+            $('.edit-attributes-name-nw .attributes-name').removeClass('attributes-name')
             //if ($('.product-attributes').length < attribute_max_count) {
             //    $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row_Add_Attributes)
             //}
