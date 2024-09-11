@@ -22,9 +22,9 @@ var product_index = {
             product_index.Listing();
         });
         $('body').on('click', '.btn-add-product', function () {
-            window.location.href='/product/detail'
+            window.location.href = '/product/detail'
         });
-       
+
         $('body').on('click', '.product-edit, .name-product', function () {
             var element = $(this)
             var product_id = element.closest('tr').attr('data-id')
@@ -44,18 +44,20 @@ var product_index = {
         $('body').on('click', '.xemthem', function () {
             var element = $(this)
             var data_id = element.attr('data-main-id')
-            var count=0
+            var count = 0
             $('#product_list .sub-product').each(function (index, item) {
-                var element_compare=$(this)
-                if (count >= 5) return false;
-                else if (element_compare.is(':hidden')) {
-                    element_compare.show()
-                    count++
+                var element_compare = $(this)
+                if (element_compare.attr('data-id') == data_id) {
+                    if (count >= parseInt(element.find('nw').attr('data-count'))) return false;
+                    else if (element_compare.is(':hidden')) {
+                        element_compare.show()
+                        count++
+                    }
                 }
             })
             element.find('nw').html('Xem thêm (còn ' + (parseInt(element.find('nw').attr('data-count')) - count) + ' phân loại)')
         });
-       
+
     },
     Listing: function () {
         var request = {
@@ -67,11 +69,11 @@ var product_index = {
         _product_function.POST('/Product/ProductListing', request, function (result) {
             if (result.is_success && result.data && result.data.length > 0) {
                 product_index.RenderSearch(JSON.parse(result.data), JSON.parse(result.subdata))
-               
+
             }
             else {
                 $('#product_list').html('')
-               
+
             }
             $('#product_list').closest('.table-responsive').removeClass('placeholder')
             $('.hanmuc').closest('.flex-lg-nowrap').removeClass('placeholder')
@@ -79,9 +81,9 @@ var product_index = {
         });
 
     },
-    RenderSearch: function (main_products,sub_products) {
+    RenderSearch: function (main_products, sub_products) {
         var html = ''
-      
+
         $(main_products).each(function (index, item) {
             var img_src = item.avatar
             if (!img_src.includes(_product_constants.VALUES.StaticDomain)
@@ -92,14 +94,14 @@ var product_index = {
             var html_item = _product_constants.HTML.Product
             html_item = html_item.replaceAll('{id}', item._id)
             html_item = html_item.replaceAll('{avatar}', img_src)
-            html_item = html_item.replaceAll('{name}', item.name)           
+            html_item = html_item.replaceAll('{name}', item.name)
             html_item = html_item.replaceAll('{attribute}', '')
             var amount_html = '0'
             if (item.amount_max != undefined
                 && item.amount_max != null
                 && item.amount_min != undefined
                 && item.amount_min != null) {
-                amount_html = _product_function.Comma(item.amount_min) + ' - '+_product_function.Comma(item.amount_max)
+                amount_html = _product_function.Comma(item.amount_min) + ' - ' + _product_function.Comma(item.amount_max)
             }
             else if (item.amount != undefined
                 && item.amount != null && item.amount > 0) {
@@ -117,8 +119,8 @@ var product_index = {
                 return obj.parent_product_id.trim() == item._id
             })
             if (variation && variation.length > 0) {
-                var amount=[]
-                var quanity_stock=[]
+                var amount = []
+                var quanity_stock = []
                 $(variation).each(function (index, sub_item) {
                     var html_sub_item = _product_constants.HTML.SubProduct
                         .replaceAll('{id}', item._id)
@@ -128,13 +130,13 @@ var product_index = {
                         .replaceAll('{amount}', _product_function.Comma(sub_item.amount) + ' đ')
                         .replaceAll('{stock}', _product_function.Comma(sub_item.quanity_of_stock))
                         .replaceAll('{order_count}', '')
-                        .replaceAll('{display}', index>1 ? 'display:none;':'')
+                        .replaceAll('{display}', index > 1 ? 'display:none;' : '')
                     var html_sub_attr = ''
 
                     //var result = jsObjects.filter(obj => {
                     //    return obj.b === 6
                     //})
-                    var sub_attr_img=[]
+                    var sub_attr_img = []
                     $(sub_item.variation_attributes).each(function (index_variation_attributes, variation_attributes_item) {
                         var attribute = item.attributes.filter(obj => {
                             return obj._id == variation_attributes_item.level
@@ -152,9 +154,9 @@ var product_index = {
                         if (index_variation_attributes < ($(sub_item.variation_attributes).length - 1)) {
                             html_sub_attr += ', '
                         }
-                        
+
                     })
-                    var img_src_sub =''
+                    var img_src_sub = ''
                     if (sub_attr_img.length > 0) {
                         img_src_sub = sub_attr_img[0]
                         if (!img_src_sub.includes(_product_constants.VALUES.StaticDomain)
@@ -163,7 +165,7 @@ var product_index = {
                             img_src_sub = _product_constants.VALUES.StaticDomain + sub_attr_img[0]
                     }
 
-                    html_sub_item = html_sub_item.replaceAll('{attribute}','Phân loại hàng: '+ html_sub_attr)
+                    html_sub_item = html_sub_item.replaceAll('{attribute}', 'Phân loại hàng: ' + html_sub_attr)
                     html_sub_item = html_sub_item.replaceAll('{avatar}', sub_attr_img.length > 0 ? img_src_sub : img_src)
                     html_variations += html_sub_item
                     amount.push(sub_item.amount)
@@ -182,14 +184,14 @@ var product_index = {
                 html_item = html_item.replaceAll('{amount}', _product_function.Comma(min) + ' đ - ' + _product_function.Comma(max) + ' đ')
                 html_item = html_item.replaceAll('{stock}', _product_function.Comma(sum_stock))
 
-                
+
             }
             html += html_item
             html += html_variations
 
         });
         $('#product_list').html(html)
-        
+
     }
-   
+
 }

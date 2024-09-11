@@ -144,8 +144,8 @@ var _product_constants = {
                         </tr>`,
         SubProductViewMore: `<tr class="sub-product" data-main-id="{main_id}">
                                     <td colspan="6" class="text-center">
-                                        <a href="javascript:;" class="xemthem">
-                                            <span><nw data-count="{count_item}">Xem thêm (còn {count} phân loại)</nw>
+                                        <a href="javascript:;" data-main-id="{main_id}" class="xemthem">
+                                            <span><nw  data-count="{count_item}">Xem thêm (còn {count} phân loại)</nw>
                                                 <i class="icofont-simple-down"></i>
                                             </span>
                                         </a>
