@@ -82,7 +82,7 @@
                                                 </div>
                                                 <div class="info">
                                                     <h6 class="bold" style="white-space: break-spaces;">@item2.name</h6>
-                                                    <div class="cat"> Phân loại: @(string.Join(",", item2.variation_detail.Select(s => s.name).ToList()))</div>
+                                                    <div class="cat"> Phân loại: @(item2.variation_detail != null ? string.Join(",", item2.variation_detail.Select(s => s.name).ToList()):"")</div>
                                                 </div>
                                             </div>
                                         }
