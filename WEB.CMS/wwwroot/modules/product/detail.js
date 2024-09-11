@@ -707,7 +707,7 @@ var product_detail = {
                 var attribute = product.attributes.filter(obj => {
                     return obj._id == ('' + (index + 1))
                 })
-                element.find('.attribute-name').val(attribute[0].name)
+                element.find('.edit-attribute-name').val(attribute[0].name)
                 element.find('.edit-attributes-name-confirm').trigger('click')
                 //element.find('.row-attributes-value').html('')
                 var attribute_detail = product.attributes_detail.filter(obj => {
@@ -1168,7 +1168,6 @@ var product_detail = {
         })
         if ($('.product-attributes').length < attribute_max_count) {
             $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row.replaceAll('{html}', _product_constants.HTML.ProductDetail_Attribute_Row_Item.replaceAll("{index}", index_attributes)))
-            $('.edit-attributes-name-nw .attributes-name').removeClass('attributes-name')
             //if ($('.product-attributes').length < attribute_max_count) {
             //    $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row_Add_Attributes)
             //}
