@@ -77,8 +77,8 @@
                                         foreach (var item2 in item.ListProduct)
                                         {
                                             <div class="item-order mb-3" style="display: flex; flex-direction: row; flex-wrap: nowrap;">
-                                                <div class="img mr-2" style="width:80px;">
-                                                    <img src="@(item2.avatar.Contains("https") ? item2.avatar:ViewBag.domainImg +item2.avatar)" style="width:80px;" alt="">
+                                                <div class="img mr-2" style="min-width:80px;max-width:80px;">
+                                                    <img src="@(item2.avatar.Contains("https") ? item2.avatar:ViewBag.domainImg +item2.avatar)" style="min-width: 80px; max-width: 80px;" alt="">
                                                 </div>
                                                 <div class="info">
                                                     <h6 class="bold" style="white-space: break-spaces;">@item2.name</h6>
