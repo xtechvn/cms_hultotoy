@@ -1510,19 +1510,23 @@ var product_detail = {
                     if (product_attributes2.length > 0 && product_attributes2[0].id != product_attributes[0].id) {
                         if (row_span > 1) {
                             html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
-                                .replaceAll('{i}', index_attribute)
+                                .replaceAll('{i}', 1)
+                                 .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-'))
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + 1 + '"')
                                 .replaceAll('{data-id}', data_id)
                         } else {
 
                             html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
-                                .replaceAll('{i}', index_attribute)
+                                .replaceAll('{i}', 1)
                                 .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-'))
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + 1 + '"')
                                 .replaceAll('{data-id}', data_id)
                         }
+
+                        html_attribute_attr += ' data-attribute-1="{data_attribute}" data-attribute-' + (index_attribute + 2) + '="' + attribute_name.trim() + '" '
+                        html_td_attribute += html_item;
                     } else {
                         if (row_span > 1) {
                             html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
@@ -1535,15 +1539,17 @@ var product_detail = {
 
                             html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                                 .replaceAll('{i}', index_attribute)
+                                .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-'))
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + row_span + '"')
                                 .replaceAll('{data-id}', data_id)
                         }
+
+                        html_attribute_attr += 'data-attribute-' + (index_attribute + 1) + '="' + attribute_name.trim() + '" '
+                        html_td_attribute += html_item;
                     }
 
 
-                    html_attribute_attr += 'data-attribute-' + (index_attribute + 1) + '="' + attribute_name.trim() + '" '
-                    html_td_attribute += html_item;
 
                 })
 
@@ -1572,6 +1578,7 @@ var product_detail = {
                 $(combination_array2).each(function (index, item) {
                     var last_element = null;
                     var dem = 0;
+                    var htmlrow=''
                     $(item).each(function (index_attribute, attribute_name) {
                         var rowspan = $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan')
                         $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan', parseFloat(rowspan) + 1)
@@ -1579,7 +1586,9 @@ var product_detail = {
                             var element = $(this)
                             var attr_value = element.attr('data-attribute-1')
                             if (attr_value.trim() == attribute_name.trim()) {
-                                last_element = element
+                                last_element = element;
+                                htmlrow = html;
+                                htmlrow = htmlrow.replaceAll('{data_attribute}', attribute_name.trim())
                                 dem++;
                             }
                         })
@@ -1589,12 +1598,13 @@ var product_detail = {
                                 var attr_value = element.attr('data-attribute-1')
                                 if (attr_value.trim() == attribute_name.trim()) {
                                     last_element = element
+                                    htmlrow = html;
                                     dem++;
                                 }
                             })
                         }
                     })
-                    $(html).insertAfter(last_element)
+                    $(htmlrow).insertAfter(last_element)
 
                 })
             }
