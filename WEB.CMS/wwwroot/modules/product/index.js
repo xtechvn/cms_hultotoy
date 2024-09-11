@@ -126,7 +126,7 @@ var product_index = {
                         .replaceAll('{id}', item._id)
                         .replaceAll('{main_id}', item.parent_product_id)
                         .replaceAll('{name}', sub_item.name)
-                        .replaceAll('{sku}', sub_item.sku)
+                        .replaceAll('{sku}', sub_item.sku == null ? "" : sub_item.sku)
                         .replaceAll('{amount}', _product_function.Comma(sub_item.amount) + ' đ')
                         .replaceAll('{stock}', _product_function.Comma(sub_item.quanity_of_stock))
                         .replaceAll('{order_count}', '')
@@ -137,22 +137,23 @@ var product_index = {
                     //    return obj.b === 6
                     //})
                     var sub_attr_img = []
-                    $(sub_item.variation_attributes).each(function (index_variation_attributes, variation_attributes_item) {
-                        var attribute = item.attributes.filter(obj => {
-                            return obj._id == variation_attributes_item.level
+                    $(sub_item.variation_detail).each(function (index_variation_attributes, variation_attributes_item) {
+                        var attribute = sub_item.attributes.filter(obj => {
+                            return obj._id == variation_attributes_item.id
                         })
-                        var attribute_detail = item.attributes_detail.filter(obj => {
-                            return (obj.attribute_id == variation_attributes_item.level && obj.name == variation_attributes_item.name)
+                        var attribute_detail = sub_item.attributes_detail.filter(obj => {
+                            return (obj.attribute_id == variation_attributes_item.id && obj.name == variation_attributes_item.name)
                         })
-                        if (attribute[0].img != null && attribute[0].img != undefined && attribute[0].img.trim() != '') {
+                        if (attribute != null && attribute.length > 0 && attribute[0].img != null && attribute[0].img != undefined && attribute[0].img.trim() != '') {
                             sub_attr_img.push(attribute[0].img)
                         }
-                        if (attribute_detail[0].img != null && attribute_detail[0].img != undefined && attribute_detail[0].img.trim() != '') {
+                        if (attribute_detail != null && attribute_detail.length > 0 && attribute_detail[0].img != null && attribute_detail[0].img != undefined && attribute_detail[0].img.trim() != '') {
                             sub_attr_img.push(attribute_detail[0].img)
                         }
+                        if (attribute != null && attribute.length > 0 && attribute_detail != null && attribute_detail.length > 0)
                         html_sub_attr += '' + attribute[0].name + ': ' + attribute_detail[0].name
-                        if (index_variation_attributes < ($(sub_item.variation_attributes).length - 1)) {
-                            html_sub_attr += ', '
+                        if (index_variation_attributes < ($(sub_item.attributes_detail).length - 1)) {
+                            html_sub_attr += '<br /> '
                         }
 
                     })
@@ -165,7 +166,8 @@ var product_index = {
                             img_src_sub = _product_constants.VALUES.StaticDomain + sub_attr_img[0]
                     }
 
-                    html_sub_item = html_sub_item.replaceAll('{attribute}', 'Phân loại hàng: ' + html_sub_attr)
+                    html_sub_item = html_sub_item.replaceAll('{attribute}', 'Phân loại hàng:')
+                    html_sub_item = html_sub_item.replaceAll('{attribute_detail}', html_sub_attr)
                     html_sub_item = html_sub_item.replaceAll('{avatar}', sub_attr_img.length > 0 ? img_src_sub : img_src)
                     html_variations += html_sub_item
                     amount.push(sub_item.amount)

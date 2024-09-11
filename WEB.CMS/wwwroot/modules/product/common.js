@@ -133,6 +133,7 @@ var _product_constants = {
                                     </div>
                                     <div class="info">
                                         <h3 class="name-product"> {attribute}</h3>
+                                        <div class="cat">{attribute_detail}</div>
                                         <div class="cat">{sku}</div>
                                     </div>
                                 </div>
