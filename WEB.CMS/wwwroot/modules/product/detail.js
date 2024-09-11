@@ -1253,12 +1253,28 @@ var product_detail = {
     RenderRowAttributeTablePrice: function () {
         var html = ''
         var product_attributes = []
+        var product_attributes3 = []
         var attributes_name = []
         $('.product-attributes').each(function (index, item) {
             var element = $(this)
             var product_attribute_by_id = {
                 id: index,
                 data_values: [],
+            }
+            if (index == 1) {
+                element.find('.attributes-name').each(function (index, item) {
+                    var element_input = $(this)
+                    var product_attribute_by_id2 = {
+                        id: index,
+                        data_values: [],
+                    }
+                    if (element_input != undefined && element_input.val() != undefined && element_input.val().trim() != '') {
+                        product_attribute_by_id2.data_values.push(element_input.val())
+                        if (product_attribute_by_id2.data_values.length > 0)
+                            product_attributes3.push(product_attribute_by_id2)
+                    }
+
+                })
             }
 
             element.find('.attributes-name').each(function (index, item) {
@@ -1276,6 +1292,7 @@ var product_detail = {
                 }
 
             })
+            if (product_attribute_by_id.data_values.length > 0)
             product_attributes.push(product_attribute_by_id)
         })
         var combination_array = []
@@ -1311,7 +1328,7 @@ var product_detail = {
                     if (row_span < 2) {
                         html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                             .replaceAll('{i}', index_attribute)
-                            .replaceAll('{class-name}', '')
+                            .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-'))
                             .replaceAll('{name}', attribute_name.trim())
                             .replaceAll('{row_span}', 'rowspan="' + row_span + '"')
                             .replaceAll('{data-id}', data_id)
@@ -1352,7 +1369,9 @@ var product_detail = {
         for (var i = 1; i <= $('.product-attributes').length; i++) {
             $('#product-attributes-price .th-attribute-' + i).show()
             $('#product-attributes-price .th-attribute-' + i).html($($('.product-attributes')[(i - 1)]).find('h6').find('b').text())
-
+            if (product_attributes3.length == 0) {
+                $('#product-attributes-price .th-attribute-2').hide()
+            }
         }
         var list_filter = GetAttributeList(1)
         $(list_filter).each(function (index, item) {
@@ -1470,6 +1489,10 @@ var product_detail = {
             if (product_attribute_by_id.data_values.length > 0)
                 product_attributes.push(product_attribute_by_id)
         })
+        if (product_attributes3.length > 0 && product_attributes3[0].data_values.length == 1) {
+            product_detail.RenderRowAttributeTablePrice()
+            return true;
+        }
         if (product_attributes.length > 0 && product_attributes3.length > 0 && product_attributes3[0].id != product_attributes[0].id) {
             product_attributes.push(product_attributes3[0])
         }
@@ -1623,7 +1646,9 @@ var product_detail = {
         for (var i = 1; i <= $('.product-attributes').length; i++) {
             $('#product-attributes-price .th-attribute-' + i).show()
             $('#product-attributes-price .th-attribute-' + i).html($($('.product-attributes')[(i - 1)]).find('h6').find('b').text())
-
+            if (product_attributes3.length == 0 ) {
+                $('#product-attributes-price .th-attribute-2').hide()
+            }
         }
         var list_filter = GetAttributeList(1)
         $(list_filter).each(function (index, item) {
