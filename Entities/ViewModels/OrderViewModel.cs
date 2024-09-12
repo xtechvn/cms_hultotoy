@@ -218,6 +218,10 @@ namespace Entities.ViewModels
         public long Discount { get; set; }
         public long Profit { get; set; }
         public long Refund { get; set; }
+        public string Address { get; set; }
+        public string WardName { get; set; }
+        public string DistrictName { get; set; }
+        public string ProvinceName { get; set; }
     }
     public class OrderServiceViewModel
     {

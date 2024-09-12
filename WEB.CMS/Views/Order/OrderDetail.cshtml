@@ -39,7 +39,9 @@
                                     </div>
                                     <div class="content">
                                         <div class="name">@(client.ClientName)</div>
-                                        @client.Phone - @client.Email
+                                        <div>@client.Phone - @client.Email</div>
+                                        <div>@(ViewBag.Address != ""?"Địa chỉ giao hàng: "+ ViewBag.Address:"")</div>
+                                        
                                     </div>
                                 </div>
                             </div>

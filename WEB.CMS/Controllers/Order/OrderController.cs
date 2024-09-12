@@ -140,6 +140,8 @@ namespace WEB.CMS.Controllers
                             ViewBag.createTime = Convert.ToDateTime(dataOrder.StartDate).ToString("dd/MM/yyyy HH:mm:ss");
                         if (dataOrder.EndDate != null)
                             ViewBag.ExpriryDate = Convert.ToDateTime(dataOrder.EndDate).ToString("dd/MM/yyyy HH:mm:ss");
+                        var Address = dataOrder.Address + "," + dataOrder.WardName + "," + dataOrder.DistrictName + "," + dataOrder.ProvinceName;
+                        ViewBag.Address = Address.TrimStart(',').TrimEnd(',');
                         if (dataOrder.ClientId != null)
                         {
                             var UserCreateclient = await _clientRepository.GetClientDetailByClientId((long)dataOrder.ClientId);

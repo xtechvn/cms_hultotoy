@@ -132,7 +132,7 @@ namespace Caching.Elasticsearch
             {
                 string endpoint = string.Empty;
                 string url_es = configuration["DataBaseConfig:Elastic:Host"];
-                string Client = configuration["Elastic:Index:Client"];
+                string Client = configuration["DataBaseConfig:Elastic:Index:Client"];
                 var workingDirectory = Environment.CurrentDirectory;
                 //  var currentDirectory = Directory.GetParent(workingDirectory);
                 var query = workingDirectory + @"\QueryEs\" + file_name;
