@@ -232,24 +232,8 @@ namespace WEB.CMS.Controllers.Funding
                     model.AttatchmentFile = "/" + _UploadFolder + "/" + _FileName;
                 }
                 //model.BillNo = await identifierServiceRepository.buildContractPay();
-                var client = new HttpClient();
-                var apiPrefix = ReadFile.LoadConfig().API_URL + ReadFile.LoadConfig().API_GET_BILL_NO;
-                var key_token_api = ReadFile.LoadConfig().KEY_TOKEN_API_MANUAL;
-                HttpClient httpClient = new HttpClient();
-                JObject jsonObject = new JObject(
-                   new JProperty("code_type", ((int)GET_CODE_MODULE.PHIEU_THU).ToString())
-                );
-                var j_param = new Dictionary<string, object>
-                 {
-                     { "key",jsonObject}
-                 };
-                var data_product = JsonConvert.SerializeObject(j_param);
-                var token = CommonHelper.Encode(data_product, key_token_api);
-                var content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("token", token) });
-                var response = await httpClient.PostAsync(apiPrefix, content);
-                var resultAPI = await response.Content.ReadAsStringAsync();
-                var output = JsonConvert.DeserializeObject<OutputAPI>(resultAPI);
-                model.BillNo = output.code;
+               
+                model.BillNo = await identifierServiceRepository.buildContractPay();
                 var contractPayId = _contractPayRepository.CreateContractPay(model);
                 if (contractPayId == -2)
                     return Ok(new

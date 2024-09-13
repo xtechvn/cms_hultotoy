@@ -358,39 +358,7 @@ namespace Repositories.Repositories
                 contractPayViewModel.ContractPayDetail = listOrderByPayId;
             }
 
-            if (contractPayViewModel.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_KY_QUY)
-            {
-                var listDepositHistoryByPayId = _contractPayDAL.GetDetailContractPayById(contractPayId,
-                    StoreProcedureConstant.sp_GetListDepositHistoryByPayId).ToList<ContractPayViewModel>();
-                contractPayViewModel.ContractPayDetail = listDepositHistoryByPayId;
-            }
-
-            if (contractPayViewModel.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_HOA_HONG_NCC ||
-                contractPayViewModel.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_NCC_HOAN_TRA)
-            {
-                var listSubServiceByPayId = _contractPayDAL.GetDetailContractPayById(contractPayId,
-                    StoreProcedureConstant.SP_GetListSubServiceByPayId).ToList<ContractPayViewModel>();
-                var listServiceByPayId = _contractPayDAL.GetDetailContractPayById(contractPayId,
-                   StoreProcedureConstant.SP_GetListServiceByPayId).ToList<ContractPayViewModel>();
-                foreach (var item in listServiceByPayId)
-                {
-                    item.ServiceIdParent = item.ServiceId;
-                    listSubServiceByPayId.Add(item);
-                }
-                listSubServiceByPayId.AsParallel().ForAll(item =>
-                {
-                    if (item.ServiceType == (int)SubServiceType.Tour)
-                        item.ServiceType = (int)ServiceType.Tour;
-                    if (item.ServiceType == (int)SubServiceType.PRODUCT_FLY_TICKET)
-                        item.ServiceType = (int)ServiceType.PRODUCT_FLY_TICKET;
-                    if (item.ServiceType == (int)SubServiceType.BOOK_HOTEL_ROOM_VIN)
-                        item.ServiceType = (int)ServiceType.BOOK_HOTEL_ROOM_VIN;
-                    if (item.ServiceType == (int)SubServiceType.Other)
-                        item.ServiceType = (int)ServiceType.Other;
-                });
-                contractPayViewModel.ContractPayDetail = listSubServiceByPayId;
-            }
-
+            
             return contractPayViewModel;
         }
 

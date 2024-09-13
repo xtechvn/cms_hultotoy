@@ -26,11 +26,10 @@ else
                     <th style="width: 140px;">Loại nghiệp vụ</th>
                     <th style="width: 100px;">Hình thức</th>
                     <th style="width: 100px;">Khách hàng</th>
-                    <th style="width: 100px;">Nhà cung cấp</th>
-                    <th style="width: 100px;">Nhân viên</th>
+                
                     <th style="width: 100px;" class="text-right">Số tiền</th>
                     <th style="width: 200px;">Nội dung</th>
-                    <th style="width: 120px;">Đơn hàng/Nạp quỹ/Dịch vụ</th>
+                    <th style="width: 120px;">Đơn hàng</th>
                     <th style="width: 140px;">Ngày tạo</th>
                     <th style="width: 140px;">Người tạo</th>
                 </tr>
@@ -54,12 +53,7 @@ else
                             <td class="text-break">
                                 <a href="/CustomerManager/Detail?id=@item.ClientId"><span class="blue"> @item.ClientName</span></a>
                             </td>
-                            <td class="text-break">
-                                <a href="/Supplier/Detail?id=@item.SupplierId"><span class="blue"> @item.SupplierName</span></a>
-                            </td>
-                            <td class="text-break">
-                                @item.EmployeeName
-                            </td>
+                    
                             <td class="text-right">
                                 @if (item.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_DON_HANG)
                                 {
@@ -73,19 +67,7 @@ else
                                     }
                                     <div>@item.Amount.ToString("N0")</div>
                                 }
-                                @if (item.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_HOA_HONG_NCC
-                               || item.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_NCC_HOAN_TRA)
-                                {
-                                    <div>@item.Amount.ToString("N0")</div>
-                                }
-                                @if (item.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_KHAC)
-                                {
-                                    <div>@item.Amount.ToString("N0")</div>
-                                }
-                                @if (item.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_KY_QUY)
-                                {
-                                    <div>@item.Amount.ToString("N0")</div>
-                                }
+                               
                             </td>
                             <td class=" text-break">@item.Note</td>
                             <td class=" text-break">
@@ -94,7 +76,7 @@ else
                                     var counterContent = 1;
                                     foreach (var dataNo in item.DataContent)
                                     {
-                                        <a class="blue" href="/Order/Orderdetails?id=@dataNo.DataId">
+                                        <a class="blue" href="/Order/@dataNo.DataId">
                                             @dataNo.DataNo
                                         </a>
                                         @if (counterContent < item.DataContent.Count)
@@ -104,57 +86,7 @@ else
                                         counterContent += 1;
                                     }
                                 }
-                                @if (item.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_KY_QUY && item.DataContent != null)
-                                {
-                                    var counterContent = 1;
-                                    foreach (var dataNo in item.DataContent)
-                                    {
-                                        <a class="blue" href="/Funding/Detail?depositHistotyId=@dataNo.DataId">
-                                            @dataNo.DataNo
-                                        </a>
-                                        @if (counterContent < item.DataContent.Count)
-                                        {
-                                            <span>,</span>
-                                        }
-                                        counterContent += 1;
-                                    }
-                                }
-                                @if ((item.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_HOA_HONG_NCC || item.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_NCC_HOAN_TRA) && item.DataContent != null)
-                                {
-                                    var counterContent = 1;
-                                    foreach (var dataNo in item.DataContent)
-                                    {
-                                        @if (dataNo.ServiceType == (int)ServiceType.PRODUCT_FLY_TICKET)
-                                        {
-                                            <a class="blue" href="/SetService/fly/detail/@dataNo.DataIdFly">
-                                                @dataNo.DataNo
-                                            </a>
-                                        }
-                                        @if (dataNo.ServiceType == (int)ServiceType.BOOK_HOTEL_ROOM_VIN)
-                                        {
-                                            <a class="blue" href="/SetService/VerifyHotelServiceDetai/@dataNo.DataId">
-                                                @dataNo.DataNo
-                                            </a>
-                                        }
-                                        @if (dataNo.ServiceType == (int)ServiceType.Tour)
-                                        {
-                                            <a class="blue" href="/SetService/Tour/Detail/@dataNo.DataId">
-                                                @dataNo.DataNo
-                                            </a>
-                                        }
-                                        @if (dataNo.ServiceType == (int)ServiceType.Other)
-                                        {
-                                            <a class="blue" href="/SetService/Others/Detail/@dataNo.DataId">
-                                                @dataNo.DataNo
-                                            </a>
-                                        }
-                                        @if (counterContent < item.DataContent.Count)
-                                        {
-                                            <span>,</span>
-                                        }
-                                        counterContent += 1;
-                                    }
-                                }
+                               
                             </td>
                             @if (item.CreatedDate != null)
                             {

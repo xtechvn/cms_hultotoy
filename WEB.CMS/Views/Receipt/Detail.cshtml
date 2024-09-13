@@ -23,7 +23,7 @@
                 <tbody>
                     <tr>
                         <td colspan="3">
-                            <strong>Mã  phiếu thu: @Model.BillNo</strong>
+                            <strong style="color:black;">Mã  phiếu thu: @Model.BillNo</strong>
                         </td>
                     </tr>
                     <tr>
@@ -33,8 +33,7 @@
                                 <div class="col-7 mb10">: @Model.TypeStr</div>
                                 <div class="col-5 mb10">Hình thức</div>
                                 <div class="col-7 mb10">: @Model.PayTypeStr</div>
-                                @if (Model.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_DON_HANG
-                                || Model.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_KY_QUY)
+                                @if (Model.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_DON_HANG)
                                 {
                                     <div class="col-5 mb10">Khách hàng</div>
                                     <div class="col-7 mb10">
@@ -45,38 +44,7 @@
                                         </a>
                                     </div>
                                 }
-                                @if (Model.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_HOA_HONG_NCC
-                                || Model.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_NCC_HOAN_TRA)
-                                {
-                                    <div class="col-5 mb10">Nhà cung cấp</div>
-                                    <div class="col-7 mb10">
-                                        : <a href="/Supplier/Detail?id=@Model.SupplierId"><span class="blue"> @Model.SupplierName</span></a>
-                                    </div>
-                                }
-                                @if (Model.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_KHAC)
-                                {
-                                    @if (Model.ObjectType == (int)DepositHistoryConstant.CONTRACT_PAY_OBJECT_TYPE.KHACH_HANG)
-                                    {
-                                        <div class="col-5 mb10">Khách hàng</div>
-                                        <div class="col-7 mb10">
-                                            : <a href="/CustomerManager/Detail?id=@Model.ClientId"><span class="blue"> @Model.ClientName</span></a>
-                                        </div>
-                                    }
-                                    @if (Model.ObjectType == (int)DepositHistoryConstant.CONTRACT_PAY_OBJECT_TYPE.NHA_CUNG_CAP)
-                                    {
-                                        <div class="col-5 mb10">Nhà cung cấp</div>
-                                        <div class="col-7 mb10">
-                                            : <a href="/Supplier/Detail?id=@Model.SupplierId"><span class="blue"> @Model.SupplierName</span></a>
-                                        </div>
-                                    }
-                                    @if (Model.ObjectType == (int)DepositHistoryConstant.CONTRACT_PAY_OBJECT_TYPE.NHAN_VIEN)
-                                    {
-                                        <div class="col-5 mb10">Nhân viên</div>
-                                        <div class="col-7 mb10">
-                                            : @Model.EmployeeName
-                                        </div>
-                                    }
-                                }
+                               
                                 <div class="col-5 mb10">Số tiền</div>
                                 @if (Model.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_DON_HANG)
                                 {
@@ -97,17 +65,7 @@
                                         }
                                     </div>
                                 }
-                                @if (Model.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_KY_QUY ||
-                                Model.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_KHAC)
-                                {
-                                    <div class="col-7 mb10">:@Model.Amount.ToString("N0")</div>
-                                }
-                                @if (Model.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_HOA_HONG_NCC
-                                || Model.Type == (int)DepositHistoryConstant.CONTRACT_PAY_TYPE.THU_TIEN_NCC_HOAN_TRA)
-                                {
-                                    <div class="col-7 mb10">: @Model.Amount.ToString("N0")</div>
-
-                                }
+                              
                                 <div class="col-5 mb10">Tài khoản ngân hàng nhận</div>
                                 @if (!string.IsNullOrEmpty(Model.BankName))
                                 {
@@ -152,7 +110,7 @@
                                                     <tr>
                                                         <th>STT</th>
                                                         <th>Mã đơn hàng</th>
-                                                        <th>Ngày bắt đầu-Ngày kết thúc</th>
+                                             
                                                         <th>Trạng thái</th>
                                                         <th>Nhân viên chính</th>
                                                         <th>Số tiền</th>
@@ -170,7 +128,7 @@
                                                                     @item.OrderNo
                                                                 </a>
                                                             </td>
-                                                            <td>@item.StartDate.ToString("dd/MM/yyyy") - @item.EndDate.ToString("dd/MM/yyyy")</td>
+                                                          
                                                             <td>@item.StatusName</td>
                                                             <td>@item.SalerName</td>
                                                             <td>@item.AmountOrder.ToString("N0")</td>
@@ -178,7 +136,7 @@
                                                         </tr>
                                                     }
                                                     <tr>
-                                                        <td class="text-right" colspan="6">
+                                                        <td class="text-right" colspan="5">
                                                             Tổng
                                                         </td>
                                                         <td>@Model.ContractPayDetail.Sum(n => n.AmountPayDetail).ToString("N0")</td>
