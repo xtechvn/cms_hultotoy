@@ -329,6 +329,7 @@ var product_detail = {
             var name = element.attr('data-name')
 
             var text = $('.attributes-name-' + id_attributes).val();
+            name == undefined ? name = text : name;
             if ($('.td-attributes-name-' + id_attributes).length > 0) {
                 $('.tr-main').each(function (index_td, item_td) {
                     var element = $(this)
