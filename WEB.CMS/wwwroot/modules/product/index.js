@@ -55,7 +55,13 @@ var product_index = {
                     }
                 }
             })
-            element.find('nw').html('Xem thêm (còn ' + (parseInt(element.find('nw').attr('data-count')) - count) + ' phân loại)')
+            if (parseInt(element.find('nw').attr('data-count')) - count > 0) {
+                element.find('nw').html('Xem thêm (còn ' + (parseInt(element.find('nw').attr('data-count')) - count) + ' phân loại)')
+            }
+            else {
+                element.find('nw').html('')
+                element.find('.icofont-simple-down').hide()
+            }
         });
 
     },
