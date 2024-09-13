@@ -17,6 +17,7 @@ namespace Entities.ViewModels.OrderDetail
         public long Quantity { get; set; }
         public long TotalAmount { get; set; }
         public long TotalPrice { get; set; }
+        public long TotalProfit { get; set; }
         public string Link { get; set; }
     }
 }
