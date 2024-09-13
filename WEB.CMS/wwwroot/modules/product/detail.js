@@ -113,6 +113,12 @@ var product_detail = {
                 $('#product-attributes-all-price').closest('.item-edit').hide()
 
             }
+            if ($('.product-attributes').length < 2) {
+                $('.btn-add-attributes').show()
+
+            } else {
+                $('.btn-add-attributes').hide()
+            }
             product_detail.RenderRowAttributeTablePrice()
         });
         $('body').on('click', '.btn-add-attributes', function () {
