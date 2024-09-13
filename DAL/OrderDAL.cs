@@ -248,5 +248,21 @@ namespace DAL
                 return -2;
             }
         }
+        public Order GetByOrderNo(string orderNo)
+        {
+            try
+            {
+                using (var _DbContext = new EntityDataContext(_connection))
+                {
+
+                    return _DbContext.Orders.AsNoTracking().FirstOrDefault(s => s.OrderNo == orderNo);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByOrderNo - OrderDal: " + ex);
+                return null;
+            }
+        }
     }
 }

@@ -12,10 +12,12 @@ using Repositories.IRepositories;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Utilities;
+using Utilities.Contants;
 
 namespace Repositories.Repositories
 {
@@ -26,7 +28,7 @@ namespace Repositories.Repositories
         private readonly AllCodeDAL allCodeDAL;
         private readonly UserDAL userDAL;
         private readonly OrderDetailDAL _orderDetailDAL;
-
+        private readonly ContractPayDAL contractPayDAL;
 
 
 
@@ -37,6 +39,7 @@ namespace Repositories.Repositories
             userDAL = new UserDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
             _clientDAL = new ClientDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
             _orderDetailDAL = new OrderDetailDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
+            contractPayDAL = new ContractPayDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
 
 
         }
@@ -123,5 +126,109 @@ namespace Repositories.Repositories
             }
             return null;
         }
+        public async Task<Order> GetOrderByOrderNo(string orderNo)
+        {
+            try
+            {
+                return _OrderDal.GetByOrderNo(orderNo);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetOrderByOrderNo - OrderRepository: " + ex);
+            }
+            return null;
+        }
+        public async Task<List<OrderViewModel>>  GetByClientId(long clientId, int payId = 0, int status = 0)
+        {
+            try
+            {
+                var listOrder = new List<OrderViewModel>();
+                var listOrderOutput = new List<OrderViewModel>();
+                var dt = _OrderDal.GetListOrderByClientId(clientId, ProcedureConstants.SP_GetDetailOrderByClientId, status);
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    listOrder = dt.ToList<OrderViewModel>();
+                    var listContractPayDetail = contractPayDAL.GetByContractDataIds(listOrder.Select(n => Convert.ToInt64(n.OrderId)).ToList());
+                    foreach (var item in listOrder)
+                    {
+                        OrderViewModel orderViewModel = new OrderViewModel();
+                        var detail = listContractPayDetail.Where(n => n.DataId != null
+                                && n.DataId.Value == Convert.ToInt64(item.OrderId) && n.PayId == payId).FirstOrDefault();
+                        var TotalDisarmed = listContractPayDetail.Where(n => n.DataId != null
+                                && n.DataId.Value == Convert.ToInt64(item.OrderId)).ToList().Sum(n => n.Amount);
+                        item.TotalDisarmed = (double)TotalDisarmed;
+                        item.TotalAmount = item.Amount;
+                        item.TotalNeedPayment = item.Amount - item.TotalDisarmed;
+                        item.CopyProperties(orderViewModel);
+                        if (detail != null)
+                        {
+                            orderViewModel.PayDetailId = detail.Id;
+                            orderViewModel.IsChecked = true;
+                            orderViewModel.Amount = (double)detail?.Amount;
+                            orderViewModel.Payment = (double)detail?.Amount;
+                        }
+
+                        if (item.TotalNeedPayment > 0 || (item.Amount == 0 && item.IsFinishPayment == 0))
+                        {
+                            if (payId <= 0)
+                                orderViewModel.Amount = item.TotalNeedPayment;
+                            listOrderOutput.Add(orderViewModel);
+                        }
+
+                    }
+                    if (payId != 0)
+                    {
+                        var allCode_ORDER_STATUS = allCodeDAL.GetListByType(AllCodeType.ORDER_STATUS);
+                        var listOrderId = listOrderOutput.Select(n => Convert.ToInt64(n.OrderId)).ToList();
+                        listContractPayDetail = contractPayDAL.GetByContractPayIds(new List<int>() { payId });
+                        var listOrderDisable = listContractPayDetail.Where(n => !listOrderId.Contains(n.DataId.Value)).ToList();
+                        foreach (var item in listOrderDisable)
+                        {
+                            OrderViewModel orderViewModel = new OrderViewModel();
+                            var order = listOrder.FirstOrDefault(n => Convert.ToInt64(n.OrderId) == item.DataId);
+                            if (order != null)
+                            {
+                                order.CopyProperties(orderViewModel);
+                                orderViewModel.Amount = (double)item?.Amount;
+                                orderViewModel.Payment = (double)item?.Amount;
+                                orderViewModel.TotalDisarmed = order.Amount;
+                                orderViewModel.TotalAmount = order.Amount;
+                            }
+                            else
+                            {
+                                var orderInfo =await _OrderDal.GetDetailOrderByOrderId(item.DataId.Value);
+                                if (orderInfo != null)
+                                {
+                                    orderViewModel.OrderId = orderInfo.OrderId.ToString();
+                                    orderViewModel.OrderNo = orderInfo.OrderNo;
+                                    orderViewModel.StartDate = orderInfo.StartDate != null ?
+                                        orderInfo.StartDate.ToString("dd:MM:yyyy") : string.Empty;
+                                    orderViewModel.EndDate = orderInfo.EndDate != null ?
+                                        orderInfo.EndDate.ToString("dd:MM:yyyy") : string.Empty;
+                                    orderViewModel.Status = allCode_ORDER_STATUS.FirstOrDefault(n => n.CodeValue == orderInfo.OrderStatus)?.Description;
+                                    orderViewModel.SalerName = userDAL.GetById(orderInfo.SalerId != null ? orderInfo.SalerId : 0).Result?.FullName;
+                                    orderViewModel.Amount = (double)item?.Amount;
+                                    orderViewModel.Payment = (double)item?.Amount;
+                                    orderViewModel.TotalDisarmed = orderInfo.Amount;
+                                    orderViewModel.TotalAmount = orderInfo.Amount;
+                                }
+                            }
+                            orderViewModel.PayDetailId = item.Id;
+                            orderViewModel.IsChecked = true;
+
+                            orderViewModel.IsDisabled = true;
+                            listOrderOutput.Add(orderViewModel);
+                        }
+                    }
+                }
+                return listOrderOutput;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("GetByClientId - OrderRepository: " + ex);
+            }
+            return new List<OrderViewModel>();
+        }
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using DAL.Generic;
 using DAL.StoreProcedure;
+using Entities.Models;
 using Entities.ViewModels;
 using Entities.ViewModels.OrderDetail;
 using Microsoft.Data.SqlClient;
@@ -40,5 +41,6 @@ namespace DAL.OrderDetail
             }
             return null;
         }
+     
     }
 }

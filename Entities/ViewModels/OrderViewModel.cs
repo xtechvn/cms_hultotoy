@@ -49,6 +49,9 @@ namespace Entities.ViewModels
         public string UtmMedium { get; set; }
         public int IsFinishPayment { get; set; }
         public string ListProductId { get; set; }
+        public string OrderStatus { get; set; }
+        public string OrderCode { get; set; }
+
         public List<ProductMongoDbModel> ListProduct { get; set; }
     }
     public class TotalValueOrder

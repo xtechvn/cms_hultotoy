@@ -16,6 +16,7 @@ namespace Repositories.IRepositories
         Task<TotalCountSumOrder> GetTotalCountSumOrder(OrderViewSearchModel searchModel);
         Task<long> UpdateOrder(Order model);
         Task<List<ListOrderDetailViewModel>> GetListOrderDetail(long orderid);
-
+        Task<Order> GetOrderByOrderNo(string orderNo);
+        Task<List<OrderViewModel>> GetByClientId(long clientId, int payId = 0, int status = 0);
     }
 }

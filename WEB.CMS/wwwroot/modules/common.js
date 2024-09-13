@@ -64,6 +64,16 @@ var _global_function = {
             x1 = x1.replace(rgx, '$1' + ',' + '$2');
         return x1 + x2;
     },
+    DateTimeDotNetToString: function (date_string, has_time = false) {
+        //"2024-08-28T09:15:09.43Z"
+        var date = new Date(date_string)
+        var text = ("0" + date.getDate()).slice(-2) + '/' + ("0" + (date.getMonth() + 1)).slice(-2) + '/' + date.getFullYear();
+        if (has_time == true) {
+            var time_text = + ' ' + (date.getHours()) + ':' + (("0" + date.getMinutes()).slice(-2))
+            return text + ' ' + time_text
+        }
+        return text
+    },
     ParseJSDate: function (text) {
         var parse_value = text.split(' ')[0].split('/')
         if (parse_value != undefined && parse_value.length > 2) {

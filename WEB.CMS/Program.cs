@@ -75,6 +75,7 @@ builder.Services.AddTransient<IContractPayRepository, ContractPayRepository>();
 builder.Services.AddTransient<IPaymentRequestRepository, PaymentRequestRepository>();
 builder.Services.AddTransient<IIdentifierServiceRepository, IdentifierServiceRepository>();
 builder.Services.AddTransient<IPaymentAccountRepository, PaymentAccountRepository>();
+builder.Services.AddTransient<IDepositHistoryRepository, DepositHistoryRepository>();
 
 
 // Setting Redis                     
