@@ -47,6 +47,12 @@ $('#grid-data').on('click', '.btn-edit-group-product', function () {
     let title = "Thông tin chuyên mục <b style='color: #1e5846'>" + seft.parent().siblings('a').text() + "</b>";
     _groupProduct.OpenFormEdit(id, title);
 });
+$('#grid-data').on('click', '.btn-clearcache-group-product', function () {
+    let seft = $(this);
+    let id = seft.data('id');
+    let name = seft.data('name');
+    _groupProduct.OnClearcache(id.name)
+});
 
 $('#grid-data').on('click', '.ckb-auto-crawl', function () {
     let seft = $(this);
@@ -161,6 +167,7 @@ var _groupProduct = {
             + '<div class="control">'
             + '<a class="btn-add-group-product" data-id="' + modelId + '"><img src="/images/icons/sql.png"></a>'
             + '<a class="btn-edit-group-product" data-id="' + modelId + '"><img src="/images/icons/edit.png"></a>'
+            + '<a class="btn-clearcache-group-product" data-name="' + modelName +'" data-id="' + modelId + '"><img src="/images/icons/edit.png"></a>'
             + '</div>'
             + (isHasLink ? checkboxText : "")
             + (isHasLink ? affCheckBox : "")
@@ -346,7 +353,35 @@ var _groupProduct = {
             });
         });
     },
+    OnClearcache: function (id, name) {
+        var SeftDOM = $('#grid-data .item-category-' + id);
+        var childLength = SeftDOM.find('.btn-expand-child').length;
+        var siblingLength = SeftDOM.siblings().length;
 
+
+        let title = 'Thông báo xác nhận';
+        let description = "Bạn có chắc chắn muốn xóa cache chuyên mục này?";
+        _msgconfirm.openDialog(title, description, function () {
+            $.ajax({
+                url: "/groupproduct/Clearcache",
+                type: "post",
+                data: { id: id,name:name },
+                success: function (result) {
+                    if (result.isSuccess) {
+                        _msgalert.success(result.message);
+                        // _groupProduct.ReLoad();
+                        if (siblingLength == 0) {
+                            SeftDOM.parent().siblings('.btn-expand-child').remove();
+                        }
+                        SeftDOM.remove();
+                        $.magnificPopup.close();
+                    } else {
+                        _msgalert.error(result.message);
+                    }
+                }
+            });
+        });
+    },
     GetAllPosition: function () {
         $.ajax({
             url: '/groupproduct/GetAllPosition',

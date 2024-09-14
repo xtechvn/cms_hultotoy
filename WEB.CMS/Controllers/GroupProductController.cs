@@ -90,15 +90,15 @@ namespace WEB.CMS.Controllers
                         OrderNo = entity.OrderNo,
                         ParentId = entity.ParentId,
                         Status = entity.Status,
-                       
+
                         PositionId = entity.PositionId,
                         Description = entity.Description,
-                        IsShowFooter=entity.IsShowFooter,
-                        IsShowHeader=entity.IsShowHeader,
-                        Code=entity.Code
+                        IsShowFooter = entity.IsShowFooter,
+                        IsShowHeader = entity.IsShowHeader,
+                        Code = entity.Code
                     };
                 }
-                _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU,Convert.ToInt32( _configuration["Redis:Database:db_common"]));
+                _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
             }
             catch
             {
@@ -130,17 +130,17 @@ namespace WEB.CMS.Controllers
                     PositionId = model.PositionId,
                     Status = model.Status,
                     ImagePath = await UpLoadHelper.UploadBase64Src(model.ImageBase64, _UrlStaticImage),
-                    IsShowHeader=model.IsShowHeader,
-                    IsShowFooter=model.IsShowFooter,
-                    ModifiedOn=DateTime.Now,
-                    Code=model.Code
-                    
+                    IsShowHeader = model.IsShowHeader,
+                    IsShowFooter = model.IsShowFooter,
+                    ModifiedOn = DateTime.Now,
+                    Code = model.Code
+
                 };
                 var rs = await _GroupProductRepository.UpSert(upsertModel);
                 if (rs > 0)
                 {
-                    _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU+ rs, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
-                    _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU+ upsertModel.ParentId, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
+                    _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU + rs, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
+                    _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU + upsertModel.ParentId, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
 
                     return new JsonResult(new
                     {
@@ -187,7 +187,7 @@ namespace WEB.CMS.Controllers
 
                 if (rs > 0)
                 {
-                    _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
+                    _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU+id, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
 
 
                     return new JsonResult(new
@@ -339,7 +339,7 @@ namespace WEB.CMS.Controllers
                 }); ;
             }
         }
-       
+
         [HttpPost]
         public IActionResult GetAllPosition()
         {
@@ -428,10 +428,28 @@ namespace WEB.CMS.Controllers
             }
         }
 
-       
 
+        public async Task<IActionResult> Clearcache(int id,string name)
+        {
+            try
+            {
 
+                _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU + id, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
+                return new JsonResult(new
+                {
+                    isSuccess = true,
+                    message = "Clear cache thành công cho chuyên mục "+ name + " có id là "+id+"."
+                });
 
-
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new
+                {
+                    isSuccess = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }
