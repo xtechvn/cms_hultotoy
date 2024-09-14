@@ -300,7 +300,7 @@ var _product_constants = {
                 </div>
             </div>`,
         ProductDetail_Attribute_Price_Tr_Td: `<td class="td-attributes td-attribute-{i} td-attributes-name-{data-id} {class-name}" {row_span}>{name}</td>`,
-        ProductDetail_Attribute_Price_TrMain: ` <tr class="tr-main" data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-1">
+        ProductDetail_Attribute_Price_TrMain: ` <tr class="tr-main" data-attribute-0="Phân loại 1" data-attribute-1="Phân loại 2-1">
                                    {td_arrtibute}
                                     <td class="td-price">
                                         <div class="form-group mb-0 price">
@@ -331,7 +331,7 @@ var _product_constants = {
                                         </div>
                                     </td>
                                 </tr>  `,
-        ProductDetail_Attribute_Price_TrSub: `<tr class="tr-sub" data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-2">
+        ProductDetail_Attribute_Price_TrSub: `<tr class="tr-sub" data-attribute-0="Phân loại 1" data-attribute-1="Phân loại 2-2">
                                    {td_arrtibute}
                                     <td class="td-price">
                                         <div class="form-group mb-0 price">
