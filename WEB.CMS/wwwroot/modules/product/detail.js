@@ -348,8 +348,12 @@ var product_detail = {
                         var element = $(this)
 
                         var attr_value = element.attr('data-attribute-0')
-                        if (attr_value.trim() == name.trim()) {
+                        var attr_value2 = element.attr('data-attribute-1')
+                        if (attr_value != undefined && attr_value.trim() == name.trim()) {
                             element.attr('data-attribute-0', text)
+                        }
+                        if (attr_value2 != undefined && attr_value2.trim() == name.trim()) {
+                            element.attr('data-attribute-1', text)
                         }
                     })
                     $('.' + name.replaceAll(' ', '-')).html(text);
