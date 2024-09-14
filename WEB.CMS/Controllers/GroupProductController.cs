@@ -139,7 +139,7 @@ namespace WEB.CMS.Controllers
                 var rs = await _GroupProductRepository.UpSert(upsertModel);
                 if (rs > 0)
                 {
-                    _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
+                    _redisService.clear(CacheName.ARTICLE_B2C_CATEGORY_MENU+ rs, Convert.ToInt32(_configuration["Redis:Database:db_common"]));
 
                     return new JsonResult(new
                     {
