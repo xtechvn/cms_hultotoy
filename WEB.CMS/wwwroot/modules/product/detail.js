@@ -1626,9 +1626,14 @@ var product_detail = {
                     var html_item = ''
                     if (product_attributes2.length > 0 && product_attributes2[0].id != product_attributes[0].id) {
                         if (row_span > 1) {
-                            html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
+                            html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td_hide
                                 .replaceAll('{i}', 0)
+                                .replaceAll('{row_span}', 'rowspan="' + 1 + '"')
+                            
+                            html_item += _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
+                                .replaceAll('{i}', 1)
                                  .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-'))
+                                .replaceAll('{data_attribute}', attribute_name.trim())
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + 1 + '"')
                                 .replaceAll('{data-id}', data_id)
@@ -1637,6 +1642,7 @@ var product_detail = {
                             html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                                 .replaceAll('{i}', 0)
                                 .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-'))
+                                .replaceAll('{data_attribute}', attribute_name.trim())
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + 1 + '"')
                                 .replaceAll('{data-id}', data_id)
@@ -1644,11 +1650,14 @@ var product_detail = {
 
                         html_attribute_attr += ' data-attribute-0="{data_attribute}" data-attribute-' + index_attribute + '="' + attribute_name.trim() + '" '
                         html_td_attribute += html_item;
-                    } else {
+                    }
+                    else
+                    {
                         if (row_span > 1) {
                             html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                                 .replaceAll('{i}', index_attribute)
                                 .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-'))
+                                .replaceAll('{data_attribute}', attribute_name.trim())
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + row_span + '"')
                                 .replaceAll('{data-id}', data_id)
@@ -1657,6 +1666,7 @@ var product_detail = {
                             html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                                 .replaceAll('{i}', index_attribute)
                                 .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-'))
+                                .replaceAll('{data_attribute}', attribute_name.trim())
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + row_span + '"')
                                 .replaceAll('{data-id}', data_id)
@@ -1673,7 +1683,7 @@ var product_detail = {
 
 
 
-                if (item[0].toLowerCase().trim() == name && level>0 ) {
+                if (product_attributes[0].id > 0) {
                     html += _product_constants.HTML.ProductDetail_Attribute_Price_TrSub
                         .replaceAll('data-attribute-0="Phân loại 1" data-attribute-1="Phân loại 2-2"', html_attribute_attr)
                         .replaceAll('{td_arrtibute}', html_td_attribute)
@@ -1698,6 +1708,15 @@ var product_detail = {
                     var dem = 0;
                     var htmlrow=''
                     $(item).each(function (index_attribute, attribute_name) {
+                        var attributeid = 0;
+                        $('.row-attributes-value').find('.col-md-6').find('.attributes-name').each(function (index, item) {
+                            var element_attributes_name = $(this)
+                            if (element_attributes_name.val().trim() == attribute_name.trim()) {
+                                attributeid = element_attributes_name.attr('data-id')
+                            }
+                        })
+                        
+                 
                         var rowspan = $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan')
                         $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan', parseFloat(rowspan) + 1)
                         $('.tr-sub').each(function (index_td, item_td) {
@@ -1705,8 +1724,7 @@ var product_detail = {
                             var attr_value = element.attr('data-attribute-0')
                             if (attr_value.trim() == attribute_name.trim()) {
                                 last_element = element;
-                                htmlrow = html;
-                                htmlrow = htmlrow.replaceAll('{data_attribute}', attribute_name.trim())
+                                htmlrow = html.replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-')).replaceAll('{name}', attribute_name.trim()).replaceAll('{data-id}', attributeid).replaceAll('{data_attribute}', attribute_name.trim());
                                 dem++;
                             }
                         })
@@ -1716,7 +1734,7 @@ var product_detail = {
                                 var attr_value = element.attr('data-attribute-0')
                                 if (attr_value.trim() == attribute_name.trim()) {
                                     last_element = element
-                                    htmlrow = html;
+                                    htmlrow = html.replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-')).replaceAll('{name}', attribute_name.trim()).replaceAll('{data-id}', attributeid).replaceAll('{data_attribute}', attribute_name.trim());
                                     dem++;
                                 }
                             })

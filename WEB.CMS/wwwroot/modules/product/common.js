@@ -192,7 +192,7 @@ var _product_constants = {
                                     </div>
                                     <div class="right-action">
                                         <a class="icon-action attribute-item-delete" style="display:none;" href="javascript:;"><i class="icofont-trash"></i></a>
-                                        <a class="icon-action attribute-item-add" href="javascript:;"><i class="icofont-drag"></i></a>
+                                        <a class="icon-action attribute-item-add" href="javascript:;"><i class="fa fa-plus"></i></a>
                                     </div>
 
                                 </div>
@@ -299,6 +299,7 @@ var _product_constants = {
                     </div>
                 </div>
             </div>`,
+        ProductDetail_Attribute_Price_Tr_Td_hide: `<td class="td-attributes td-attribute-0 td-attributes-name-{data-id} {class-name}" style="display: none;" {row_span}>{name}</td>`,
         ProductDetail_Attribute_Price_Tr_Td: `<td class="td-attributes td-attribute-{i} td-attributes-name-{data-id} {class-name}" {row_span}>{name}</td>`,
         ProductDetail_Attribute_Price_TrMain: ` <tr class="tr-main" data-attribute-0="Phân loại 1" data-attribute-1="Phân loại 2-1">
                                    {td_arrtibute}
