@@ -1380,7 +1380,7 @@ var product_detail = {
                 }
             }
         }
-
+        
         if (combination_array.length > 0) {
             var name = combination_array[0][0]
             var model = product_detail.GetAttributeItem()
@@ -1423,7 +1423,7 @@ var product_detail = {
 
 
 
-                if (item[0].toLowerCase().trim() == name) {
+                if (item[0].toLowerCase().trim() == name && html.trim()!='') {
                     html += _product_constants.HTML.ProductDetail_Attribute_Price_TrSub
                         .replaceAll('data-attribute-1="Phân loại 1" data-attribute-2="Phân loại 2-2"', html_attribute_attr)
                         .replaceAll('{td_arrtibute}', html_td_attribute)
