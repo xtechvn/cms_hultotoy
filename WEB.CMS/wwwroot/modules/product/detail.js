@@ -1861,6 +1861,7 @@ var product_detail = {
                         rowspan--
                     }
                     element.find('.td-attribute-' + prev_attribute).attr('rowspan', rowspan)
+                    element.remove()
                 }
                 else {
                     var attr_value = element.attr('data-attribute-0')
