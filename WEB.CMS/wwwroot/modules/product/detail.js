@@ -1660,7 +1660,7 @@ var product_detail = {
                                 .replaceAll('{data-id}', data_id)
                         }
 
-                        html_attribute_attr += ' data-attribute-0="{data_attribute}" data-attribute-' + index_attribute + '="' + attribute_name.trim() + '" '
+                        html_attribute_attr += ' data-attribute-0="{data_attribute}" data-attribute-1="' + attribute_name.trim() + '" '
                         html_td_attribute += html_item;
                     }
                     else
