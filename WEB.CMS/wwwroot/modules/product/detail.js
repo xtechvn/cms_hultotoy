@@ -1790,94 +1790,34 @@ var product_detail = {
 
     },
     DeleteRowAttributeTablePrice: function (attribute_name, id) {
-        //var product_attributes2 = []
-        //$('.product-attributes').each(function (index, item) {
-        //    var element = $(this)
-
-        //    if (index == 0) {
-        //        var product_attribute_by_id2 = {
-        //            id: index,
-        //            data_values: [],
-        //        }
-        //        element.find('.attributes-name').each(function (index, item) {
-        //            var element_input = $(this)
-        //            if (element_input != undefined && element_input.val() != undefined && element_input.val().trim() != '') {
-        //                product_attribute_by_id2.data_values.push(element_input.val())
-        //            }
-
-        //        })
-        //        if (product_attribute_by_id2.data_values.length > 0)
-        //            product_attributes2.push(product_attribute_by_id2)
-        //    }
-
-        //})
-        //var combination_array2 = []
-        //if (id != 0) {
-        //    if (product_attributes2.length > 0) {
-        //        combination_array2 = product_attributes2[0].data_values.map(v => [].concat(v))
-        //        if (product_attributes2.length > 1) {
-        //            for (var i = 1; i < product_attributes2.length; i++) {
-        //                var array2 = product_attributes2[i].data_values;
-        //                combination_array2 = combination_array2.flatMap(d => array2.map(v => [].concat(d, v)))
-
-        //            }
-        //        }
-        //    }
-        //    $(combination_array2).each(function (index, item) {
-        //        var last_element = null;
-        //        $(item).each(function (index_attribute, attribute_name) {
-        //            var rowspan = $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan')
-        //            $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan', parseFloat(rowspan) - 1)
-        //            if((parseFloat(rowspan) - 1 )== 1){
-        //                $('.' + attribute_name.trim().replaceAll(' ', '-')).show()
-        //            }
-        //        })
-        //    })
-        //}
-        //$('.tr-sub').each(function (index_td, item_td) {
-        //    var element = $(this)
-        //    var attr_value = element.attr('data-attribute-0')
-        //    var attr_value2 = element.attr('data-attribute-1')
-        //    if (attr_value != undefined && attr_value.trim() == attribute_name.trim() || attr_value2 != undefined && attr_value2.trim() == attribute_name.trim()) {
-        //        element.remove()
-        //    }
-        //})
-
-        //$('.tr-main').each(function (index_td, item_td) {
-        //    var element = $(this)
-        //    var attr_value = element.attr('data-attribute-0')
-        //    var attr_value2 = element.attr('data-attribute-1')
-        //    if (attr_value.trim() == attribute_name.trim() || attr_value2.trim() == attribute_name.trim()) {
-        //        element.remove()
-        //    }
-        //})
-        var prev_attribute=(id-1)
+        var changed_attr_0=[]
         $('#product-attributes-price tbody tr').each(function (index_td, item_td) {
             var element = $(this)
-            if (element.hasClass('tr-main')) {
-                if (prev_attribute >= 0) {
-                    var rowspan = parseInt(element.find('.td-attribute-' + prev_attribute).attr('rowspan'))
-                    if (!isNaN(rowspan) && rowspan > 1) {
-                        rowspan--
-                    }
-                    element.find('.td-attribute-' + prev_attribute).attr('rowspan', rowspan)
-                    element.remove()
+
+            var attr_by_id = element.attr('data-attribute-' + id)
+            if (attr_by_id.trim() == attribute_name.trim()) {
+                if (element.hasClass('tr-main') && !changed_attr_0.includes(element.attr('data-attribute-0').trim()) ) {
+                    changed_attr_0.push( element.attr('data-attribute-0').trim())
+                   
                 }
-                else {
-                    var attr_value = element.attr('data-attribute-0')
-                    if (attr_value != undefined && attr_value.trim() == attribute_name.trim()) {
-                        element.remove()
-                    }
-                }
-            }
-            else if (element.hasClass('tr-sub')) {
-                var attr_value = element.attr('data-attribute-' + id)
-                if (attr_value != undefined && attr_value.trim() == attribute_name.trim()) {
-                    element.remove()
-                }
+                element.remove()
             }
         })
+        $(changed_attr_0).each(function (index, attribute_0) {
+            $('#product-attributes-price tbody .tr-sub').each(function (index_td, item_td) {
+                var element_sub = $(this)
+                var sub_attr_by_id = element_sub.attr('data-attribute-0')
+                if (sub_attr_by_id.trim() == attribute_0) {
+                    element_sub.removeClass('tr-sub')
+                    element_sub.addClass('tr-main')
+                    return false
+                }
+            })
+        })
        
+        $('#product-attributes-price tbody .td-attribute-0').show()
+        $('#product-attributes-price tbody .td-attribute-1').show()
+        product_detail.HideProductAttributeCell()
     },
     HideProductAttributeCell: function () {
         var list_level_0 = []
