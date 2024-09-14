@@ -169,30 +169,35 @@ var product_detail = {
             var element = $(this)
             var id_attributes = element.closest('.col-md-6').find('.attributes-name').attr('data-id')
             var text = $('.attributes-name-' + id_attributes).val();
-            var id = 0;
+            var id = -1;
             $('.product-attributes').each(function (index, item) {
-                var element = $(this)
-                var product_attribute_by_id = {
-                    id: index,
-                    data_values: [],
+                var element_parent = $(this)
+                //var product_attribute_by_id = {
+                //    id: index,
+                //    data_values: [],
+                //}
+                //element.find('.attributes-name').each(function (index, item) {
+                //    var element_input = $(this)
+
+                //    if (element_input != undefined && element_input.val() != undefined && element_input.val().trim() != '' && text.trim() == element_input.val().trim()) {
+                //        product_attribute_by_id.data_values.push(element_input.val())
+                //    }
+
+                //})
+                //if (product_attribute_by_id.data_values.length > 0)
+                //    id = product_attribute_by_id.id
+                if (element.closest('.col-md-6').parent(element_parent).length) {
+                    id = index
+                    return false
                 }
-                element.find('.attributes-name').each(function (index, item) {
-                    var element_input = $(this)
-
-                    if (element_input != undefined && element_input.val() != undefined && element_input.val().trim() != '' && text.trim() == element_input.val().trim()) {
-                        product_attribute_by_id.data_values.push(element_input.val())
-                    }
-
-                })
-                if (product_attribute_by_id.data_values.length > 0)
-                    id = product_attribute_by_id.id
             })
             if (element.closest('.row-attributes-value').find('.col-md-6').length <= 2) {
                 element.closest('.row-attributes-value').find('.attribute-item-delete').hide()
             }
             element.closest('.col-md-6').remove()
-
-            product_detail.DeleteRowAttributeTablePrice(text, id)
+            if (id > -1) {
+                product_detail.DeleteRowAttributeTablePrice(text, ++id)
+            }
         });
         $('body').on('click', '.attribute-item-add', function () {
             var element = $(this)
@@ -1730,68 +1735,75 @@ var product_detail = {
         })
     },
     DeleteRowAttributeTablePrice: function (attribute_name, id) {
-        var product_attributes2 = []
-        $('.product-attributes').each(function (index, item) {
+        //var product_attributes2 = []
+        //$('.product-attributes').each(function (index, item) {
+        //    var element = $(this)
+
+        //    if (index == 0) {
+        //        var product_attribute_by_id2 = {
+        //            id: index,
+        //            data_values: [],
+        //        }
+        //        element.find('.attributes-name').each(function (index, item) {
+        //            var element_input = $(this)
+        //            if (element_input != undefined && element_input.val() != undefined && element_input.val().trim() != '') {
+        //                product_attribute_by_id2.data_values.push(element_input.val())
+        //            }
+
+        //        })
+        //        if (product_attribute_by_id2.data_values.length > 0)
+        //            product_attributes2.push(product_attribute_by_id2)
+        //    }
+
+        //})
+        //var combination_array2 = []
+        //if (id != 0) {
+        //    if (product_attributes2.length > 0) {
+        //        combination_array2 = product_attributes2[0].data_values.map(v => [].concat(v))
+        //        if (product_attributes2.length > 1) {
+        //            for (var i = 1; i < product_attributes2.length; i++) {
+        //                var array2 = product_attributes2[i].data_values;
+        //                combination_array2 = combination_array2.flatMap(d => array2.map(v => [].concat(d, v)))
+
+        //            }
+        //        }
+        //    }
+        //    $(combination_array2).each(function (index, item) {
+        //        var last_element = null;
+        //        $(item).each(function (index_attribute, attribute_name) {
+        //            var rowspan = $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan')
+        //            $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan', parseFloat(rowspan) - 1)
+        //            if((parseFloat(rowspan) - 1 )== 1){
+        //                $('.' + attribute_name.trim().replaceAll(' ', '-')).show()
+        //            }
+        //        })
+        //    })
+        //}
+        //$('.tr-sub').each(function (index_td, item_td) {
+        //    var element = $(this)
+        //    var attr_value = element.attr('data-attribute-1')
+        //    var attr_value2 = element.attr('data-attribute-2')
+        //    if (attr_value != undefined && attr_value.trim() == attribute_name.trim() || attr_value2 != undefined && attr_value2.trim() == attribute_name.trim()) {
+        //        element.remove()
+        //    }
+        //})
+
+        //$('.tr-main').each(function (index_td, item_td) {
+        //    var element = $(this)
+        //    var attr_value = element.attr('data-attribute-1')
+        //    var attr_value2 = element.attr('data-attribute-2')
+        //    if (attr_value.trim() == attribute_name.trim() || attr_value2.trim() == attribute_name.trim()) {
+        //        element.remove()
+        //    }
+        //})
+        $('#product-attributes-price tbody tr').each(function (index_td, item_td) {
             var element = $(this)
-
-            if (index == 0) {
-                var product_attribute_by_id2 = {
-                    id: index,
-                    data_values: [],
-                }
-                element.find('.attributes-name').each(function (index, item) {
-                    var element_input = $(this)
-                    if (element_input != undefined && element_input.val() != undefined && element_input.val().trim() != '') {
-                        product_attribute_by_id2.data_values.push(element_input.val())
-                    }
-
-                })
-                if (product_attribute_by_id2.data_values.length > 0)
-                    product_attributes2.push(product_attribute_by_id2)
-            }
-
-        })
-        var combination_array2 = []
-        if (id != 0) {
-            if (product_attributes2.length > 0) {
-                combination_array2 = product_attributes2[0].data_values.map(v => [].concat(v))
-                if (product_attributes2.length > 1) {
-                    for (var i = 1; i < product_attributes2.length; i++) {
-                        var array2 = product_attributes2[i].data_values;
-                        combination_array2 = combination_array2.flatMap(d => array2.map(v => [].concat(d, v)))
-
-                    }
-                }
-            }
-            $(combination_array2).each(function (index, item) {
-                var last_element = null;
-                $(item).each(function (index_attribute, attribute_name) {
-                    var rowspan = $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan')
-                    $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan', parseFloat(rowspan) - 1)
-                    if((parseFloat(rowspan) - 1 )== 1){
-                        $('.' + attribute_name.trim().replaceAll(' ', '-')).show()
-                    }
-                })
-            })
-        }
-
-        $('.tr-sub').each(function (index_td, item_td) {
-            var element = $(this)
-            var attr_value = element.attr('data-attribute-1')
-            var attr_value2 = element.attr('data-attribute-2')
-            if (attr_value != undefined && attr_value.trim() == attribute_name.trim() || attr_value2 != undefined && attr_value2.trim() == attribute_name.trim()) {
+            var attr_value = element.attr('data-attribute-'+id)
+            if (attr_value != undefined && attr_value.trim() == attribute_name.trim() ) {
                 element.remove()
             }
         })
-
-        $('.tr-main').each(function (index_td, item_td) {
-            var element = $(this)
-            var attr_value = element.attr('data-attribute-1')
-            var attr_value2 = element.attr('data-attribute-2')
-            if (attr_value.trim() == attribute_name.trim() || attr_value2.trim() == attribute_name.trim()) {
-                element.remove()
-            }
-        })
+       
     },
 
 }
