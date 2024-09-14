@@ -332,20 +332,32 @@ var product_detail = {
 
             var id_attributes = element.attr('data-id')
             var name = element.attr('data-name')
-
+            var type = 0;
             var text = $('.attributes-name-' + id_attributes).val();
+            $('.attributes-name').each(function (index, item) {
+                var element = $(this)
+                if (text.toUpperCase().trim() == element.val().toUpperCase().trim() && parseFloat(id_attributes) != parseFloat(element.attr('data-id'))) {
+                    _msgalert.error("Tên phân loại " + text + "  đã có ")
+                    type = 1;
+                }
+            })
             name == undefined ? name = text : name;
             if ($('.td-attributes-name-' + id_attributes).length > 0) {
-                $('.tr-main').each(function (index_td, item_td) {
-                    var element = $(this)
-                  
-                    var attr_value = element.attr('data-attribute-0')
-                    if (attr_value.trim() == name.trim()) {
-                        element.attr('data-attribute-0', text)
-                    }
-                })
-                $('.td-attributes-name-' + id_attributes).html(text);
-                $('.td-attributes-name-' + id_attributes).addClass(text.trim().replaceAll(' ', '-'));
+                if (type == 0) {
+                    $('.tr-main').each(function (index_td, item_td) {
+                        var element = $(this)
+
+                        var attr_value = element.attr('data-attribute-0')
+                        if (attr_value.trim() == name.trim()) {
+                            element.attr('data-attribute-0', text)
+                        }
+                    })
+                    $('.' + name.replaceAll(' ', '-')).html(text);
+                    $('.' + name.replaceAll(' ', '-')).addClass(text.trim().replaceAll(' ', '-'));
+                    $('.' + name.replaceAll(' ', '-')).removeClass(name.replaceAll(' ', '-'));
+                    element.attr('data-name', text)
+                }
+             
             } else {
                 product_detail.AddRowAttributeTablePrice(id_attributes)
             }
@@ -1661,6 +1673,8 @@ var product_detail = {
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + row_span + '"')
                                 .replaceAll('{data-id}', data_id)
+                            html_attribute_attr += 'data-attribute-' + index_attribute + '="' + attribute_name.trim() + '" '
+                            html_td_attribute += html_item;
                         } else {
 
                             html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
@@ -1670,10 +1684,11 @@ var product_detail = {
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + row_span + '"')
                                 .replaceAll('{data-id}', data_id)
+                            html_attribute_attr += ' data-attribute-0="' + item[0]+'" data-attribute-' + index_attribute + '="' + attribute_name.trim() + '" '
+                            html_td_attribute += html_item;
                         }
 
-                        html_attribute_attr += 'data-attribute-' + index_attribute + '="' + attribute_name.trim() + '" '
-                        html_td_attribute += html_item;
+                      
                     }
 
 
@@ -1683,17 +1698,24 @@ var product_detail = {
 
 
 
-                if (product_attributes[0].id > 0) {
+                if (product_attributes[0].id > 0 && level > 0) {
                     html += _product_constants.HTML.ProductDetail_Attribute_Price_TrSub
                         .replaceAll('data-attribute-0="Phân loại 1" data-attribute-1="Phân loại 2-2"', html_attribute_attr)
                         .replaceAll('{td_arrtibute}', html_td_attribute)
                 }
                 else {
-                    level++;
-                    name = item[0].toLowerCase().trim()
-                    html += _product_constants.HTML.ProductDetail_Attribute_Price_TrMain
-                        .replaceAll('data-attribute-0="Phân loại 1" data-attribute-1="Phân loại 2-1"', html_attribute_attr)
-                        .replaceAll('{td_arrtibute}', html_td_attribute)
+                    if (item[0].toLowerCase().trim() == name && level > 0) {
+                        html += _product_constants.HTML.ProductDetail_Attribute_Price_TrSub
+                            .replaceAll('data-attribute-0="Phân loại 1" data-attribute-1="Phân loại 2-2"', html_attribute_attr)
+                            .replaceAll('{td_arrtibute}', html_td_attribute)
+                    } else {
+                        level++;
+                        name = item[0].toLowerCase().trim()
+                        html += _product_constants.HTML.ProductDetail_Attribute_Price_TrMain
+                            .replaceAll('data-attribute-0="Phân loại 1" data-attribute-1="Phân loại 2-1"', html_attribute_attr)
+                            .replaceAll('{td_arrtibute}', html_td_attribute)
+                    }
+               
                 }
 
             })
