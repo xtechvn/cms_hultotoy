@@ -347,7 +347,7 @@ var product_detail = {
             })
             name == undefined ? name = text : name;
             if (name != "" && $('.' + name.replaceAll(' ', '-')).length > 0) {
-                if (type == 0 && name != text) {
+                if (type == 0 && name.trim() != text.trim()) {
                     $('.tr-main').each(function (index_td, item_td) {
                         var element = $(this)
 
