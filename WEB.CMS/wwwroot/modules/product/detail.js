@@ -342,7 +342,7 @@ var product_detail = {
                 }
             })
             name == undefined ? name = text : name;
-            if ($('.td-attributes-name-' + id_attributes).length > 0) {
+            if ($('.' + name.replaceAll(' ', '-')).length > 0) {
                 if (type == 0) {
                     $('.tr-main').each(function (index_td, item_td) {
                         var element = $(this)
