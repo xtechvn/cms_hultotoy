@@ -105,7 +105,7 @@ var product_detail = {
 
         $('body').on('click', '.item-edit .delete', function () {
             var element = $(this)
-            element.closest('.product-attributes').next().remove()
+           /* element.closest('.product-attributes').next().remove()*/
             element.closest('.product-attributes').remove()
             if ($('.product-attributes').length <= 0) {
                 $('#single-product-amount').show()
@@ -375,7 +375,11 @@ var product_detail = {
                 }
              
             } else {
-                product_detail.AddRowAttributeTablePrice(id_attributes)
+                if (type == 0) {
+                    element.attr('data-name', text)
+                    product_detail.AddRowAttributeTablePrice(id_attributes)
+                }
+                
             }
 
 
@@ -740,7 +744,7 @@ var product_detail = {
 
             if (product.specification != null && product.specification.length > 0) {
                 specification = product.specification.filter(obj => {
-                    return obj.attribute_id === item.attribute_id
+                    return obj.attribute_id === item.id
                 })
             }
             switch (item.type) {
@@ -902,7 +906,7 @@ var product_detail = {
 
         _product_function.POST('/Product/GetSpecificationByName', { type: type, name: name }, function (result) {
             if (result.is_success && result.data && result.data.length > 0) {
-                var current_value = element.closest('.namesp').find('.input-select-option').val()
+                var current_value = element.find('.input-select-option').val()
                 if (current_value == undefined) current_value = ''
                 $(result.data).each(function (index, item) {
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions_NewOptions
