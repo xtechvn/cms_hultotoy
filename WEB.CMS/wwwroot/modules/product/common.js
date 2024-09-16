@@ -186,9 +186,9 @@ var _product_constants = {
                                         </div>
                                     </label>
                                     <div class="relative w-100">
-                                        <input type="text" class="form-control attributes-name attributes-name-{index}" data-id="{index}" placeholder="Tên thuộc tính" maxlength="14" value="">
+                                        <input type="text" class="form-control attributes-name attributes-name-{index}" data-id="{index}" placeholder="Tên thuộc tính" maxlength="50" value="">
                                         <p class="error" style="display:none;"> </p>
-                                        <span class="note"><nw class="count">0</nw>/14</span>
+                                        <span class="note"><nw class="count">0</nw>/50</span>
                                     </div>
                                     <div class="right-action">
                                         <a class="icon-action attribute-item-delete" style="display:none;" href="javascript:;"><i class="icofont-trash"></i></a>

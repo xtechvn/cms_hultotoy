@@ -852,10 +852,10 @@ var product_detail = {
                         }
                         if (list.length > 0) {
                             element.attr('data-id', list[0]._id)
-                            element.find('.td-price').find('input').val(Comma(list[0].price))
-                            element.find('.td-profit').find('input').val(Comma(list[0].profit))
-                            element.find('.td-amount').find('input').val(Comma(list[0].amount))
-                            element.find('.td-stock').find('input').val(Comma(list[0].quanity_of_stock))
+                            element.find('.td-price').find('input').val(list[0].price == 0 ? null: Comma(list[0].price))
+                            element.find('.td-profit').find('input').val(list[0].profit == 0 ? null :Comma(list[0].profit))
+                            element.find('.td-amount').find('input').val(list[0].amount == 0 ? null :Comma(list[0].amount))
+                            element.find('.td-stock').find('input').val(list[0].quanity_of_stock == 0 ? null :Comma(list[0].quanity_of_stock))
                             element.find('.td-sku').find('input').val(list[0].sku)
                         }
                         
@@ -1221,10 +1221,10 @@ var product_detail = {
                 var variation = {
                     _id: var_id,
                     variation_attributes: [],
-                    price: (price == undefined || isNaN(price) || price <= 0) ? 0 : price,
-                    profit: (profit == undefined || isNaN(profit) || profit <= 0) ? 0 : profit,
-                    amount: (amount == undefined || isNaN(amount) || amount <= 0) ? 0 : amount,
-                    quanity_of_stock: (quanity_of_stock == undefined || isNaN(quanity_of_stock) || quanity_of_stock <= 0) ? 0 : quanity_of_stock,
+                    price: (price == undefined || isNaN(price) || price <= 0) ? null : price,
+                    profit: (profit == undefined || isNaN(profit) || profit <= 0) ? null : profit,
+                    amount: (amount == undefined || isNaN(amount) || amount <= 0) ? null : amount,
+                    quanity_of_stock: (quanity_of_stock == undefined || isNaN(quanity_of_stock) || quanity_of_stock <= 0) ? null : quanity_of_stock,
                     sku: element.find('.td-sku').find('input').val(),
                 }
                 for (var i = 0; i < $('.product-attributes').length; i++) {
