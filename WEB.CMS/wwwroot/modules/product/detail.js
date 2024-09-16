@@ -157,6 +157,8 @@ var product_detail = {
 
             element.closest('.lastest-attribute-value').removeClass('lastest-attribute-value')
             if (element.val() != undefined && element.val().trim() != '') {
+                if ($('.attributes-name-' + i_attributes).length > 0)
+                    i_attributes++;
                 element.closest('.row-attributes-value').append(_product_constants.HTML.ProductDetail_Attribute_Row_Item.replaceAll("{index}", i_attributes))
                 $('.row-attributes-value .col-md-6 .attribute-item-delete').show()
                 if (element.closest('.row-attributes-value').find('.col-md-6').length < 2) {
@@ -201,11 +203,13 @@ var product_detail = {
         });
         $('body').on('click', '.attribute-item-add', function () {
             var element = $(this)
-            var i = 0;
+
             $('.attributes-name').each(function (index, item) {
-                i = index
+                i_attributes++;
+                if ($('.attributes-name-' + i_attributes).length > 0)
+                    i_attributes++;
             })
-            element.closest('.row-attributes-value').append(_product_constants.HTML.ProductDetail_Attribute_Row_Item.replaceAll("{index}", i))
+            element.closest('.row-attributes-value').append(_product_constants.HTML.ProductDetail_Attribute_Row_Item.replaceAll("{index}", i_attributes))
             element.closest('.row-attributes-value').find('.attribute-item-delete').show()
             //element.closest('.row-attributes-value').find('.attributes-name').addClass('attributes-name-add')
             //element.closest('.row-attributes-value').find('.attributes-name').removeClass('attributes-name')
