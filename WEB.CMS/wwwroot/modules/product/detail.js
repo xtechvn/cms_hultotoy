@@ -346,7 +346,7 @@ var product_detail = {
                 }
             })
             name == undefined ? name = text : name;
-            if (name != "" && $('.' + name.replaceAll('(', '-').replaceAll(')', '-').replaceAll(' ', '-')).length > 0) {
+            if (name != "" && $('.' + name.replaceAll('(', '-').replaceAll(')', '-').replaceAll(' ', '-').replaceAll('[', '-').replaceAll(']', '-')).length > 0) {
                 if (type == 0 && name.trim() != text.trim()) {
                     $('.tr-main').each(function (index_td, item_td) {
                         var element = $(this)
@@ -372,9 +372,9 @@ var product_detail = {
                             element.attr('data-attribute-1', text)
                         }
                     })
-                    $('.' + name.replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-')).html(text);
-                    $('.' + name.replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-')).addClass(text.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-'));
-                    $('.' + name.replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-')).removeClass(name.replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-'));
+                    $('.' + name.replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-')).html(text);
+                    $('.' + name.replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-')).addClass(text.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-'));
+                    $('.' + name.replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-')).removeClass(name.replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-'));
                     element.attr('data-name', text)
                 }
              
@@ -1450,7 +1450,7 @@ var product_detail = {
                     if (row_span < 2) {
                         html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                             .replaceAll('{i}', index_attribute)
-                            .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-'))
+                            .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-'))
                             .replaceAll('{name}', attribute_name.trim())
                             .replaceAll('{row_span}', 'rowspan="' + row_span + '"')
                             .replaceAll('{data-id}', data_id)
@@ -1458,7 +1458,7 @@ var product_detail = {
 
                         html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                             .replaceAll('{i}', index_attribute)
-                            .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-'))
+                            .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-'))
                             .replaceAll('{name}', attribute_name.trim())
                             .replaceAll('{row_span}', 'rowspan="' + row_span + '"')
                             .replaceAll('{data-id}', data_id)
@@ -1672,7 +1672,7 @@ var product_detail = {
                             
                             html_item += _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                                 .replaceAll('{i}', 1)
-                                .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-'))
+                                .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-'))
                                 .replaceAll('{data_attribute}', attribute_name.trim())
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + 1 + '"')
@@ -1681,7 +1681,7 @@ var product_detail = {
 
                             html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                                 .replaceAll('{i}', 0)
-                                .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-'))
+                                .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-'))
                                 .replaceAll('{data_attribute}', attribute_name.trim())
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + 1 + '"')
@@ -1696,7 +1696,7 @@ var product_detail = {
                         if (row_span > 1) {
                             html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                                 .replaceAll('{i}', index_attribute)
-                                .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-'))
+                                .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-'))
                                 .replaceAll('{data_attribute}', attribute_name.trim())
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + row_span + '"')
@@ -1707,7 +1707,7 @@ var product_detail = {
 
                             html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                                 .replaceAll('{i}', index_attribute)
-                                .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-'))
+                                .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-'))
                                 .replaceAll('{data_attribute}', attribute_name.trim())
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + row_span + '"')
@@ -1760,14 +1760,14 @@ var product_detail = {
                         })
                         
                  
-                        var rowspan = $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan')
-                        $('.' + attribute_name.trim().replaceAll(' ', '-')).attr('rowspan', parseFloat(rowspan) + 1)
+                        var rowspan = $('.' + attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-')).attr('rowspan')
+                        $('.' + attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-')).attr('rowspan', parseFloat(rowspan) + 1)
                         $('.tr-sub').each(function (index_td, item_td) {
                             var element = $(this)
                             var attr_value = element.attr('data-attribute-0')
                             if (attr_value.trim() == attribute_name.trim()) {
                                 last_element = element;
-                                htmlrow = html.replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-')).replaceAll('{name}', attribute_name.trim()).replaceAll('{data-id}', attributeid).replaceAll('{data_attribute}', attribute_name.trim());
+                                htmlrow = html.replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-')).replaceAll('{name}', attribute_name.trim()).replaceAll('{data-id}', attributeid).replaceAll('{data_attribute}', attribute_name.trim());
                                 dem++;
                             }
                         })
@@ -1777,7 +1777,7 @@ var product_detail = {
                                 var attr_value = element.attr('data-attribute-0')
                                 if (attr_value.trim() == attribute_name.trim()) {
                                     last_element = element
-                                    htmlrow = html.replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-')).replaceAll('{name}', attribute_name.trim()).replaceAll('{data-id}', attributeid).replaceAll('{data_attribute}', attribute_name.trim());
+                                    htmlrow = html.replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-')).replaceAll('{name}', attribute_name.trim()).replaceAll('{data-id}', attributeid).replaceAll('{data_attribute}', attribute_name.trim());
                                     dem++;
                                 }
                             })
