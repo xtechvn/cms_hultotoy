@@ -336,7 +336,7 @@ var product_detail = {
             var text = $('.attributes-name-' + id_attributes).val();
             $('.attributes-name').each(function (index, item) {
                 var element = $(this)
-                if (text.toUpperCase().trim() == element.val().toUpperCase().trim() && parseFloat(id_attributes) != parseFloat(element.attr('data-id'))) {
+                if (text != undefined && text != "" && text.toUpperCase().trim() == element.val().toUpperCase().trim() && parseFloat(id_attributes) != parseFloat(element.attr('data-id'))) {
                     _msgalert.error("Tên phân loại " + text + "  đã có ")
                     type = 1;
                 }
