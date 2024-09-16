@@ -342,7 +342,7 @@ var product_detail = {
                 }
             })
             name == undefined ? name = text : name;
-            if ($('.' + name.replaceAll(' ', '-')).length > 0) {
+            if (name != "" && $('.' + name.replaceAll(' ', '-')).length > 0) {
                 if (type == 0) {
                     $('.tr-main').each(function (index_td, item_td) {
                         var element = $(this)
@@ -375,7 +375,7 @@ var product_detail = {
                 }
              
             } else {
-                if (type == 0) {
+                if (text != "" && type == 0) {
                     element.attr('data-name', text)
                     product_detail.AddRowAttributeTablePrice(id_attributes)
                 }
@@ -906,7 +906,7 @@ var product_detail = {
 
         _product_function.POST('/Product/GetSpecificationByName', { type: type, name: name }, function (result) {
             if (result.is_success && result.data && result.data.length > 0) {
-                var current_value = element.find('.input-select-option').val()
+                var current_value = element.closest('.col-md-6').find('.namesp').find('.input-select-option').val()
                 if (current_value == undefined) current_value = ''
                 $(result.data).each(function (index, item) {
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions_NewOptions
@@ -1711,17 +1711,10 @@ var product_detail = {
                             html_attribute_attr += ' data-attribute-0="' + item[0]+'" data-attribute-' + index_attribute + '="' + attribute_name.trim() + '" '
                             html_td_attribute += html_item;
                         }
-
                       
                     }
 
-
-
                 })
-
-
-
-
                 if (product_attributes[0].id > 0 && level > 0) {
                     html += _product_constants.HTML.ProductDetail_Attribute_Price_TrSub
                         .replaceAll('data-attribute-0="Phân loại 1" data-attribute-1="Phân loại 2-2"', html_attribute_attr)
