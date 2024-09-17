@@ -381,10 +381,15 @@ var product_detail = {
                     $('.product-attributes').each(function (index, item) {
                         var element_parent = $(this)
 
-                        if (element.closest('.col-md-6').find('.namesp').find('.attributes-name').attr('data-name').trim() == name.trim()) {
-                            id = index
-                         
-                        }
+                   
+                        element_parent.find('.attributes-name').each(function (index2, item2) {
+                            var element_input = $(this)
+                            if (element_input.attr('data-name') != "" && element_input.attr('data-name') != undefined && element_input.attr('data-name').trim() == name.trim()) {
+                                id = index
+
+                            }
+
+                        })
                     })
                     if (id!= -1)
                     product_detail.DeleteRowAttributeTablePrice(name, id)
