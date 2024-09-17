@@ -162,7 +162,7 @@ var _global_function = {
         return text.replaceAll(/[^a-zA-Z0-9àáãảạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệđùúủũụưừứửữựòóỏõọôồốổỗộơờớởỡợìíỉĩịäëïîöüûñçýỳỹỵỷ ]/g, '');
     },
     RemoveSpecialCharacter_ky_tu_DB: function (text) {
-        return text.replaceAll(/([\\!"#$%&'()*+,./:;<=>?@\[\]^`{|}~])/g, "_");
+        return text.replaceAll(/[^a-zA-Z0-9]/g, "_");
     },
     CheckIfStringIsDate: function (text) {
         if (text == null || text == undefined || text.trim() == '')
