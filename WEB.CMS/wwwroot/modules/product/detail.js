@@ -1305,7 +1305,7 @@ var product_detail = {
         $('.attributes-name').each(function (index, item) {
             
             index_attributes++
-            if ($('.attributes-name-') + index_attributes.length > 0)
+            if ($('.attributes-name-' + index_attributes) .length > 0)
                 index_attributes++
         })
         if ($('.product-attributes').length < attribute_max_count) {
