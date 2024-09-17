@@ -1303,7 +1303,10 @@ var product_detail = {
         var attribute_max_count = 2
        
         $('.attributes-name').each(function (index, item) {
-           index_attributes ++
+            
+            index_attributes++
+            if ($('.attributes-name-') + index_attributes.length > 0)
+                index_attributes++
         })
         if ($('.product-attributes').length < attribute_max_count) {
             $('#product-attributes-box').append(_product_constants.HTML.ProductDetail_Attribute_Row.replaceAll('{html}', _product_constants.HTML.ProductDetail_Attribute_Row_Item.replaceAll("{index}", index_attributes)))
