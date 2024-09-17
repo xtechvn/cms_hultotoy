@@ -1287,7 +1287,7 @@ var product_detail = {
         var result = 0
         $('.product-attributes').each(function (index, item) {
             if ($(this).is(element)) {
-                result = (index + 1)
+                result = index
                 return false
             }
         })
