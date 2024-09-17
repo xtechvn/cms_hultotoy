@@ -376,23 +376,27 @@ var product_detail = {
                     $('.' + _global_function.RemoveSpecialCharacter_ky_tu_DB(name.trim()).replaceAll(' ', '-')).addClass(_global_function.RemoveSpecialCharacter_ky_tu_DB(text.trim()).replaceAll(' ', '-'));
                     $('.' + _global_function.RemoveSpecialCharacter_ky_tu_DB(name.trim()).replaceAll(' ', '-')).removeClass(_global_function.RemoveSpecialCharacter_ky_tu_DB(name.trim()).replaceAll(' ', '-'));
                     element.attr('data-name', text)
-                } else {
-                    var id = -1;
-                    $('.product-attributes').each(function (index, item) {
-                        var element_parent = $(this)
+                }
+                else {
+                    if (type != 1) {
+                        var id = -1;
+                        $('.product-attributes').each(function (index, item) {
+                            var element_parent = $(this)
 
-                   
-                        element_parent.find('.attributes-name').each(function (index2, item2) {
-                            var element_input = $(this)
-                            if (element_input.attr('data-name') != "" && element_input.attr('data-name') != undefined && element_input.attr('data-name').trim() == name.trim()) {
-                                id = index
 
-                            }
+                            element_parent.find('.attributes-name').each(function (index2, item2) {
+                                var element_input = $(this)
+                                if (element_input.attr('data-name') != "" && element_input.attr('data-name') != undefined && element_input.attr('data-name').trim() == name.trim()) {
+                                    id = index
 
+                                }
+
+                            })
                         })
-                    })
-                    if (id!= -1)
-                    product_detail.DeleteRowAttributeTablePrice(name, id)
+                        if (id != -1)
+                            product_detail.DeleteRowAttributeTablePrice(name, id)
+                    }
+                  
                 }
              
             } else {
