@@ -836,17 +836,29 @@ var product_detail = {
             for (var i = 0; i < product.attributes.length; i++) {
                 product_detail.AddProductAttributes()
             }
+            var old_attribute = false
             $('.product-attributes').each(function (index, item) {
                 var element = $(this)
                 var attribute = product.attributes.filter(obj => {
-                    return obj._id == ('' + (index + 1))
+                    return obj._id == index
                 })
+                if (attribute.length <= 0 || old_attribute == true) {
+                    attribute = product.attributes.filter(obj => {
+                        return obj._id == ('' + ( + 1))
+                    })
+                    old_attribute = true;
+                }
                 element.find('.edit-attribute-name').val(attribute[0].name)
                 element.find('.edit-attributes-name-confirm').trigger('click')
                 //element.find('.row-attributes-value').html('')
                 var attribute_detail = product.attributes_detail.filter(obj => {
-                    return obj.attribute_id == ('' + (index + 1))
+                    return obj.attribute_id == index
                 })
+                if (attribute_detail.length <= 0 || old_attribute == true) {
+                    attribute_detail = product.attributes_detail.filter(obj => {
+                        return obj.attribute_id == ('' + (index+1))
+                    })
+                }
                 var first = true
                 $(attribute_detail).each(function (index_detail, item_detail) {
                     $(element.find('.row-attributes-value').find('.col-md-6').find('.attributes-name')).each(function (index_element, item_element) {
@@ -870,6 +882,16 @@ var product_detail = {
                                 //return obj.variation_attributes.includes({ level: i, name: element.attr('data-attribute-'+i)})
                                 return obj.variation_detail.some(e => e.id == i && e.name == element.attr('data-attribute-' + i))
                             })
+                        }
+                        if (list.length <= 0) {
+                            list = result.data
+                            for (var i = 0; i < product.attributes.length; i++) {
+                                var attr_value = element.attr('data-attribute-' + i);
+                                list = list.filter(obj => {
+                                    //return obj.variation_attributes.includes({ level: i, name: element.attr('data-attribute-'+i)})
+                                    return obj.variation_detail.some(e => e.id == ('' + (i + 1)) && e.name == attr_value)
+                                })
+                            }
                         }
                         if (list.length > 0) {
                             element.attr('data-id', list[0]._id)
@@ -1304,7 +1326,6 @@ var product_detail = {
        
         $('.attributes-name').each(function (index, item) {
             
-            index_attributes++
             if ($('.attributes-name-' + index_attributes) .length > 0)
                 index_attributes++
         })
@@ -1458,7 +1479,7 @@ var product_detail = {
 
                 $(item).each(function (index_attribute, attribute_name) {
                     var row_span = model.attributes_detail.filter(obj => {
-                        return obj.attribute_id == (index_attribute + 1)
+                        return obj.attribute_id == index_attribute
                     }).length
                     if (row_span <= 0) row_span = 1
                     var data_id = 0;
@@ -1675,7 +1696,7 @@ var product_detail = {
 
                 $(item).each(function (index_attribute, attribute_name) {
                     var row_span = model.attributes_detail.filter(obj => {
-                        return obj.attribute_id == (index_attribute + 2)
+                        return obj.attribute_id == (index_attribute + 1)
                     }).length
                     if (row_span <= 0) row_span = 1
                     var data_id = 0;
