@@ -1672,7 +1672,7 @@ var product_detail = {
                             
                             html_item += _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                                 .replaceAll('{i}', 1)
-                                .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-'))
+                                .replaceAll('{class-name}', _global_function.RemoveSpecialCharacter_ky_tu_DB(attribute_name.trim()).replaceAll(' ', '-'))
                                 .replaceAll('{data_attribute}', attribute_name.trim())
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + 1 + '"')
@@ -1681,7 +1681,7 @@ var product_detail = {
 
                             html_item = _product_constants.HTML.ProductDetail_Attribute_Price_Tr_Td
                                 .replaceAll('{i}', 0)
-                                .replaceAll('{class-name}', attribute_name.trim().replaceAll(' ', '-').replaceAll('(', '-').replaceAll(')', '-').replaceAll('[', '-').replaceAll(']', '-'))
+                                .replaceAll('{class-name}', _global_function.RemoveSpecialCharacter_ky_tu_DB(attribute_name.trim()).replaceAll(' ', '-'))
                                 .replaceAll('{data_attribute}', attribute_name.trim())
                                 .replaceAll('{name}', attribute_name.trim())
                                 .replaceAll('{row_span}', 'rowspan="' + 1 + '"')
