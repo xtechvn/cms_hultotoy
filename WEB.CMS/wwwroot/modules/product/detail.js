@@ -347,7 +347,7 @@ var product_detail = {
             })
             name == undefined ? name = text : name;
             if (name != "" && $('.' + _global_function.RemoveSpecialCharacter_ky_tu_DB(name.trim()).replaceAll(' ', '-')).length > 0) {
-                if (type == 0 && name.trim() != text.trim()) {
+                if (type == 0 && name.trim() != text.trim() && text != "") {
                     $('.tr-main').each(function (index_td, item_td) {
                         var element = $(this)
 
@@ -376,6 +376,18 @@ var product_detail = {
                     $('.' + _global_function.RemoveSpecialCharacter_ky_tu_DB(name.trim()).replaceAll(' ', '-')).addClass(_global_function.RemoveSpecialCharacter_ky_tu_DB(text.trim()).replaceAll(' ', '-'));
                     $('.' + _global_function.RemoveSpecialCharacter_ky_tu_DB(name.trim()).replaceAll(' ', '-')).removeClass(_global_function.RemoveSpecialCharacter_ky_tu_DB(name.trim()).replaceAll(' ', '-'));
                     element.attr('data-name', text)
+                } else {
+                    var id = -1;
+                    $('.product-attributes').each(function (index, item) {
+                        var element_parent = $(this)
+
+                        if (element.closest('.col-md-6').find('.namesp').find('.attributes-name').attr('data-name').trim() == name.trim()) {
+                            id = index
+                         
+                        }
+                    })
+                    if (id!= -1)
+                    product_detail.DeleteRowAttributeTablePrice(name, id)
                 }
              
             } else {
