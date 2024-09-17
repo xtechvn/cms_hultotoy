@@ -1552,7 +1552,7 @@ var product_detail = {
         $('.product-attributes').each(function (index, item) {
             var element = $(this)
             model.attributes.push({
-                _id: (index + 1),
+                _id: index,
                 name: element.find('h6').find('b').html(),
             })
 
