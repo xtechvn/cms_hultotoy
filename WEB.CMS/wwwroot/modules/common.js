@@ -161,6 +161,9 @@ var _global_function = {
     RemoveSpecialCharacter: function (text) {
         return text.replaceAll(/[^a-zA-Z0-9àáãảạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệđùúủũụưừứửữựòóỏõọôồốổỗộơờớởỡợìíỉĩịäëïîöüûñçýỳỹỵỷ ]/g, '');
     },
+    RemoveSpecialCharacter_ky_tu_DB: function (text) {
+        return text.replaceAll(/([\\!"#$%&'()*+,./:;<=>?@\[\]^`{|}~])/g, "_");
+    },
     CheckIfStringIsDate: function (text) {
         if (text == null || text == undefined || text.trim() == '')
             return true
