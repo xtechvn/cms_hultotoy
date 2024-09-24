@@ -608,7 +608,6 @@ var product_detail = {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
                         .replaceAll('{id}', item.id)
-
                         .replaceAll('{value}', '')
 
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item
@@ -800,6 +799,7 @@ var product_detail = {
                 default: {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
+                        .replaceAll('{dataid}', (specification[0].type_ids))
                         .replaceAll('{id}', item.id)
                         .replaceAll('{value}', specification.length > 0 ? specification[0].value : '')
 
@@ -953,13 +953,13 @@ var product_detail = {
 
         _product_function.POST('/Product/GetSpecificationByName', { type: type, name: name }, function (result) {
             if (result.is_success && result.data && result.data.length > 0) {
-                var current_value = element.closest('.col-md-6').find('.namesp').find('.input-select-option').val()
+                var current_value = element.closest('.col-md-6').find('.namesp').find('.input-select-option').attr('data-value')
                 if (current_value == undefined) current_value = ''
                 $(result.data).each(function (index, item) {
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions_NewOptions
                         .replaceAll('{option-name}', 'specification-' + type)
                         .replaceAll('{value}', item._id)
-                        .replaceAll('{checked}', current_value.includes(item.attribute_name) ? 'checked' : '')
+                        .replaceAll('{checked}', current_value.includes(item._id) ? 'checked' : '')
                         .replaceAll('{name}', item.attribute_name)
                 })
             }
@@ -1216,7 +1216,8 @@ var product_detail = {
                 _id: '-1',
                 attribute_id: element.attr('data-attr-id'),
                 value_type: element.attr('data-type'),
-                value: element.find('input').val()
+                value: element.find('input').val(),
+                type_ids: element.find('input').attr('data-value'),
             })
 
         })

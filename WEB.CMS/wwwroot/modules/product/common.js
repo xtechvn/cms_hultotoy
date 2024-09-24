@@ -259,7 +259,7 @@ var _product_constants = {
             </div>`,
         ProductDetail_Specification_Row_Item_SelectOptions_NewOptions: `<li style=" list-style: none; "><input class="checkbox-option" type="checkbox" name="{option-name}" value="{value}" {checked}> <span>{name}</span></li>`,
         ProductDetail_Specification_Row_Item_SelectOptions: ` <div class="form-group namesp"data-type="1" data-attr-id="{id}">
-                <input type="text" class="form-control input-select-option" placeholder="{placeholder}" readonly value="{value}">
+                <input type="text" class="form-control input-select-option" data-value="{dataid}" placeholder="{placeholder}" readonly value="{value}">
                 <a href="" class="edit"><i class="icofont-thin-down"></i></a>
             </div>
             <div class="select-option p-2" style="width:90%;display:none;">
@@ -395,7 +395,7 @@ var _product_constants = {
 
                                             </label>
                                             <div class="form-group mb-0 price discount-percent">
-                                                <input type="text" class="form-control input-price" placeholder="Nhập số">
+                                                <input type="text" class="form-control input-price" placeholder="Nhập số" maxlength="3">
                                                 <span class="note">%</span>
                                             </div>
                                         </div>
