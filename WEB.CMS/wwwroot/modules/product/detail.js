@@ -1296,7 +1296,7 @@ var product_detail = {
         _product_function.POST('/Product/Summit', { request: model }, function (result) {
             if (result.is_success) {
                 _global_function.RemoveLoading()
-                _msgalert.success('Thêm mới sản phẩm thành công')
+                _msgalert.success(result.msg)
                 setTimeout(function () {
                     window.location.href = '/product';
                 }, 2000);

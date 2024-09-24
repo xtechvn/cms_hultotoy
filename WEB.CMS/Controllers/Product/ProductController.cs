@@ -152,6 +152,7 @@ namespace WEB.CMS.Controllers
         }
         public async Task<IActionResult> Summit(ProductMongoDbSummitModel request)
         {
+            var msg = "Cập nhật sản phẩm thành công";
             try
             {
                 //ProductMongoDbSummitModel request = JsonConvert.DeserializeObject<ProductMongoDbSummitModel>(request_object);
@@ -238,6 +239,7 @@ namespace WEB.CMS.Controllers
                 product_main.parent_product_id = "";
                 if (product_main._id==null || product_main._id.Trim() == "")
                 {
+                    msg = "Thêm mới sản phẩm thành công";
                     product_main.status = (int)ProductStatus.ACTIVE;
                     rs = await _productV2DetailMongoAccess.AddNewAsync(product_main);
                    
@@ -283,7 +285,7 @@ namespace WEB.CMS.Controllers
                     return Ok(new
                     {
                         is_success = true,
-                        msg = "Thêm mới / Cập nhật sản phẩm thành công",
+                        msg = msg,
                         data = rs
                     });
                 }
