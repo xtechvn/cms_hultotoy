@@ -65,7 +65,7 @@
         return img_src
     },
     CheckIfImageVideoIsLocal: function (data) {
-        if (data.includes("data:image") || data.includes("data:video") || data.includes("base64,")) {
+        if (data != undefined && (data.includes("data:image") || data.includes("data:video") || data.includes("base64,"))) {
             return true
         }
         else {
@@ -119,7 +119,8 @@ var _product_constants = {
                             <td class="text-center">{stock}</td>
                             <td class="text-center">
                                 <a href="javascript:;" class="product-edit">Cập nhật</a><br />
-                                <a href="javascript:;" class="product-viewmore" style="display: none;" >Xem thêm</a>
+                                <a href="javascript:;" class="product-viewmore" style="display: none;" >Xem thêm</a><br />
+                                <a href="javascript:;" class="product-remove">xóa</a><br />
                             </td>
                         </tr>
         `,

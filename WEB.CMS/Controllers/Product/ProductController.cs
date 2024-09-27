@@ -25,25 +25,25 @@ namespace WEB.CMS.Controllers
         private readonly ProductSpecificationMongoAccess _productSpecificationMongoAccess;
         private readonly GroupProductESService _groupProductESService;
         private readonly RedisConn _redisConn;
-        private  StaticAPIService _staticAPIService;
+        private StaticAPIService _staticAPIService;
         private readonly int group_product_root = 1;
         private readonly int db_index = 9;
         public ProductController(IConfiguration configuration, RedisConn redisConn)
         {
             _productV2DetailMongoAccess = new ProductDetailMongoAccess(configuration);
             _groupProductESService = new GroupProductESService(configuration["DataBaseConfig:Elastic:Host"], configuration);
-            _productSpecificationMongoAccess = new ProductSpecificationMongoAccess( configuration);
-            _staticAPIService = new StaticAPIService( configuration);
+            _productSpecificationMongoAccess = new ProductSpecificationMongoAccess(configuration);
+            _staticAPIService = new StaticAPIService(configuration);
             _redisConn = redisConn;
             _redisConn.Connect();
             db_index = Convert.ToInt32(configuration["Redis:Database:db_search_result"]);
         }
         public IActionResult Index()
         {
-           
+
             return View();
-        } 
-        
+        }
+
         public IActionResult Detail(string id = "")
         {
             ViewBag.ProductId = id;
@@ -53,14 +53,14 @@ namespace WEB.CMS.Controllers
         {
             try
             {
-                if(group_id>0)
-                return Ok(new
-                {
-                    is_success = true,
-                    data =  _groupProductESService.GetListGroupProductByParentId(group_id),
-                    position = position
+                if (group_id > 0)
+                    return Ok(new
+                    {
+                        is_success = true,
+                        data = _groupProductESService.GetListGroupProductByParentId(group_id),
+                        position = position
 
-                });
+                    });
             }
             catch
             {
@@ -82,7 +82,7 @@ namespace WEB.CMS.Controllers
                 {
                     is_success = true,
                     data = JsonConvert.SerializeObject(main_products),
-                    subdata =JsonConvert.SerializeObject(await _productV2DetailMongoAccess.SubListing(main_products.Select(x => x._id)))
+                    subdata = JsonConvert.SerializeObject(await _productV2DetailMongoAccess.SubListing(main_products.Select(x => x._id)))
                 });
 
             }
@@ -121,24 +121,26 @@ namespace WEB.CMS.Controllers
             {
                 var product = await _productV2DetailMongoAccess.GetByID(product_id);
                 var group_string = "";
-                if (product != null && product.group_product_id!=null && product.group_product_id.Trim()!="") {
+                if (product != null && product.group_product_id != null && product.group_product_id.Trim() != "")
+                {
                     try
                     {
                         var split_value = product.group_product_id.Split(",");
-                        for (int i=0;i<split_value.Length;i++) {
+                        for (int i = 0; i < split_value.Length; i++)
+                        {
                             var group = _groupProductESService.GetDetailGroupProductById(Convert.ToInt64(split_value[i]));
                             group_string += group.Name;
                             if (i < (split_value.Length - 1)) group_string += " > ";
                         }
                     }
                     catch { }
-                    
+
                 }
                 return Ok(new
                 {
                     is_success = true,
                     data = JsonConvert.SerializeObject(await _productV2DetailMongoAccess.GetByID(product_id)),
-                    product_group= group_string
+                    product_group = group_string
                 });
             }
             catch
@@ -156,11 +158,10 @@ namespace WEB.CMS.Controllers
             try
             {
                 //ProductMongoDbSummitModel request = JsonConvert.DeserializeObject<ProductMongoDbSummitModel>(request_object);
-                if (request==null||
-                    request.name==null || request.name.Trim()==""
-                    || request.images == null || request.images.Count<=0
+                if (request == null ||
+                    request.name == null || request.name.Trim() == ""
+                    || request.images == null || request.images.Count <= 0
                     || request.avatar == null || request.avatar.Trim() == ""
-                    || request.group_product_id == null || request.group_product_id.Trim() == ""
                     )
                 {
                     return Ok(new
@@ -191,7 +192,7 @@ namespace WEB.CMS.Controllers
                 //            uploaded_image.Add(img);
 
                 //        }
-                       
+
                 //    }
                 //}
                 //request.images = uploaded_image;
@@ -224,7 +225,7 @@ namespace WEB.CMS.Controllers
                 //        }
                 //    }
                 //}
-               
+
                 //-- Add/Update product_main
                 var product_main = JsonConvert.DeserializeObject<ProductMongoDbModel>(JsonConvert.SerializeObject(request));
                 //-- Add / Update Sub product
@@ -235,23 +236,25 @@ namespace WEB.CMS.Controllers
                     product_main.amount_max = amount_variations.OrderByDescending(x => x).First();
                     product_main.amount_min = amount_variations.OrderBy(x => x).First();
                     product_main.quanity_of_stock = request.variations.Sum(x => x.quanity_of_stock);
+                    product_main.updated_last = DateTime.Now;
                 }
                 product_main.parent_product_id = "";
-                if (product_main._id==null || product_main._id.Trim() == "")
+                if (product_main._id == null || product_main._id.Trim() == "")
                 {
+                    product_main.created_date = DateTime.Now;
                     msg = "Thêm mới sản phẩm thành công";
                     product_main.status = (int)ProductStatus.ACTIVE;
                     rs = await _productV2DetailMongoAccess.AddNewAsync(product_main);
-                   
+
                 }
                 else
                 {
-                    var old_product= await _productV2DetailMongoAccess.GetByID(product_main._id);
+                    var old_product = await _productV2DetailMongoAccess.GetByID(product_main._id);
                     rs = await _productV2DetailMongoAccess.UpdateAsync(product_main);
                     await _productV2DetailMongoAccess.DeactiveByParentId(product_main._id);
                     //await _productV2DetailMongoAccess.DeleteInactiveByParentId(product_main._id);
                 }
-                
+
                 //-- Add / Update Sub product
                 if (request.variations != null && request.variations.Count > 0)
                 {
@@ -276,7 +279,7 @@ namespace WEB.CMS.Controllers
                             await _productV2DetailMongoAccess.AddNewAsync(product_by_variations);
                         }
                     }
-                  
+
                 }
                 await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING, db_index);
                 await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_DETAIL + product_main._id, db_index);
@@ -335,7 +338,7 @@ namespace WEB.CMS.Controllers
             {
                 is_success = false,
             });
-        } 
+        }
         public async Task<IActionResult> SummitVideo(string data_video)
         {
             try
@@ -377,7 +380,7 @@ namespace WEB.CMS.Controllers
             try
             {
                 List<GroupProduct> groups = new List<GroupProduct>();
-                foreach(var id in ids.Split(","))
+                foreach (var id in ids.Split(","))
                 {
                     if (id != null && id.Trim() != "")
                     {
@@ -391,7 +394,7 @@ namespace WEB.CMS.Controllers
                 return Ok(new
                 {
                     is_success = true,
-                    data= groups,
+                    data = groups,
                 });
             }
             catch
@@ -438,7 +441,7 @@ namespace WEB.CMS.Controllers
             {
                 if (name == null || name.Trim() == "")
                 {
-                   
+
                 }
                 else
                 {
@@ -458,7 +461,7 @@ namespace WEB.CMS.Controllers
                         });
                     }
                 }
-               
+
             }
             catch
             {
@@ -473,7 +476,7 @@ namespace WEB.CMS.Controllers
         {
             try
             {
-                if (type<=0)
+                if (type <= 0)
                 {
 
                 }
@@ -497,7 +500,80 @@ namespace WEB.CMS.Controllers
                 is_success = false
             });
         }
-        
+        public async Task<IActionResult> CopyProductByID(string product_id)
+        {
+            var msg = "Sao chép sản phẩm thành công";
+            try
+            {
+                var product = await _productV2DetailMongoAccess.GetByID(product_id);
+
+                product.created_date = DateTime.Now;
+                product.updated_last = DateTime.Now;
+
+                var rs = await _productV2DetailMongoAccess.AddNewAsync(product);
+                if (rs != null)
+                {
+                    return Ok(new
+                    {
+                        is_success = true,
+                        msg = msg,
+                        data = rs
+                    });
+                }
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("CopyProductByID - ProductController: " + ex.ToString());
+                return Ok(new
+                {
+                    is_success = false,
+                    msg = "sao chép sản phẩm thất bại, vui lòng liên hệ bộ phận IT",
+                });
+            }
+            return Ok(new
+            {
+                is_success = false,
+                msg = "sao chép sản phẩm thất bại",
+            });
+        }
+        public async Task<IActionResult> UpdateProductStatus(string product_id)
+        {
+            var msg = "Ẩn phẩm thành công";
+            try
+            {
+                var product = await _productV2DetailMongoAccess.GetByID(product_id);
+                product.updated_last = DateTime.Now;
+                product.status = (int)ProductStatus.DEACTIVE;
+                await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING, db_index);
+                await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_DETAIL + product._id, db_index);
+                var  rs = await _productV2DetailMongoAccess.UpdateAsync(product);
+                if (rs != null)
+                {
+                    return Ok(new
+                    {
+                        is_success = true,
+                        msg = msg,
+                        data = rs
+                    });
+                }
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("CopyProductByID - ProductController: " + ex.ToString());
+                return Ok(new
+                {
+                    is_success = false,
+                    msg = "Ẩn sản phẩm thất bại, vui lòng liên hệ bộ phận IT",
+                });
+            }
+            return Ok(new
+            {
+                is_success = false,
+                msg = "Ẩn sản phẩm thất bại",
+            });
+        }
     }
-  
+
 }
