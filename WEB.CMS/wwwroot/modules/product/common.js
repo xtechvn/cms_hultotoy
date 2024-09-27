@@ -154,7 +154,7 @@ var _product_constants = {
                                 </tr>`,
         ProductDetail_Images_AddImagesButton: `<div class="items import">
                                 <label class="choose choose-wrap">
-                                    <input class="image_input" type="file" name="myFile">
+                                    <input class="image_input" type="file" name="myFile" multiple>
                                     <div class="choose-content choose-product-images">
                                         <i class="icofont-image"></i>
                                         <span>Thêm hình ảnh (<nw class="count">{0}</nw>/{max})</span>
