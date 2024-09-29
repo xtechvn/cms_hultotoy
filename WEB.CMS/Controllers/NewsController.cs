@@ -1,4 +1,5 @@
-﻿using Entities.ViewModels;
+﻿using Amazon.Runtime.Internal.Transform;
+using Entities.ViewModels;
 using Entities.ViewModels.News;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -18,6 +19,7 @@ using Utilities.Common;
 using Utilities.Contants;
 using WEB.CMS.Customize;
 using WEB.CMS.Models;
+using WEB.CMS.RabitMQ;
 using WEB.CMS.Service.News;
 
 namespace WEB.CMS.Controllers
@@ -33,6 +35,7 @@ namespace WEB.CMS.Controllers
         private readonly ICommonRepository _CommonRepository;
         private readonly IWebHostEnvironment _WebHostEnvironment;
         private readonly IConfiguration _configuration;
+        private readonly WorkQueueClient work_queue;
 
         public NewsController(IConfiguration configuration, IArticleRepository articleRepository, IUserRepository userRepository, ICommonRepository commonRepository, IWebHostEnvironment hostEnvironment,
             IGroupProductRepository groupProductRepository)
@@ -43,6 +46,7 @@ namespace WEB.CMS.Controllers
             _WebHostEnvironment = hostEnvironment;
             _configuration = configuration;
             _GroupProductRepository = groupProductRepository;
+            work_queue = new WorkQueueClient(configuration);
 
 
         }
@@ -181,7 +185,19 @@ namespace WEB.CMS.Controllers
                     if (model.Categories != null && model.Categories.Count > 0)
                         strCategories = string.Join(",", model.Categories);
 
-                     ClearCacheArticle(articleId, strCategories);
+                    ClearCacheArticle(articleId, strCategories);
+
+                    // Tạo message để push vào queue
+                    var j_param = new Dictionary<string, object>
+                            {
+                                { "store_name", "Sp_GetAllArticle" },
+                                { "index_es", "es_hulotoys_sp_get_article" },
+                                {"project_type", "Hulotoy" }
+
+                            };
+                    var _data_push = JsonConvert.SerializeObject(j_param);
+                    // Push message vào queue
+                    var response_queue = work_queue.InsertQueueSimple(_data_push, QueueName.queue_app_push);
 
                     return new JsonResult(new
                     {
@@ -235,6 +251,18 @@ namespace WEB.CMS.Controllers
                     var Categories = await _ArticleRepository.GetArticleCategoryIdList(Id);
                     ClearCacheArticle(Id, string.Join(",", Categories));
 
+                    // Tạo message để push vào queue
+                    var j_param = new Dictionary<string, object>
+                            {
+                                { "store_name", "Sp_GetAllArticle" },
+                                { "index_es", "es_hulotoys_sp_get_article" },
+                                {"project_type", "Hulotoy" }
+
+                            };
+                    var _data_push = JsonConvert.SerializeObject(j_param);
+                    // Push message vào queue
+                    var response_queue = work_queue.InsertQueueSimple(_data_push, QueueName.queue_app_push);
+
                     return new JsonResult(new
                     {
                         isSuccess = true,
@@ -273,6 +301,17 @@ namespace WEB.CMS.Controllers
                 {
                     //  clear cache article
                     ClearCacheArticle(Id, string.Join(",", Categories));
+                    // Tạo message để push vào queue
+                    var j_param = new Dictionary<string, object>
+                            {
+                                { "store_name", "Sp_GetAllArticle" },
+                                { "index_es", "es_hulotoys_sp_get_article" },
+                                {"project_type", "Hulotoy" }
+
+                            };
+                    var _data_push = JsonConvert.SerializeObject(j_param);
+                    // Push message vào queue
+                    var response_queue = work_queue.InsertQueueSimple(_data_push, QueueName.queue_app_push);
 
                     return new JsonResult(new
                     {
