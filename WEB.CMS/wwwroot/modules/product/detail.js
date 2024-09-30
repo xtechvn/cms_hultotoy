@@ -1365,7 +1365,7 @@ var product_detail = {
         if ($('#images .flex-lg-nowrap .magnific_popup').length >= max_item) {
             _msgalert.error('Số lượng ảnh vượt quá giới hạn')
             success = false
-        } else if ($('#images .flex-lg-nowrap .magnific_popup').length ==0) {
+        } else if ($('#images .magnific_popup').length ==0) {
             _msgalert.error('Chưa có ảnh sản phẩm')
             success = false
         }
@@ -1376,7 +1376,7 @@ var product_detail = {
             _msgalert.error('Số lượng ảnh đại diện vượt quá giới hạn')
             success = false
         }
-        else if ($('#avatar .flex-lg-nowrap .magnific_popup').length == 0) {
+        else if ($('#avatar .magnific_popup').length == 0) {
             _msgalert.error('Chưa có ảnh đại diện sản phẩm')
             success = false
         }
