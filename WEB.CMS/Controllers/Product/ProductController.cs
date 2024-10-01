@@ -537,24 +537,24 @@ namespace WEB.CMS.Controllers
                 msg = "sao chép sản phẩm thất bại",
             });
         }
-        public async Task<IActionResult> UpdateProductStatus(string product_id)
+        public async Task<IActionResult> UpdateProductStatus(string product_id,long status)
         {
             var msg = "Ẩn phẩm thành công";
             try
             {
                 var product = await _productV2DetailMongoAccess.GetByID(product_id);
                 product.updated_last = DateTime.Now;
-                product.status = (int)ProductStatus.DEACTIVE;
-                await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING, db_index);
-                await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_DETAIL + product._id, db_index);
+                product.status = (int)ProductStatus.DEACTIVE;          
                 var  rs = await _productV2DetailMongoAccess.UpdateAsync(product);
                 if (rs != null)
                 {
+                    await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING, db_index);
+                    await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_DETAIL + product._id, db_index);
                     return Ok(new
                     {
                         is_success = true,
                         msg = msg,
-                        data = rs
+                      
                     });
                 }
 

@@ -33,12 +33,21 @@ var product_index = {
 
             }
         });
-        $('body').on('click', '.product-viewmore', function () {
+        $('body').on('click', '.product-remove-sp', function () {
             var element = $(this)
             var product_id = element.closest('tr').attr('data-id')
             if (product_id != null && product_id != undefined && product_id.trim() != '') {
-                window.location.href = '/product/detail/' + product_id
-
+                _product_function.POST('/Product/UpdateProductStatus', { product_id: product_id,status:2 }, function (result) {
+                    if (result.is_success) {
+                        _msgalert.success(result.msg)
+                        setTimeout(function () {
+                            window.location.href = '/product'
+                        }, 1000);
+                    }
+                    else {
+                        _msgalert.error(result.msg)
+                    }
+                });
             }
         });
         $('body').on('click', '.product-copy', function () {
