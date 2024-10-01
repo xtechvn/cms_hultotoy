@@ -537,14 +537,14 @@ namespace WEB.CMS.Controllers
                 msg = "sao chép sản phẩm thất bại",
             });
         }
-        public async Task<IActionResult> UpdateProductStatus(string product_id,long status)
+        public async Task<IActionResult> UpdateProductStatus(string product_id,int status)
         {
             var msg = "Ẩn phẩm thành công";
             try
             {
                 var product = await _productV2DetailMongoAccess.GetByID(product_id);
                 product.updated_last = DateTime.Now;
-                product.status = (int)ProductStatus.DEACTIVE;          
+                product.status = status;          
                 var  rs = await _productV2DetailMongoAccess.UpdateAsync(product);
                 if (rs != null)
                 {

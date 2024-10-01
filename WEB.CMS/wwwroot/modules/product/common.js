@@ -121,6 +121,8 @@ var _product_constants = {
                                 <a href="javascript:;" class="product-edit">Cập nhật</a><br />
                                 <a href="javascript:;" class="product-viewmore" style="display: none;" >Xem thêm</a><br />
                                 <a href="javascript:;" class="product-remove-sp">Ẩn</a><br />
+                                <a href="javascript:;" class="product-remove-sp2">Xóa</a><br />
+                                <a href="javascript:;" class="product-copy-sp">Sao chép</a><br />
                             </td>
                         </tr>
         `,
