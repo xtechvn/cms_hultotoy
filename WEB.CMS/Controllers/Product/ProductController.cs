@@ -506,13 +506,23 @@ namespace WEB.CMS.Controllers
             try
             {
                 var product = await _productV2DetailMongoAccess.GetByID(product_id);
+                var SubListing = await _productV2DetailMongoAccess.SubListing(product_id);
 
                 product.created_date = DateTime.Now;
                 product.updated_last = DateTime.Now;
 
                 var rs = await _productV2DetailMongoAccess.AddNewAsync(product);
+                
                 if (rs != null)
                 {
+                    if(SubListing != null)
+                    {
+                        foreach(var item in SubListing)
+                        {
+                            item.parent_product_id = rs;
+                            await _productV2DetailMongoAccess.AddNewAsync(item);
+                        }
+                    }
                     return Ok(new
                     {
                         is_success = true,
