@@ -799,7 +799,7 @@ var product_detail = {
                 default: {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
-                        .replaceAll('{dataid}', (specification[0].type_ids))
+                        .replaceAll('{dataid}', (specification.length > 0 ? specification[0].type_ids : ''))
                         .replaceAll('{id}', item.id)
                         .replaceAll('{value}', specification.length > 0 ? specification[0].value : '')
 
