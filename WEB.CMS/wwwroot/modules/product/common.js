@@ -119,10 +119,16 @@ var _product_constants = {
                             <td class="text-center">{stock}</td>
                             <td class="text-center">
                                 <a href="javascript:;" class="product-edit">Cập nhật</a><br />
-                                <a href="javascript:;" class="product-viewmore" style="display: none;" >Xem thêm</a><br />
-                                <a href="javascript:;" class="product-remove-sp">Ẩn</a><br />
-                                <a href="javascript:;" class="product-remove-sp2">Xóa</a><br />
-                                <a href="javascript:;" class="product-copy-sp">Sao chép</a><br />
+                                <a href="javascript:;" class="product-viewmore onclick"  >Xem thêm</a><br />
+                               
+                                <div class="form-down grid-slide-{id}" style="display: none;" >
+                                    <div >
+                                        <a href="javascript:;" class="product-copy-sp">Sao chép</a><br />
+                                        <a href="javascript:;" class="product-remove-sp">Ẩn</a><br />
+                                        <a href="javascript:;" class="product-remove-sp2">Xóa</a><br />
+                                    </div>
+
+                                </div>
                             </td>
                         </tr>
         `,

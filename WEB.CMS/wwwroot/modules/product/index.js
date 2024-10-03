@@ -33,6 +33,7 @@ var product_index = {
 
             }
         });
+    
         $('body').on('click', '.product-remove-sp', function () {
             var element = $(this)
             var product_id = element.closest('tr').attr('data-id')
