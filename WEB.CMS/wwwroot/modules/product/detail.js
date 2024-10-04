@@ -869,8 +869,18 @@ var product_detail = {
                         if (index_element == index_detail) {
                             var element_attr_detail = $(this)
                             if (item_detail.img != null) {
-                                var img_src = _product_function.CorrectImage(item_detail.img)
-                                element_attr_detail.closest('.col-md-6').find('#image_row_item').find('.row_item').html('<img src="' + img_src +'">')
+
+                                var img_src = _product_function.CorrectImage(product.avatar)
+
+                              
+                                var html =`<div class="items magnific_popup" data-id="-1" bis_skin_checked="1">
+                                <button type="button" class="delete"><i class="icofont-close-line"></i></button>
+                                <a class="thumb_img thumb_1x1 magnific_thumb">
+                                    <img src="{img_src}">
+                                </a>
+                            </div>`
+                                element_attr_detail.closest('.col-md-6').find('#image_row_item').find('.list').prepend(html.replaceAll('{img_src}', img_src))
+
                             }
                             element_attr_detail.val(item_detail.name)
                             element_attr_detail.attr('data-name',item_detail.name)
@@ -1128,8 +1138,8 @@ var product_detail = {
 
             } break
             case 'image_row_item': {
-                var max_item = _product_constants.VALUES.ProductDetail_Max_Image
-                if (element.closest('.image_input').find('.magnific_popup').length >= 1) {
+     
+                if (element.closest('.flex-lg-nowrap').find('.magnific_popup').length >= 1) {
                     _msgalert.error('Số lượng ảnh vượt quá giới hạn')
                     element.val(null)
                 }
@@ -1142,15 +1152,14 @@ var product_detail = {
 
                         var reader = new FileReader();
                         reader.onload = function (e) {
-                            element.closest('#image_row_item').find('.row_item').html(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
-                          
+                            element.closest('.list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
+            
                         }
                         reader.readAsDataURL(item);
                     });
                     element.val(null)
 
                 }
-
             } break
         }
 
