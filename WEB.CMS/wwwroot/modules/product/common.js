@@ -188,10 +188,14 @@ var _product_constants = {
         ProductDetail_Attribute_Row_Item: ` <div class="col-md-6 lastest-attribute-value item">
                             <div class="box-list">
                                 <div class="form-group namesp flex-input-choose">
-                                    <label class="choose choose-wrap">
-                                        <input type="file" name="myFile">
-                                        <div class="choose-content">
-                                            <i class="icofont-image"></i>
+                                    <label id="image_row_item" class="flex list align-items-center choose choose-wrap flex-lg-nowrap">
+                                        <div class="items import">
+                                            <label class="choose choose-wrap">
+                                                <input class="image_input" type="file" name="myFile">
+                                                <div class="choose-content row_item">
+                                                    <i class="icofont-image"></i>
+                                                </div>
+                                            </label>
                                         </div>
                                     </label>
                                     <div class="relative w-100">
