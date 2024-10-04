@@ -776,7 +776,7 @@ var product_detail = {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_Input
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
                         .replaceAll('{id}', item.id)
-                        .replaceAll('{value}', specification.length > 0 ? specification[0].value : '')
+                        .replaceAll('{value}', specification.length > 0 ? specification[0].value != "null" ? specification[0].value:'' : '')
 
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item
                         .replaceAll('{type}', item.type)
@@ -789,7 +789,7 @@ var product_detail = {
                     var html_item = _product_constants.HTML.ProductDetail_Specification_Row_Item_DateTime
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
                         .replaceAll('{id}', item.id)
-                        .replaceAll('{value}', specification.length > 0 ? specification[0].value : '')
+                        .replaceAll('{value}', specification.length > 0 ? specification[0].value != "null" ? specification[0].value : '' : '')
 
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item
                         .replaceAll('{type}', item.type).replaceAll('{name}', item.name).replaceAll('{wrap_input}', html_item)
@@ -801,7 +801,7 @@ var product_detail = {
                         .replaceAll('{placeholder}', ('Nhập ' + item.name))
                         .replaceAll('{dataid}', (specification.length > 0 ? specification[0].type_ids : ''))
                         .replaceAll('{id}', item.id)
-                        .replaceAll('{value}', specification.length > 0 ? specification[0].value : '')
+                        .replaceAll('{value}', specification.length > 0 ? specification[0].value != "null" ? specification[0].value : '' : '')
 
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item
                         .replaceAll('{type}', item.type).replaceAll('{name}', item.name).replaceAll('{wrap_input}', html_item)
