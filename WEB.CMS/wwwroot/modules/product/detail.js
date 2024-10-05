@@ -870,7 +870,7 @@ var product_detail = {
                             var element_attr_detail = $(this)
                             if (item_detail.img != null) {
 
-                                var img_src = _product_function.CorrectImage(product.avatar)
+                                var img_src = _product_function.CorrectImage(item_detail.img)
 
                               
                                 var html =`<div class="items magnific_popup" data-id="-1" bis_skin_checked="1">
