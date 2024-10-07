@@ -127,6 +127,8 @@ public partial class DataMSContext : DbContext
 
     public virtual DbSet<ProvinceHotel> ProvinceHotels { get; set; }
 
+    public virtual DbSet<Rating> Ratings { get; set; }
+
     public virtual DbSet<ReceivePromotion> ReceivePromotions { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
@@ -1106,6 +1108,25 @@ public partial class DataMSContext : DbContext
 
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<Rating>(entity =>
+        {
+            entity.ToTable("Rating");
+
+            entity.Property(e => e.Comment).HasMaxLength(1000);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.ImgLink)
+                .HasMaxLength(1000)
+                .IsUnicode(false);
+            entity.Property(e => e.ProductId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Star).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.VideoLink)
+                .HasMaxLength(1000)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<ReceivePromotion>(entity =>

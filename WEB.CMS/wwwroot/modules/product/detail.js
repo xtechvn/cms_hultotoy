@@ -685,7 +685,9 @@ var product_detail = {
         $('#avatar .items .count').html($('#avatar .items .count').closest('.list').find('.magnific_popup').length)
 
         $(product.videos).each(function (index, item) {
-            $('#videos .list').prepend(_product_constants.HTML.ProductDetail_Video_Item.replaceAll('{src}', item).replaceAll('{id}', '-1'))
+            if (item == null || item.trim() == '') return true
+            var img_src = _product_function.CorrectImage(item)
+            $('#videos .list').prepend(_product_constants.HTML.ProductDetail_Video_Item.replaceAll('{src}', img_src).replaceAll('{id}', '-1'))
             $('#videos .items .count').html($('#videos .items .count').closest('.list').find('.magnific_popup').length)
 
         })
@@ -1219,27 +1221,37 @@ var product_detail = {
                 model.avatar = result.data
             }
         }
-        var result = _product_function.POSTSynchorus('/Product/SummitImages', { data_image: $('#avatar .list .items').first().find('img').attr('src') })
+        var result = _product_function.POSTSynchorus('/Files/SummitImages', { data_image: $('#avatar .list .items').first().find('img').attr('src') })
         if (result != undefined && result.data != undefined && result.data.trim() != '') {
             model.avatar = result.data
         } else {
             model.avatar = $('#avatar .list .items').first().find('img').attr('src')
         }
+      
         model.videos = []
-        $('#videos .list .items').each(function (index, item) {
+        $('#videos .items .magnific_thumb').each(function (index, item) {
             var element_image = $(this)
             //model.videos.push(element_image.find('video').find('source').attr('src'))
             var data_src = element_image.find('video').find('source').attr('src')
             if (data_src == null || data_src == undefined || data_src.trim() == '') return true
             if (_product_function.CheckIfImageVideoIsLocal(data_src)) {
-                var result = _product_function.POSTSynchorus('/Product/SummitVideo', { data_video: data_src })
+                const byteCharacters = atob(data_src.split('base64,')[1]);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: "video/mp4" });
+
+                //// Create a FormData object to send via AJAX
+                var formData = new FormData();
+                formData.append('request', blob, 'video.mp4'); // Append the Blob as a file
+
+                var result = _product_function.POSTFileSynchorus('/Files/SummitVideo', formData)
+
                 if (result != undefined && result.data != undefined && result.data.trim() != '') {
                     model.videos.push(result.data)
-                } else {
-                    model.videos.push(data_src)
                 }
-            } else {
-                model.images.push(data_src)
             }
 
         })
@@ -1633,7 +1645,7 @@ var product_detail = {
         $('#product-attributes-box .attributes-name').each(function (index_2, item_2) {
             var element = $(this)
             var img_src = element.closest('.col-md-6 ').find('#image_row_item').find('img').attr('src')
-            if (_product_function.CheckIfImageVideoIsLocal(img_src)) {
+            if (img_src != undefined && _product_function.CheckIfImageVideoIsLocal(img_src)) {
                 var result = _product_function.POSTSynchorus('/Product/SummitImages', { data_image: img_src })
                 if (result != undefined && result.data != undefined && result.data.trim() != '') {
                     img_src = result.data

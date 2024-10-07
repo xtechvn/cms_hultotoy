@@ -43,6 +43,24 @@
             });
         });
     },
+    POSTFileSynchorus: function (url, model) {
+        var data = undefined
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: model,
+            processData: false,  // Prevent jQuery from processing the data
+            contentType: false,  // Prevent jQuery from setting contentType
+            success: function (result) {
+                data = result;
+            },
+            error: function (err) {
+                console.log(err)
+            },
+            async: false
+        });
+        return data
+    },
     Comma: function (number) { //function to add commas to textboxes
         number = ('' + number).replace(/[^0-9.,]+/g, '');
         number += '';
@@ -62,6 +80,11 @@
             && !img_src.includes("http")
             && !img_src.includes("base64,"))
             img_src = _product_constants.VALUES.StaticDomain + image
+        else if  (!img_src.includes(_product_constants.VALUES.StaticDomain)
+            && !img_src.includes("data:video")
+            && !img_src.includes("http")
+            && !img_src.includes("base64,"))
+            img_src = _product_constants.VALUES.StaticDomain + image
         return img_src
     },
     CheckIfImageVideoIsLocal: function (data) {
@@ -71,7 +94,8 @@
         else {
             return false
         }
-    },
+    }
+    
 }
 var _product_constants = {
     VALUES: {
