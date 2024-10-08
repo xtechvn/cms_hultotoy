@@ -201,6 +201,31 @@ var product_detail = {
                 product_detail.DeleteRowAttributeTablePrice(text, id)
             }
         });
+        $('body').on('click', '.attribute-item-draggable', function () {
+            var element = $(this)
+            element.closest('.row-attributes-value').sortable({
+                group: "row-attributes-value",
+                animation: 150,
+                ghostClass: "row-attributes-value",
+            });
+
+            //const column = document.querySelector('.row-attributes-value');
+
+            //new Sortable(column, {
+            //    animation: 150,
+            //    ghostClass: 'blue-background-class'
+            //});
+            //const columns = document.querySelectorAll(".row-attributes-value");
+
+            //columns.forEach((column) => {
+            //    new Sortable(column, {
+            //        group: "shared",
+            //        animation: 150,
+            //        ghostClass: "blue-background-class",
+            //    });
+
+            //});
+        });
         $('body').on('click', '.attribute-item-add', function () {
             var element = $(this)
 
@@ -215,6 +240,7 @@ var product_detail = {
             //element.closest('.row-attributes-value').find('.attributes-name').removeClass('attributes-name')
 
         });
+  
         $('body').on('click', '.attribute-name-edit', function () {
             var element = $(this)
             element.hide()
