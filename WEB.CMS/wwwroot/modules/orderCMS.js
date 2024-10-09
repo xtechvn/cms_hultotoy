@@ -94,13 +94,18 @@ $(document).ready(function () {
                     results: $.map(response.data, function (item) {
                         return {
                             text: item.orderno,
-                            id: item.orderno.toUpperCase(),
+                            id: item.id,  // using OrderId as the ID
+                            orderno: item.orderno.toUpperCase()
+                            
                         }
                     })
                 };
             },
             cache: true
         }
+    }).on('select2:select', function (e) {
+        var selectedOrderId = e.params.data.id;
+        window.location.href = '/Order/' + selectedOrderId;
     });
 
 

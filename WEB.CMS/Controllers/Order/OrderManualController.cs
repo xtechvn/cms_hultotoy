@@ -98,11 +98,15 @@ namespace WEB.CMS.Controllers.Order
                 }
                 if (txt_search != null)
                 {
-                    data = await _orderESRepository.GetOrderNoSuggesstion(txt_search);
+               data = await _orderESRepository.GetOrderNoSuggesstion(txt_search);
+                    var result = data.Select(o => new {
+                        id = o.orderid,  // assuming OrderId is the ID you want
+                        orderno = o.orderno
+                    }).ToList();
                     return Ok(new
                     {
                         status = (int)ResponseType.SUCCESS,
-                        data = data,
+                        data = result,
                         selected = _UserId
                     });
                 }
