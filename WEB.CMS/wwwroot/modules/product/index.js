@@ -134,6 +134,7 @@ var product_index = {
         });
 
     },
+
     Listing: function () {
         var request = {
             keyword: $('#input-search-product-name').val(),
