@@ -209,7 +209,7 @@ var _product_constants = {
                                     </video>
                                 </a>
                             </div>`,
-        ProductDetail_Attribute_Row_Item: ` <div class="col-md-6 lastest-attribute-value item">
+        ProductDetail_Attribute_Row_Item: ` <div class="col-md-6 lastest-attribute-value item" draggable="true">
                             <div class="box-list">
                                 <div class="form-group namesp flex-input-choose">
                                     <div id="image_row_item" class="item flex flex-lg-nowrap gap10 mb-2 "style="flex-wrap: nowrap !important;position: relative !important;" >
@@ -235,7 +235,7 @@ var _product_constants = {
                                     </div>
                                     <div class="right-action">
                                         <a class="icon-action attribute-item-delete" style="display:none;" href="javascript:;"><i class="icofont-trash"></i></a>
-                                        <a class="icon-action attribute-item-add" href="javascript:;"><i class="fa fa-plus"></i></a>
+                                        <a class="icon-action attribute-item-draggable" href="javascript:;"><i class="icofont-drag"></i></a>
                                     </div>
 
                                 </div>
