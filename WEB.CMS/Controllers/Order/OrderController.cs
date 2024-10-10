@@ -3,6 +3,7 @@ using Entities.ViewModels;
 using Entities.ViewModels.Mongo;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.IRepositories;
+using StackExchange.Redis;
 using System.Security.Claims;
 using Utilities;
 using Utilities.Contants;
@@ -21,9 +22,10 @@ namespace WEB.CMS.Controllers
         private readonly IContractPayRepository _contractPayRepository;
         private readonly IPaymentRequestRepository _paymentRequestRepository;
         private readonly ProductDetailMongoAccess _productV2DetailMongoAccess;
+        private readonly ICommonRepository _commonRepository;
 
         public OrderController(IConfiguration configuration, IAllCodeRepository allCodeRepository, IOrderRepository orderRepository, IClientRepository clientRepository, 
-            IUserRepository userRepository, IContractPayRepository contractPayRepository, IPaymentRequestRepository paymentRequestRepository)
+            IUserRepository userRepository, IContractPayRepository contractPayRepository, IPaymentRequestRepository paymentRequestRepository, ICommonRepository commonRepository)
         {
             _configuration = configuration;
             _allCodeRepository = allCodeRepository;
@@ -33,6 +35,7 @@ namespace WEB.CMS.Controllers
             _contractPayRepository = contractPayRepository;
             _paymentRequestRepository = paymentRequestRepository;
             _productV2DetailMongoAccess = new ProductDetailMongoAccess(configuration);
+            _commonRepository = commonRepository;
         }
         public IActionResult Index()
         {
@@ -325,6 +328,103 @@ namespace WEB.CMS.Controllers
                 });
             }
         }
+        public async Task<IActionResult> EditAddress(int orderId)
+        {
+            try
+            {
+                if (orderId != 0)
+                {
+                    var dataOrder = await _orderRepository.GetOrderDetailByOrderId(orderId);
+                    if (dataOrder.ProvinceId != null )
+                    {
+                        ViewBag.District = await _commonRepository.GetDistrictList(dataOrder.ProvinceId.ToString());
+                    }
+                    if (dataOrder.DistrictId != null )
+                    {
+                        ViewBag.Ward = await _commonRepository.GetWardListByDistrictId(dataOrder.DistrictId.ToString());
+                    }
+                    ViewBag.Provinces = await _commonRepository.GetProvinceList();
+                    ViewBag.orderId = orderId;
+                    return PartialView(dataOrder);
+                }
+              
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("EditAddress-OrderController" + ex.ToString());
+               
+            }
+            return PartialView();
+        }
+        public async Task<IActionResult> SuggestDistrict(string id)
+        {
+            if (id != null)
+            {
+                var data = await _commonRepository.GetDistrictList(id);
+                return Ok(new
+                {
+                    status = (int)ResponseType.SUCCESS,
+                    data = data
+                });
+            }
+            else
+            {
+                return Ok(new
+                {
+                    status = (int)ResponseType.ERROR,
+                });
+            }
+            
+        }
+        public async Task<IActionResult> SuggestWard(string id)
+        {
+            if (id != null)
+            {
+                var data = await _commonRepository.GetWardListByDistrictId(id);
+                return Ok(new
+                {
+                    status = (int)ResponseType.SUCCESS,
+                    data = data
+                });
 
+            }
+            else
+            {
+                return Ok(new
+                {
+                    status = (int)ResponseType.ERROR,
+                });
+            }
+          
+        }
+        public async Task<IActionResult> UpdateAddress(Entities.Models.Order model)
+        {
+            try
+            {
+                int _UserId = 0;
+                if (HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) != null)
+                {
+                    _UserId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                }
+                model.UserUpdateId = _UserId;
+                var success = await _orderRepository.UpdateOrder(model);
+
+                return Ok(new
+                {
+                    status = (int)ResponseType.SUCCESS,
+                    msg = "Cập nhật địa chỉ giao hàng thành công"
+                });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("EditAddress-OrderController" + ex.ToString());
+
+            }
+            return Ok(new
+            {
+                status = (int)ResponseType.SUCCESS,
+                msg = "Cập nhật địa chỉ giao hàng không thành công"
+            });
+        }
     }
 }

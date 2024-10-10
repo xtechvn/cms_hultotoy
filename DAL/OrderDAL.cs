@@ -219,7 +219,7 @@ namespace DAL
         {
             try
             {
-                SqlParameter[] objParam = new SqlParameter[18];
+                SqlParameter[] objParam = new SqlParameter[22];
                 objParam[0] = new SqlParameter("@OrderId", model.OrderId);
                 objParam[1] = new SqlParameter("@ClientId", model.ClientId == 0 ? DBNull.Value : model.ClientId);
                 objParam[2] = new SqlParameter("@OrderNo", model.OrderNo == null ? DBNull.Value : model.OrderNo);
@@ -238,6 +238,10 @@ namespace DAL
                 objParam[15] = new SqlParameter("@UserId", model.UserId == 0 ? DBNull.Value : model.UserId);
                 objParam[16] = new SqlParameter("@UserGroupIds", model.UserGroupIds == null ? DBNull.Value : model.UserGroupIds);
                 objParam[17] = new SqlParameter("@UserUpdateId", model.UserUpdateId == null ? DBNull.Value : model.UserUpdateId);
+                objParam[18] = new SqlParameter("@ProvinceId", model.ProvinceId == null ? DBNull.Value : model.ProvinceId);
+                objParam[19] = new SqlParameter("@DistrictId", model.DistrictId == null ? DBNull.Value : model.DistrictId);
+                objParam[20] = new SqlParameter("@WardId", model.WardId == null ? DBNull.Value : model.WardId);
+                objParam[21] = new SqlParameter("@Address", model.Address == null ? DBNull.Value : model.Address);
 
                 return _DbWorker.ExecuteNonQuery(StoreProcedureConstant.Sp_UpdateOrder, objParam);
 

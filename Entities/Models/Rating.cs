@@ -11,6 +11,8 @@ public partial class Rating
 
     public string ProductId { get; set; }
 
+    public string ProductDetailId { get; set; }
+
     public decimal? Star { get; set; }
 
     public string Comment { get; set; }

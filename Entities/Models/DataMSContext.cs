@@ -1119,6 +1119,9 @@ public partial class DataMSContext : DbContext
             entity.Property(e => e.ImgLink)
                 .HasMaxLength(1000)
                 .IsUnicode(false);
+            entity.Property(e => e.ProductDetailId)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.ProductId)
                 .HasMaxLength(50)
                 .IsUnicode(false);
