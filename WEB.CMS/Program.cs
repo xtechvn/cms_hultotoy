@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Repositories.IRepositories;
 using Repositories.Repositories;
 using WEB.CMS.Customize;
+using WEB.CMS.RabitMQ;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,6 +82,9 @@ builder.Services.AddTransient<IPaymentRequestRepository, PaymentRequestRepositor
 builder.Services.AddTransient<IIdentifierServiceRepository, IdentifierServiceRepository>();
 builder.Services.AddTransient<IPaymentAccountRepository, PaymentAccountRepository>();
 builder.Services.AddTransient<IDepositHistoryRepository, DepositHistoryRepository>();
+// Đăng ký QueueService
+builder.Services.AddScoped<QueueService>();
+
 
 
 // Setting Redis                     

@@ -5,6 +5,7 @@ using HuloToys_Service.ElasticSearch.NewEs;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Repositories.IRepositories;
+using System.Text;
 using Utilities;
 using Utilities.Contants;
 using Utilities.Contants.ProductV2;
@@ -69,12 +70,22 @@ namespace WEB.CMS.Controllers
                 is_success = false
             });
         }
+       
         public async Task<IActionResult> ProductListing(string keyword = "", int group_id = -1, int page_index = 1, int page_size = 10)
         {
             try
             {
                 if (page_size <= 0) page_size = 10;
                 if (page_index < 1) page_index = 1;
+                Console.WriteLine($"Controller received keyword: '{keyword}'");
+
+                // Kiểm tra encoding
+                var bytes = System.Text.Encoding.UTF8.GetBytes(keyword);
+                Console.WriteLine($"Keyword bytes: {string.Join(",", bytes)}");
+
+                var normalizedKeyword = keyword.Normalize(NormalizationForm.FormC);
+                Console.WriteLine($"Normalized keyword: '{normalizedKeyword}'");
+
                 var main_products = await _productV2DetailMongoAccess.Listing(keyword, group_id, page_index, page_size);
                 return Ok(new
                 {
@@ -92,6 +103,22 @@ namespace WEB.CMS.Controllers
             {
                 is_success = false
             });
+        }
+        public static string NormalizeString(string text)
+        {
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC).ToLower();
         }
         public async Task<IActionResult> ProductSubListing(string parent_id)
         {

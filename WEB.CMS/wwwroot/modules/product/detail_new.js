@@ -826,7 +826,16 @@ var product_detail_new = {
             }
 
         })
-        model.name = $('#product-name input').val()
+        function normalizeText(input) {
+            return input
+                .normalize("NFC")
+                .replace(/[\u0300-\u036f]/g, "") // Bỏ các dấu tiếng Việt
+                .trim();
+        }
+
+        model.name = normalizeText($('#product-name input').val());
+        //console.log("Normalized Product Name before sending:", model.name);
+        //Console.WriteLine("Received Product Name: " + model.name);
         model.group_product_id = $('#group-id input').attr('data-id')
         model.description = $('#description textarea').val()
         model.specification = []

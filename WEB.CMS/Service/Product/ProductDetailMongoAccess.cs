@@ -21,10 +21,10 @@ namespace WEB.CMS.Models.Product
         {
             _configuration = configuration;
             //mongodb://adavigolog_writer:adavigolog_2022@103.163.216.42:27017/?authSource=HoanBds
-            string url = "mongodb://"+ configuration["DataBaseConfig:MongoServer:user"] + 
+            string url = "mongodb://" + configuration["DataBaseConfig:MongoServer:user"] +
                 ":" + configuration["DataBaseConfig:MongoServer:pwd"] +
                 "@" + configuration["DataBaseConfig:MongoServer:Host"] +
-                ":" + configuration["DataBaseConfig:MongoServer:Port"] + 
+                ":" + configuration["DataBaseConfig:MongoServer:Port"] +
                 "/?authSource=" + configuration["DataBaseConfig:MongoServer:catalog"] + "";
 
             var client = new MongoClient(url);
@@ -61,8 +61,8 @@ namespace WEB.CMS.Models.Product
                 return null;
             }
         }
-       
-      
+
+
         public async Task<ProductMongoDbModel> GetByID(string id)
         {
             try
@@ -79,24 +79,67 @@ namespace WEB.CMS.Models.Product
                 return null;
             }
         }
-     
+       
+
+        // Thêm method này vào ProductV2DetailMongoAccess
+        public async Task<List<ProductMongoDbModel>> GetAllProducts()
+        {
+            try
+            {
+                var allProducts = await _productDetailCollection
+                    .Find(_ => true)
+                    .ToListAsync();
+
+                // In ra console để kiểm tra
+                foreach (var product in allProducts)
+                {
+                    Console.WriteLine($"Product in DB: {product.name}");
+                }
+
+                return allProducts;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting products: {ex.Message}");
+                return new List<ProductMongoDbModel>();
+            }
+        }
+
         public async Task<List<ProductMongoDbModel>> Listing(string keyword = "", int group_id = -1, int page_index = 1, int page_size = 10)
         {
             try
             {
+
+                // In ra keyword để kiểm tra
+                Console.WriteLine($"Searching for keyword: '{keyword}'");
+
+                // Lấy tất cả sản phẩm
+                //var allProducts = await GetAllProducts();
+               
+
+
+
                 var filter = Builders<ProductMongoDbModel>.Filter;
                 var filterDefinition = filter.Empty;
-                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.name, new Regex(keyword.ToLower().Trim(), RegexOptions.IgnoreCase));
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.name, new Regex(keyword, RegexOptions.IgnoreCase));
                 filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.parent_product_id, "");
                 if (group_id > 0)
                 {
                     filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.group_product_id, group_id.ToString());
                 }
                 var sort_filter = Builders<ProductMongoDbModel>.Sort;
-                var sort_filter_definition = sort_filter.Descending(x=>x.updated_last);
-                var model =  _productDetailCollection.Find(filterDefinition);
+                var sort_filter_definition = sort_filter.Descending(x => x.updated_last);
+                var model = _productDetailCollection.Find(filterDefinition);
                 model.Options.Skip = page_index < 1 ? 0 : (page_index - 1) * page_size;
                 model.Options.Limit = page_size;
+                // Retrieve products from MongoDB
+                var result1 = await _productDetailCollection.Find(filterDefinition).ToListAsync();
+
+                // Log each product's name to confirm normalization
+                foreach (var product in result1)
+                {
+                    Console.WriteLine("Product in DB: " + product.name);
+                }
                 var result = await model.ToListAsync();
                 return result;
             }
@@ -106,6 +149,7 @@ namespace WEB.CMS.Models.Product
                 return null;
             }
         }
+
         public async Task<List<ProductMongoDbModel>> SubListing(string parent_id)
         {
             try
@@ -132,7 +176,7 @@ namespace WEB.CMS.Models.Product
                 var filter = Builders<ProductMongoDbModel>.Filter;
                 var filterDefinition = filter.Empty;
                 filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.status, (int)ProductStatus.ACTIVE); ;
-                filterDefinition &= Builders<ProductMongoDbModel>.Filter.In(x=>x.parent_product_id, parent_id);
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.In(x => x.parent_product_id, parent_id);
 
                 var model = _productDetailCollection.Find(filterDefinition);
                 var result = await model.ToListAsync();
