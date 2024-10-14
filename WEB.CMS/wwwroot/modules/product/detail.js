@@ -1129,6 +1129,7 @@ var product_detail = {
                     if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length - 1 + element[0].files.length) > max_item) {
                         _msgalert.error('Số lượng ảnh vượt quá giới hạn')
                         element.val(null)
+                        return
                     }
                     $(element[0].files).each(function (index, item) {
 
@@ -1158,6 +1159,7 @@ var product_detail = {
                     if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length - 1 + element[0].files.length) > max_item) {
                         _msgalert.error('Số lượng Video vượt quá giới hạn')
                         element.val(null)
+                        return
                     }
                     $(element[0].files).each(function (index, item) {
                         var reader = new FileReader();
@@ -1187,6 +1189,7 @@ var product_detail = {
                     if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length - 1 + element[0].files.length) > max_item) {
                         _msgalert.error('Số lượng ảnh vượt quá giới hạn')
                         element.val(null)
+                        return
                     }
                     $(element[0].files).each(function (index, item) {
 
