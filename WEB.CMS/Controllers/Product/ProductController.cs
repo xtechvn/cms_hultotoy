@@ -1,19 +1,14 @@
-﻿using Azure.Core;
-using Caching.RedisWorker;
+﻿using Caching.RedisWorker;
 using Entities.Models;
 using Entities.ViewModels.Products;
 using HuloToys_Service.ElasticSearch.NewEs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Nest;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using Utilities;
 using Utilities.Contants;
 using Utilities.Contants.ProductV2;
 using WEB.Adavigo.CMS.Service;
 using WEB.CMS.Customize;
-using WEB.CMS.Models;
 using WEB.CMS.Models.Product;
 
 namespace WEB.CMS.Controllers
@@ -24,6 +19,7 @@ namespace WEB.CMS.Controllers
         private readonly ProductDetailMongoAccess _productV2DetailMongoAccess;
         private readonly ProductSpecificationMongoAccess _productSpecificationMongoAccess;
         private readonly GroupProductESService _groupProductESService;
+        private readonly IConfiguration _configuration;
         private readonly RedisConn _redisConn;
         private StaticAPIService _staticAPIService;
         private readonly int group_product_root = 1;
@@ -37,6 +33,7 @@ namespace WEB.CMS.Controllers
             _redisConn = redisConn;
             _redisConn.Connect();
             db_index = Convert.ToInt32(configuration["Redis:Database:db_search_result"]);
+            _configuration = configuration;
         }
         public IActionResult Index()
         {
@@ -237,10 +234,17 @@ namespace WEB.CMS.Controllers
                     product_main.amount_min = amount_variations.OrderBy(x => x).First();
                     product_main.quanity_of_stock = request.variations.Sum(x => x.quanity_of_stock);
                     product_main.updated_last = DateTime.Now;
+                   
+                }
+                else
+                {
+                    product_main.amount_max = null;
+                    product_main.amount_min = null;
                 }
                 product_main.parent_product_id = "";
                 if (product_main._id == null || product_main._id.Trim() == "")
                 {
+                  
                     product_main.created_date = DateTime.Now;
                     msg = "Thêm mới sản phẩm thành công";
                     product_main.status = (int)ProductStatus.ACTIVE;
@@ -584,6 +588,81 @@ namespace WEB.CMS.Controllers
                 is_success = false,
                 msg = "Ẩn sản phẩm thất bại",
             });
+        }
+
+        public async Task<IActionResult> DetailNew(string id = "")
+        {
+            ViewBag.Static = _configuration["API:StaticURL"];
+            if(id==null || id.Trim() == "")
+            {
+                ViewBag.GroupProduct = "";
+                ViewBag.Product = new ProductMongoDbModel();
+                ViewBag.SubProduct = new List<ProductMongoDbModel>();
+                ViewBag.ProductId = "";
+                return View();
+
+            }
+            var product = await _productV2DetailMongoAccess.GetByID(id);
+            if(product == null || product._id==null || product._id.Trim() == "")
+            {
+                ViewBag.GroupProduct = "";
+                ViewBag.Product = new ProductMongoDbModel();
+                ViewBag.SubProduct = new List<ProductMongoDbModel>();
+                ViewBag.ProductId = "";
+                return View();
+            }
+            var group_string = "";
+            if (product != null && product.group_product_id != null && product.group_product_id.Trim() != "")
+            {
+                try
+                {
+                    var split_value = product.group_product_id.Split(",");
+                    for (int i = 0; i < split_value.Length; i++)
+                    {
+                        var group = _groupProductESService.GetDetailGroupProductById(Convert.ToInt64(split_value[i]));
+                        group_string += group.Name;
+                        if (i < (split_value.Length - 1)) group_string += " > ";
+                    }
+                }
+                catch { }
+
+            }
+            ViewBag.GroupProduct = group_string;
+            ViewBag.Product = product;
+            ViewBag.SubProduct = await _productV2DetailMongoAccess.SubListing(id);
+            ViewBag.ProductId = id;
+
+            return View();
+        }
+        public async Task<IActionResult> AttributesPrice(
+            bool? is_one_weight, List<ProductAttributeMongoDbModel> attributes, List<ProductAttributeMongoDbModelItem> attributes_detail, List<ProductMongoDbModel> sub_product,
+            string product_id="")
+        {
+            ViewBag.IsOneWeight = is_one_weight;
+            ViewBag.Attributes = attributes;
+            ViewBag.AttributesDetail = attributes_detail;
+            ViewBag.SubProduct = sub_product;
+            try
+            {
+                var subs = sub_product;
+                if(product_id!=null && product_id.Trim() != "")
+                {
+                    var product = await _productV2DetailMongoAccess.GetByID(product_id);
+                    if (product != null && product._id != null)
+                    {
+                        ViewBag.IsOneWeight = product.is_one_weight;
+                        ViewBag.Attributes = product.attributes;
+                        ViewBag.AttributesDetail = product.attributes_detail;
+                        subs.AddRange(await _productV2DetailMongoAccess.SubListing(product_id));
+
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+            return View();
         }
     }
 

@@ -1126,6 +1126,10 @@ var product_detail = {
                         _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.ImageExtension.join(', '));
                         return
                     }
+                    if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length + element[0].files.length) >= max_item) {
+                        _msgalert.error('Số lượng ảnh vượt quá giới hạn')
+                        element.val(null)
+                    }
                     $(element[0].files).each(function (index, item) {
 
                         var reader = new FileReader();
@@ -1151,6 +1155,10 @@ var product_detail = {
                         _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.VideoExtension.join(', '));
                         return
                     }
+                    if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length + element[0].files.length) >= max_item) {
+                        _msgalert.error('Số lượng Video vượt quá giới hạn')
+                        element.val(null)
+                    }
                     $(element[0].files).each(function (index, item) {
                         var reader = new FileReader();
                         reader.onload = function (e) {
@@ -1175,6 +1183,10 @@ var product_detail = {
                     if ($.inArray(element.val().split('.').pop().toLowerCase(), _product_constants.VALUES.ImageExtension) == -1) {
                         _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.ImageExtension.join(', '));
                         return
+                    }
+                    if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length + element[0].files.length) >= max_item) {
+                        _msgalert.error('Số lượng ảnh vượt quá giới hạn')
+                        element.val(null)
                     }
                     $(element[0].files).each(function (index, item) {
 

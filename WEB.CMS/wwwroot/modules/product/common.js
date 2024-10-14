@@ -464,3 +464,75 @@ var _product_constants = {
                     </div>`
     }
 }
+
+
+var _product_constants_2 = {
+    Attributes: {
+        Input:` <div class="col-md-6 lastest-attribute-value item ui-sortable-handle attributes-detail" draggable="true">
+                                                    <div class="box-list">
+                                                        <div class="form-group namesp flex-input-choose">
+                                                            <label class="choose choose-wrap">
+                                                                <input type="file" name="myFile">
+                                                                <div class="choose-content">
+                                                                    <i class="icofont-image"></i>
+                                                                </div>
+                                                            </label>
+                                                            <div class="relative w-100">
+                                                                <input type="text" class="form-control" placeholder="" value="">
+                                                                <span class="note"><nw class="count">0</nw>/14</span>
+                                                            </div>
+                                                            <div class="right-action">
+                                                                <a class="icon-action" href="javascript:;"><i class="icofont-trash"></i></a>
+                                                                <a class="icon-action attribute-item-draggable" href="javascript:;"><i class="icofont-drag"></i></a>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>`
+    },
+    DiscountGroupBuy: {
+        Tr:` <tr>
+                                            <td>Khoảng giá  @(++i)</td>
+                                            <td>
+                                                <div class="flex gap10 flex-nowrap align-items-center justify-content-center">
+                                                    <div class="form-group mb-0">
+                                                        <input type="text" class="form-control input-price " placeholder="Từ sản phẩm" value="">
+                                                    </div>
+                                                    <i class="icofont-arrow-right"></i>
+                                                    <div class="form-group mb-0">
+                                                        <input type="text" class="form-control input-price" placeholder="Đến sản phẩm" value="">
+                                                    </div>
+                                                </div>
+
+                                            </td>
+                                            <td>
+                                                <div class="flex gap10 flex-nowrap align-items-center justify-content-center">
+                                                    <label class="radio mb-3">
+                                                        <input type="radio" name="discount-type-@i"checked>
+                                                        <span class="checkmark"></span>
+                                                    </label>
+                                                    <div class="form-group mb-0 price mr-3">
+                                                        <input type="text" class="form-control input-price" placeholder="Nhập số"">
+                                                        <span class="note">đ</span>
+                                                    </div>
+                                                    <label class="radio mb-3">
+                                                        <input type="radio" name="discount-type-@i" >
+                                                        <span class="checkmark"></span>
+
+                                                    </label>
+                                                    <div class="form-group mb-0 price">
+                                                        <input type="text" class="form-control input-price" placeholder="">
+                                                        <span class="note">%</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                 <a href="javascript:;" class="delete-row">
+                                            <i class="icofont-trash"></i>
+                                       </a>
+                                            </td>
+
+                                        </tr>`
+    }
+}
+
