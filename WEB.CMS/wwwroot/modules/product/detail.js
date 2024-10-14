@@ -1117,7 +1117,7 @@ var product_detail = {
             case 'images':
             case 'avatar': {
                 var max_item = _product_constants.VALUES.ProductDetail_Max_Image
-                if (element.closest('.flex-lg-nowrap').find('.magnific_popup').length >= max_item) {
+                if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length - 1) >= max_item) {
                     _msgalert.error('Số lượng ảnh vượt quá giới hạn')
                     element.val(null)
                 }
@@ -1126,7 +1126,7 @@ var product_detail = {
                         _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.ImageExtension.join(', '));
                         return
                     }
-                    if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length + element[0].files.length) >= max_item) {
+                    if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length - 1 + element[0].files.length) > max_item) {
                         _msgalert.error('Số lượng ảnh vượt quá giới hạn')
                         element.val(null)
                     }
@@ -1146,7 +1146,7 @@ var product_detail = {
             } break
             case 'videos': {
                 var max_item = _product_constants.VALUES.ProductDetail_Max_Avt
-                if (element.closest('.flex-lg-nowrap').find('.magnific_popup').length >= max_item) {
+                if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length - 1 )>= max_item) {
                     _msgalert.error('Số lượng video vượt quá giới hạn')
                     element.val(null)
                 }
@@ -1155,7 +1155,7 @@ var product_detail = {
                         _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.VideoExtension.join(', '));
                         return
                     }
-                    if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length + element[0].files.length) >= max_item) {
+                    if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length - 1 + element[0].files.length) > max_item) {
                         _msgalert.error('Số lượng Video vượt quá giới hạn')
                         element.val(null)
                     }
@@ -1175,7 +1175,7 @@ var product_detail = {
             } break
             case 'image_row_item': {
      
-                if (element.closest('.flex-lg-nowrap').find('.magnific_popup').length >= 1) {
+                if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length - 1) >= 1) {
                     _msgalert.error('Số lượng ảnh vượt quá giới hạn')
                     element.val(null)
                 }
@@ -1184,7 +1184,7 @@ var product_detail = {
                         _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.ImageExtension.join(', '));
                         return
                     }
-                    if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length + element[0].files.length) >= max_item) {
+                    if ((element.closest('.flex-lg-nowrap').find('.magnific_popup').length - 1 + element[0].files.length) > max_item) {
                         _msgalert.error('Số lượng ảnh vượt quá giới hạn')
                         element.val(null)
                     }
