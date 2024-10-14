@@ -269,6 +269,7 @@ namespace WEB.CMS.Controllers
                         product_by_variations.amount = variation.amount;
                         product_by_variations.quanity_of_stock = variation.quanity_of_stock;
                         product_by_variations.sku = variation.sku;
+                        product_by_variations.updated_last = DateTime.Now;
                         if (variation._id != null && variation._id != "")
                         {
                             product_by_variations._id = variation._id;
