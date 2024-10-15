@@ -482,7 +482,7 @@ var _product_constants_2 = {
                                                                 <span class="note"><nw class="count">0</nw>/14</span>
                                                             </div>
                                                             <div class="right-action">
-                                                                <a class="icon-action" href="javascript:;"><i class="icofont-trash"></i></a>
+                                                                <a class="icon-action delete-attribute-detail" href="javascript:;"><i class="icofont-trash"></i></a>
                                                                 <a class="icon-action attribute-item-draggable" href="javascript:;"><i class="icofont-drag"></i></a>
                                                             </div>
 

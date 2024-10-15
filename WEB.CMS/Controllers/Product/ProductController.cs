@@ -41,7 +41,7 @@ namespace WEB.CMS.Controllers
             return View();
         }
 
-        public IActionResult Detail(string id = "")
+        public IActionResult Detail_old(string id = "")
         {
             ViewBag.ProductId = id;
             return View();
@@ -170,59 +170,6 @@ namespace WEB.CMS.Controllers
                 }
                 string rs = "";
                 var uploaded_image = new List<string>();
-                ////-- IMg
-                //if (request.images != null && request.images.Count > 0)
-                //{
-                //    foreach (var img in request.images)
-                //    {
-                //        if(img!=null && img.Trim() != "")
-                //        {
-                //            var data_img = _staticAPIService.GetImageSrcBase64Object(img);
-                //            if (data_img != null)
-                //            {
-                //                var url = await _staticAPIService.UploadImageBase64(data_img);
-                //                if (url != null && url.Trim() != "")
-                //                {
-                //                    uploaded_image.Add(url);
-                //                    continue;
-                //                }
-                //            }
-                //            uploaded_image.Add(img);
-
-                //        }
-
-                //    }
-                //}
-                //request.images = uploaded_image;
-                ////-- Avt:
-                //if (request.avatar != null && request.avatar.Trim() != "")
-                //{
-                //    if (request.avatar != null && request.avatar.Trim() != "" && request.avatar.Contains("data:image") && request.avatar.Contains("base64"))
-                //    {
-                //        var data_img = _staticAPIService.GetImageSrcBase64Object(request.avatar);
-                //        if (data_img != null)
-                //        {
-                //            request.avatar = await _staticAPIService.UploadImageBase64(data_img);
-                //        }
-
-                //    }
-                //}
-                ////-- Attributes Img:
-                //if (request.attributes_detail != null && request.attributes_detail.Count > 0)
-                //{
-                //    foreach (var attributes_detail in request.attributes_detail)
-                //    {
-                //        if (attributes_detail.img!=null && attributes_detail.img.Trim()!="" && attributes_detail.img.Contains("data:image") && attributes_detail.img.Contains("base64"))
-                //        {
-                //            var data_img = _staticAPIService.GetImageSrcBase64Object(attributes_detail.img);
-                //            if (data_img != null)
-                //            {
-                //                attributes_detail.img = await _staticAPIService.UploadImageBase64(data_img);
-                //            }
-
-                //        }
-                //    }
-                //}
 
                 //-- Add/Update product_main
                 var product_main = JsonConvert.DeserializeObject<ProductMongoDbModel>(JsonConvert.SerializeObject(request));
@@ -234,6 +181,10 @@ namespace WEB.CMS.Controllers
                     product_main.amount_max = amount_variations.OrderByDescending(x => x).First();
                     product_main.amount_min = amount_variations.OrderBy(x => x).First();
                     product_main.quanity_of_stock = request.variations.Sum(x => x.quanity_of_stock);
+                    product_main.is_one_weight = request.is_one_weight;
+                    product_main.package_width = request.package_width;
+                    product_main.package_height = request.package_height;
+                    product_main.package_depth = request.package_depth;
                     
 
                 }
@@ -275,6 +226,11 @@ namespace WEB.CMS.Controllers
                         product_by_variations.amount = variation.amount;
                         product_by_variations.quanity_of_stock = variation.quanity_of_stock;
                         product_by_variations.sku = variation.sku;
+                        product_by_variations.is_one_weight = product_main.is_one_weight;
+                        product_by_variations.weight = variation.weight;
+                        product_by_variations.package_depth = variation.package_depth;
+                        product_by_variations.package_height = variation.package_height;
+                        product_by_variations.package_width = variation.package_width;
                         product_by_variations.updated_last = DateTime.Now;
                         if (variation._id != null && variation._id != "")
                         {
@@ -592,7 +548,7 @@ namespace WEB.CMS.Controllers
             });
         }
 
-        public async Task<IActionResult> DetailNew(string id = "")
+        public async Task<IActionResult> Detail(string id = "")
         {
             ViewBag.Static = _configuration["API:StaticURL"];
             if (id == null || id.Trim() == "")
@@ -664,6 +620,11 @@ namespace WEB.CMS.Controllers
             {
 
             }
+            return View();
+        }
+        public IActionResult AttributeDetail(int item_index)
+        {
+            ViewBag.Index = item_index;
             return View();
         }
     }

@@ -41,6 +41,8 @@ var product_detail_new = {
         });
         $('body').on('click', '.magnific_popup .delete', function () {
             var element = $(this)
+            var parent = element.closest('.list')
+            parent.find('.count').html((parent.find('.items').length-2))
             element.closest('.items').remove()
 
         });
@@ -187,7 +189,7 @@ var product_detail_new = {
                 product_detail_new.RenderAddNewAttribute(element.closest('.attributes-list'), element)
                 product_detail_new.RenderAttributesPrice()
 
-            }, 500);
+            }, 1000);
         })
         $('body').on('click', '.attributes-list .open-edit', function () {
             var element = $(this)
@@ -219,6 +221,40 @@ var product_detail_new = {
             element.closest('h6').find('.open-edit').show()
 
         })
+        $('body').on('click', '#product-attributes-add', function () {
+            var element = $(this)
+            var count = $('#product-attributes .attributes-list').length
+            if (count >= 2) {
+                element.hide()
+                return
+            }
+            _product_function.POST('/Product/AttributeDetail', { item_index: (++count) }, function (result) {
+                if (result != undefined) $('#product-attributes').append(result)
+
+            })
+        });
+        $('body').on('click', '.attributes-list .delete ', function () {
+            var element = $(this)
+            element.closest('.attributes-list').remove()
+            product_detail_new.RenderAttributesPrice()
+            $('#product-attributes-add').show()
+            $('#product-attributes .attributes-list').each(function (index, item) {
+                var attr_element = $(this)
+                attr_element.find('.label').html('Phân loại hàng '+(index+1))
+
+            })
+        });
+        $('body').on('click', '.attributes-list .delete-attribute-detail ', function () {
+            var element = $(this)
+            element.closest('.attributes-detail').remove()
+            product_detail_new.RenderAttributesPrice()
+
+        });
+        $('body').on('change', '.attributes-detail .choose input', function (e) {
+            var element = $(this)
+            element.attr('data-type', 'image_row_item')
+            product_detail_new.AddProductMedia(element)
+        });
         //--Attribute table:
         $('body').on('click', '.btn-all', function () {
             product_detail_new.ApplyAllPriceToTable()
@@ -282,8 +318,12 @@ var product_detail_new = {
         });
         $('body').on('keyup', '.input-price', function () {
             var element = $(this)
-            var value = element.val()
-            element.val(_product_function. Comma(value))
+            var value = parseFloat(element.val().replaceAll(',', ''))
+            if (isNaN(value)) value=0
+            element.val(_product_function.Comma(value))
+        });
+        $('body').on('keyup', '#product-attributes-prices input', function () {
+            var element = $(this)
             product_detail_new.RenderRowData(element.closest('tr'))
         });
         $('body').on('click', '#product-detail-cancel', function () {
@@ -516,15 +556,11 @@ var product_detail_new = {
                     _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.ImageExtension.join(', '));
                     return
                 }
-                $(element[0].files).each(function (index, item) {
-
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        element.closest('.list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
-
-                    }
-                    reader.readAsDataURL(item);
-                });
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    element.closest('.choose').find('.choose-content').html(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
+                }
+                reader.readAsDataURL(element[0].files[0]);
                 element.val(null)
             } break
         }
@@ -639,7 +675,7 @@ var product_detail_new = {
             var price = isNaN(parseFloat(tr.find('.td-price').find('input').val().replaceAll(',', ''))) ? 0 : parseFloat(tr.find('.td-price').find('input').val().replaceAll(',', ''))
             var profit = isNaN(parseFloat(tr.find('.td-profit').find('input').val().replaceAll(',', ''))) ? 0 : parseFloat(tr.find('.td-profit').find('input').val().replaceAll(',', ''))
 
-            tr.find('.td-amount').find('input').val(Comma(price + profit))
+            tr.find('.td-amount').find('input').val(_product_function.Comma(price + profit))
         }
 
     },
@@ -737,15 +773,15 @@ var product_detail_new = {
         model.group_product_id = $('#group-id input').attr('data-id')
         model.description = $('#description textarea').val()
         model.specification = []
-        $('#specifications .namesp').each(function (index, item) {
+        $('#specifications .col-md-6').each(function (index, item) {
             var element = $(this)
 
             model.specification.push({
                 _id: '-1',
-                attribute_id: element.attr('data-attr-id'),
-                value_type: element.attr('data-type'),
-                value: element.find('input').val(),
-                type_ids: element.find('input').attr('data-value'),
+                attribute_id: element.find('.item').attr('data-id'),
+                value_type: element.find('.item').attr('data-type'),
+                value: element.find('.item').find('.namesp').find('input').val(),
+                type_ids: element.find('.item').find('.namesp').find('input').attr('data-value'),
             })
 
         })
@@ -783,10 +819,10 @@ var product_detail_new = {
 
         model.variations = []
         if (!$('#product-attributes-price').closest('.item-edit').is(':hidden')) {
-            var attribute_model = product_detail.GetAttributeItem()
+            var attribute_model = product_detail_new.GetAttributeItem()
             model.attributes = attribute_model.attributes
             model.attributes_detail = attribute_model.attributes_detail
-            $('#product-attributes-price tbody tr').each(function (index, index) {
+            $('#product-attributes-prices tbody tr').each(function (index, index) {
                 var element = $(this)
                 var var_id = element.attr('data-id')
                 if (var_id == undefined) var_id = ''
@@ -794,6 +830,10 @@ var product_detail_new = {
                 var profit = parseFloat(element.find('.td-profit').find('input').val().replaceAll(',', ''))
                 var amount = parseFloat(element.find('.td-amount').find('input').val().replaceAll(',', ''))
                 var quanity_of_stock = parseFloat(element.find('.td-stock').find('input').val().replaceAll(',', ''))
+                var weight = parseFloat(element.find('.td-weight').find('input').val().replaceAll(',', ''))
+                var package_width = parseFloat(element.find('.td-dismenssion-width').find('input').val().replaceAll(',', ''))
+                var package_height = parseFloat(element.find('.td-dismenssion-height').find('input').val().replaceAll(',', ''))
+                var package_depth = parseFloat(element.find('.td-dismenssion-depth').find('input').val().replaceAll(',', ''))
                 var variation = {
                     _id: var_id,
                     variation_attributes: [],
@@ -802,8 +842,14 @@ var product_detail_new = {
                     amount: (amount == undefined || isNaN(amount) || amount <= 0) ? null : amount,
                     quanity_of_stock: (quanity_of_stock == undefined || isNaN(quanity_of_stock) || quanity_of_stock <= 0) ? null : quanity_of_stock,
                     sku: element.find('.td-sku').find('input').val(),
+                    weight: (weight == undefined || isNaN(weight) || weight <= 0) ? null : weight,
+                    package_width: (package_width == undefined || isNaN(package_width) || package_width <= 0) ? null : package_width,
+                    package_height: (package_height == undefined || isNaN(package_height) || package_height <= 0) ? null : package_height,
+                    package_depth: (package_depth == undefined || isNaN(package_depth) || package_depth <= 0) ? null : package_depth,
+
                 }
-                for (var i = 0; i < $('.product-attributes').length; i++) {
+                debugger
+                for (var i = 0; i < $('.attributes-list').length; i++) {
                     var attr_value = element.attr('data-attribute-' + i)
 
                     variation.variation_attributes.push({
@@ -821,6 +867,14 @@ var product_detail_new = {
         model.condition_of_product = $('#condition_of_product').find(':selected').val()
         model.sku = $('#sku input').val()
 
+        var package_width = parseFloat($('#single-weight .dismenssion-width').val().replaceAll(',', ''))
+        var package_height = parseFloat($('#single-weight .dismenssion-height').val().replaceAll(',', ''))
+        var package_depth = parseFloat($('#single-weight .dismenssion-depth').val().replaceAll(',', ''))
+        model.package_width = (package_width == undefined || isNaN(package_width) || package_width <= 0) ? null : package_width;
+        model.package_height = (package_height == undefined || isNaN(package_height) || package_height <= 0) ? null : package_height;
+        model.package_depth = (package_depth == undefined || isNaN(package_depth) || package_depth <= 0) ? null : package_depth;
+        model.is_one_weight = $('#single-weight .switch-weight').is(':checked')
+        debugger
         _product_function.POST('/Product/Summit', { request: model }, function (result) {
             if (result.is_success) {
                 _global_function.RemoveLoading()
@@ -881,5 +935,39 @@ var product_detail_new = {
 
 
         return success
+    },
+    GetAttributeItem: function () {
+        var model = {
+            attributes :[],
+            attributes_detail :[]
+        }
+        $('.attributes-list').each(function (index, item) {
+            var element = $(this)
+
+            model.attributes.push({
+                _id: index,
+                name: element.find('h6').find('input').val(),
+            })
+            element.find('.attributes-detail').each(function (index_2, item_2) {
+                var element_detail = $(this)
+                var img_src = element_detail.find('.choose-content').find('img').attr('src')
+                if (img_src != undefined && _product_function.CheckIfImageVideoIsLocal(img_src)) {
+                    var result = _product_function.POSTSynchorus('/Product/SummitImages', { data_image: img_src })
+                    if (result != undefined && result.data != undefined && result.data.trim() != '') {
+                        img_src = result.data
+                    }
+                }
+                var value = element_detail.find('.relative').find('input').val()
+                if (value != undefined && value.trim() != '') {
+                    model.attributes_detail.push({
+                        attribute_id: index,
+                        img: img_src == undefined ? '' : img_src,
+                        name: value
+                    })
+                }
+            })
+        })
+       
+        return model
     },
 }
