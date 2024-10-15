@@ -546,6 +546,7 @@ var product_detail = {
                         discount = parseFloat(element.find('.discount-percent').find('input').val().replaceAll(',', ''))
                         if (discount > 100) {
                             _msgalert.error("Chiết khấu tối đa 100%")
+                                element.find('.discount-percent').find('input').val(100)
                         }
                     } break
                 }
