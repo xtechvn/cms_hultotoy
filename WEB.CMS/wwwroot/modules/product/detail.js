@@ -1445,6 +1445,8 @@ var product_detail = {
         var value = $('#product-name input').val()
         var description_textarea = $('#description textarea').val()
         var group_id_input = $('#group-id input').val()
+        var main_profit_input = $('#main-profit input').val()
+        var main_price_input = $('#main-price input').val()
         //-- product-name:
         if (value == undefined || value.trim() == '') {
             _msgalert.error('Tên sản phẩm không được bỏ trống')
@@ -1459,6 +1461,14 @@ var product_detail = {
         } 
         if(group_id_input == undefined || group_id_input.trim() == '') {
             _msgalert.error('Ngành hàng không được bỏ trống')
+            success = false
+        }
+        if (main_profit_input == undefined || group_id_input.trim() == '') {
+            _msgalert.error('Lợi nhuận không được bỏ trống')
+            success = false
+        }
+        if (main_price_input == undefined || group_id_input.trim() == '') {
+            _msgalert.error('Giá nhập không được bỏ trống')
             success = false
         }
         if (!success) return success
