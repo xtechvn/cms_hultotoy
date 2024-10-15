@@ -126,7 +126,8 @@ namespace WEB.CMS.Controllers
                         for (int i = 0; i < split_value.Length; i++)
                         {
                             var group = _groupProductESService.GetDetailGroupProductById(Convert.ToInt64(split_value[i]));
-                            group_string += group.Name;
+                            if (group != null)
+                                group_string += group.Name;
                             if (i < (split_value.Length - 1)) group_string += " > ";
                         }
                     }
@@ -233,8 +234,8 @@ namespace WEB.CMS.Controllers
                     product_main.amount_max = amount_variations.OrderByDescending(x => x).First();
                     product_main.amount_min = amount_variations.OrderBy(x => x).First();
                     product_main.quanity_of_stock = request.variations.Sum(x => x.quanity_of_stock);
-                    product_main.updated_last = DateTime.Now;
-                   
+                    
+
                 }
                 else
                 {
@@ -242,9 +243,10 @@ namespace WEB.CMS.Controllers
                     product_main.amount_min = null;
                 }
                 product_main.parent_product_id = "";
+                product_main.updated_last = DateTime.Now;
                 if (product_main._id == null || product_main._id.Trim() == "")
                 {
-                  
+
                     product_main.created_date = DateTime.Now;
                     msg = "Thêm mới sản phẩm thành công";
                     product_main.status = (int)ProductStatus.ACTIVE;
@@ -517,12 +519,12 @@ namespace WEB.CMS.Controllers
                 product.updated_last = DateTime.Now;
 
                 var rs = await _productV2DetailMongoAccess.AddNewAsync(product);
-                
+
                 if (rs != null)
                 {
-                    if(SubListing != null)
+                    if (SubListing != null)
                     {
-                        foreach(var item in SubListing)
+                        foreach (var item in SubListing)
                         {
                             item.parent_product_id = rs;
                             await _productV2DetailMongoAccess.AddNewAsync(item);
@@ -552,15 +554,15 @@ namespace WEB.CMS.Controllers
                 msg = "sao chép sản phẩm thất bại",
             });
         }
-        public async Task<IActionResult> UpdateProductStatus(string product_id,int status)
+        public async Task<IActionResult> UpdateProductStatus(string product_id, int status)
         {
             var msg = "Ẩn phẩm thành công";
             try
             {
                 var product = await _productV2DetailMongoAccess.GetByID(product_id);
                 product.updated_last = DateTime.Now;
-                product.status = status;          
-                var  rs = await _productV2DetailMongoAccess.UpdateAsync(product);
+                product.status = status;
+                var rs = await _productV2DetailMongoAccess.UpdateAsync(product);
                 if (rs != null)
                 {
                     await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING, db_index);
@@ -569,7 +571,7 @@ namespace WEB.CMS.Controllers
                     {
                         is_success = true,
                         msg = msg,
-                      
+
                     });
                 }
 
@@ -593,7 +595,7 @@ namespace WEB.CMS.Controllers
         public async Task<IActionResult> DetailNew(string id = "")
         {
             ViewBag.Static = _configuration["API:StaticURL"];
-            if(id==null || id.Trim() == "")
+            if (id == null || id.Trim() == "")
             {
                 ViewBag.GroupProduct = "";
                 ViewBag.Product = new ProductMongoDbModel();
@@ -603,7 +605,7 @@ namespace WEB.CMS.Controllers
 
             }
             var product = await _productV2DetailMongoAccess.GetByID(id);
-            if(product == null || product._id==null || product._id.Trim() == "")
+            if (product == null || product._id == null || product._id.Trim() == "")
             {
                 ViewBag.GroupProduct = "";
                 ViewBag.Product = new ProductMongoDbModel();
@@ -636,7 +638,7 @@ namespace WEB.CMS.Controllers
         }
         public async Task<IActionResult> AttributesPrice(
             bool? is_one_weight, List<ProductAttributeMongoDbModel> attributes, List<ProductAttributeMongoDbModelItem> attributes_detail, List<ProductMongoDbModel> sub_product,
-            string product_id="")
+            string product_id = "")
         {
             ViewBag.IsOneWeight = is_one_weight;
             ViewBag.Attributes = attributes;
@@ -645,7 +647,7 @@ namespace WEB.CMS.Controllers
             try
             {
                 var subs = sub_product;
-                if(product_id!=null && product_id.Trim() != "")
+                if (product_id != null && product_id.Trim() != "")
                 {
                     var product = await _productV2DetailMongoAccess.GetByID(product_id);
                     if (product != null && product._id != null)
