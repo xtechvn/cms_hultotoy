@@ -27,7 +27,6 @@ namespace WEB.CMS.Controllers
         private readonly IRoleRepository _RoleRepository;
         private readonly IMFARepository _mFARepository;
         private readonly ManagementUser _ManagementUser;
-        private readonly APIService _aPIService;
         private readonly IConfiguration _configuration;
 
 
@@ -42,7 +41,6 @@ namespace WEB.CMS.Controllers
             _DepartmentRepository = departmentRepository;
             _ManagementUser = managementUser;
             _configuration = configuration;
-            _aPIService = new APIService(configuration, userRepository);
         }
 
         public IActionResult Index()
@@ -118,8 +116,6 @@ namespace WEB.CMS.Controllers
                     {
                         ViewBag.UserRoleList = list_role_active.Select(x => x.Id).ToList();
                     }
-                    var user = await _aPIService.GetByUserDetail(model.Id,model.UserName,model.Email);
-                    ViewBag.CompanyType = user != null && user.Id > 0 ? user.CompanyType : "";
                 }
                 else
                 {
@@ -168,7 +164,6 @@ namespace WEB.CMS.Controllers
                     model.Avata = "/" + _UploadFolder + "/" + _FileName;
                 }
 
-                int rs = 0;
                 if(model.UserPositionId!=null && model.UserPositionId > 0)
                 {
                     var active_position = await _UserRepository.GetUserPositionsByID((int)model.UserPositionId);
@@ -189,36 +184,22 @@ namespace WEB.CMS.Controllers
                 if (model.Avata == null) model.Avata = "";
                 if (model.Address == null) model.Address = "";
                 //-- Update dbUser:
-                var success = await _aPIService.UpdateUser(model);
-                if (success > 0 )
+                var exists = await _UserRepository.GetById(model.Id);
+                int user_id = 0;
+                if (exists == null || exists.Id <= 0)
                 {
-                    var exists = await _UserRepository.GetById(model.Id);
-                    if(exists==null || exists.Id <= 0)
-                    {
-                        rs = await _UserRepository.Create(model);
+                    user_id = await _UserRepository.CountUser();
+                    model.Id=user_id;
+                    user_id = await _UserRepository.Create(model);
 
-                    }
-                    else
-                    {
-                        rs = await _UserRepository.Update(model);
-
-                    }
                 }
                 else
                 {
-                    rs = -2;
+                    user_id = await _UserRepository.Update(model);
+
                 }
-                  /*
-                if (model.Id != 0)
-                {
-                    rs = await _UserRepository.Update(model);
-                }
-                else
-                {
-                    rs = await _UserRepository.Create(model);
-                }
-               */
-                if (rs > 0)
+               
+                if (user_id > 0)
                 {
 
 
@@ -228,7 +209,7 @@ namespace WEB.CMS.Controllers
                         message = "Cập nhật thành công"
                     });
                 }
-                else if (rs == -1)
+                else if (user_id == -1)
                 {
                     return new JsonResult(new
                     {
@@ -353,25 +334,12 @@ namespace WEB.CMS.Controllers
             {
                 var rs = await _UserRepository.ResetPasswordByUserId(userId);
                 var current_user = await _UserRepository.GetById(userId);
-                var user = await _aPIService.GetByUserDetail(current_user.Id, current_user.UserName, current_user.Email);
-                var result_2 = await _aPIService.ChangePassword(current_user.UserName, current_user.Password);
-                if (result_2 > 0)
+                return new JsonResult(new
                 {
-                    return new JsonResult(new
-                    {
-                        isSuccess = true,
-                        message = "Cập nhật thành công",
-                        result = rs
-                    });
-                }
-                else
-                {
-                    return new JsonResult(new
-                    {
-                        isSuccess = false,
-                        message = "Cập nhật thất bại"
-                    });
-                }
+                    isSuccess = true,
+                    message = "Cập nhật thành công",
+                    result = rs
+                });
             }
             catch (Exception ex)
             {
@@ -427,9 +395,7 @@ namespace WEB.CMS.Controllers
             {
                 var rs = await _UserRepository.ChangePassword(model);
                 var current_user = await _UserRepository.GetById(model.Id);
-                var user = await _aPIService.GetByUserDetail(current_user.Id, current_user.UserName, current_user.Email);
                 var NewPassword = EncodeHelpers.MD5Hash(model.NewPassword);
-                var result_2 = _aPIService.ChangePassword(current_user.UserName, NewPassword);
                 if (rs > 0)
                 {
                     return new JsonResult(new
@@ -476,7 +442,6 @@ namespace WEB.CMS.Controllers
                 detail.Status = 0;
                 var rs = await _mFARepository.UpdateAsync(detail);
                 var user_local = await _UserRepository.GetById(detail.UserId);
-                var user = await _aPIService.GetByUserDetail(user_local.Id, user_local.UserName, user_local.Email);
 
                 if (rs)
                     return new JsonResult(new
@@ -560,18 +525,14 @@ namespace WEB.CMS.Controllers
             {
                 var mfa_record = new Mfauser();
                 var model = await _UserRepository.GetById(id);
-                APIService apiService = new APIService(_configuration, _UserRepository);
                 string enviroment = _configuration["Config:OTP_Enviroment"];
                 if (enviroment == null) enviroment = "";
            
                 mfa_record.Username = model.UserName;
                 mfa_record.Id = model.Id;
-                var data = await apiService.GenQrCode(model.UserName);
-                if (data != null)
-                {
-                   ViewBag.manual_entry_key = data.manual_entry_key;
-                    mfa_record.SecretKey = data.manual_entry_key;
-                }
+                mfa_record.SecretKey = "";
+                ViewBag.manual_entry_key = "";
+
                 ViewBag.key = MFAService.GenerateQRCode(mfa_record, enviroment);
                 return PartialView();
             }
