@@ -149,6 +149,7 @@ var _product_constants = {
                                     <div >
                                         <a href="javascript:;" class="product-copy-sp">Sao chép</a><br />
                                         <a href="javascript:;" class="product-remove-sp">Ẩn</a><br />
+                                        <a href="javascript:;" class="product-open-sp">Hiển thị</a><br />
                                         <a href="javascript:;" class="product-remove-sp2">Xóa</a><br />
                                     </div>
 

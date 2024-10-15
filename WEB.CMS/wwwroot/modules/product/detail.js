@@ -546,6 +546,7 @@ var product_detail = {
                         discount = parseFloat(element.find('.discount-percent').find('input').val().replaceAll(',', ''))
                         if (discount > 100) {
                             _msgalert.error("Chiết khấu tối đa 100%")
+                                element.find('.discount-percent').find('input').val(100)
                         }
                     } break
                 }
@@ -1442,12 +1443,32 @@ var product_detail = {
     ValidateProduct: function () {
         var success = true;
         var value = $('#product-name input').val()
+        var description_textarea = $('#description textarea').val()
+        var group_id_input = $('#group-id input').val()
+        var main_profit_input = $('#main-profit input').val()
+        var main_price_input = $('#main-price input').val()
         //-- product-name:
         if (value == undefined || value.trim() == '') {
             _msgalert.error('Tên sản phẩm không được bỏ trống')
             success = false
         } else if (value.length > 120) {
             _msgalert.error('Tên sản phẩm không được quá 120 ký tự')
+            success = false
+        }
+        if (description_textarea == undefined || description_textarea.trim() == '') {
+            _msgalert.error('Mô tả sản phẩm không được bỏ trống')
+            success = false
+        } 
+        if(group_id_input == undefined || group_id_input.trim() == '') {
+            _msgalert.error('Ngành hàng không được bỏ trống')
+            success = false
+        }
+        if (main_profit_input == undefined || group_id_input.trim() == '') {
+            _msgalert.error('Lợi nhuận không được bỏ trống')
+            success = false
+        }
+        if (main_price_input == undefined || group_id_input.trim() == '') {
+            _msgalert.error('Giá nhập không được bỏ trống')
             success = false
         }
         if (!success) return success
