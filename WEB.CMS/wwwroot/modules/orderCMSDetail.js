@@ -171,6 +171,10 @@ var _orderDetail = {
         var row = '';
         $("#DistrictId").empty();
         $("#DistrictId").append('<option value="">Chọn địa điểm</option>');
+
+        $("#WardId").empty();
+        $("#WardId").append('<option value="">Chọn địa điểm</option>');
+  
         $.ajax({
             url: "/Order/SuggestDistrict",
             type: "Post",

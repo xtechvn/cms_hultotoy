@@ -15,7 +15,7 @@
                     <div class="row row_min">
                         <input id="OrderId" value="@ViewBag.orderId " style="display:none;" />
                         <div class="form-group col-6">
-                            <label class="lbl">Tỉnh/Huyện <sup class="red">*</sup></label>
+                            <label class="lbl">Tỉnh/Thành phố <sup class="red">*</sup></label>
                             <div class="wrap_input">
                                 <select class="form-control select2-modal" style="width:100%" onchange="_orderDetail.loadingDistrict()" id="ProvinceId" name="ProvinceId">
                                     @if (Model.ProvinceId != null)
@@ -30,7 +30,7 @@
                                         {
                                             @if (item.ProvinceId != Model.ProvinceId)
                                             {
-                                                <option value="@item.ProvinceId">@item.Name</option>
+                                                <option value="@item.Id">@item.Name</option>
                                             }
 
                                         }
@@ -39,7 +39,7 @@
                             </div>
                         </div>
                         <div class="form-group col-6">
-                            <label class="lbl">Thành phố <sup class="red">*</sup></label>
+                            <label class="lbl">Quận/huyện <sup class="red">*</sup></label>
                             <div class="wrap_input">
                                 <select class="form-control select2-modal" onchange="_orderDetail.loadingWard()" style="width:100%" id="DistrictId" name="DistrictId">
                                     @if (Model.DistrictId != null)
@@ -54,7 +54,7 @@
                                         {
                                             @if (item.DistrictId != Model.DistrictId)
                                             {
-                                                <option value="@item.DistrictId">@item.Name</option>
+                                                <option value="@item.Id">@item.Name</option>
                                             }
                                         }
                                     }
@@ -77,7 +77,7 @@
                                         {
                                             @if (item.WardId != Model.WardId)
                                             {
-                                                <option value="@item.WardId">@item.Name</option>
+                                                <option value="@item.Id">@item.Name</option>
                                             }
                                         }
                                     }
