@@ -1443,12 +1443,22 @@ var product_detail = {
     ValidateProduct: function () {
         var success = true;
         var value = $('#product-name input').val()
+        var description_textarea = $('#description textarea').val()
+        var group_id_input = $('#group-id input').val()
         //-- product-name:
         if (value == undefined || value.trim() == '') {
             _msgalert.error('Tên sản phẩm không được bỏ trống')
             success = false
         } else if (value.length > 120) {
             _msgalert.error('Tên sản phẩm không được quá 120 ký tự')
+            success = false
+        }
+        if (description_textarea == undefined || description_textarea.trim() == '') {
+            _msgalert.error('Mô tả sản phẩm không được bỏ trống')
+            success = false
+        } 
+        if(group_id_input == undefined || group_id_input.trim() == '') {
+            _msgalert.error('Ngành hàng không được bỏ trống')
             success = false
         }
         if (!success) return success
