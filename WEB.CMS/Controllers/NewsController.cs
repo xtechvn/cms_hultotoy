@@ -187,17 +187,17 @@ namespace WEB.CMS.Controllers
 
                     ClearCacheArticle(articleId, strCategories);
 
-                    // Tạo message để push vào queue
-                    var j_param = new Dictionary<string, object>
-                            {
-                                { "store_name", "Sp_GetAllArticle" },
-                                { "index_es", "es_hulotoys_sp_get_article" },
-                                {"project_type", "Hulotoy" }
+                    //Tạo message để push vào queue
+                    //var j_param = new Dictionary<string, object>
+                    //        {
+                    //            { "store_name", "Sp_GetAllArticle" },
+                    //            { "index_es", "es_hulotoys_sp_get_article" },
+                    //            {"project_type", "Hulotoy" }
 
-                            };
-                    var _data_push = JsonConvert.SerializeObject(j_param);
-                    // Push message vào queue
-                    var response_queue = work_queue.InsertQueueSimple(_data_push, QueueName.queue_app_push);
+                    //        };
+                    //var _data_push = JsonConvert.SerializeObject(j_param);
+                    //Push message vào queue
+                    //var response_queue = work_queue.InsertQueueSimple(_data_push, QueueName.queue_app_push);
 
                     return new JsonResult(new
                     {
