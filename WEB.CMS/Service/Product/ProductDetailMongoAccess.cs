@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Utilities;
 using Utilities.Contants;
 using Utilities.Contants.ProductV2;
 
@@ -19,8 +20,14 @@ namespace WEB.CMS.Models.Product
         public ProductDetailMongoAccess(IConfiguration configuration)
         {
             _configuration = configuration;
-            string url = "mongodb://" + configuration["DataBaseConfig:MongoServer:Host"] + "";
-            var client = new MongoClient("mongodb://" + configuration["DataBaseConfig:MongoServer:Host"] + "");
+            //mongodb://adavigolog_writer:adavigolog_2022@103.163.216.42:27017/?authSource=HoanBds
+            string url = "mongodb://"+ configuration["DataBaseConfig:MongoServer:user"] + 
+                ":" + configuration["DataBaseConfig:MongoServer:pwd"] +
+                "@" + configuration["DataBaseConfig:MongoServer:Host"] +
+                ":" + configuration["DataBaseConfig:MongoServer:Port"] + 
+                "/?authSource=" + configuration["DataBaseConfig:MongoServer:catalog"] + "";
+
+            var client = new MongoClient(url);
             IMongoDatabase db = client.GetDatabase(configuration["DataBaseConfig:MongoServer:catalog"]);
             _productDetailCollection = db.GetCollection<ProductMongoDbModel>("ProductDetail");
         }
@@ -34,7 +41,7 @@ namespace WEB.CMS.Models.Product
             }
             catch (Exception ex)
             {
-                Utilities.LogHelper.InsertLogTelegram("ProductDetailMongoAccess - AddNewAsync: \nData: aff_model: " + JsonConvert.SerializeObject(model) + ".\n Error: " + ex);
+                LogHelper.InsertLogTelegram("AddNewAsync - ProductDetailMongoAccess: " + ex.ToString());
                 return null;
             }
         }
@@ -50,7 +57,7 @@ namespace WEB.CMS.Models.Product
             }
             catch (Exception ex)
             {
-                Utilities.LogHelper.InsertLogTelegram("ProductDetailMongoAccess - UpdateAsync: \nData: aff_model: " + JsonConvert.SerializeObject(model) + ".\n Error: " + ex);
+                LogHelper.InsertLogTelegram("UpdateAsync - ProductDetailMongoAccess: " + ex.ToString());
                 return null;
             }
         }
@@ -85,10 +92,9 @@ namespace WEB.CMS.Models.Product
                 {
                     filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.group_product_id, group_id.ToString());
                 }
-                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Where(x => x.status != (int)ProductStatus.REMOVE);
                 var sort_filter = Builders<ProductMongoDbModel>.Sort;
                 var sort_filter_definition = sort_filter.Descending(x=>x.updated_last);
-                var model =  _productDetailCollection.Find(filterDefinition).Sort(sort_filter_definition);
+                var model =  _productDetailCollection.Find(filterDefinition);
                 model.Options.Skip = page_index < 1 ? 0 : (page_index - 1) * page_size;
                 model.Options.Limit = page_size;
                 var result = await model.ToListAsync();
