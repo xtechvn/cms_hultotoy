@@ -738,7 +738,7 @@
                     }
                 }
             </nw>
-            <div class="item-edit item flex flex-lg-nowrap gap10 mb-2 w-100">
+            <div id="product-attributes-table" class="item-edit item flex flex-lg-nowrap gap10 mb-2 w-100" style="@((product != null && product.attributes != null && product.attributes.Count > 0)? "":"display:none;")">
                 <label class="label">
                     Danh sách
                     phân loại hàng
@@ -751,13 +751,13 @@
                                     <tr>
                                         <td class="td-price">
                                             <div class="form-group mb-0 price">
-                                                <input type="text" class="form-control input-price" placeholder="Giá nhập">  <sup class="red">*</sup>
+                                                <input type="text" class="form-control input-price" placeholder="Giá nhập">  
                                                 <span class="note">đ</span>
                                             </div>
                                         </td>
                                         <td class="td-profit">
                                             <div class="form-group mb-0 price">
-                                                <input type="text" class="form-control input-price" placeholder="Lợi nhuận"> <sup class="red">*</sup>
+                                                <input type="text" class="form-control input-price" placeholder="Lợi nhuận"> 
                                                 <span class="note">đ</span>
                                             </div>
                                         </td>
@@ -810,7 +810,7 @@
                             <label class="label">Giá nhập</label>
                             <div class="wrap_input">
                                 <div id="main-price" class="form-group price">
-                                    <input type="text" class="form-control" placeholder="Nhập giá" value="@(product==null ?"0":product.amount.ToString("N0"))">
+                                    <input type="text" class="form-control input-price" placeholder="Nhập giá" value="@(product==null ?"0":product.amount.ToString("N0"))">
                                     <span class="note">đ</span>
                                 </div>
                             </div>
@@ -823,7 +823,7 @@
                             <label class="label">Lợi nhuận</label>
                             <div class="wrap_input">
                                 <div id="main-profit" class="form-group price">
-                                    <input type="text" class="form-control" placeholder="Nhập giá" value="@(product==null ?"0":product.profit.ToString("N0"))">
+                                    <input type="text" class="form-control input-price" placeholder="Nhập giá" value="@(product==null ?"0":product.profit.ToString("N0"))">
                                     <span class="note">đ</span>
                                 </div>
                             </div>
@@ -836,7 +836,7 @@
                             <label class="label">Giá bán</label>
                             <div class="wrap_input">
                                 <div id="main-amount" class="form-group price product-single-amount">
-                                    <input type="text" class="form-control" placeholder="Nhập giá" value="@(product==null ?"0":product.amount.ToString("N0"))">
+                                    <input type="text" class="form-control input-price" placeholder="Nhập giá" value="@(product==null ?"0":product.amount.ToString("N0"))" readonly>
                                     <span class="note">đ</span>
                                 </div>
                             </div>
@@ -849,7 +849,7 @@
                             <label class="label">Kho</label>
                             <div id="main-stock" class="wrap_input">
                                 <div class="form-group price">
-                                    <input type="text" class="form-control" placeholder="Nhập giá" value="@(product==null ?"0":product.quanity_of_stock.ToString("N0"))">
+                                    <input type="text" class="form-control input-price" placeholder="Nhập giá" value="@(product==null ?"0":product.quanity_of_stock.ToString("N0"))">
                                 </div>
                             </div>
                         </div>

@@ -468,6 +468,11 @@ var _product_constants = {
 
 
 var _product_constants_2 = {
+    Values: {
+        GroupProduct: 1,
+        GroupProductName: 'Hulotoy',
+
+    },
     Attributes: {
         Input:` <div class="col-md-6 lastest-attribute-value item ui-sortable-handle attributes-detail" draggable="true">
                                                     <div class="box-list">

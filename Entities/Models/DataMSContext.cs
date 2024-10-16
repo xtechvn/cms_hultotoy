@@ -619,6 +619,7 @@ public partial class DataMSContext : DbContext
 
             entity.ToTable("District");
 
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.DistrictId)
                 .IsRequired()
                 .HasMaxLength(5);
@@ -1086,6 +1087,7 @@ public partial class DataMSContext : DbContext
 
             entity.ToTable("Province");
 
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasMaxLength(100);
@@ -1468,6 +1470,7 @@ public partial class DataMSContext : DbContext
 
             entity.ToTable("Ward");
 
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.DistrictId)
                 .IsRequired()
                 .HasMaxLength(5);
