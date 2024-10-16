@@ -532,6 +532,23 @@ var product_detail_new = {
                 element.val(null)
             } break
             case 'avatar': 
+                {
+                    if ($.inArray(element.val().split('.').pop().toLowerCase(), _product_constants.VALUES.ImageExtension) == -1) {
+                        _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.ImageExtension.join(', '));
+                        return
+                    }
+                    $(element[0].files).each(function (index, item) {
+
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            element.closest('.list').prepend(_product_constants.HTML.ProductDetail_Images_Item.replaceAll('{src}', e.target.result).replaceAll('{id}', '-1'))
+                            element.closest('.items').find('.count').html(element.closest('.list').find('.magnific_popup').length)
+
+                        }
+                        reader.readAsDataURL(item);
+                    });
+                    element.val(null)
+                } break
             case 'videos': {
                 if ($.inArray(element.val().split('.').pop().toLowerCase(), _product_constants.VALUES.VideoExtension) == -1) {
                     _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.VideoExtension.join(', '));
