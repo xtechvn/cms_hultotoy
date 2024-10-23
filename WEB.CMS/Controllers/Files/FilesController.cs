@@ -49,6 +49,7 @@ namespace HuloToys_Front_End.Controllers.Files
             });
         }
         [HttpPost]
+        [RequestFormLimits(MultipartBodyLengthLimit = 100*1024*1024)]
         public async Task<IActionResult> SummitVideo(IFormFile request)
         {
             try
