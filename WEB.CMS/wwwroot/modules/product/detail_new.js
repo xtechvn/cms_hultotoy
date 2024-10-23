@@ -984,6 +984,59 @@ var product_detail_new = {
         }
         if (!success) return success
 
+        if ($('#description textarea').val() == undefined
+            || $('#description textarea').val().trim()=='') {
+            _msgalert.error('Mô tả sản phẩm không được bỏ trống')
+            success = false
+        }
+        if (!success) return success
+
+        if ($('#group-id namesp input').val() == undefined
+            || $('#group-id namesp input').val().trim() == ''
+            || $('#group-id namesp input').attr('data-id') == undefined
+            || $('#group-id namesp input').attr('data-id').trim() == '') {
+            _msgalert.error('Vui lòng chọn ngành hàng cho sản phẩm')
+            success = false
+        }
+        if (!success) return success
+        if ($('#product-attributes-price').closest('.item-edit').is(':hidden')) {
+            if ($('#main-price input').val() == undefined || $('#main-price input').val().trim() == '') {
+                _msgalert.error('Vui lòng nhập giá nhập sản phẩm')
+                success = false
+            }
+            else if ($('#main-profit input').val() == undefined || $('#main-profit input').val().trim() == '') {
+                _msgalert.error('Vui lòng nhập lợi nhuận sản phẩm')
+                success = false
+            }
+            else if ($('#main-amount input').val() == undefined || $('#main-amount input').val().trim() == '') {
+                _msgalert.error('Vui lòng nhập giá bán sản phẩm')
+                success = false
+            }
+           
+        } else {
+            $('#product-attributes-prices tbody tr').each(function (index, index) {
+                var element = $(this)
+                var price = parseFloat(element.find('.td-price').find('input').val().replaceAll(',', ''))
+                var profit = parseFloat(element.find('.td-profit').find('input').val().replaceAll(',', ''))
+                var amount = parseFloat(element.find('.td-amount').find('input').val().replaceAll(',', ''))
+                if (price == undefined || isNaN(price) || price <= 0) {
+                    _msgalert.error('Vui lòng nhập đầy đủ giá nhập cho tất cả các biến thể của sản phẩm')
+                    success = false
+                    return false
+                }
+                if (profit == undefined || isNaN(profit) || profit < 0) {
+                    _msgalert.error('Vui lòng nhập đầy đủ lợi nhuận cho tất cả các biến thể của sản phẩm')
+                    success = false
+                    return false
+                }
+                if (amount == undefined || isNaN(amount) || amount < 0) {
+                    _msgalert.error('Vui lòng nhập đầy đủ giá bán cho tất cả các biến thể của sản phẩm')
+                    success = false
+                    return false
+                }
+            })
+        }
+        if (!success) return success
 
         return success
     },
