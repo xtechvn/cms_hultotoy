@@ -991,10 +991,10 @@ var product_detail_new = {
         }
         if (!success) return success
 
-        if ($('#group-id namesp input').val() == undefined
-            || $('#group-id namesp input').val().trim() == ''
-            || $('#group-id namesp input').attr('data-id') == undefined
-            || $('#group-id namesp input').attr('data-id').trim() == '') {
+        if ($('#group-id .namesp input').val() == undefined
+            || $('#group-id .namesp input').val().trim() == ''
+            || $('#group-id .namesp input').attr('data-id') == undefined
+            || $('#group-id .namesp input').attr('data-id').trim() == '') {
             _msgalert.error('Vui lòng chọn ngành hàng cho sản phẩm')
             success = false
         }
