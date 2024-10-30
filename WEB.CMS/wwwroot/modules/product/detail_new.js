@@ -906,7 +906,12 @@ var product_detail_new = {
                     package_depth: (package_depth == undefined || isNaN(package_depth) || package_depth <= 0) ? model.package_depth : package_depth,
 
                 }
-                
+                if (model.is_one_weight==true) {
+                    variation.weight = model.weight
+                    variation.package_width = model.package_width
+                    variation.package_height = model.package_height
+                    variation.package_depth = model.package_depth
+                }
                 for (var i = 0; i < $('.attributes-list').length; i++) {
                     var attr_value = element.attr('data-attribute-' + i)
 
