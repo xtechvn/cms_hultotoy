@@ -113,7 +113,7 @@ var _product_constants = {
         StaticDomain: `https://static-image.adavigo.com`,
         ImageExtension: ['jpeg', 'jpg', 'png', 'bmp'],
         VideoExtension: ['mp4'],
-
+        VideoMaxSize: 31457280
     },
     HTML: {
         Product: `
