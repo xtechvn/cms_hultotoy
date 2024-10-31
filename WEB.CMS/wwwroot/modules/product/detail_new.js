@@ -586,6 +586,13 @@ var product_detail_new = {
                     _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.VideoExtension.join(', '));
                     return
                 }
+                if (typeof FileReader !== "undefined") {
+                    var size = element[0].files[0].size;
+                    if (size > _product_constants.VALUES.VideoMaxSize) {
+                        _msgalert.error("Vui lòng chỉ upload video có dung lượng dưới 30MB.");
+                        return
+                    }
+                }
                 $(element[0].files).each(function (index, item) {
                     var reader = new FileReader();
                     reader.onload = function (e) {
