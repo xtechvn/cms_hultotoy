@@ -19,6 +19,7 @@
     var Status = (List<AllCode>)ViewBag.Order_Status;
     var PAYMENT_STATUS = (List<AllCode>)ViewBag.PAYMENT_STATUS;
     var PERMISION_TYPE = (List<AllCode>)ViewBag.PERMISION_TYPE;
+    var SHIPPING_CARRIER = (List<AllCode>)ViewBag.SHIPPING_CARRIER;
     var SuggestOrder = (string[])ViewBag.FilterOrder.SuggestOrder;
 
 }
@@ -49,6 +50,16 @@
                 <input class="form-control date text-left filter_date_daterangepicker" id="filter_date_daterangepicker" type="text" name="datetimeOrder"
                        placeholder="Ngày tạo" />
             </div>
+        </div>  
+        <div class="form-group mb10 mr-2">
+            <select class="select2" id="CarrierId" name="" style="width: 220px; height: 30px;">
+                <option value="-1">Tất cả đơn vị vận chuyển</option>
+                @if(SHIPPING_CARRIER != null){
+                        foreach (var item in SHIPPING_CARRIER){
+                            <option value="@item.CodeValue">@item.Description</option>
+                        }
+                    }
+            </select>
         </div>
         @*   <div class="row-main-head mb10 mr-2">
         <div class="down-up">

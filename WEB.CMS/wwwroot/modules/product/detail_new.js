@@ -586,6 +586,13 @@ var product_detail_new = {
                     _msgalert.error("Vui lòng chỉ upload các định dạng sau: " + _product_constants.VALUES.VideoExtension.join(', '));
                     return
                 }
+                if (typeof FileReader !== "undefined") {
+                    var size = element[0].files[0].size;
+                    if (size > _product_constants.VALUES.VideoMaxSize) {
+                        _msgalert.error("Vui lòng chỉ upload video có dung lượng dưới 30MB.");
+                        return
+                    }
+                }
                 $(element[0].files).each(function (index, item) {
                     var reader = new FileReader();
                     reader.onload = function (e) {
@@ -865,6 +872,15 @@ var product_detail_new = {
                 type: parseInt(checkbox_value)
             })
         })
+        var weight = parseFloat($('#single-weight .weight').val().replaceAll(',', ''))
+        var package_width = parseFloat($('#single-weight .dismenssion-width').val().replaceAll(',', ''))
+        var package_height = parseFloat($('#single-weight .dismenssion-height').val().replaceAll(',', ''))
+        var package_depth = parseFloat($('#single-weight .dismenssion-depth').val().replaceAll(',', ''))
+        model.weight = (weight == undefined || isNaN(weight) || weight <= 0) ? null : weight;
+        model.package_width = (package_width == undefined || isNaN(package_width) || package_width <= 0) ? null : package_width;
+        model.package_height = (package_height == undefined || isNaN(package_height) || package_height <= 0) ? null : package_height;
+        model.package_depth = (package_depth == undefined || isNaN(package_depth) || package_depth <= 0) ? null : package_depth;
+        model.is_one_weight = !($('#single-weight .switch-weight').is(':checked'))
 
         model.variations = []
         if (!$('#product-attributes-price').closest('.item-edit').is(':hidden')) {
@@ -891,13 +907,18 @@ var product_detail_new = {
                     amount: (amount == undefined || isNaN(amount) || amount <= 0) ? null : amount,
                     quanity_of_stock: (quanity_of_stock == undefined || isNaN(quanity_of_stock) || quanity_of_stock <= 0) ? null : quanity_of_stock,
                     sku: element.find('.td-sku').find('input').val(),
-                    weight: (weight == undefined || isNaN(weight) || weight <= 0) ? null : weight,
-                    package_width: (package_width == undefined || isNaN(package_width) || package_width <= 0) ? null : package_width,
-                    package_height: (package_height == undefined || isNaN(package_height) || package_height <= 0) ? null : package_height,
-                    package_depth: (package_depth == undefined || isNaN(package_depth) || package_depth <= 0) ? null : package_depth,
+                    weight: (weight == undefined || isNaN(weight) || weight <= 0) ? model.weight : weight,
+                    package_width: (package_width == undefined || isNaN(package_width) || package_width <= 0) ? model.package_width : package_width,
+                    package_height: (package_height == undefined || isNaN(package_height) || package_height <= 0) ? model.package_height : package_height,
+                    package_depth: (package_depth == undefined || isNaN(package_depth) || package_depth <= 0) ? model.package_depth : package_depth,
 
                 }
-                
+                if (model.is_one_weight==true) {
+                    variation.weight = model.weight
+                    variation.package_width = model.package_width
+                    variation.package_height = model.package_height
+                    variation.package_depth = model.package_depth
+                }
                 for (var i = 0; i < $('.attributes-list').length; i++) {
                     var attr_value = element.attr('data-attribute-' + i)
 
@@ -916,15 +937,7 @@ var product_detail_new = {
         model.condition_of_product = $('#condition_of_product').find(':selected').val()
         model.sku = $('#sku input').val()
 
-        var weight = parseFloat($('#single-weight .weight').val().replaceAll(',', ''))
-        var package_width = parseFloat($('#single-weight .dismenssion-width').val().replaceAll(',', ''))
-        var package_height = parseFloat($('#single-weight .dismenssion-height').val().replaceAll(',', ''))
-        var package_depth = parseFloat($('#single-weight .dismenssion-depth').val().replaceAll(',', ''))
-        model.weight = (weight == undefined || isNaN(weight) || weight <= 0) ? null : weight;
-        model.package_width = (package_width == undefined || isNaN(package_width) || package_width <= 0) ? null : package_width;
-        model.package_height = (package_height == undefined || isNaN(package_height) || package_height <= 0) ? null : package_height;
-        model.package_depth = (package_depth == undefined || isNaN(package_depth) || package_depth <= 0) ? null : package_depth;
-        model.is_one_weight = $('#single-weight .switch-weight').is(':checked')
+        
         
         _product_function.POST('/Product/Summit', { request: model }, function (result) {
             if (result.is_success) {

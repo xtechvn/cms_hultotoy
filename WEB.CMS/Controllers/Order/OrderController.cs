@@ -48,10 +48,12 @@ namespace WEB.CMS.Controllers
                 var orderStatus = _allCodeRepository.GetListByType("ORDER_STATUS");
                 var PAYMENT_STATUS = _allCodeRepository.GetListByType("PAYMENT_STATUS");
                 var PERMISION_TYPE = _allCodeRepository.GetListByType("PERMISION_TYPE");
+                var SHIPPING_CARRIER = _allCodeRepository.GetListByType("SHIPPING_CARRIER");
 
                 ViewBag.Order_Status = orderStatus;
                 ViewBag.PAYMENT_STATUS = PAYMENT_STATUS;
                 ViewBag.PERMISION_TYPE = PERMISION_TYPE;
+                ViewBag.SHIPPING_CARRIER = SHIPPING_CARRIER;
                 ViewBag.FilterOrder = new FilterOrder()
                 {
                     SysTemType = systemtype,

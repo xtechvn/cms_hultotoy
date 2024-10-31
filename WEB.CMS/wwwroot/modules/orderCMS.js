@@ -449,6 +449,7 @@ var _ordersCMS = {
             CreateName: null,
             HINHTHUCTT: listHINHTHUCTT,
             Sale: null,
+            CarrierId: null,
             BoongKingCode: null,
             sysTemType: -1,
             StatusTab: 99,
@@ -626,6 +627,7 @@ var _ordersCMS = {
 
 
         objSearch.searchModel.Note = $('#Note').val().trim();
+        objSearch.searchModel.CarrierId = $('#CarrierId').val();
         objSearch.searchModel.UtmSource = listServiceType;
         objSearch.searchModel.ServiceType = listService;
         objSearch.searchModel.Status = listStatus;
@@ -733,6 +735,7 @@ var _ordersCMS = {
         $('#Status').val(objSearch.searchModel.Status ?? -1).change();
         $('#CreateName').val(objSearch.searchModel.CreateName);
         $('#Sale').val(objSearch.searchModel.Sale);
+        $('#CarrierId').val(objSearch.searchModel.CarrierId);
         $("#selectPaggingOptions").find(':selected').val(objSearch.pageSize)
     },
     saveCookieFilter: function () {
