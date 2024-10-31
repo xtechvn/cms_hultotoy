@@ -624,13 +624,14 @@ var product_detail_new = {
         if (element.val() != null && element.val() != undefined && element.val().trim() != '') name = element.val()
         _product_function.POST('/Product/GetSpecificationByName', { type: type, name: name }, function (result) {
             if (result.is_success && result.data && result.data.length > 0) {
-                var current_value = element.closest('.col-md-6').find('.item').find('.input-select-option').attr('data-value')
+                var current_value = element.closest('.col-md-6').find('.spec-value').val()
                 if (current_value == undefined) current_value = ''
+                var current_value2 = current_value.split(',')
                 $(result.data).each(function (index, item) {
                     html += _product_constants.HTML.ProductDetail_Specification_Row_Item_SelectOptions_NewOptions
                         .replaceAll('{option-name}', 'specification-' + type)
                         .replaceAll('{value}', item._id)
-                        .replaceAll('{checked}', current_value.includes(item._id) ? 'checked' : '')
+                        .replaceAll('{checked}', current_value2.includes(item.attribute_name) ? 'checked' : '')
                         .replaceAll('{name}', item.attribute_name)
                 })
             }
@@ -688,7 +689,7 @@ var product_detail_new = {
         element.closest('ul').find('input:checked').each(function (index, item) {
             var checkbox_element = $(this)
             value += checkbox_element.val()
-            html += checkbox_element.closest('li').find('span').html()
+            html += checkbox_element.closest('li').find('span').text()
             if (index < (element.closest('ul').find('input:checked').length - 1)) {
                 value += ','
                 html += ','
