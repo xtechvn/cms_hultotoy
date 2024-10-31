@@ -29,7 +29,7 @@ namespace DAL
             try
             {
 
-                SqlParameter[] objParam = new SqlParameter[24];
+                SqlParameter[] objParam = new SqlParameter[25];
 
 
                 objParam[0] = (CheckDate(searchModel.CreateTime) == DateTime.MinValue) ? new SqlParameter("@CreateTime", DBNull.Value) : new SqlParameter("@CreateTime", CheckDate(searchModel.CreateTime));
@@ -120,6 +120,7 @@ namespace DAL
                 }
 
                 objParam[23] = new SqlParameter("@OrderId", searchModel.BoongKingCode);
+                objParam[24] = new SqlParameter("@CarrierId", searchModel.CarrierId);
 
 
                 return _DbWorker.GetDataTable(proc, objParam);

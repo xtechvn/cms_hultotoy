@@ -172,10 +172,22 @@
                                     <li class="flex justify-content-between mb-2">
                                         <div class="">Chi nhánh</div>
                                         <div class="text-right">@Model.BranchCodeName</div>
-                                    </li> 
+                                    </li>
                                     <li class="flex justify-content-between mb-2">
                                         <div class="">Đơn vị vận chuyển</div>
-                                        <div class="text-right"> </div>
+                                        <div class="text-right">@Model.CarrierTypeName </div>
+                                    </li>
+                                    <li class="flex justify-content-between mb-2">
+                                        <div class="">Phương thức giao hàng</div>
+                                        <div class="text-right">@Model.ShippingTypeName </div>
+                                    </li>
+                                    <li class="flex justify-content-between mb-2">
+                                        <div class="">Phí vận chuyển</div>
+                                        <div class="text-right">@Model.ShippingFee.ToString("N0") đ </div>
+                                    </li>
+                                    <li class="flex justify-content-between mb-2">
+                                        <div class="">Mã vận đơn</div>
+                                        <div class="text-right">@Model.ShippingCode </div>
                                     </li>
                                     <li>
                                         <div class="form-group">
