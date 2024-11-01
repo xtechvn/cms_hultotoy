@@ -218,9 +218,9 @@ namespace WEB.CMS.Controllers
                     // Tạo message để push vào queue
                     var j_param = new Dictionary<string, object>
                             {
-                                 { "store_name", "sp_getGroupProduct" },
-                                { "index_es", "group_product_hoanbds_store" },
-                                {"project_type", Convert.ToInt16(ProjectType.HOANBDS) },
+                                 { "store_name", "Sp_GetAllArticle" },
+                                { "index_es", "es_hulotoys_sp_get_article" },
+                                {"project_type", Convert.ToInt16(ProjectType.HULOTOYS) },
                                   {"id" , model.Id }
 
                             };
@@ -286,9 +286,9 @@ namespace WEB.CMS.Controllers
                     // Tạo message để push vào queue
                     var j_param = new Dictionary<string, object>
                             {
-                                 { "store_name", "sp_getGroupProduct" },
-                                { "index_es", "group_product_hoanbds_store" },
-                                {"project_type", Convert.ToInt16(ProjectType.HOANBDS) },
+                                  { "store_name", "Sp_GetAllArticle" },
+                                { "index_es", "es_hulotoys_sp_get_article" },
+                                {"project_type", Convert.ToInt16(ProjectType.HULOTOYS) },
                                   {"id" , Id }
 
                             };
@@ -335,17 +335,17 @@ namespace WEB.CMS.Controllers
                     //  clear cache article
                     ClearCacheArticle(Id, string.Join(",", Categories));
                     // Tạo message để push vào queue
-                    var j_param = new Dictionary<string, object>
-                            {
-                                  { "store_name", "SP_GetAllArticle" },
-                                { "index_es", "es_hulotoys_sp_get_article" },
-                                {"project_type", Convert.ToInt16(ProjectType.HULOTOYS) },
-                                  {"id" , "-1" }
+                    //var j_param = new Dictionary<string, object>
+                    //        {
+                    //              { "store_name", "SP_GetAllArticle" },
+                    //            { "index_es", "es_hulotoys_sp_get_article" },
+                    //            {"project_type", Convert.ToInt16(ProjectType.HULOTOYS) },
+                    //              {"id" , "-1" }
 
-                            };
-                    var _data_push = JsonConvert.SerializeObject(j_param);
-                    // Push message vào queue
-                    var response_queue = work_queue.InsertQueueSimple(_data_push, QueueName.queue_app_push);
+                    //        };
+                    //var _data_push = JsonConvert.SerializeObject(j_param);
+                    //// Push message vào queue
+                    //var response_queue = work_queue.InsertQueueSimple(_data_push, QueueName.queue_app_push);
 
                     return new JsonResult(new
                     {
