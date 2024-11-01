@@ -23,6 +23,7 @@ namespace WEB.CMS.RabitMQ
                 v_host = _configuration["Queue:V_Host"],
                 username = _configuration["Queue:Username"],
                 password = _configuration["Queue:Password"],
+                queue_Name = _configuration["Queue:Queue_Name"],
             };
             factory = new ConnectionFactory()
             {
@@ -42,7 +43,7 @@ namespace WEB.CMS.RabitMQ
                 try
                 {
                     channel.QueueDeclare(queue: queueName,
-                                     durable: false,
+                                     durable: true,
                                      exclusive: false,
                                      autoDelete: false,
                                      arguments: null);

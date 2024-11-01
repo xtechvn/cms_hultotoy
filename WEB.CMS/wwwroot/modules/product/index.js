@@ -21,6 +21,12 @@ var product_index = {
         $('body').on('click', '.btn-search-product', function () {
             product_index.Listing();
         });
+
+        $("#input-search-product-name").on('keyup', function (e) {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                product_index.Listing();
+            }
+        });
         $('body').on('click', '.btn-add-product', function () {
             window.location.href = '/product/detail'
         });
@@ -33,7 +39,7 @@ var product_index = {
 
             }
         });
-    
+
         $('body').on('click', '.product-remove-sp', function () {
             var element = $(this)
             var product_id = element.closest('tr').attr('data-id')
@@ -57,7 +63,7 @@ var product_index = {
                 }
 
             });
-           
+
         });
         $('body').on('click', '.product-open-sp', function () {
             var element = $(this)
@@ -82,7 +88,7 @@ var product_index = {
                 }
 
             });
-           
+
         });
         $('body').on('click', '.product-remove-sp2', function () {
             var element = $(this)
@@ -159,22 +165,34 @@ var product_index = {
         });
 
     },
+    
 
     Listing: function () {
+       
+        function normalizeText(input) {
+            return input
+                .normalize("NFC")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .trim()
+        }
         var request = {
-            keyword: $('#input-search-product-name').val(),
+            keyword: normalizeText($('#input-search-product-name').val()), // Làm sạch từ khóa
             group_id: -1,
             page_index: product_index.Model.page_index,
             page_size: parseInt($('#item-per-page').find(':selected').val())
         }
+
         _product_function.POST('/Product/ProductListing', request, function (result) {
             if (result.is_success && result.data && result.data.length > 0) {
                 product_index.RenderSearch(JSON.parse(result.data), JSON.parse(result.subdata))
-              
+                // Gán tổng số sản phẩm vào phần tử với class 'count'
+                $('.count').text(result.total_count || JSON.parse(result.data).length);
                 $('.hanmuc').closest('.flex-lg-nowrap').find('.count').html(JSON.parse(result.data).length)
             }
             else {
                 $('#product_list').html('')
+                $('.count').text(0); // Đặt về 0 nếu không có kết quả
 
             }
             $('#product_list').closest('.table-responsive').removeClass('placeholder')
@@ -252,7 +270,7 @@ var product_index = {
                             sub_attr_img.push(attribute_detail[0].img)
                         }
                         if (attribute != null && attribute.length > 0 && attribute_detail != null && attribute_detail.length > 0)
-                        html_sub_attr += '' + attribute[0].name + ': ' + attribute_detail[0].name
+                            html_sub_attr += '' + attribute[0].name + ': ' + attribute_detail[0].name
                         if (index_variation_attributes < ($(sub_item.attributes_detail).length - 1)) {
                             html_sub_attr += '<br /> '
                         }

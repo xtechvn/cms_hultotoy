@@ -82,7 +82,7 @@ var product_detail = {
         });
         $('body').on('keyup', '#description textarea, #product-name input, .product-attributes input', function () {
             var element = $(this)
-            element.closest('.item').find('.count').html(_product_function.Comma(element.val().length))
+            element.closest('.item').find('.count').html(_product_function.comma(element.val().length))
 
         });
         $('body').on('click', '#product-detail-cancel', function () {
@@ -720,7 +720,15 @@ var product_detail = {
 
         })
 
-        $('#product-name input').val(product.name)
+        function normalizeText(input) {
+            return input
+                .normalize("NFC")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .trim();
+        }
+        
+        normalizeText($('#product-name input').val(product.name)
 
         //-- Group Product
         $('#group-id input').attr('data-id', product.group_product_id)
@@ -1298,7 +1306,18 @@ var product_detail = {
             }
 
         })
-        model.name = $('#product-name input').val()
+        function normalizeText(input) {
+            return input
+                .normalize("NFC")
+                .replace(/[\u0300-\u036f]/g, "") // Bỏ các dấu tiếng Việt
+                .toLowerCase()
+                .trim();
+        }
+
+        model.name = normalizeText($('#product-name input').val());
+        console.log("Normalized Product Name before sending:", model.name);
+        Console.WriteLine("Product Name received at Server: " + model.name);
+
         model.group_product_id = $('#group-id input').attr('data-id')
         model.description = $('#description textarea').val()
         model.specification = []
