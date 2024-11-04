@@ -172,9 +172,10 @@ var product_index = {
         function normalizeText(input) {
             return input
                 .normalize("NFC")
-                .replace(/[\u0300-\u036f]/g, "")
-                .toLowerCase()
-                .trim()
+               
+                //.replace(/[()]/g, "")             // Loại bỏ dấu ngoặc đơn
+                .replace(/\s+/g, ' ')             // Xóa khoảng trắng thừa
+                .trim();
         }
         var request = {
             keyword: normalizeText($('#input-search-product-name').val()), // Làm sạch từ khóa
