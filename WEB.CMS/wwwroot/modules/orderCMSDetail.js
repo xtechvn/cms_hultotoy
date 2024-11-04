@@ -7,6 +7,7 @@ $(document).ready(function () {
     _orderDetail.LoadBillVAT(input);
     _orderDetail.LoadFile(input, type);
     _orderDetail.LoadPersonInCharge(input);
+    _orderDetail.DynamicBind();
 });
 var _orderDetail = {
     LoadOeederDetail: function () {
@@ -209,5 +210,31 @@ var _orderDetail = {
         });
 
     },
+    DynamicBind: function () {
+        $('body').on('click', '#send-order-to-carrier', function () {
+            _orderDetail.SendToCarrier()
+
+        });
+    },
+    SendToCarrier: function () {
+        var title = 'Chuyển đơn hàng sang cho ĐVVC';
+        var description = 'Đơn hàng này sẽ được chuyển sang cho ĐVVC, bạn có chắc chắn không?';
+        _msgconfirm.openDialog(title, description, function () {
+            var id = $('#order_Id').val()
+            $.ajax({
+                url: "/OrderManual/SendToCarrier",
+                type: "Post",
+                data: { id: id },
+                success: function (result) {
+                    if (result.is_success) {
+                        _msgalert.success(result.msg);
+                    } else {
+                        _msgalert.error(result.msg);
+                    }
+                }
+            });
+        });
+       
+    }
     
 }
