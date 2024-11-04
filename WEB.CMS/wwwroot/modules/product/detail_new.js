@@ -829,7 +829,9 @@ var product_detail_new = {
         function normalizeText(input) {
             return input
                 .normalize("NFC")
-                .replace(/[\u0300-\u036f]/g, "") // Bỏ các dấu tiếng Việt
+                
+                //.replace(/[()]/g, "")             // Loại bỏ dấu ngoặc đơn
+                .replace(/\s+/g, ' ')             // Xóa khoảng trắng thừa
                 .trim();
         }
 

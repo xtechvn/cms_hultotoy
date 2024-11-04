@@ -5,6 +5,7 @@ using Nest;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using Utilities;
 using Utilities.Contants;
@@ -115,13 +116,15 @@ namespace WEB.CMS.Models.Product
 
                 // Lấy tất cả sản phẩm
                 //var allProducts = await GetAllProducts();
-               
+                // Chuẩn hóa từ khóa tìm kiếm
+                string normalizedKeyword = NormalizeTextForSearch(keyword);
+
 
 
 
                 var filter = Builders<ProductMongoDbModel>.Filter;
                 var filterDefinition = filter.Empty;
-                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.name, new Regex(keyword, RegexOptions.IgnoreCase));
+                 filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.name, new Regex(  Regex.Escape(normalizedKeyword) , RegexOptions.IgnoreCase));
                 filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.parent_product_id, "");
                 if (group_id > 0)
                 {
@@ -148,6 +151,14 @@ namespace WEB.CMS.Models.Product
                 Utilities.LogHelper.InsertLogTelegram("ProductDetailMongoAccess - Listing Error: " + ex);
                 return null;
             }
+        }
+        // Hàm chuẩn hóa từ khóa tìm kiếm, giữ lại dấu ngoặc và các ký tự cần thiết
+        private string NormalizeTextForSearch(string input)
+        {
+            return input
+                .Normalize(NormalizationForm.FormC)
+                .ToLower()
+                .Trim();
         }
 
         public async Task<List<ProductMongoDbModel>> SubListing(string parent_id)
