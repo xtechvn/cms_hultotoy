@@ -21,7 +21,7 @@ var product_index = {
         $('body').on('click', '.btn-search-product', function () {
             product_index.Listing();
         });
-
+       
         $("#input-search-product-name").on('keyup', function (e) {
             if (e.key === 'Enter' || e.keyCode === 13) {
                 product_index.Listing();
@@ -162,6 +162,24 @@ var product_index = {
                 element.find('nw').html('')
                 element.find('.icofont-simple-down').hide()
             }
+        });
+        //-- Import Excel:
+        $('body').on('click', '.product-import', function () {
+            var element = $(this)
+            if (element.find('.box-action').is(':hidden')) {
+                element.find('.box-action').fadeIn()
+            } else {
+                element.find('.box-action').fadeOut()
+            }
+        });
+        $('body').on('click', '.product-import-add', function () {
+            var title = 'Thêm sản phẩm hàng loạt ';
+            let url = '/Product/ImportExcel';
+            let param = {
+
+            };
+
+            _magnific.OpenSmallPopup(title, url, param);
         });
 
     },

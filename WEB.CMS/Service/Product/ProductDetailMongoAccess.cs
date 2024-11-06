@@ -294,5 +294,22 @@ namespace WEB.CMS.Models.Product
             return null;
 
         }
+        public async Task<ProductMongoDbModel> GetByNameAndSKU(string name,string sku)
+        {
+            try
+            {
+                var filter = Builders<ProductMongoDbModel>.Filter;
+                var filterDefinition = filter.Empty;
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.name, name); ;
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.sku, sku); ;
+                var model = await _productDetailCollection.Find(filterDefinition).FirstOrDefaultAsync();
+                return model;
+            }
+            catch (Exception ex)
+            {
+                Utilities.LogHelper.InsertLogTelegram("GetByNameAndSKU - GetByID Error: " + ex);
+                return null;
+            }
+        }
     }
 }

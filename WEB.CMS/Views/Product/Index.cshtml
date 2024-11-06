@@ -76,7 +76,15 @@
             <div class="flex gap10">
                 <button class="btn btn-round btn-export-excel">
                     <i class="icofont-file-excel"></i>Xuất Excel
+                </button> 
+                <button class="btn btn-round product-import">
+                   Công cụ xử lý hàng loạt
+                    <div class="box-action" style="right:auto;bottom:auto;z-index: 1; display:none;">
+                        <a href="javascript:;" class="product-import-add">Đăng hàng loạt</a>
+                        <a href="javascript:;">Cập nhật hàng loạt</a>
+                    </div>
                 </button>
+               
                 <button class="btn btn-base btn-round btn-add-product">
                     <i class="icofont-plus "></i>Thêm sản phẩm mới
                 </button>
@@ -270,4 +278,5 @@
 @section Scripts {
     <script src="/modules/product/common.js"></script>
     <script src="/modules/product/index.js"></script>
+    <script src="/modules/product/import_excel.js"></script>
 }

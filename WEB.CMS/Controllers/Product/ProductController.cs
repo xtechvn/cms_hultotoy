@@ -4,13 +4,18 @@ using Entities.ViewModels.Products;
 using HuloToys_Service.ElasticSearch.NewEs;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using OfficeOpenXml;
 using Repositories.IRepositories;
+using Repositories.Repositories;
+using System.Security.Claims;
 using System.Text;
 using Utilities;
 using Utilities.Contants;
 using Utilities.Contants.ProductV2;
 using WEB.Adavigo.CMS.Service;
+using WEB.CMS.Controllers.Product.Bussiness;
 using WEB.CMS.Customize;
+using WEB.CMS.Models;
 using WEB.CMS.Models.Product;
 
 namespace WEB.CMS.Controllers
@@ -23,6 +28,7 @@ namespace WEB.CMS.Controllers
         private readonly IConfiguration _configuration;
         private readonly IGroupProductRepository _groupProductRepository;
         private readonly RedisConn _redisConn;
+        private readonly ProductDetailService productDetailService;
         private StaticAPIService _staticAPIService;
         private readonly int group_product_root = 31;
         private readonly int db_index = 9;
@@ -36,6 +42,7 @@ namespace WEB.CMS.Controllers
             _groupProductRepository = groupProductRepository;
             db_index = Convert.ToInt32(configuration["Redis:Database:db_search_result"]);
             _configuration = configuration;
+            productDetailService = new ProductDetailService(configuration);
         }
         public IActionResult Index()
         {
@@ -70,7 +77,7 @@ namespace WEB.CMS.Controllers
                 is_success = false
             });
         }
-       
+
         public async Task<IActionResult> ProductListing(string keyword = "", int group_id = -1, int page_index = 1, int page_size = 10)
         {
             try
@@ -214,7 +221,7 @@ namespace WEB.CMS.Controllers
                     product_main.package_width = request.package_width;
                     product_main.package_height = request.package_height;
                     product_main.package_depth = request.package_depth;
-                    
+
 
                 }
                 else
@@ -288,7 +295,7 @@ namespace WEB.CMS.Controllers
                 {
                     is_success = false,
                     msg = "Thêm mới / Cập nhật sản phẩm thất bại, vui lòng liên hệ bộ phận IT",
-                    err=rs
+                    err = rs
                 });
             }
             catch (Exception ex)
@@ -301,7 +308,7 @@ namespace WEB.CMS.Controllers
                     err = ex.ToString(),
                 });
             }
-           
+
         }
         public async Task<IActionResult> SummitImages(string data_image)
         {
@@ -385,7 +392,7 @@ namespace WEB.CMS.Controllers
                     {
                         try
                         {
-                            groups.Add( await _groupProductRepository.GetById(Convert.ToInt32(id)));
+                            groups.Add(await _groupProductRepository.GetById(Convert.ToInt32(id)));
                         }
                         catch { }
                     }
@@ -663,6 +670,102 @@ namespace WEB.CMS.Controllers
             ViewBag.Index = item_index;
             return View();
         }
-    }
+        public IActionResult ImportExcel()
+        {
 
+            return PartialView();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ImportProductListing(IFormFile file)
+        {
+
+            try
+            {
+                var stream = new MemoryStream();
+                await file.CopyToAsync(stream);
+                var data_list = new List<ProductExcelUploadModel>();
+                using (var package = new ExcelPackage(stream))
+                {
+                    ExcelWorksheet ws = package.Workbook.Worksheets.FirstOrDefault();
+
+                    var endRow = ws.Cells.End.Row;
+                    var startRow = 2;
+
+                    for (int row = startRow; row <= endRow; row++)
+                    {
+                        var cellRange = ws.Cells[row, 1, row, 13];
+                        var isRowEmpty = cellRange.All(c => c.Value == null);
+                        if (isRowEmpty)
+                        {
+                            break;
+                        }
+                        data_list.Add(new ProductExcelUploadModel()
+                        {
+                            group_product_id = Convert.ToInt32(ws.Cells[row, 1].Value),
+                            name = ws.Cells[row, 2].Value.ToString(),
+                            description = ws.Cells[row, 3].Value == null ? "" : ws.Cells[row, 3].Value.ToString(),
+                            sku = ws.Cells[row, 4].Value==null?"": ws.Cells[row, 4].Value.ToString(),
+                            product_code = ws.Cells[row, 5].Value.ToString(),
+                            attribute_1_name = ws.Cells[row, 6].Value == null ? "" : ws.Cells[row, 6].Value.ToString(),
+                            variation_1_name = ws.Cells[row, 7].Value == null ? "" : ws.Cells[row, 7].Value.ToString(),
+                            variation_images = ws.Cells[row, 8].Value == null ? "" : ws.Cells[row,8].Value.ToString(),
+                            attribute_2_name = ws.Cells[row, 9].Value == null ? "" : ws.Cells[row, 9].Value.ToString(),
+                            variation_2_name = ws.Cells[row, 10].Value == null ? "" : ws.Cells[row,10].Value.ToString(),
+                            variation_sku = ws.Cells[row, 11].Value == null ? "" : ws.Cells[row, 11].Value.ToString(),
+                            price =Convert.ToDouble(ws.Cells[row, 12].Value.ToString().Replace(",","")),
+                            profit = Convert.ToDouble(ws.Cells[row, 13].Value.ToString().Replace(",", "")),
+                            amount = ws.Cells[row, 14].Value==null?0: Convert.ToDouble(ws.Cells[row, 14].Value.ToString().Replace(",", "")),
+                            stock = Convert.ToInt32(ws.Cells[row, 15].Value.ToString().Replace(",", "")),
+                            avatar = ws.Cells[row, 16].Value.ToString(),
+                            video = ws.Cells[row, 17].Value == null ? "" : ws.Cells[row, 17].Value.ToString(),
+                            image_1 = ws.Cells[row, 18].Value == null ? "" : ws.Cells[row, 18].Value.ToString(),
+                            image_2 = ws.Cells[row, 19].Value == null ? "" : ws.Cells[row, 19].Value.ToString(),
+                            image_3 = ws.Cells[row, 20].Value == null ? "" : ws.Cells[row, 20].Value.ToString(),
+                            image_4 = ws.Cells[row, 21].Value == null ? "" : ws.Cells[row, 21].Value.ToString(),
+                            image_5 = ws.Cells[row, 22].Value == null ? "" : ws.Cells[row, 22].Value.ToString(),
+                            image_6 = ws.Cells[row, 23].Value == null ? "" : ws.Cells[row, 23].Value.ToString(),
+                            image_7 = ws.Cells[row, 24].Value == null ? "" : ws.Cells[row, 24].Value.ToString(),
+                            image_8 = ws.Cells[row, 25].Value == null ? "" : ws.Cells[row, 25].Value.ToString(),
+                            weight = float.Parse(ws.Cells[row, 26].Value.ToString()),
+                            width = float.Parse(ws.Cells[row, 27].Value.ToString()),
+                            height = float.Parse(ws.Cells[row, 28].Value.ToString()),
+                            depth = float.Parse(ws.Cells[row, 29].Value.ToString()),
+                            brand = ws.Cells[row, 30].Value == null ? "" : ws.Cells[row, 30].Value.ToString(),
+                        });
+
+                    }
+
+
+                }
+
+                ViewBag.CheckedAll = true;
+                return PartialView(data_list);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("ImportProductListing - ProductController: " + ex.ToString());
+                return PartialView();
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> ConfirmProductExcel(string model_json )
+        {
+            List<ProductMongoDbModel> products = new List<ProductMongoDbModel>();
+            try
+            {
+                if(model_json==null || model_json.Trim()=="") return PartialView(products);
+                List<ProductExcelUploadModel> request = JsonConvert.DeserializeObject<List<ProductExcelUploadModel>>(model_json);
+                if (request == null || request.Count<=0) return PartialView(products);
+                products = await productDetailService.ConvertToProducts(request);
+              
+            }
+            catch (Exception ex)
+            {
+                LogHelper.InsertLogTelegram("ConfirmProductExcel - ProductController: " + ex.ToString());
+            }
+            return PartialView(products);
+
+        }
+    }
+    
 }
