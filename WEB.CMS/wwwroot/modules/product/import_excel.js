@@ -56,7 +56,8 @@ var product_import_excel = {
         let url = '/Product/ConfirmProductExcel';
         let data = [];
         $('#import-error').hide()
-        $('#confirm-ws-import').prop('disabled',true)
+        $('#confirm-ws-import').prop('disabled', true)
+        console.log($('#grid_ws tbody tr').first().find('.group_product_id').text())
         $('#grid_ws tbody tr').each(function () {
             let seft = $(this);
             data.push({
