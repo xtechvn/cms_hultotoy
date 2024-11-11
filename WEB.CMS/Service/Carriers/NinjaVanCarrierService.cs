@@ -129,7 +129,6 @@ namespace WEB.CMS.Service.Carriers
                         is_pickup_required = true,
                         pickup_service_type = "Scheduled",
                         pickup_service_level = service_level,
-                        pickup_address_id = "",
                         pickup_date = DateTime.Now.ToString("yyyy-MM-dd"),
                         pickup_timeslot = new
                         {
@@ -146,7 +145,8 @@ namespace WEB.CMS.Service.Carriers
                             end_time = _configuration["Carrier:NinjaVan:TimeSlot:Delivery:End"],
                             timezone = _configuration["Carrier:NinjaVan:TimeSlot:Delivery:Timezone"]
                         },
-                        dimensions=new
+                        cash_on_delivery=order.ShippingFee,
+                        dimensions = new
                         {
                             weight= order.PackageWeight
                         },
@@ -163,13 +163,8 @@ namespace WEB.CMS.Service.Carriers
                 if (response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     dynamic resultContent = Newtonsoft.Json.Linq.JObject.Parse(response.Content.ReadAsStringAsync().Result);
-                    if (resultContent.status == 0)
-                    {
-                        carrier_packages_id = resultContent.tracking_number;
-                       
+                    carrier_packages_id = resultContent.tracking_number;
 
-
-                    }
                 }
 
             }
