@@ -122,16 +122,13 @@ namespace WEB.CMS.Controllers.Product.Bussiness
                         }
                        
                         //-- Check if main_products exists? :
-                        if (list.Any(x => 
-                            x.name.ToLower().Trim() == item.name.ToLower().Trim() 
-                            && item.sku.ToLower().Trim() == x.sku.ToLower().Trim()
+                        if (list.Any(x =>  item.sku.ToLower().Trim() == x.sku.ToLower().Trim()
                             && (x.parent_product_id == null || x.parent_product_id.Trim() == "")
                             && (x._id != null && x._id.Trim() != "")
                             ))
                         {
-                            var main_product = list.First(x => 
-                            x.name.ToLower().Trim() == item.name.ToLower().Trim() 
-                            && item.sku.ToLower().Trim() == x.sku.ToLower().Trim()
+                            var main_product = list.First(x =>
+                             item.sku.ToLower().Trim() == x.sku.ToLower().Trim()
                             && (x.parent_product_id==null || x.parent_product_id.Trim()=="")
                             && (x._id != null && x._id.Trim() != "")
                             );
@@ -194,18 +191,47 @@ namespace WEB.CMS.Controllers.Product.Bussiness
                     }
                     list.Add(model);
                 }
-                foreach(var product in list)
+                foreach (var product in list)
                 {
+                    //-- if parent, check if have child  && just 1 child, its is single product,remove parent_product :
+                    if (product._id != null && product._id.Trim() != "")
+                    {
+                        var childs = list.Where(x => x.parent_product_id != null && x.parent_product_id == product._id);
+                        if (childs.Count() == 1)
+                        {
+                            product.status = 2; // status deactive 
+                        }
+                        continue;
+                    }
+                }
+
+               
+                foreach (var product in list)
+                {
+                    if (product.status == 2) continue;
                     if(product._id==null || product._id.Trim() == "")
                     {
                         if(product.parent_product_id!=null && product.parent_product_id.Trim() != "")
                         {
                             var parent = list.First(x => x._id == product.parent_product_id);
-                            product.attributes = parent.attributes;
-                            product.attributes_detail = parent.attributes_detail;
-                            product.amount_min = parent.amount_min;
-                            product.amount_max = parent.amount_max;
-                            product.is_one_weight = parent.is_one_weight;
+                            if (parent.status == 2)
+                            {
+                                product.variation_detail = null;
+                                product.attributes = null;
+                                product.attributes_detail = null;
+                                product.parent_product_id = null;
+                                product.is_one_weight = true;
+                                product.amount_min = parent.amount;
+                                product.amount_max = parent.amount;
+                            }
+                            else
+                            {
+                                product.attributes = parent.attributes;
+                                product.attributes_detail = parent.attributes_detail;
+                                product.amount_min = parent.amount_min;
+                                product.amount_max = parent.amount_max;
+                                product.is_one_weight = parent.is_one_weight;
+                            }
                         }
                         if ((product.parent_product_id == null || product.parent_product_id.Trim() == "") && product.variation_detail!=null && product.variation_detail.Count>0)
                         {
@@ -221,7 +247,7 @@ namespace WEB.CMS.Controllers.Product.Bussiness
                 }
                 if (list != null && list.Count > 0)
                 {
-                    list = list.Where(x => x._id!=null && x._id.Trim()!="" &&( x.parent_product_id == null || x.parent_product_id.Trim() == "")).ToList();
+                    list = list.Where(x => x._id!=null && x._id.Trim()!="" && x.status==1 &&( x.parent_product_id == null || x.parent_product_id.Trim() == "")).ToList();
                 }
             }
             catch(Exception ex) 
