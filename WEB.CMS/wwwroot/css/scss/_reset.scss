@@ -730,14 +730,14 @@ button {
     border-radius: 6px;
     padding: 0 24px;
     text-align: center;
-    background: #FF5B00;
+    background: #056BD3;
     transition: 0.2s all;
-    border: 1px solid #FF5B00;
+    border: 1px solid #056BD3;
     cursor: pointer;
     &:hover {
         color: #fff;
-        background: #FD8F52;
-        border: 1px solid #FD8F52;
+        background: #0059A1;
+        border: 1px solid #0059A1;
     }
     &.full {
         width: 100%;

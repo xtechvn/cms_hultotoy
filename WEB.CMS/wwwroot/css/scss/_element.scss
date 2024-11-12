@@ -1230,7 +1230,7 @@ label.switch {
 
 .status-green {
     font-size: 10px;
-    background: var(--color-main);
+    background: #25B019;
     color: #fff;
     padding: 2px 6px;
     border-radius: 5px;
@@ -4446,5 +4446,42 @@ label.switch {
         .color-green {
             display: none
         }
+    }
+}
+.list-filter{
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    a{
+        display: inline-block;
+        padding:3px 5px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+        background: #C93636;
+        svg{
+            width: 13px;
+            height: 13px;
+            margin-left: 5px;
+            background: #fff;
+            color: #C93636;
+            padding: 2px;
+            border-radius: 50%;
+        }
+    }
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered[title="Còn phòng"]{
+    color: #1254FF;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered[title="Hết phòng"]{
+    color: #FF5B00;
+}
+.main-container{
+    .grid__3{
+        @media (max-width:991px) {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+
     }
 }

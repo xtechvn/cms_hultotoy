@@ -27,5 +27,7 @@ namespace Utilities.Contants
         public const string DISTRICT = "DISTRICT";
         public const string WARD = "WARD";
 
+        public const string NINJAVAN_OAUTH = "NINJAVAN_OAUTH";
+
     }
 }

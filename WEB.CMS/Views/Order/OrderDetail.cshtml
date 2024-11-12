@@ -246,8 +246,15 @@
 
                     <div class="form-group align-right mt20 block pin-btn-bottom ">
                         <button type="button" class="btn btn-default cancel ml-1" onclick="history.back()">Quay lại</button>
+                        @if (ViewBag.editsale == true)
+                        {
+                            <button type="button" class="btn btn-default ml-1" onclick="_orderDetail.ChangeOrderSaler(@ViewBag.OrderId,'@ViewBag.OrderNo')">Nhận xử lý đơn hàng</button>
+                        }
+                        @if (Model.PaymentStatus != null && (Model.ShippingCode == null || Model.ShippingCode.Trim() == ""))
+                        {
+                            <button id="send-order-to-carrier" type="button" class="btn btn-default ml-1 ">Gửi ĐVVC</button>
 
-                        <button type="button" class="btn btn-default ml-1" onclick="_orderDetail.ChangeOrderSaler(@ViewBag.OrderId,'@ViewBag.OrderNo')">Nhận xử lý đơn hàng</button>
+                        }
                     </div>
                 </div>
             </div>

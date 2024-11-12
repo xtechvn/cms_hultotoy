@@ -865,6 +865,7 @@ public partial class DataMSContext : DbContext
                 .HasMaxLength(50)
                 .IsFixedLength();
             entity.Property(e => e.ReceiverName).HasMaxLength(150);
+            entity.Property(e => e.ShippingCode).HasMaxLength(50);
             entity.Property(e => e.UpdateLast).HasColumnType("datetime");
             entity.Property(e => e.UserGroupIds).HasMaxLength(250);
             entity.Property(e => e.UtmMedium).HasMaxLength(250);

@@ -115,10 +115,17 @@ namespace WEB.CMS.Controllers
                 if (orderId != 0)
                 {
                     ViewBag.orderId = orderId;
+                    ViewBag.editsale = false;
                     var dataOrder = await _orderRepository.GetOrderDetailByOrderId(orderId);
                     if (dataOrder != null)
                     {
-                     
+                        if( dataOrder.SalerId == 1)
+                        {
+                            ViewBag.editsale = true; 
+                        }
+                        ViewBag.OrderNo = dataOrder.OrderNo;
+
+
                         if (dataOrder.CreatedDate != null)
                             ViewBag.UserCreateTime = ((DateTime)dataOrder.CreatedDate).ToString("dd/MM/yyyy HH:mm:ss");
                         if (dataOrder.UpdateLast != null)
@@ -307,12 +314,13 @@ namespace WEB.CMS.Controllers
                 {
                     _UserId = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 }
+                var orderDetail =await _orderRepository.GetOrderByOrderNo(OrderNo);
                 if (saleid != 0) _UserId = _UserId = saleid;
-                var order = new Entities.Models.Order();
-                order.OrderId = (long)order_id;
-                order.UserId = _UserId;
-                order.UserUpdateId = _UserId;
-                var success = await _orderRepository.UpdateOrder(order);
+                //var order = new Entities.Models.Order();
+                //order.OrderId = (long)order_id;
+                orderDetail.UserId = _UserId;
+                orderDetail.UserUpdateId = _UserId;
+                var success = await _orderRepository.UpdateOrder(orderDetail);
               
                 return Ok(new
                 {

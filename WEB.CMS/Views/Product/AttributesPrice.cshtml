@@ -27,11 +27,11 @@
             <th class="th-profit" style="min-width: 150px;">Lợi nhuận</th>
             <th class="th-amount" style="min-width: 150px;">Giá bán</th>
             <th class="th-stock" style="min-width: 100px;">Kho hàng</th>
-            <th class="th-weight" style="@((is_one_weight==false ||is_one_weight==null)?"display:none;":"") min-width: 100px; ">
+            <th class="th-weight" style="@((is_one_weight==false ||is_one_weight==null)?"":"display:none;") min-width: 100px; ">
                 Cân nặng<br>
                 (Sau khi đóng gói)
             </th>
-            <th class="th-dismension" style="@((is_one_weight==false ||is_one_weight==null)?"display:none;":"") min-width: 300px;">
+            <th class="th-dismension" style="@((is_one_weight==false ||is_one_weight==null)?"":"display:none;") min-width: 300px;">
                 Kích thước đóng gói<br>(Phí vận chuyển thực tế sẽ thay đổi nếu bạn nhập sai kích thước)
             </th>
             <th class="th-sku">SKU phân loại</th>
@@ -80,13 +80,13 @@
                                         <input type="text" class="form-control input-price" placeholder="Kho hàng" value="@(sub_selected != null && sub_selected.quanity_of_stock>0 ? sub_selected.quanity_of_stock.ToString("N0"):"")">
                                     </div>
                                 </td>
-                                <td class="td-weight" style="@((is_one_weight==false ||is_one_weight==null)? "display:none;" : "")">
+                                <td class="td-weight" style="@((is_one_weight==false ||is_one_weight==null)? "":"display:none;")">
                                     <div class="form-group mb-0 price">
                                         <input type="text" class="form-control input-price" placeholder="nhập cân nặng" value="@(sub_selected != null && sub_selected.weight>0 ? ((float)sub_selected.weight).ToString("N0"):"")">
                                         <span class="note">gr</span>
                                     </div>
                                 </td>
-                                <td class="td-dismenssion" style="@((is_one_weight==false ||is_one_weight==null)?"display:none;":"")">
+                                <td class="td-dismenssion" style="@((is_one_weight==false ||is_one_weight==null)?"":"display:none;")">
                                     <div class="flex gap10 flex-nowrap align-items-center">
                                         <div  class="td-dismenssion-height form-group mb-0 price">
                                             <input type="text" class="form-control input-price" placeholder="nhập chiều rộng" value="@(sub_selected != null && sub_selected.package_height!=null ? ((float)sub_selected.package_height).ToString("N0"):"")">
@@ -141,13 +141,13 @@
                                     <input type="text" class="form-control input-price" placeholder="Kho hàng" value="@(sub_selected != null && sub_selected.quanity_of_stock>0 ? sub_selected.quanity_of_stock.ToString("N0"):"")">
                                 </div>
                             </td>
-                            <td class="td-weight" style="@((is_one_weight==false ||is_one_weight==null)?"display:none;":"")">
+                            <td class="td-weight" style="@((is_one_weight==false ||is_one_weight==null)?"":"display:none;")">
                                 <div class="form-group mb-0 price">
                                     <input type="text" class="form-control input-price" placeholder="nhập cân nặng" value="@(sub_selected != null && sub_selected.profit>0 ? sub_selected.profit.ToString("N0"):"")">
                                     <span class="note">gr</span>
                                 </div>
                             </td>
-                            <td class="td-dismenssion" style="@((is_one_weight==false ||is_one_weight==null)?"display:none;":"")">
+                            <td class="td-dismenssion" style="@((is_one_weight==false ||is_one_weight==null)?"":"display:none;")">
                                 <div class="flex gap10 flex-nowrap align-items-center">
                                     <div class="form-group mb-0 input-price td-dismenssion-height">
                                         <input type="text" class=" form-control input-price" placeholder="nhập chiều rộng" value="@(sub_selected != null && sub_selected.package_height!=null ? ((float)sub_selected.package_height).ToString("N0"):"")">
