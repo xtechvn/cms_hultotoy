@@ -115,9 +115,14 @@ namespace WEB.CMS.Controllers
                 if (orderId != 0)
                 {
                     ViewBag.orderId = orderId;
+                    ViewBag.editsale = false;
                     var dataOrder = await _orderRepository.GetOrderDetailByOrderId(orderId);
                     if (dataOrder != null)
                     {
+                        if( dataOrder.SalerId == 1)
+                        {
+                            ViewBag.editsale = true; 
+                        }
                         ViewBag.OrderNo = dataOrder.OrderNo;
 
 
