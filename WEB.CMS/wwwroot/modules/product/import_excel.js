@@ -4,12 +4,21 @@
 })
 
 var product_import_excel = {
-    Initialization: function () {
-        product_import_excel.DynamicBind()
+    Initialization: function (first_time = true) {
+        if (first_time) {
+            product_import_excel.DynamicBind()
+        } else {
+            $('.product-mass-upload-step1').show()
+            $('.product-mass-upload-step2').hide()
+            $('.product-mass-upload-step3').hide()
+            $('.product-mass-upload-breadcumb-step1').css('font-weight', 'bold')
+            $('.product-mass-upload-breadcumb-step2').css('font-weight', 'normal')
+            $('.product-mass-upload-breadcumb-step3').css('font-weight', 'normal')
+        }
+      
     },
     DynamicBind: function () {
         $('body').on('change', '#import-file-product', function (e) {
-
             product_import_excel.ProductListing()
         });
         $('body').on('click', '#confirm-ws-import', function (e) {
@@ -21,6 +30,12 @@ var product_import_excel = {
         let file = document.getElementById("import-file-product").files[0];
         if (file == undefined) {
             _msgalert.error('Vui lòng chọn lại tệp tin khác.')
+            $('.product-mass-upload-step1').show()
+            $('.product-mass-upload-step2').hide()
+            $('.product-mass-upload-step3').hide()
+            $('.product-mass-upload-breadcumb-step1').css('font-weight', 'bold')
+            $('.product-mass-upload-breadcumb-step2').css('font-weight', 'normal')
+            $('.product-mass-upload-breadcumb-step3').css('font-weight', 'normal')
         }
         var file_type = file['type'];
         if (file_type !== "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
@@ -43,6 +58,12 @@ var product_import_excel = {
                 if (result != null) {
                     $('#grid_ws').html(result);
                     $('#confirm-ws-import').show()
+                    $('.product-mass-upload-step1').hide()
+                    $('.product-mass-upload-step2').show()
+                    $('.product-mass-upload-step3').hide()
+                    $('.product-mass-upload-breadcumb-step1').css('font-weight', 'normal')
+                    $('.product-mass-upload-breadcumb-step2').css('font-weight', 'bold')
+                    $('.product-mass-upload-breadcumb-step3').css('font-weight', 'normal')
                 } else {
                     $('#import-error').removeClass('mfp-hide');
                 }
@@ -101,6 +122,12 @@ var product_import_excel = {
             success: function (result) {
                 $('#grid_ws').html(result);
                 $('#confirm-ws-import').hide()
+                $('.product-mass-upload-step1').hide()
+                $('.product-mass-upload-step2').hide()
+                $('.product-mass-upload-step3').show()
+                $('.product-mass-upload-breadcumb-step1').css('font-weight', 'normal')
+                $('.product-mass-upload-breadcumb-step2').css('font-weight', 'normal')
+                $('.product-mass-upload-breadcumb-step3').css('font-weight', 'bold')
             }
         });
     }

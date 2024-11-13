@@ -8,7 +8,11 @@
 {
     var ready_checked = false;
     if (ViewBag.CheckedAll != null) ready_checked = (bool)ViewBag.CheckedAll;
-
+    <div class="green p-3 rounded mb20" style="padding:0!important;">
+      Thông tin sản phẩm trong file đăng tải
+      <br />
+      (Sau khi xem và xác nhận thông tin là đúng, vui lòng nhấn nút [Đăng tải sản phẩm] để lưu sản phẩm vào hệ thống)
+    </div>
     <div class="table-responsive table-default table-gray table-modal mb20" style="max-height:500px;">
         <table class="table table-nowrap">
             <thead>
