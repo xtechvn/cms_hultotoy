@@ -80,7 +80,7 @@ namespace WEB.CMS.Models.Product
                 return null;
             }
         }
-       
+
 
         // Thêm method này vào ProductV2DetailMongoAccess
         public async Task<List<ProductMongoDbModel>> GetAllProducts()
@@ -124,8 +124,12 @@ namespace WEB.CMS.Models.Product
 
                 var filter = Builders<ProductMongoDbModel>.Filter;
                 var filterDefinition = filter.Empty;
-                 filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.name, new Regex(  Regex.Escape(normalizedKeyword) , RegexOptions.IgnoreCase));
-                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.parent_product_id, "");
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.name, new Regex(Regex.Escape(normalizedKeyword), RegexOptions.IgnoreCase));
+                //filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.parent_product_id, "");
+                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Or(
+                    Builders<ProductMongoDbModel>.Filter.Eq(p => p.parent_product_id, null),
+                    Builders<ProductMongoDbModel>.Filter.Eq(p => p.parent_product_id, "")
+                );
                 if (group_id > 0)
                 {
                     filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.group_product_id, group_id.ToString());
@@ -294,7 +298,7 @@ namespace WEB.CMS.Models.Product
             return null;
 
         }
-        public async Task<ProductMongoDbModel> GetByNameAndSKU(string name,string sku)
+        public async Task<ProductMongoDbModel> GetByNameAndSKU(string name, string sku)
         {
             try
             {
