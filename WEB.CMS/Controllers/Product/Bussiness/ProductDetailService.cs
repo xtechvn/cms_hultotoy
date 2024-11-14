@@ -189,6 +189,7 @@ namespace WEB.CMS.Controllers.Product.Bussiness
                            await _productV2DetailMongoAccess.AddNewAsync(model);
                         }
                     }
+                    model.sku = item.variation_sku;
                     list.Add(model);
                 }
                 foreach (var product in list)
