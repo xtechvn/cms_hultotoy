@@ -7,7 +7,9 @@ var product_index = {
         keyword: '',
         group_id: -1,
         page_index: 1,
-        page_size: 10
+        page_size: 10,
+        reached_end: false,
+        on_excuting:false
     },
     Initialization: function () {
         var model = [{ url: '/', name: 'Trang chủ' }, { url: '/productv2', name: 'Quản lý sản phẩm', activated: true }]
@@ -19,12 +21,17 @@ var product_index = {
     },
     DynamicBind: function () {
         $('body').on('click', '.btn-search-product', function () {
+            product_index.ResetSearch()
             product_index.Listing();
         });
        
         $("#input-search-product-name").on('keyup', function (e) {
             if (e.key === 'Enter' || e.keyCode === 13) {
-                product_index.Listing();
+                if (product_index.Model.reached_end == false) {
+                    product_index.ResetSearch()
+
+                    product_index.Listing();
+                }
             }
         });
         $('body').on('click', '.btn-add-product', function () {
@@ -181,12 +188,34 @@ var product_index = {
 
             _magnific.OpenSmallPopup(title, url, param);
         });
+        $('body').on('select2:select', '#item-per-page', function () {
+            product_index.ResetSearch()
 
+            product_index.Listing();
+        });
+        //--scroll event
+        $(window).scroll(function () {
+            if ($(window).scrollTop() >= $('.main-products table').offset().top + $('.main-products table').outerHeight() - window.innerHeight) {
+                product_index.Listing()
+            }
+        }); 
     },
-    
+    ResetSearch: function () {
+        product_index.Model.page_index = 1;
+        product_index.Model.page_index = 1;
+        product_index.Model.on_excuting = false;
+        product_index.Model.reached_end = false;
+        $('.count').attr('data-value', '0')
+        $('.count').text('0')
+        $('#product_list').closest('.table-responsive').addClass('placeholder')
+        $('.hanmuc').closest('.flex-lg-nowrap').addClass('placeholder')
+    },
 
     Listing: function () {
-       
+        if (product_index.Model.reached_end == true || product_index.Model.on_excuting == true) {
+            return;
+        }
+        product_index.Model.on_excuting = true
         function normalizeText(input) {
             return input
                 .normalize("NFC")
@@ -203,19 +232,26 @@ var product_index = {
         }
 
         _product_function.POST('/Product/ProductListing', request, function (result) {
-            if (result.is_success && result.data && result.data.length > 0) {
+            if (result.is_success && result.data && result.data.length > 0 && JSON.parse(result.data).length > 0) {
                 product_index.RenderSearch(JSON.parse(result.data), JSON.parse(result.subdata))
                 // Gán tổng số sản phẩm vào phần tử với class 'count'
-                $('.count').text(result.total_count || JSON.parse(result.data).length);
+                var current_count = $('.count').attr('data-value')
+                if (current_count == undefined) current_count = '0';
+                if (result.total_count == undefined || result.total_count <= 0) {
+                    $('.count').attr('data-value', (JSON.parse(result.data).length + parseFloat(current_count)))
+                }
+                $('.count').text(result.total_count || (JSON.parse(result.data).length + parseFloat(current_count)));
                 $('.hanmuc').closest('.flex-lg-nowrap').find('.count').html(JSON.parse(result.data).length)
+                
             }
             else {
-                $('#product_list').html('')
-                $('.count').text(0); // Đặt về 0 nếu không có kết quả
-
+                product_index.Model.reached_end = true
             }
             $('#product_list').closest('.table-responsive').removeClass('placeholder')
             $('.hanmuc').closest('.flex-lg-nowrap').removeClass('placeholder')
+            product_index.Model.on_excuting = false
+            product_index.Model.page_index++
+
         });
 
     },
@@ -330,7 +366,7 @@ var product_index = {
             html += html_variations
 
         });
-        $('#product_list').html(html)
+        $('#product_list').append(html)
 
     }
 

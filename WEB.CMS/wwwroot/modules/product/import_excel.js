@@ -74,6 +74,7 @@ var product_import_excel = {
         });
     },
     ConfirmImport: function () {
+        $('.loading-gif').show()
         let url = '/Product/ConfirmProductExcel';
         let data = [];
         $('#import-error').hide()
@@ -125,6 +126,8 @@ var product_import_excel = {
                 $('.product-mass-upload-step1').hide()
                 $('.product-mass-upload-step2').hide()
                 $('.product-mass-upload-step3').show()
+                $('.loading-gif').hide()
+
                 $('.product-mass-upload-breadcumb-step1').css('font-weight', 'normal')
                 $('.product-mass-upload-breadcumb-step2').css('font-weight', 'normal')
                 $('.product-mass-upload-breadcumb-step3').css('font-weight', 'bold')

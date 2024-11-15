@@ -136,17 +136,17 @@ namespace WEB.CMS.Models.Product
                 }
                 var sort_filter = Builders<ProductMongoDbModel>.Sort;
                 var sort_filter_definition = sort_filter.Descending(x => x.updated_last);
-                var model = _productDetailCollection.Find(filterDefinition);
+                var model = _productDetailCollection.Find(filterDefinition).Sort(sort_filter_definition);
                 model.Options.Skip = page_index < 1 ? 0 : (page_index - 1) * page_size;
                 model.Options.Limit = page_size;
-                // Retrieve products from MongoDB
-                var result1 = await _productDetailCollection.Find(filterDefinition).ToListAsync();
+                //// Retrieve products from MongoDB
+                //var result1 = await _productDetailCollection.Find(filterDefinition).Sort(sort_filter_definition).ToListAsync();
 
-                // Log each product's name to confirm normalization
-                foreach (var product in result1)
-                {
-                    Console.WriteLine("Product in DB: " + product.name);
-                }
+                //// Log each product's name to confirm normalization
+                //foreach (var product in result1)
+                //{
+                //    Console.WriteLine("Product in DB: " + product.name);
+                //}
                 var result = await model.ToListAsync();
                 return result;
             }

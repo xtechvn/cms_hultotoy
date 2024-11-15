@@ -5,6 +5,7 @@ using HuloToys_Service.ElasticSearch.NewEs;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Repositories.IRepositories;
 using Repositories.Repositories;
 using System.Security.Claims;
@@ -230,11 +231,11 @@ namespace WEB.CMS.Controllers
                     product_main.amount_min = null;
                 }
                 product_main.parent_product_id = "";
+                product_main.created_date = DateTime.Now;
                 product_main.updated_last = DateTime.Now;
                 if (product_main._id == null || product_main._id.Trim() == "")
                 {
 
-                    product_main.created_date = DateTime.Now;
                     msg = "Thêm mới sản phẩm thành công";
                     product_main.status = (int)ProductStatus.ACTIVE;
                     rs = await _productV2DetailMongoAccess.AddNewAsync(product_main);
@@ -242,6 +243,7 @@ namespace WEB.CMS.Controllers
                 }
                 else
                 {
+                   
                     var old_product = await _productV2DetailMongoAccess.GetByID(product_main._id);
                     rs = await _productV2DetailMongoAccess.UpdateAsync(product_main);
                     await _productV2DetailMongoAccess.DeactiveByParentId(product_main._id);
@@ -267,6 +269,7 @@ namespace WEB.CMS.Controllers
                         product_by_variations.package_depth = variation.package_depth;
                         product_by_variations.package_height = variation.package_height;
                         product_by_variations.package_width = variation.package_width;
+                        product_by_variations.created_date = DateTime.Now;
                         product_by_variations.updated_last = DateTime.Now;
                         if (variation._id != null && variation._id != "")
                         {
