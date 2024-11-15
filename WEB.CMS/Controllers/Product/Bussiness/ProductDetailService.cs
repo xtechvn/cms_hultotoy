@@ -74,7 +74,7 @@ namespace WEB.CMS.Controllers.Product.Bussiness
                     {
                         //-- Add new "Brand" specification if not exists:
                         var exists_spec = await _productSpecificationMongoAccess.GetByNameAndType(1, item.brand);
-                        if(exists_spec!=null && exists_spec._id != null)
+                       if(exists_spec!=null && exists_spec._id != null)
                         {
 
                         }
@@ -210,7 +210,9 @@ namespace WEB.CMS.Controllers.Product.Bussiness
                 foreach (var product in list)
                 {
                     if (product.status == 2) continue;
-                    if(product._id==null || product._id.Trim() == "")
+                    product.created_date=DateTime.Now;
+                    product.updated_last = DateTime.Now;
+                    if (product._id==null || product._id.Trim() == "")
                     {
                         if(product.parent_product_id!=null && product.parent_product_id.Trim() != "")
                         {
@@ -242,6 +244,7 @@ namespace WEB.CMS.Controllers.Product.Bussiness
                     }
                     else
                     {
+
                         await _productV2DetailMongoAccess.UpdateAsync(product);
                     }
 
