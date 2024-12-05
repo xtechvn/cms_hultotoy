@@ -183,7 +183,7 @@ var _orderDetail = {
             success: function (result) {
                 if (result.status === 0) {
                     for (var i = 0; i < result.data.length; i++) {
-                        $("#DistrictId").append(' <option value="' + result.data[i].districtId + '">' + result.data[i].name + '</option>')
+                        $("#DistrictId").append(' <option value="' + result.data[i].id + '">' + result.data[i].name + '</option>')
                     }
             
                 }
@@ -203,7 +203,7 @@ var _orderDetail = {
             success: function (result) {
                 if (result.status === 0) {
                     for (var i = 0; i < result.data.length; i++) {
-                        $("#WardId").append(' <option value="' + result.data[i].wardId + '">' + result.data[i].name + '</option>')
+                        $("#WardId").append(' <option value="' + result.data[i].id + '">' + result.data[i].name + '</option>')
                     }
                 }
             }
