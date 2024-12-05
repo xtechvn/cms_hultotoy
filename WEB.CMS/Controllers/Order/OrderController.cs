@@ -119,7 +119,7 @@ namespace WEB.CMS.Controllers
                     var dataOrder = await _orderRepository.GetOrderDetailByOrderId(orderId);
                     if (dataOrder != null)
                     {
-                        ViewBag.ReceiverName = dataOrder.ReceiverName;
+                        ViewBag.ReceiverName = dataOrder.ReceiverName+" SDT: "+ dataOrder.PhoneOrder;
                         if ( dataOrder.SalerId == 1)
                         {
                             ViewBag.editsale = true; 
