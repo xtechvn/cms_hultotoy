@@ -46,6 +46,10 @@
                                                 <a onclick="_orderDetail.EditAddress(@ViewBag.OrderId)"><i class="fa fa-edit"></i></a>
                                             }
                                         </div>
+                                         <div>
+                                            @( ViewBag.ReceiverName != ""?"Người nhận: " + ViewBag.ReceiverName : "")
+                                          
+                                        </div>
                                     </div>
                                 </div>
                             </div>
