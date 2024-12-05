@@ -236,6 +236,7 @@ namespace Entities.ViewModels
         public double ShippingFee { get; set; }
         public string ShippingTypeName { get; set; }
         public string CarrierTypeName { get; set; }
+        public string ReceiverName { get; set; }
     }
     public class OrderServiceViewModel
     {
