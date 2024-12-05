@@ -237,6 +237,7 @@ namespace Entities.ViewModels
         public string ShippingTypeName { get; set; }
         public string CarrierTypeName { get; set; }
         public string ReceiverName { get; set; }
+        public string PhoneOrder { get; set; }
     }
     public class OrderServiceViewModel
     {
