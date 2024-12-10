@@ -52,6 +52,7 @@
                         var attr_2 = attributes_detail.Where(x => x.attribute_id == "1");
                         foreach (var a2 in attr_2)
                         {
+
                             var sub_selected = sub_product.Where(x => x.variation_detail != null).FirstOrDefault(x => x.variation_detail.Any(v => v.name.ToLower().Trim() == a1.name.ToLower().Trim())
                             && x.variation_detail.Any(v => v.name.ToLower().Trim() == a2.name.ToLower().Trim()));
                             <tr class="@(is_first==false?"tr-main":"tr-sub")" data-attribute-0="@a1.name" data-attribute-1="@a2.name" data-id="@(sub_selected != null && sub_selected._id!=null ? sub_selected._id:"")">
@@ -110,7 +111,6 @@
                                 </td>
                             </tr>
                             is_first = true;
-
                         }
                     }
                     else
@@ -143,7 +143,7 @@
                             </td>
                             <td class="td-weight" style="@((is_one_weight==false ||is_one_weight==null)?"":"display:none;")">
                                 <div class="form-group mb-0 price">
-                                    <input type="text" class="form-control input-price" placeholder="nhập cân nặng" value="@(sub_selected != null && sub_selected.profit>0 ? sub_selected.profit.ToString("N0"):"")">
+                                    <input type="text" class="form-control input-price" placeholder="nhập cân nặng" value="@(sub_selected != null && sub_selected.weight>0 ? ((float)sub_selected.weight).ToString("N0"):"")">
                                     <span class="note">gr</span>
                                 </div>
                             </td>
