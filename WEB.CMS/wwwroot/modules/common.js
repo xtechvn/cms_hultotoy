@@ -44,6 +44,9 @@
         }
 
     });
+    $('body').on('click', '.cancel', function () {
+        $.magnificPopup.close();
+    });
 });
 var _global_function = {
     AddLoading: function () {
