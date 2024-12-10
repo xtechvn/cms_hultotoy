@@ -189,6 +189,8 @@ namespace WEB.CMS.Controllers
         public async Task<IActionResult> Summit(ProductMongoDbSummitModel request)
         {
             var msg = "Cập nhật sản phẩm thành công";
+            TimeZoneInfo utcPlus7 = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            DateTime currentTimeInUtcPlus7 = TimeZoneInfo.ConvertTime(DateTime.UtcNow, utcPlus7);
             try
             {
                 //ProductMongoDbSummitModel request = JsonConvert.DeserializeObject<ProductMongoDbSummitModel>(request_object);
@@ -231,8 +233,10 @@ namespace WEB.CMS.Controllers
                     product_main.amount_min = null;
                 }
                 product_main.parent_product_id = "";
-                product_main.created_date = DateTime.Now;
-                product_main.updated_last = DateTime.Now;
+               
+
+                product_main.created_date = currentTimeInUtcPlus7;
+                product_main.updated_last = currentTimeInUtcPlus7;
                 if (product_main._id == null || product_main._id.Trim() == "")
                 {
 
@@ -269,8 +273,8 @@ namespace WEB.CMS.Controllers
                         product_by_variations.package_depth = variation.package_depth;
                         product_by_variations.package_height = variation.package_height;
                         product_by_variations.package_width = variation.package_width;
-                        product_by_variations.created_date = DateTime.Now;
-                        product_by_variations.updated_last = DateTime.Now;
+                        product_by_variations.created_date = currentTimeInUtcPlus7;
+                        product_by_variations.updated_last = currentTimeInUtcPlus7;
                         if (variation._id != null && variation._id != "")
                         {
                             product_by_variations._id = variation._id;
