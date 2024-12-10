@@ -110,34 +110,24 @@ namespace WEB.CMS.Models.Product
         {
             try
             {
+                var filter = Builders<ProductMongoDbModel>.Filter.Or(
+                                    Builders<ProductMongoDbModel>.Filter.Regex(p => p.name, new MongoDB.Bson.BsonRegularExpression(keyword.Trim().ToLower(), "i")),
+                                    Builders<ProductMongoDbModel>.Filter.Regex(p => p.sku, new MongoDB.Bson.BsonRegularExpression(keyword.Trim().ToLower(), "i")),
+                                    Builders<ProductMongoDbModel>.Filter.Regex(p => p.code, new MongoDB.Bson.BsonRegularExpression(keyword.Trim().ToLower(), "i"))
 
-                // In ra keyword để kiểm tra
-                Console.WriteLine($"Searching for keyword: '{keyword}'");
-
-                // Lấy tất cả sản phẩm
-                //var allProducts = await GetAllProducts();
-                // Chuẩn hóa từ khóa tìm kiếm
-                string normalizedKeyword = NormalizeTextForSearch(keyword);
-
-
-
-
-                var filter = Builders<ProductMongoDbModel>.Filter;
-                var filterDefinition = filter.Empty;
-                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.name, new Regex(Regex.Escape(normalizedKeyword), RegexOptions.IgnoreCase));
-                //filterDefinition &= Builders<ProductMongoDbModel>.Filter.Eq(x => x.parent_product_id, "");
-                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Or(
+                                    );
+                filter &= Builders<ProductMongoDbModel>.Filter.Or(
                     Builders<ProductMongoDbModel>.Filter.Eq(p => p.parent_product_id, null),
                     Builders<ProductMongoDbModel>.Filter.Eq(p => p.parent_product_id, "")
                 );
-                filterDefinition &= Builders<ProductMongoDbModel>.Filter.Where(s => s.status != (int)ProductStatus.REMOVE);
+                filter &= Builders<ProductMongoDbModel>.Filter.Where(s => s.status != (int)ProductStatus.REMOVE);
                 if (group_id > 0)
                 {
-                    filterDefinition &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.group_product_id, group_id.ToString());
+                    filter &= Builders<ProductMongoDbModel>.Filter.Regex(x => x.group_product_id, group_id.ToString());
                 }
                 var sort_filter = Builders<ProductMongoDbModel>.Sort;
                 var sort_filter_definition = sort_filter.Descending(x => x.updated_last);
-                var model = _productDetailCollection.Find(filterDefinition).Sort(sort_filter_definition);
+                var model = _productDetailCollection.Find(filter).Sort(sort_filter_definition);
                 model.Options.Skip = page_index < 1 ? 0 : (page_index - 1) * page_size;
                 model.Options.Limit = page_size;
                 //// Retrieve products from MongoDB
