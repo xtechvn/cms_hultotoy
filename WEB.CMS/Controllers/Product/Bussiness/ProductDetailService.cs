@@ -1,5 +1,6 @@
 ﻿using Caching.RedisWorker;
 using Entities.ViewModels.Products;
+using HuloToys_Front_End.Controllers.Files.Bussiness;
 using Newtonsoft.Json;
 using Repositories.IRepositories;
 using Utilities.Contants.ProductV2;
@@ -12,11 +13,14 @@ namespace WEB.CMS.Controllers.Product.Bussiness
         private readonly ProductDetailMongoAccess _productV2DetailMongoAccess;
         private readonly ProductSpecificationMongoAccess _productSpecificationMongoAccess;
         private readonly IConfiguration _configuration;
+        private readonly StaticAPIService _staticAPIService;
+        
         public ProductDetailService(IConfiguration configuration)
         {
             _productV2DetailMongoAccess = new ProductDetailMongoAccess(configuration);
             _productSpecificationMongoAccess = new ProductSpecificationMongoAccess(configuration);
             _configuration = configuration;
+            _staticAPIService= new StaticAPIService(configuration);
         }
 
         public async Task<List<ProductMongoDbModel>> ConvertToProducts(List<ProductExcelUploadModel> request)
@@ -33,7 +37,7 @@ namespace WEB.CMS.Controllers.Product.Bussiness
                         amount_min = null,
                         attributes = null,
                         attributes_detail = null,
-                        avatar = item.avatar,
+                        avatar =await _staticAPIService.ConvertOtherImageURLToStaticURL(item.avatar),
                         code = item.product_code,
                         condition_of_product = 0,
                         created_date = DateTime.Now,
@@ -62,14 +66,15 @@ namespace WEB.CMS.Controllers.Product.Bussiness
                         weight = item.weight,
                     };
 
-                    if(item.image_1!=null && item.image_1.Trim()!="") model.images.Add(item.image_1);
-                    if(item.image_2!=null && item.image_2.Trim()!="") model.images.Add(item.image_2);
-                    if(item.image_3!=null && item.image_3.Trim()!="") model.images.Add(item.image_3);
-                    if(item.image_4!=null && item.image_4.Trim()!="") model.images.Add(item.image_4);
-                    if(item.image_5!=null && item.image_5.Trim()!="") model.images.Add(item.image_5);
-                    if(item.image_6!=null && item.image_6.Trim()!="") model.images.Add(item.image_6);
-                    if(item.image_7!=null && item.image_7.Trim()!="") model.images.Add(item.image_7);
-                    if(item.image_8!=null && item.image_8.Trim()!="") model.images.Add(item.image_8);
+                    if(item.image_1!=null && item.image_1.Trim()!="") model.images.Add(await _staticAPIService.ConvertOtherImageURLToStaticURL(item.image_1));
+                    if(item.image_2!=null && item.image_2.Trim()!="") model.images.Add(await _staticAPIService.ConvertOtherImageURLToStaticURL(item.image_2));
+                    if(item.image_3!=null && item.image_3.Trim()!="") model.images.Add(await _staticAPIService.ConvertOtherImageURLToStaticURL(item.image_3));
+                    if(item.image_4!=null && item.image_4.Trim()!="") model.images.Add(await _staticAPIService.ConvertOtherImageURLToStaticURL(item.image_4));
+                    if(item.image_5!=null && item.image_5.Trim()!="") model.images.Add(await _staticAPIService.ConvertOtherImageURLToStaticURL(item.image_5));
+                    if(item.image_6!=null && item.image_6.Trim()!="") model.images.Add(await _staticAPIService.ConvertOtherImageURLToStaticURL(item.image_6));
+                    if(item.image_7!=null && item.image_7.Trim()!="") model.images.Add(await _staticAPIService.ConvertOtherImageURLToStaticURL(item.image_7));
+                    if(item.image_8!=null && item.image_8.Trim()!="") model.images.Add(await _staticAPIService.ConvertOtherImageURLToStaticURL(item.image_8));
+
                     if(item.brand != null && item.brand.Trim()!="")
                     {
                         //-- Add new "Brand" specification if not exists:
