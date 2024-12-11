@@ -272,6 +272,7 @@ var product_index = {
             html_item = html_item.replaceAll('{name}', item.name)
             html_item = html_item.replaceAll('{attribute}', '')
             var amount_html = '0'
+            var stock_count = 0;
             if (item.amount_max != undefined
                 && item.amount_max != null
                 && item.amount_min != undefined
@@ -285,7 +286,7 @@ var product_index = {
             }
             html_item = html_item.replaceAll('{amount}', amount_html)
 
-            html_item = html_item.replaceAll('{stock}', _product_function.Comma(item.quanity_of_stock))
+            /*html_item = html_item.replaceAll('{stock}', _product_function.Comma(item.quanity_of_stock))*/
 
             html_item = html_item.replaceAll('{order_count}', '')
             var html_variations = ''
@@ -356,12 +357,16 @@ var product_index = {
 
                 }
                 const sum_stock = quanity_stock.reduce((partialSum, a) => partialSum + a, 0);
+                stock_count = sum_stock;
                 var max = Math.max(...amount);
                 var min = Math.min(...amount);
                 html_item = html_item.replaceAll('{amount}', _product_function.Comma(min) + ' đ - ' + _product_function.Comma(max) + ' đ')
                 html_item = html_item.replaceAll('{stock}', _product_function.Comma(sum_stock))
 
 
+            }
+            if (stock_count == 0) {
+                html_item = html_item.replaceAll('{stock}', _product_function.Comma(item.quanity_of_stock))
             }
             html += html_item
             html += html_variations
