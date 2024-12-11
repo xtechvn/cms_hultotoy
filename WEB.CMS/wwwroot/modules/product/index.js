@@ -21,6 +21,7 @@ var product_index = {
     },
     DynamicBind: function () {
         $('body').on('click', '.btn-search-product', function () {
+            $('#product_list').html('')
             product_index.ResetSearch()
             product_index.Listing();
         });
