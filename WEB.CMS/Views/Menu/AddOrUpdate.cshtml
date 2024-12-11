@@ -74,7 +74,7 @@
                         </div>
                     </form>
                     <div class="text-right">
-                        <button type="button" class="btn btn-default btn btn-default cancel" data-dismiss="modal">Bỏ qua</button>
+                        <button type="button" class="btn btn-default btn btn-default cancel" onclick="_menu.Close()" data-dismiss="modal">Bỏ qua</button>
                         <button type="button" class="btn btn-default" onclick="_menu.OnSave()">@(Model.Id > 0 ? "Cập nhật" : "Thêm mới")</button>
                     </div>
                 </div>
