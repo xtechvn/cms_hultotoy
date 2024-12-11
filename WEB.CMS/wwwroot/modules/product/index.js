@@ -28,6 +28,7 @@ var product_index = {
         $("#input-search-product-name").on('keyup', function (e) {
             if (e.key === 'Enter' || e.keyCode === 13) {
                 if (product_index.Model.reached_end == false) {
+                    $('#product_list').html('')
                     product_index.ResetSearch()
 
                     product_index.Listing();
