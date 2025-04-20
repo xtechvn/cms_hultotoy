@@ -35,8 +35,8 @@ namespace WEB.CMS.RabitMQ
             };
         }
         public bool InsertQueueSimple(string message, string queueName)
-        {            
-            
+        {
+
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
@@ -67,7 +67,7 @@ namespace WEB.CMS.RabitMQ
         }
         //public bool InsertQueueSimpleDurable( string message, string queueName)
         //{
-            
+
         //    using (var connection = factory.CreateConnection())
         //    using (var channel = connection.CreateModel())
         //    {

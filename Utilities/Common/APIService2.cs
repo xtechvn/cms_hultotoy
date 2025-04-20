@@ -10,10 +10,10 @@ namespace Utilities.Common
         private HttpClient _HttpClient;
         private const string CONST_TOKEN_PARAM = "token";
         private readonly string _ApiSecretKey;
-        private string USER_NAME="test";
-        private string PASSWORD="password";
-        private string API_GET_TOKEN="/api/auth/login";
-        private string TOKEN="";
+        private string USER_NAME = "test";
+        private string PASSWORD = "password";
+        private string API_GET_TOKEN = "/api/auth/login";
+        private string TOKEN = "";
 
         public APIService2(IConfiguration configuration)
         {
@@ -34,11 +34,11 @@ namespace Utilities.Common
         {
             try
             {
-                if(TOKEN==null || TOKEN.Trim()=="" ) TOKEN = await GetToken();
+                if (TOKEN == null || TOKEN.Trim() == "") TOKEN = await GetToken();
                 string token = EncodeHelpers.Encode(JsonConvert.SerializeObject(request), _ApiSecretKey);
                 var request_message = new HttpRequestMessage(HttpMethod.Post, endpoint);
                 request_message.Headers.Add("Authorization", "Bearer " + TOKEN);
-                var content = new StringContent("{\"token\":\""+token+"\"}", Encoding.UTF8, "application/json");
+                var content = new StringContent("{\"token\":\"" + token + "\"}", Encoding.UTF8, "application/json");
                 request_message.Content = content;
                 var response = await _HttpClient.SendAsync(request_message);
                 return await response.Content.ReadAsStringAsync();
@@ -55,7 +55,7 @@ namespace Utilities.Common
                 var request = new UserLoginModel()
                 {
                     Username = USER_NAME,
-                    Password= PASSWORD
+                    Password = PASSWORD
                 };
                 var request_message = new HttpRequestMessage(HttpMethod.Post, API_GET_TOKEN);
                 var content = new StringContent(JsonConvert.SerializeObject(request), null, "application/json");
@@ -65,7 +65,7 @@ namespace Utilities.Common
                 if (response.IsSuccessStatusCode)
                 {
                     var json = JObject.Parse(await response.Content.ReadAsStringAsync());
-                   return json["token"].ToString();
+                    return json["token"].ToString();
                 }
             }
             catch

@@ -218,10 +218,10 @@ namespace WEB.CMS.Controllers
                     // Tạo message để push vào queue
                     var j_param = new Dictionary<string, object>
                             {
-                                 { "store_name", "Sp_GetAllArticle" },
+                                 { "store_name", "SP_GetAllArticle" },
                                 { "index_es", "es_hulotoys_sp_get_article" },
                                 {"project_type", Convert.ToInt16(ProjectType.HULOTOYS) },
-                                  {"id" , articleId }
+                                  {"id" , -1 }
 
                             };
                     var _data_push = JsonConvert.SerializeObject(j_param);
@@ -286,10 +286,10 @@ namespace WEB.CMS.Controllers
                     // Tạo message để push vào queue
                     var j_param = new Dictionary<string, object>
                             {
-                                  { "store_name", "Sp_GetAllArticle" },
+                                 { "store_name", "SP_GetAllArticle" },
                                 { "index_es", "es_hulotoys_sp_get_article" },
                                 {"project_type", Convert.ToInt16(ProjectType.HULOTOYS) },
-                                  {"id" , Id }
+                                  {"id" , -1 }
 
                             };
                     var _data_push = JsonConvert.SerializeObject(j_param);
@@ -387,7 +387,7 @@ namespace WEB.CMS.Controllers
                     { "article_id", articleId.ToString() },
                     { "category_id",ArrCategoryId }
                 };
-                api.POST(ReadFile.LoadConfig().API_SYNC_ARTICLE, j_param);
+                api.POST(_configuration["API:Api_get_list_by_article"], j_param);
                 var category_list_id = ArrCategoryId.Split(",");
                 foreach (var item in category_list_id)
                 {
