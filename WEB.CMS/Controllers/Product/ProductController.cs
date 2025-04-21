@@ -1,4 +1,5 @@
-﻿using Caching.RedisWorker;
+﻿using Caching.Elasticsearch;
+using Caching.RedisWorker;
 using Entities.Models;
 using Entities.ViewModels.Products;
 using HuloToys_Service.ElasticSearch.NewEs;
@@ -33,6 +34,7 @@ namespace WEB.CMS.Controllers
         private StaticAPIService _staticAPIService;
         private readonly int group_product_root = 31;
         private readonly int db_index = 9;
+        private readonly ProductESRepository _productESRepository;
         public ProductController(IConfiguration configuration, RedisConn redisConn, IGroupProductRepository groupProductRepository)
         {
             _productV2DetailMongoAccess = new ProductDetailMongoAccess(configuration);
@@ -44,6 +46,8 @@ namespace WEB.CMS.Controllers
             db_index = Convert.ToInt32(configuration["Redis:Database:db_search_result"]);
             _configuration = configuration;
             productDetailService = new ProductDetailService(configuration);
+            _productESRepository = new ProductESRepository(_configuration["DataBaseConfig:Elastic:Host"], configuration);
+
         }
         public IActionResult Index()
         {
@@ -287,6 +291,40 @@ namespace WEB.CMS.Controllers
                     }
 
                 }
+                //--ES:
+                var delete_es= await _productESRepository.DeleteByProductIdAsync(product_main._id);
+                if (delete_es)
+                {
+                    ProductESModel product_es = new ProductESModel()
+                    {
+                        id=_productESRepository.GenerateId(),
+                        amount=0,
+                        description=product_main.description,
+                        name=product_main.name,
+                        product_code=product_main.code,
+                        product_id=product_main._id
+                    };
+                    await _productESRepository.InsertAsync(product_es);
+                }
+                //var products = await _productV2DetailMongoAccess.GetAllProducts();
+                //if(products!=null && products.Count > 0)
+                //{
+                //    products = products.Where(x => (x.parent_product_id == null || x.parent_product_id == "") && x.status==(int)ProductStatus.ACTIVE).ToList();
+                //    foreach (var product in products) {
+                //        await _productESRepository.DeleteByProductIdAsync(product._id);
+
+                //        ProductESModel product_es = new ProductESModel()
+                //        {
+                //            id = _productESRepository.GenerateId(),
+                //            amount = 0,
+                //            description = product.description,
+                //            name = product.name,
+                //            product_code = product.code,
+                //            product_id = product._id
+                //        };
+                //        await _productESRepository.InsertAsync(product_es);
+                //    }
+                //}
                 await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_LISTING, db_index);
                 await _redisConn.DeleteCacheByKeyword(CacheName.PRODUCT_DETAIL + product_main._id, db_index);
                 if (rs != null)

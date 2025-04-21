@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="IdGen" Version="3.0.7" />
     <PackageReference Include="NEST" Version="7.17.5" />
     <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
   </ItemGroup>

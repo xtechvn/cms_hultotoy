@@ -1,12 +1,14 @@
 ﻿using Elasticsearch.Net;
 using Entities.ViewModels;
 using Entities.ViewModels.ElasticSearch;
+using IdGen;
 using Nest;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Threading.Tasks;
 using Utilities;
 
@@ -120,9 +122,12 @@ namespace Caching.Elasticsearch
             }
             return 0;
         }
-      
-        
-        
+        public  long GenerateId()
+        {
+            IdGenerator _generator = new(0); // Machine ID = 0
+            return _generator.CreateId();
+        }
+
     }
 
 }

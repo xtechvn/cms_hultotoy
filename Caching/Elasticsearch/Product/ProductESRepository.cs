@@ -1,6 +1,9 @@
 ﻿using Elasticsearch.Net;
 using Entities.ViewModels;
+using Entities.ViewModels.ElasticSearch;
 using Entities.ViewModels.Products;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Configuration;
 using Nest;
 using Newtonsoft.Json;
 using System;
@@ -13,157 +16,81 @@ using Utilities.Contants;
 namespace Caching.Elasticsearch
 {
     //https://www.steps2code.com/post/how-to-use-elasticsearch-in-csharp
-    public class ProductESRepository<TEntity> : IProductESRepository<TEntity> where TEntity : class
+    public class ProductESRepository : ESRepository<ProductESModel>
     {
+        public string index = "hulotoys_mongodb_product";
         private static string _ElasticHost;
+        private static IConfiguration configuration;
+        private readonly ElasticClient _client;
 
-        public ProductESRepository(string Host)
+        public ProductESRepository(string Host, IConfiguration _configuration) : base(Host)
         {
             _ElasticHost = Host;
+            configuration = _configuration;
+            index = _configuration["DataBaseConfig:Elastic:Index:Product"];
+            var settings = new ConnectionSettings(new Uri(_ElasticHost))
+                .DefaultIndex(index);
+            _client = new ElasticClient(settings);
         }
 
-        public bool DeleteProductByCode(string index_name, string document_id)
+        // 1. Function tìm kiếm data theo product_id
+        public async Task<ProductESModel> GetByProductIdAsync(string productId)
         {
-            string key_es_id = string.Empty;
-            try
-            {
-                var nodes = new Uri[] { new Uri(_ElasticHost) };
-                var connectionPool = new StaticConnectionPool(nodes);
-                var connectionSettings = new ConnectionSettings(connectionPool).DisableDirectStreaming().DefaultIndex("people");
-                var elasticClient = new ElasticClient(connectionSettings);
-                // input
-                //var document = new ProductViewModel
-                //{
-                //    product_code = document_id
-                //};
-                //// find key
-                //var result = elasticClient.Index(document, i => i.Index(index_name));
-                /*
-                var result = elasticClient.Search<object>(s => s
-                                             .Index(index_name)
-                                             .Query(q => q
-                                             .Term("product_code", document_id))
-                                             );*/
-                var result = elasticClient.Search<object>(sd => sd
-                               .Index(index_name)
-                               .Query(q => q
-                                   .Match(m => m.Field("product_code").Query(document_id)
-                                   )));
+            var response = await _client.SearchAsync<ProductESModel>(s => s
+                .Query(q => q
+                    .Term(t => t
+                        .Field(f => f.product_id)
+                        .Value(productId)
+                    )
+                )
+            );
 
-                if (result.IsValid && result.Documents.Count > 0)
-                {
-                    foreach (Hit<object> hit in (IHit<object>[])result.HitsMetadata.Hits)
-                    {
-                        key_es_id = ((Hit<object>)((IHit<object>[])result.HitsMetadata.Hits)[0]).Id;
-                        var response = elasticClient.Delete<object>(key_es_id.ToString(), d => d
-                        .Index(index_name)
-                        );
-                    }
-                    return result.IsValid;
-                }
-                else
-                {
-                    return true; // chưa có mã này
-                }
-            }
-            catch (Exception ex)
-            {
-                //LogHelper.InsertLogTelegram("DeleteProductByCode key_es_id= " + key_es_id + " document_id" + document_id + " Exception" + ex.ToString());
-                return false;
-            }
+            return response.Documents.FirstOrDefault();
         }
 
-        
-        /// <summary>
-
-        /// </summary>
-        /// <param name="indexName"></param>
-        /// <param name="value">Giá trị cần tìm kiếm</param>
-        /// <param name="field_name">Tên cột cần search</param>
-        /// <returns></returns>
-        public TEntity FindById(string indexName, object value, string field_name = "id")
+        // 2. Function xóa theo product_id
+        public async Task<bool> DeleteByProductIdAsync(string productId)
         {
-            try
-            {
-                var nodes = new Uri[] { new Uri(_ElasticHost) };
-                var connectionPool = new StaticConnectionPool(nodes);
-                var connectionSettings = new ConnectionSettings(connectionPool).DisableDirectStreaming().DefaultIndex("people");
-                var elasticClient = new ElasticClient(connectionSettings);
+            var response = await _client.DeleteByQueryAsync<ProductESModel>(q => q
+                .Query(rq => rq
+                    .Term(t => t
+                        .Field(f => f.product_id)
+                        .Value(productId)
+                    )
+                )
+            );
 
-                var searchResponse = elasticClient.Search<object>(s => s
-                    .Index(indexName)
-                    .Query(q => q.Term(field_name, value))
-                );
-
-                var JsonObject = JsonConvert.SerializeObject(searchResponse.Documents);
-                var ListObject = JsonConvert.DeserializeObject<List<TEntity>>(JsonObject);
-                return ListObject.FirstOrDefault();
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
+            return response.IsValid && response.Deleted > 0;
         }
 
-        /// <summary>
-        /// Lấy ra chi tiết sản phẩm theo code
-        /// </summary>
-        /// <param name="index_name"></param>
-        /// <param name="value_search"></param>
-        /// <returns></returns>
-
-        public int UpSert(TEntity entity, string indexName)
+        // 3. Function insert vào index
+        public async Task<bool> InsertAsync(ProductESModel product)
         {
-            try
-            {
-                var nodes = new Uri[] { new Uri(_ElasticHost) };
-                var connectionPool = new StaticConnectionPool(nodes);
-                var connectionSettings = new ConnectionSettings(connectionPool).DisableDirectStreaming().DefaultIndex("people");
-                var elasticClient = new ElasticClient(connectionSettings);
-                var indexResponse = elasticClient.Index(new IndexRequest<TEntity>(entity, indexName));
-
-                if (!indexResponse.IsValid)
-                {
-                    //LogHelper.WriteLogActivity(Directory.GetCurrentDirectory(), indexResponse.OriginalException.Message);
-                    //LogHelper.WriteLogActivity(Directory.GetCurrentDirectory(), "apicall" + indexResponse.ApiCall.OriginalException.Message);
-                    return 0;
-                }
-
-                return 1;
-            }
-            catch
-            {
-                return -1;
-            }
+            var response = await _client.IndexDocumentAsync(product);
+            return response.IsValid;
         }
-
-        public async Task<int> UpSertAsync(TEntity entity, string indexName)
+        // Tìm kiếm theo keyword trên trường name và product_code
+        public async Task<List<ProductESModel>> SearchByKeywordAsync(string keyword)
         {
-            try
-            {
-                var nodes = new Uri[] { new Uri(_ElasticHost) };
-                var connectionPool = new StaticConnectionPool(nodes);
-                var connectionSettings = new ConnectionSettings(connectionPool).DisableDirectStreaming().DefaultIndex("people");
-                var elasticClient = new ElasticClient(connectionSettings);
+            var response = await _client.SearchAsync<ProductESModel>(s => s
+                .Query(q => q
+                    .MultiMatch(m => m
+                        .Fields(f => f
+                            .Field(p => p.name)
+                            .Field(p => p.product_code)
+                        )
+                        .Query(keyword)
+                        .Type(TextQueryType.BestFields)
+                        .Analyzer("standard") // Sử dụng analyzer chuẩn hỗ trợ Unicode
+                        .Fuzziness(Fuzziness.Auto) // Cho phép tìm gần đúng
+                    )
+                )
+            );
 
-                var indexResponse = elasticClient.Index(entity, i => i.Index(indexName));
-                if (!indexResponse.IsValid)
-                {
-                    // If the request isn't valid, we can take action here
-                }
-
-                var indexResponseAsync = await elasticClient.IndexDocumentAsync(entity);
-            }
-            catch
-            {
-
-            }
-            return 0;
+            return response.Documents.ToList();
         }
 
 
-
-        
     }
 
 
