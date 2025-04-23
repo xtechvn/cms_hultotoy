@@ -307,10 +307,12 @@ namespace WEB.CMS.Controllers
                     await _productESRepository.InsertAsync(product_es);
                 }
                 //var products = await _productV2DetailMongoAccess.GetAllProducts();
-                //if(products!=null && products.Count > 0)
+                //if (products != null && products.Count > 0)
                 //{
-                //    products = products.Where(x => (x.parent_product_id == null || x.parent_product_id == "") && x.status==(int)ProductStatus.ACTIVE).ToList();
-                //    foreach (var product in products) {
+                //    products = products.Where(x => (x.parent_product_id == null || x.parent_product_id == "") && x.status == (int)ProductStatus.ACTIVE).ToList();
+                //    products = products.GroupBy(x => x.name).Select(x => x.First()).ToList();
+                //    foreach (var product in products)
+                //    {
                 //        await _productESRepository.DeleteByProductIdAsync(product._id);
 
                 //        ProductESModel product_es = new ProductESModel()
@@ -320,7 +322,8 @@ namespace WEB.CMS.Controllers
                 //            description = product.description,
                 //            name = product.name,
                 //            product_code = product.code,
-                //            product_id = product._id
+                //            product_id = product._id,
+                //            product_name_no_tv = CommonHelper.RemoveSpecialCharacters(StringHelpers.RemoveUnicode(product.name).ToLower().Replace(" ", "").Trim())
                 //        };
                 //        await _productESRepository.InsertAsync(product_es);
                 //    }
