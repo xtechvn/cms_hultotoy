@@ -29,13 +29,14 @@ namespace WEB.CMS.Controllers
         private readonly ProductSpecificationMongoAccess _productSpecificationMongoAccess;
         private readonly IConfiguration _configuration;
         private readonly IGroupProductRepository _groupProductRepository;
+        private readonly ILabelRepository _labelRepository;
         private readonly RedisConn _redisConn;
         private readonly ProductDetailService productDetailService;
         private StaticAPIService _staticAPIService;
         private readonly int group_product_root = 31;
         private readonly int db_index = 9;
         private readonly ProductESRepository _productESRepository;
-        public ProductController(IConfiguration configuration, RedisConn redisConn, IGroupProductRepository groupProductRepository)
+        public ProductController(IConfiguration configuration, RedisConn redisConn, IGroupProductRepository groupProductRepository, ILabelRepository labelRepository)
         {
             _productV2DetailMongoAccess = new ProductDetailMongoAccess(configuration);
             _productSpecificationMongoAccess = new ProductSpecificationMongoAccess(configuration);
@@ -47,7 +48,7 @@ namespace WEB.CMS.Controllers
             _configuration = configuration;
             productDetailService = new ProductDetailService(configuration);
             _productESRepository = new ProductESRepository(_configuration["DataBaseConfig:Elastic:Host"], configuration);
-
+            _labelRepository = labelRepository;
         }
         public IActionResult Index()
         {
@@ -680,7 +681,7 @@ namespace WEB.CMS.Controllers
             ViewBag.Product = product;
             ViewBag.SubProduct = await _productV2DetailMongoAccess.SubListing(id);
             ViewBag.ProductId = id;
-
+            ViewBag.Labels = await _labelRepository.Listing(0, null, -1, 200);
             return View();
         }
         public async Task<IActionResult> AttributesPrice(

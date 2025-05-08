@@ -763,7 +763,9 @@ var product_detail_new = {
             profit: $('#main-profit input').val() == undefined || $('#main-profit input').val().trim() == '' ? 0 : parseFloat($('#main-profit input').val().replaceAll(',', '')),
             amount: $('#main-amount input').val() == undefined || $('#main-amount input').val().trim() == '' ? 0 : parseFloat($('#main-amount input').val().replaceAll(',', '')),
             discount: 0,
-            quanity_of_stock: $('#main-stock input').val() == undefined || $('#main-stock input').val().trim() == '' ? 0 : parseInt($('#main-stock input').val().replaceAll(',', ''))
+            quanity_of_stock: $('#main-stock input').val() == undefined || $('#main-stock input').val().trim() == '' ? 0 : parseInt($('#main-stock input').val().replaceAll(',', '')),
+            label_id: $('#label-id select').find(':selected').val() == undefined || $('#label-id select').find(':selected').val().trim() == '' ? 0 : $('#label-id select').find(':selected').val(),
+
         }
         model.images = []
         $('#images .list .items').each(function (index, item) {

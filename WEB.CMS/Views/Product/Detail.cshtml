@@ -1,4 +1,5 @@
 ﻿@using Entities.ViewModels.Products
+@using HuloToys_Service.Models.Label
 @{
     ViewData["Title"] = "Chi tiết sản phẩm";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -6,7 +7,7 @@
     string static_url = (string)ViewBag.Static;
     string group_product = (string)ViewBag.GroupProduct;
     ProductMongoDbModel product = (ProductMongoDbModel)ViewBag.Product;
-
+    List<LabelListingModel> labels = (List<LabelListingModel>)ViewBag.Labels;
 
     ProductSpecificationDetailMongoDbModel brand = null;
     ProductSpecificationDetailMongoDbModel material = null;
@@ -212,6 +213,41 @@
 
                         </textarea>
                         <p class="text-right mt-1"><nw class="count">@(product != null && product.description != null && product.description.Trim() != "" ? product.description.Length : "0")</nw>/3000</p>
+                    </div>
+                </div>
+            </div>
+            <div id="label-id" class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                <label class="label">Chọn nhãn hiệu</label>
+                <div class="wrap_input">
+                    <div class="form-group namesp">
+                        <select class="select2 w-100">
+                            @if (labels != null && labels.Count > 0)
+                            {
+                                foreach (var lbl in labels)
+                                {
+                                    if(product!=null && product.label_id!=null && product.label_id>0 && product.label_id == lbl.Id)
+                                    {
+                                        <option value="@lbl.Id" selected>@lbl.LabelCode - @lbl.LabelName</option>
+
+                                    }else{
+                                        <option value="@lbl.Id">@lbl.LabelCode - @lbl.LabelName</option>
+
+                                    }
+                                }
+
+                            }
+
+
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="supplier-id" class="item flex flex-lg-nowrap gap10 mb-2 w-100">
+                <label class="label">Chọn nhà cung cấp</label>
+                <div class="wrap_input">
+                    <div class="form-group namesp">
+                        <select class="select2 w-100">
+                        </select>
                     </div>
                 </div>
             </div>

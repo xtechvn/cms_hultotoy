@@ -377,7 +377,11 @@ namespace Utilities.Contants
         public static string sp_UpdateHotelSurcharge = "sp_UpdateHotelSurcharge";
 
         public static string SP_GetHotelRoomByHotelId = "SP_GetHotelRoomByHotelId";
-        
+
         #endregion
+
+        public static string InsertLabel = "sp_InsertLabel";
+        public static string UpdateLabel = "sp_UpdateLabel";
+        public static string GetListLabels = "SP_GetListLabels";
     }
 }

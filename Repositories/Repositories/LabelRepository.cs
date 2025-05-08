@@ -1,90 +1,26 @@
 ﻿using DAL;
 using Entities.ConfigModels;
-using Entities.Models;
-using Microsoft.Extensions.Logging;
+using HuloToys_Service.Models.Label;
 using Microsoft.Extensions.Options;
-using Repositories.IRepositories;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Utilities;
 
-namespace Repositories.Repositories
+namespace Repositories.IRepositories
 {
     public class LabelRepository : ILabelRepository
     {
-        private readonly ILogger<LabelRepository> _logger;
-        private readonly LabelDAL _LabelDAL;
-        public LabelRepository(IOptions<DataBaseConfig> dataBaseConfig, ILogger<LabelRepository> logger)
+        private readonly LabelDAL labelDAL;
+        private readonly IOptions<DataBaseConfig> dataBaseConfig;
+
+        public LabelRepository(IOptions<DataBaseConfig> _dataBaseConfig)
         {
-            _logger = logger;
-            _LabelDAL = new LabelDAL(dataBaseConfig.Value.SqlServer.ConnectionString);
-        }
-        public async Task<int> Create(Label model)
-        {
-            try
-            {
-                var entity = new Label();
-                entity.Icon = model.Icon;
-                entity.CreateTime = DateTime.Now;
-                entity.Domain = model.Domain;
-                entity.PrefixOrderCode = model.PrefixOrderCode;
-                entity.StoreName = model.StoreName;
-                await _LabelDAL.CreateAsync(entity);
-                return model.Id;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("Create - LabelRepository" + ex.Message);
-                return -1;
-            }
+            labelDAL = new LabelDAL(_dataBaseConfig.Value.SqlServer.ConnectionString);
+            dataBaseConfig = _dataBaseConfig;
         }
 
-        public Task<int> Delete(int id)
+        public async Task<List<LabelListingModel>> Listing(int status = -1, string label_name = null, int page_index = 1, int page_size = 100)
         {
-            throw new NotImplementedException();
-        }
-
-        public List<Label> GetAll()
-        {
-            return _LabelDAL.GetAll();
-        }
-
-        public Task<Label> GetById(int Id)
-        {
-            return _LabelDAL.FindAsync(Id);
-        }
-
-        public async Task<int> Update(Label model)
-        {
-            try
-            {
-                var entity = await _LabelDAL.FindAsync(model.Id);
-                entity.Icon = model.Icon;
-                entity.Domain = model.Domain;
-                entity.PrefixOrderCode = model.PrefixOrderCode;
-                entity.StoreName = model.StoreName;
-                entity.UpdateTime = DateTime.Now;
-                await _LabelDAL.UpdateAsync(entity);
-                return model.Id;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.InsertLogTelegram("Update - LabelRepository" + ex.Message);
-                return -1;
-            }
-        }
-
-        public List<Label> GetListAll()
-        {
-            return _LabelDAL.GetAll();
-        }
-
-        public Task<List<Label>> GetLabelActive()
-        {
-            return _LabelDAL.getLabelActive();
+            return await labelDAL.Listing(status,label_name,page_index,page_size);
         }
     }
 }
