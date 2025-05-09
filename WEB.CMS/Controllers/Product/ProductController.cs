@@ -36,7 +36,10 @@ namespace WEB.CMS.Controllers
         private readonly int group_product_root = 31;
         private readonly int db_index = 9;
         private readonly ProductESRepository _productESRepository;
-        public ProductController(IConfiguration configuration, RedisConn redisConn, IGroupProductRepository groupProductRepository, ILabelRepository labelRepository)
+        private readonly ISupplierRepository _supplierRepository;
+
+        public ProductController(IConfiguration configuration, RedisConn redisConn, IGroupProductRepository groupProductRepository, ILabelRepository labelRepository,
+            ISupplierRepository supplierRepository)
         {
             _productV2DetailMongoAccess = new ProductDetailMongoAccess(configuration);
             _productSpecificationMongoAccess = new ProductSpecificationMongoAccess(configuration);
@@ -49,6 +52,7 @@ namespace WEB.CMS.Controllers
             productDetailService = new ProductDetailService(configuration);
             _productESRepository = new ProductESRepository(_configuration["DataBaseConfig:Elastic:Host"], configuration);
             _labelRepository = labelRepository;
+            _supplierRepository = supplierRepository;
         }
         public IActionResult Index()
         {
@@ -649,6 +653,8 @@ namespace WEB.CMS.Controllers
                 ViewBag.Product = new ProductMongoDbModel();
                 ViewBag.SubProduct = new List<ProductMongoDbModel>();
                 ViewBag.ProductId = "";
+                ViewBag.Supplier = new Supplier();
+                ViewBag.Label = new Label();
                 return View();
 
             }
@@ -677,11 +683,18 @@ namespace WEB.CMS.Controllers
                 catch { }
 
             }
+            if (product != null && product.supplier_id != null && product.supplier_id>0)
+            {
+                ViewBag.Supplier = _supplierRepository.GetById((int)product.supplier_id);
+            }
+            if (product != null && product.label_id != null && product.label_id > 0)
+            {
+                ViewBag.Label = await _labelRepository.GetById((int)product.label_id);
+            }
             ViewBag.GroupProduct = group_string;
             ViewBag.Product = product;
             ViewBag.SubProduct = await _productV2DetailMongoAccess.SubListing(id);
             ViewBag.ProductId = id;
-            ViewBag.Labels = await _labelRepository.Listing(0, null, -1, 200);
             return View();
         }
         public async Task<IActionResult> AttributesPrice(

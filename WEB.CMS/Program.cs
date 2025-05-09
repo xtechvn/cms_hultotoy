@@ -52,7 +52,6 @@ builder.Services.AddTransient<IRoleRepository, RoleRepository>();
 builder.Services.AddTransient<IPermissionRepository, PermissionRepository>();
 builder.Services.AddTransient<IPositionRepository, PositionRepository>();
 builder.Services.AddTransient<INoteRepository, NoteRepository>();
-builder.Services.AddTransient<IAllCodeRepository, AllCodeRepository>();
 builder.Services.AddTransient<IAttachFileRepository, AttachFileRepository>();
 builder.Services.AddTransient<IArticleRepository, ArticleRepository>();
 builder.Services.AddTransient<IProvinceRepository, ProvinceRepository>();
@@ -75,7 +74,6 @@ builder.Services.AddTransient<IAccountAccessApiRepository, AccountAccessApiRepos
 builder.Services.AddTransient<IAccountAccessApiPermissionRepository, AccountAccessApiPermissionRepository>();
 
 builder.Services.AddTransient<ICommentRepository, CommentRepository>();
-
 builder.Services.AddTransient<IOrderRepository, OrderRepository>();
 builder.Services.AddTransient<IContractPayRepository, ContractPayRepository>();
 builder.Services.AddTransient<IPaymentRequestRepository, PaymentRequestRepository>();
@@ -83,6 +81,7 @@ builder.Services.AddTransient<IIdentifierServiceRepository, IdentifierServiceRep
 builder.Services.AddTransient<IPaymentAccountRepository, PaymentAccountRepository>();
 builder.Services.AddTransient<IDepositHistoryRepository, DepositHistoryRepository>();
 builder.Services.AddSingleton<ILabelRepository, LabelRepository>();
+builder.Services.AddSingleton<ISupplierRepository, SupplierRepository>();
 // Đăng ký QueueService
 builder.Services.AddScoped<QueueService>();
 

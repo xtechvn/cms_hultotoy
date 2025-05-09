@@ -1,4 +1,6 @@
-﻿@using Entities.ViewModels.Products
+﻿@using Entities.Models
+@using Entities.ViewModels.Label
+@using Entities.ViewModels.Products
 @using HuloToys_Service.Models.Label
 @{
     ViewData["Title"] = "Chi tiết sản phẩm";
@@ -7,8 +9,8 @@
     string static_url = (string)ViewBag.Static;
     string group_product = (string)ViewBag.GroupProduct;
     ProductMongoDbModel product = (ProductMongoDbModel)ViewBag.Product;
-    List<LabelListingModel> labels = (List<LabelListingModel>)ViewBag.Labels;
-
+    Supplier supplier = (Supplier)ViewBag.Supplier;
+    Label label = (Label)ViewBag.Label;
     ProductSpecificationDetailMongoDbModel brand = null;
     ProductSpecificationDetailMongoDbModel material = null;
     ProductSpecificationDetailMongoDbModel age_restriction = null;
@@ -221,23 +223,10 @@
                 <div class="wrap_input">
                     <div class="form-group namesp">
                         <select class="select2 w-100">
-                            @if (labels != null && labels.Count > 0)
+                            @if (label != null && label.Id > 0)
                             {
-                                foreach (var lbl in labels)
-                                {
-                                    if(product!=null && product.label_id!=null && product.label_id>0 && product.label_id == lbl.Id)
-                                    {
-                                        <option value="@lbl.Id" selected>@lbl.LabelCode - @lbl.LabelName</option>
-
-                                    }else{
-                                        <option value="@lbl.Id">@lbl.LabelCode - @lbl.LabelName</option>
-
-                                    }
-                                }
-
+                                <option value="@label.Id" selected>@(label.LabelCode != null && label.LabelCode.Trim() != "" ? label.LabelCode +" - ": "") @label.LabelName</option>
                             }
-
-
                         </select>
                     </div>
                 </div>
@@ -247,6 +236,10 @@
                 <div class="wrap_input">
                     <div class="form-group namesp">
                         <select class="select2 w-100">
+                            @if(supplier!=null && supplier.SupplierId > 0)
+                            {
+                                <option value="@supplier.SupplierId" selected>@supplier.FullName</option>
+                            }
                         </select>
                     </div>
                 </div>

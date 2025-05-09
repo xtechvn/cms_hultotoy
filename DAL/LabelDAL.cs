@@ -1,6 +1,7 @@
 ﻿using DAL.Generic;
 using DAL.StoreProcedure;
 using Entities.Models;
+using Entities.ViewModels.Label;
 using HuloToys_Service.Models.Label;
 using Microsoft.Data.SqlClient;
 using System;
@@ -19,20 +20,8 @@ namespace DAL
         public LabelDAL(string connection) : base(connection) {
             _DbWorker = new DbWorker(connection);
         }
-        //public async Task< List<Label>> Listing()
-        //{
-        //    try
-        //    {
-        //        var _DbContext = new EntityDataContext(_connection);
-        //        var list = await _DbContext.Labels.AsNoTracking().Where(x => x.Status == 0).ToListAsync();
-        //        return list;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        LogHelper.InsertLogTelegram("Listing - LabelDAL: " + ex);
-        //        return null;
-        //    }
-        //}
+      
+
         public async Task<List<LabelListingModel>> Listing(int status=-1, string label_name=null, int page_index = -1, int page_size = 100)
         {
             try
